@@ -405,7 +405,7 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t,
         const double& lambda, StateToStateAction<T, O>* toStateAction,
         PolicyDistribution<T>* policy, Trace<T>* e) :
-        initialized(false), alpha_u(alpha_u), gamma_t(0), lambda(lambda),
+        initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda),
             toStateAction(toStateAction), policy(policy), e(e),
             u(new SparseVector<T>(e->vect().dimension()))
     {
@@ -422,14 +422,19 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
       initialized = true;
     }
 
+    const std::vector<SparseVector<T>*>& updatePolicy(const DenseVector<O>& x)
+    {
+      const std::vector<SparseVector<T>*>& xas = toStateAction->stateActions(x);
+      policy->update(*u, xas);
+      return xas;
+    }
+
     void update(const DenseVector<O>& x_t, const Action& a_t,
         double const& rho_t, double const& gamma_t, double delta_t)
     {
       assert(initialized);
 
-      const std::vector<SparseVector<T>*>& xas_t = toStateAction->stateActions(
-          x_t);
-      policy->update(*u, xas_t);
+      const std::vector<SparseVector<T>*>& xas_t = updatePolicy(x_t);
       e->update(gamma_t * lambda, policy->computeGradLog(a_t, xas_t));
       e->multiplyToSelf(rho_t);
       u->addToSelf(alpha_u * delta_t, e->vect());
@@ -437,9 +442,8 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     }
     const Action& proposeAction(const DenseVector<O>& x)
     {
-      const std::vector<SparseVector<T>*>& xas = toStateAction->stateActions(x);
-      policy->update(*u, xas);
-      return policy->sampleAction();
+      updatePolicy(x);
+      return policy->sampleBestAction();
     }
 
     void reset()

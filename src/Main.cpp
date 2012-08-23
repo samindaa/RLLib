@@ -242,7 +242,7 @@ void testOffPACMountainCar()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getActionList());
 
-  double alpha_v = 0.01 / projector->vectorNorm();
+  double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma = 0.99;
   Trace<double>* critice = new ATrace<double>(projector->dimension());

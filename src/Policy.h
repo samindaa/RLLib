@@ -134,7 +134,12 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     }
     const Action& sampleBestAction() const
     {
-      return sampleAction();
+      unsigned int maxa = 0;
+      for (unsigned int a = 1; a < actions->getNumActions(); a++)
+      {
+        if (distribution->at(a) >= distribution->at(maxa)) maxa = a;
+      }
+      return actions->at(maxa);
     }
 };
 
