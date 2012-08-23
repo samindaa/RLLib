@@ -314,6 +314,7 @@ class GTDLambda: public Predictor<T>
     SparseVector<T>* v;
     SparseVector<T>* w;
 
+  public:
     GTDLambda(const double& alpha_v, const double& alpha_w,
         const double& gamma_t, const double& lambda_t, Trace<T>* e) :
         delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w),
@@ -364,6 +365,12 @@ class GTDLambda: public Predictor<T>
       return delta_t;
     }
 
+    double update(const SparseVector<T>& phi_t, const SparseVector<T>& phi_tp1,
+        const double& rho_t, const double& gamma_t, double r_tp1, double z_tp1)
+    {
+      return update(phi_t, phi_tp1, gamma_t, lambda_t, rho_t, r_tp1, z_tp1);
+    }
+
     void reset()
     {
       e->clear();
@@ -381,6 +388,135 @@ class GTDLambda: public Predictor<T>
       return v->dot(phi);
     }
 
+};
+
+template<class T, class O>
+class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
+{
+  protected:
+    bool initialized;
+    double alpha_u, gamma_t, lambda;
+    StateToStateAction<T, O>* toStateAction;
+    PolicyDistribution<T>* policy;
+    Trace<T>* e;
+    SparseVector<T>* u;
+
+  public:
+    ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t,
+        const double& lambda, StateToStateAction<T, O>* toStateAction,
+        PolicyDistribution<T>* policy, Trace<T>* e) :
+        initialized(false), alpha_u(alpha_u), gamma_t(0), lambda(lambda),
+            toStateAction(toStateAction), policy(policy), e(e),
+            u(new SparseVector<T>(e->vect().dimension()))
+    {
+    }
+
+    virtual ~ActorLambdaOffPolicy()
+    {
+      delete u;
+    }
+
+    void initialize()
+    {
+      e->clear();
+      initialized = true;
+    }
+
+    void update(const DenseVector<O>& x_t, const Action& a_t,
+        double const& rho_t, double const& gamma_t, double delta_t)
+    {
+      assert(initialized);
+
+      const std::vector<SparseVector<T>*>& xas_t = toStateAction->stateActions(
+          x_t);
+      policy->update(*u, xas_t);
+      e->update(gamma_t * lambda, policy->computeGradLog(a_t, xas_t));
+      e->multiplyToSelf(rho_t);
+      u->addToSelf(alpha_u * delta_t, e->vect());
+
+    }
+    const Action& proposeAction(const DenseVector<O>& x)
+    {
+      const std::vector<SparseVector<T>*>& xas = toStateAction->stateActions(x);
+      policy->update(*u, xas);
+      return policy->sampleAction();
+    }
+
+    void reset()
+    {
+      u->clear();
+      e->clear();
+    }
+
+    const PolicyDistribution<T>& getPolicy() const
+    {
+      return *policy;
+    }
+};
+
+template<class T, class O>
+class OffPAC: public OffPolicyControlLearner<T, O>
+{
+  private:
+    double rho_t, delta_t;
+  protected:
+    Policy<T>* behavior;
+    GTDLambda<T>* critic;
+    ActorOffPolicy<T, O>* actor;
+    StateToStateAction<T, O>* toStateAction;
+    Projector<T, O>* projector;
+    double gamma_t;
+    SparseVector<T>* phi_t;
+    SparseVector<T>* phi_tp1;
+
+  public:
+    OffPAC(Policy<T>* behavior, GTDLambda<T>* critic,
+        ActorOffPolicy<T, O>* actor, StateToStateAction<T, O>* toStateAction,
+        Projector<T, O>* projector, const double& gamma_t) :
+        rho_t(0), delta_t(0), behavior(behavior), critic(critic), actor(actor),
+            toStateAction(toStateAction), projector(projector),
+            gamma_t(gamma_t),
+            phi_t(new SparseVector<T>(projector->dimension())),
+            phi_tp1(new SparseVector<T>(projector->dimension()))
+    {
+    }
+
+    virtual ~OffPAC()
+    {
+      delete phi_t;
+      delete phi_tp1;
+    }
+
+    const Action& initialize(const DenseVector<O>& x_0)
+    {
+      critic->initialize();
+      actor->initialize();
+      actor->proposeAction(x_0);
+      return behavior->decide(toStateAction->stateActions(x_0));
+    }
+
+    const Action& step(const DenseVector<O>& x_t, const Action& a_t,
+        const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
+    {
+      phi_t->set(projector->project(x_t));
+      phi_tp1->set(projector->project(x_tp1));
+      delta_t = critic->update(*phi_t, *phi_tp1, rho_t, gamma_t, r_tp1, z_tp1);
+      rho_t = actor->getPolicy().pi(a_t) / behavior->pi(a_t);
+      actor->update(x_t, a_t, rho_t, gamma_t, delta_t);
+      actor->proposeAction(x_tp1);
+      return behavior->decide(toStateAction->stateActions(x_tp1));
+    }
+
+    void reset()
+    {
+      critic->reset();
+      actor->reset();
+    }
+
+    const Action& proposeAction(const DenseVector<O>& x)
+    {
+      return actor->proposeAction(x);
+    }
 };
 
 #endif /* ALGORITHM_H_ */

@@ -42,9 +42,9 @@ class Env
     virtual float r() const =0;
     virtual float z() const =0;
 
-    ActionList* getActionList() const
+    ActionList& getActionList() const
     {
-      return actions;
+      return *actions;
     }
 
     int getNumActions() const

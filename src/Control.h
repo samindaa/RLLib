@@ -10,6 +10,7 @@
 
 #include "Action.h"
 #include "Vector.h"
+#include "Policy.h"
 
 template<class T, class O>
 class Control
@@ -42,6 +43,22 @@ class OffPolicyControlLearner: public Control<T, O>
     virtual ~OffPolicyControlLearner()
     {
     }
+};
+
+template<class T, class O>
+class ActorOffPolicy
+{
+  public:
+    virtual ~ActorOffPolicy()
+    {
+    }
+    virtual void initialize() =0;
+    virtual void reset() =0;
+    virtual void update(const DenseVector<O>& x_t, const Action& a_t,
+        double const& rho_t, double const& gamma_t, double delta_t) =0;
+    virtual const Action& proposeAction(const DenseVector<O>& x) =0;
+    virtual const PolicyDistribution<T>& getPolicy() const =0;
+
 };
 
 #endif /* CONTROL_H_ */

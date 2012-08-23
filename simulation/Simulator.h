@@ -23,20 +23,29 @@ template<class T, class O>
 class Simulator
 {
   protected:
+    int maxTestRuns;
 
     Control<T, O>* agent;
     Env<O>* env;
 
     const Action* action;
-    int maxTestRuns;
-    DenseVector<O> xt_tmp;
+    DenseVector<O>* x_t;
+    DenseVector<O>* x_tp1;
 
     std::vector<double> xTest;
 
   public:
     Simulator(Control<T, O>* agent, Env<O>* env) :
-        agent(agent), env(env), action(0), maxTestRuns(20)
+        maxTestRuns(20), agent(agent), env(env), action(0),
+            x_t(new DenseVector<O>(env->getVars().dimension())),
+            x_tp1(new DenseVector<O>(env->getVars().dimension()))
     {
+    }
+
+    ~Simulator()
+    {
+      delete x_t;
+      delete x_tp1;
     }
     void run(int maxRuns, int maxSteps, int maxEpisodes)
     {
@@ -51,14 +60,16 @@ class Simulator
         for (int episode = 0; episode < maxEpisodes; episode++)
         {
           env->initialize();
-          action = &agent->initialize(env->getVars());
+          x_t->set(env->getVars());
+          action = &agent->initialize(*x_t);
           int steps = 0;
           do
           {
             env->step(*action);
+            x_tp1->set(env->getVars());
             ++steps;
-            action = &agent->step(xt_tmp, *action, env->getVars(), env->r(),
-                env->z());
+            action = &agent->step(*x_t, *action, *x_tp1, env->r(), env->z());
+            x_t->set(*x_tp1);
           } while (!env->endOfEpisode() && steps < maxSteps);
 
           std::cout << steps << " ";

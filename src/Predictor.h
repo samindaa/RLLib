@@ -22,14 +22,4 @@ class Predictor
     virtual void reset() =0;
 };
 
-template<class T>
-class OffPolicyTD: public Predictor<T>
-{
-  public:
-    virtual ~OffPolicyTD()
-    {
-    }
-    //@@>>TODO: which method to use
-};
-
 #endif /* PREDICTOR_H_ */

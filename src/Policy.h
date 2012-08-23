@@ -9,7 +9,9 @@
 #define POLICY_H_
 
 #include <cstdlib>
+#include <cmath>
 #include <vector>
+#include <algorithm>
 
 #include "Vector.h"
 #include "Action.h"
@@ -42,7 +44,131 @@ class DiscreteActionPolicy: public Policy<T>
     virtual ~DiscreteActionPolicy()
     {
     }
-    virtual const double* getValues() const =0;
+
+};
+
+template<class T>
+class PolicyDistribution: public Policy<T>
+{
+  public:
+    virtual ~PolicyDistribution()
+    {
+    }
+    virtual void update(const SparseVector<T>& u,
+        const std::vector<SparseVector<T>*>& xas) =0;
+    virtual const SparseVector<T>& computeGradLog(const Action& action,
+        const std::vector<SparseVector<T>*>& xas) =0;
+};
+
+template<class T>
+class BoltzmannDistribution: public PolicyDistribution<T>
+{
+  protected:
+    ActionList* actions;
+    SparseVector<T>* xa;
+    DenseVector<double>* distribution;
+  public:
+    BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
+        actions(actions), xa(new SparseVector<T>(numFeatures)),
+            distribution(new DenseVector<double>(actions->getNumActions()))
+    {
+    }
+    virtual ~BoltzmannDistribution()
+    {
+      delete xa;
+      delete distribution;
+    }
+
+    void update(const SparseVector<T>& u,
+        const std::vector<SparseVector<T>*>& xas)
+    {
+      distribution->clear();
+      double sum = 0;
+      for (unsigned int a = 0; a < xas.size(); a++)
+      {
+        distribution->at(a) = exp(u.dot(*xas.at(a)));
+        sum += distribution->at(a);
+      }
+      assert(sum);
+      for (unsigned int a = 0; a < xas.size(); a++)
+        distribution->at(a) /= sum;
+
+    }
+
+    void update(const std::vector<SparseVector<T>*>& xas)
+    {
+      assert(false);
+    }
+
+    const SparseVector<T>& computeGradLog(const Action& action,
+        const std::vector<SparseVector<T>*>& xas)
+    {
+      xa->clear();
+      for (unsigned int b = 0; b < xas.size(); b++)
+        xa->addToSelf(-distribution->at(b), *xas.at(b));
+      xa->addToSelf(*xas.at(action));
+      return *xa;
+    }
+
+    double pi(const Action& action) const
+    {
+      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      {
+        if (action == actions->at(a)) return distribution->at(a);
+      }
+      assert(false);
+      return actions->at(0);
+
+    }
+    const Action& sampleAction() const
+    {
+      double random = drand48();
+      double sum = 0;
+      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      {
+        sum += distribution->at(a);
+        if (sum >= random) return actions->at(a);
+      }
+      return actions->at(actions->getNumActions() - 1);
+
+    }
+    const Action& sampleBestAction() const
+    {
+      return sampleAction();
+    }
+};
+
+template<class T>
+class RandomPolicy: public Policy<T>
+{
+  protected:
+    ActionList* actions;
+  public:
+    RandomPolicy(ActionList* actions) :
+        actions(actions)
+    {
+    }
+
+    virtual ~RandomPolicy()
+    {
+    }
+
+    void update(const std::vector<SparseVector<T>*>& xas)
+    {
+    }
+    double pi(const Action& a) const
+    {
+      return 1.0 / actions->getNumActions();
+    }
+    const Action& sampleAction() const
+    {
+      return actions->at(rand() % actions->getNumActions());
+    }
+    const Action& sampleBestAction() const
+    {
+      assert(false);
+      return actions->at(0);
+    }
 };
 
 template<class T>
@@ -113,11 +239,6 @@ class Greedy: public DiscreteActionPolicy<T>
     const Action& sampleBestAction() const
     {
       return *bestAction;
-    }
-
-    const double* getValues() const
-    {
-      return actionValues;
     }
 
 };

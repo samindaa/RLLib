@@ -96,20 +96,26 @@ class DenseVector: public Vector<T>
     {
       assert(capacity == that.capacity);
       for (int i = 0; i < capacity; i++)
-        data += that.data[i];
+        data[i] += that.data[i];
       return *this;
     }
     DenseVector<T>& operator-(const DenseVector<T>& that)
     {
       assert(capacity == that.capacity);
       for (int i = 0; i < capacity; i++)
-        data -= that.data[i];
+        data[i] -= that.data[i];
       return *this;
     }
 
     T& operator[](const int& index) const
     {
+      assert(index >= 0 && index < capacity);
       return data[index];
+    }
+
+    T& at(const int& index) const
+    {
+      return (*this)[index];
     }
 
     int dimension() const
@@ -137,6 +143,18 @@ class DenseVector: public Vector<T>
     T* operator()() const
     {
       return data;
+    }
+
+    void clear()
+    {
+      std::fill(data, data + capacity, 0);
+    }
+
+    void set(const DenseVector<T>& that)
+    {
+      assert(capacity == that.capacity);
+      for (int i = 0; i < capacity; i++)
+        data[i] = that.data[i];
     }
 
     template<class O> friend std::ostream& operator<<(std::ostream& out,
