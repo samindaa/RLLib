@@ -56,8 +56,8 @@ class PolicyDistribution: public Policy<T>
     }
     virtual void update(const SparseVector<T>& u,
         const std::vector<SparseVector<T>*>& xas) =0;
-    virtual const SparseVector<T>& computeGradLog(const Action& action,
-        const std::vector<SparseVector<T>*>& xas) =0;
+    virtual const SparseVector<T>& computeGradLog(
+        const std::vector<SparseVector<T>*>& xas, const Action& action) =0;
 };
 
 template<class T>
@@ -100,8 +100,8 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       assert(false);
     }
 
-    const SparseVector<T>& computeGradLog(const Action& action,
-        const std::vector<SparseVector<T>*>& xas)
+    const SparseVector<T>& computeGradLog(
+        const std::vector<SparseVector<T>*>& xas, const Action& action)
     {
       xa->clear();
       for (unsigned int b = 0; b < xas.size(); b++)
@@ -134,12 +134,13 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     }
     const Action& sampleBestAction() const
     {
-      unsigned int maxa = 0;
-      for (unsigned int a = 1; a < actions->getNumActions(); a++)
-      {
-        if (distribution->at(a) >= distribution->at(maxa)) maxa = a;
-      }
-      return actions->at(maxa);
+      /*unsigned int maxa = 0;
+       for (unsigned int a = 1; a < actions->getNumActions(); a++)
+       {
+       if (distribution->at(a) >= distribution->at(maxa)) maxa = a;
+       }
+       return actions->at(maxa);*/
+      return sampleAction();
     }
 };
 

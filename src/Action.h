@@ -143,7 +143,7 @@ class StateActionTilings: public StateToStateAction<T, O>
     {
       const SparseVector<T>& xa = *xas.at(0);
       for (unsigned int index = 1; index < actions->getNumActions(); index++)
-        if (action == actions->at(index)) return *xas[index];
+        if (action == actions->at(index)) return *xas.at(index);
       return xa;
     }
 };

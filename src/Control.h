@@ -54,11 +54,12 @@ class ActorOffPolicy
     }
     virtual void initialize() =0;
     virtual void reset() =0;
-    virtual const std::vector<SparseVector<T>*>& updatePolicy(
-        const DenseVector<O>& x) =0;
-    virtual void update(const DenseVector<O>& x_t, const Action& a_t,
-        double const& rho_t, double const& gamma_t, double delta_t) =0;
-    virtual const Action& proposeAction(const DenseVector<O>& x) =0;
+    virtual void updatePolicy(const std::vector<SparseVector<T>*>& xas) =0;
+    virtual void update(const std::vector<SparseVector<T>*>& xas_t,
+        const Action& a_t, double const& rho_t, double const& gamma_t,
+        double delta_t) =0;
+    virtual const Action& proposeAction(
+        const std::vector<SparseVector<T>*>& xas) =0;
     virtual const PolicyDistribution<T>& getPolicy() const =0;
 
 };
