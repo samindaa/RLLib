@@ -169,7 +169,7 @@ void testSarsaMountainCar()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
-  double alpha = 0.15 / projector->vectorNorm();
+  double alpha = 0.2 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.9;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
@@ -201,7 +201,7 @@ void testExpectedSarsaMountainCar()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
-  double alpha = 0.15 / projector->vectorNorm();
+  double alpha = 0.1 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.9;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
@@ -333,7 +333,7 @@ void testSarsaMountainCar3D()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(10, 1000, 500);
+  sim->run(1, 5000, 200);
 
   delete problem;
   delete projector;
@@ -377,7 +377,7 @@ void testOffPACMountainCar3D()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(20, 1000, 100);
+  sim->run(20, 5000, 1000);
 
   delete problem;
   delete projector;

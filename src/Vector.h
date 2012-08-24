@@ -374,14 +374,23 @@ class SparseVector: public Vector<T>
       return *this;
     }
 
+  private:
+    double dot(const SparseVector<T>& _this, const SparseVector<T>& _that) const
+    {
+      double tmp = 0;
+      for (int position = 0; position < _this.numActive; position++)
+        tmp += _that.getEntry(_this.activeIndexes[position])
+            * _this.values[position];
+      return tmp;
+    }
+
+  public:
     // w'* phi
     double dot(const SparseVector<T>& that) const
     {
       assert(dimension() == that.dimension());
-      double tmp = 0;
-      for (int position = 0; position < numActive; position++)
-        tmp += that.getEntry(activeIndexes[position]) * values[position];
-      return tmp;
+      if (numActive < that.numActive) return dot(*this, that);
+      else return dot(that, *this);
     }
 
     // Shallow copy of that to this.
