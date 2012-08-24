@@ -278,14 +278,14 @@ void testOffPACMountainCar()
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma = 0.99;
-  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
       0.4, critice);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getActionList());
 
-  Trace<double>* actore = new ATrace<double>(projector->dimension());
+  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
           actore);
