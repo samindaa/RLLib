@@ -345,6 +345,53 @@ void testSarsaMountainCar3D()
   delete sim;
 }
 
+void testOffPACMountainCar3D()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new MCar3D;
+  Projector<double, float>* projector = new FullTilings<double, float>(
+      1000000 + 1, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getActionList());
+
+  double alpha_v = 0.05 / projector->vectorNorm();
+  double alpha_w = .0001 / projector->vectorNorm();
+  double gamma = 0.99;
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
+      0.4, critice);
+  double alpha_u = 1.0 / projector->vectorNorm();
+  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
+      projector->dimension(), &problem->getActionList());
+
+  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
+  ActorOffPolicy<double, float>* actor =
+      new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
+          actore);
+
+  Policy<double>* behavior = new RandomPolicy<double>(
+      &problem->getActionList());
+  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
+      behavior, critic, actor, toStateAction, projector, gamma);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(20, 1000, 100);
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actore;
+  delete actor;
+  delete behavior;
+  delete target;
+  delete control;
+  delete sim;
+}
+
 int main()
 {
   cout << "## start" << endl; // prints @@ start
@@ -354,9 +401,10 @@ int main()
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
-  testOffPACMountainCar();
+//  testOffPACMountainCar();
 
 //  testSarsaMountainCar3D();
+  testOffPACMountainCar3D();
   cout << "## end" << endl;
   return 0;
 }
