@@ -16,7 +16,7 @@
 #include "Vector.h"
 #include "Trace.h"
 #include "Projector.h"
-#include "Algorithm.h"
+#include "ControlAlgorithm.h"
 #include "../simulation/Simulator.h"
 #include "../simulation/MCar2D.h"
 #include "../simulation/MCar3D.h"
