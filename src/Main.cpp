@@ -20,6 +20,7 @@
 #include "../simulation/Simulator.h"
 #include "../simulation/MCar2D.h"
 #include "../simulation/MCar3D.h"
+#include "../simulation/SwingPendulum.h"
 
 using namespace std;
 
@@ -317,13 +318,13 @@ void testSarsaMountainCar3D()
 {
   Env<float>* problem = new MCar3D;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      100000 + 1, 16, false);
+      1000000 + 1, 16, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getActionList());
   Trace<double>* e = new RMaxTrace<double>(projector->dimension(), 1000, 0.001);
-  double alpha = 0.05 / projector->vectorNorm();
+  double alpha = 0.15 / projector->vectorNorm();
   double gamma = 0.99;
-  double lambda = 0.9;
+  double lambda = 0.8;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
   double epsilon = 0.1;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
@@ -333,7 +334,7 @@ void testSarsaMountainCar3D()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 200);
+  sim->run(1, 5000, 1000);
 
   delete problem;
   delete projector;
@@ -351,12 +352,12 @@ void testOffPACMountainCar3D()
   srand48(time(0));
   Env<float>* problem = new MCar3D;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, true);
+      1000000 + 1, 16, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getActionList());
 
-  double alpha_v = 0.05 / projector->vectorNorm();
-  double alpha_w = .0001 / projector->vectorNorm();
+  double alpha_v = 0.01 / projector->vectorNorm();
+  double alpha_w = .00001 / projector->vectorNorm();
   double gamma = 0.99;
   Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
@@ -392,6 +393,53 @@ void testOffPACMountainCar3D()
   delete sim;
 }
 
+void testOffPACSwingPendulum()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new SwingPendulum;
+  Projector<double, float>* projector = new FullTilings<double, float>(
+      1000000 + 1, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getActionList());
+
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_w = .005 / projector->vectorNorm();
+  double gamma = 0.99;
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
+      0.4, critice);
+  double alpha_u = 0.5 / projector->vectorNorm();
+  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
+      projector->dimension(), &problem->getActionList());
+
+  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
+  ActorOffPolicy<double, float>* actor =
+      new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
+          actore);
+
+  Policy<double>* behavior = new RandomPolicy<double>(
+      &problem->getActionList());
+  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
+      behavior, critic, actor, toStateAction, projector, gamma);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 500);
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actore;
+  delete actor;
+  delete behavior;
+  delete target;
+  delete control;
+  delete sim;
+}
+
 int main()
 {
   cout << "## start" << endl; // prints @@ start
@@ -401,10 +449,11 @@ int main()
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
+  testOffPACMountainCar();
 
 //  testSarsaMountainCar3D();
-  testOffPACMountainCar3D();
+//  testOffPACMountainCar3D();
+//  testOffPACSwingPendulum();
   cout << "## end" << endl;
   return 0;
 }
