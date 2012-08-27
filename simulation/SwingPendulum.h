@@ -9,22 +9,26 @@
 #define SWINGPENDULUM_H_
 
 #include <iostream>
+#include <cstdlib>
+#include <cmath>
 #include "Env.h"
 
 class SwingPendulum: public Env<float>
 {
   protected:
-    float uMax, xDot, theta, maxTheta, stepTime, maxXdot, mass, length, g,
-        requiredUpTime, upRange;
+    float uMax, theta, velocity, maxTheta, stepTime, maxVelocity, mass, length,
+        g, requiredUpTime, upRange;
 
     int upTime;
   public:
     SwingPendulum() :
-        Env(2, 3), uMax(2.0), xDot(0), theta(0), maxTheta(M_PI), stepTime(0.01),
-            maxXdot(M_PI_4 / stepTime), mass(1.0), length(1.0), g(9.8),
-            requiredUpTime(10.0/*seconds*/), upRange(M_PI_4/*seconds*/),
-            upTime(0)
+        Env(2, 3), uMax(2.0), theta(0), velocity(0), maxTheta(M_PI),
+            stepTime(0.01), maxVelocity(M_PI_4 / stepTime), mass(1.0),
+            length(1.0), g(9.8), requiredUpTime(10.0 /*seconds*/),
+            upRange(M_PI_4 /*seconds*/), upTime(0)
     {
+      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+        actions->add(a, uMax * (a - 1.0));
     }
 
     virtual ~SwingPendulum()
@@ -47,28 +51,28 @@ class SwingPendulum: public Env<float>
       DenseVector<float>& vars = *__vars;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = theta / (2.0 * maxTheta) / 10;
-      vars[1] = xDot / (2.0 * maxXdot) / 10;
+      vars[1] = velocity / (2.0 * maxVelocity) / 10;
     }
     void initialize()
     {
       upTime = 0;
-      theta = M_PI_2;
-      xDot = 0.0;
+      theta = (2.0 * drand48() - 1.0) * M_PI; //M_PI_2;
+      velocity = 0.0;
       normalize(theta);
       update();
     }
 
     void step(const Action& a)
     {
-      float torque = uMax * (a.action() - 1.0);
-      float thetaDot = -stepTime * xDot + mass * g * length * sin(theta)
-          + torque;
-      xDot += thetaDot;
-      if (fabs(xDot) > maxXdot) xDot = sgn(xDot) * maxXdot;
-      theta += xDot * stepTime;
+      float thetaAcc = -stepTime * velocity + mass * g * length * sin(theta)
+          + a.at();
+      velocity = std::max(-maxVelocity,
+          std::min(maxVelocity, velocity + thetaAcc));
+      theta += velocity * stepTime;
+      normalize(theta);
       upTime = fabs(theta) > upRange ?
           0 : upTime + 1;
-      normalize(theta);
+
       update();
     }
     bool endOfEpisode() const

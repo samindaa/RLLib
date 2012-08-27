@@ -32,6 +32,8 @@ class MCar2D: public Env<float>
             mcar_max_velocity(0.07), mcar_goal_position(0.5),
             POS_WIDTH(1.7 / 10.0), VEL_WIDTH(0.14 / 10.0)
     {
+      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+        actions->add(a, a);
     }
 
     virtual ~MCar2D()
@@ -55,7 +57,7 @@ class MCar2D: public Env<float>
 
     void step(const Action& a)
     {
-      mcar_velocity += (a.action() - 1) * 0.001
+      mcar_velocity += (a.at() - 1) * 0.001
           + ::cos(3 * mcar_position) * (-0.0025);
       if (mcar_velocity > mcar_max_velocity) mcar_velocity = mcar_max_velocity;
       if (mcar_velocity < -mcar_max_velocity) mcar_velocity =

@@ -217,24 +217,18 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t,
         const double& lambda, PolicyDistribution<T>* policy, Trace<T>* e) :
         initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda),
-            policy(policy), e(e), u(new SparseVector<T>(e->vect().dimension()))
+            policy(policy), e(e), u(policy->parameters()->at(0))
     {
     }
 
     virtual ~ActorLambdaOffPolicy()
     {
-      delete u;
     }
 
     void initialize()
     {
       e->clear();
       initialized = true;
-    }
-
-    void updatePolicy(const std::vector<SparseVector<T>*>& xas)
-    {
-      policy->update(*u, xas);
     }
 
     void update(const std::vector<SparseVector<T>*>& xas_t, const Action& a_t,
@@ -246,9 +240,15 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
       u->addToSelf(alpha_u * delta_t, e->vect());
 
     }
+
+    void updateParameters(const std::vector<SparseVector<T>*>& xas)
+    {
+      policy->update(xas);
+    }
+
     const Action& proposeAction(const std::vector<SparseVector<T>*>& xas)
     {
-      updatePolicy(xas);
+      policy->update(xas);
       return policy->sampleBestAction();
     }
 
@@ -258,9 +258,9 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
       e->clear();
     }
 
-    const PolicyDistribution<T>& getPolicy() const
+    double pi(const Action& a) const
     {
-      return *policy;
+      return policy->pi(a);
     }
 };
 
@@ -301,10 +301,7 @@ class OffPAC: public OffPolicyControlLearner<T, O>
     {
       critic->initialize();
       actor->initialize();
-      const std::vector<SparseVector<T>*>& xas_0 = toStateAction->stateActions(
-          x_0);
-      actor->updatePolicy(xas_0);
-      return behavior->decide(xas_0);
+      return behavior->decide(toStateAction->stateActions(x_0));
     }
 
     const Action& step(const DenseVector<O>& x_t, const Action& a_t,
@@ -315,15 +312,14 @@ class OffPAC: public OffPolicyControlLearner<T, O>
 
       const std::vector<SparseVector<T>*>& xas_t = toStateAction->stateActions(
           x_t);
-      actor->updatePolicy(xas_t);
-      rho_t = actor->getPolicy().pi(a_t) / behavior->pi(a_t);
+      actor->updateParameters(xas_t);
+      rho_t = actor->pi(a_t) / behavior->pi(a_t);
 
       delta_t = critic->update(*phi_t, *phi_tp1, rho_t, gamma_t, r_tp1, z_tp1);
       actor->update(xas_t, a_t, rho_t, gamma_t, delta_t);
 
       const std::vector<SparseVector<T>*>& xas_tp1 =
           toStateAction->stateActions(x_tp1);
-      actor->updatePolicy(xas_tp1);
       return behavior->decide(xas_tp1);
     }
 

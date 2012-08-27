@@ -64,6 +64,8 @@ class MCar3D: public Env<float>
             mcar_Ystep(1.7 / 10.0), mcar_Dxstep(0.14 / 10.0),
             mcar_Dystep(0.14 / 10.0)
     {
+      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+        actions->add(a, a);
     }
 
     virtual ~MCar3D()
@@ -176,7 +178,7 @@ class MCar3D: public Env<float>
 
     void step(const Action& a)
     {
-      update_velocity(a.action());
+      update_velocity(a.at());
       update_position();
       update();
     }

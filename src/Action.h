@@ -17,15 +17,21 @@ class Action
 {
   protected:
     int id;
+    std::vector<double> values;
   public:
     Action(const int& id) :
         id(id)
     {
     }
 
-    const double action() const
+    void add(const double& value)
     {
-      return id;
+      values.push_back(value);
+    }
+
+    const double at(const int& i = 0 /*default to a single action*/) const
+    {
+      return values.at(i);
     }
 
     operator unsigned int() const
@@ -47,6 +53,8 @@ class Action
 
 class ActionList
 {
+  protected:
+    std::vector<Action*> actions;
   public:
     virtual ~ActionList()
     {
@@ -55,14 +63,15 @@ class ActionList
     virtual const unsigned int getNumActions() const =0;
     virtual const Action& operator[](const int& index) const =0;
     virtual const Action& at(const int& index) const =0;
+    virtual void add(const int& index, const double& value) =0;
+
+    typedef std::vector<Action*>::iterator iterator;
+    typedef std::vector<Action*>::const_iterator const_iterator;
 
 };
 
 class TabularActionList: public ActionList
 {
-  protected:
-    std::vector<Action*> actions;
-
   public:
     TabularActionList(const int& numActions)
     {
@@ -85,6 +94,11 @@ class TabularActionList: public ActionList
     const Action& at(const int& index) const
     {
       return *actions.at(index);
+    }
+
+    void add(const int& index, const double& value)
+    {
+      actions.at(index)->add(value);
     }
 
     const unsigned int getNumActions() const

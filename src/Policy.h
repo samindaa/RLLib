@@ -54,10 +54,10 @@ class PolicyDistribution: public Policy<T>
     virtual ~PolicyDistribution()
     {
     }
-    virtual void update(const SparseVector<T>& u,
-        const std::vector<SparseVector<T>*>& xas) =0;
+    //virtual void update(const std::vector<SparseVector<T>*>& xas) =0;
     virtual const SparseVector<T>& computeGradLog(
         const std::vector<SparseVector<T>*>& xas, const Action& action) =0;
+    virtual std::vector<SparseVector<T>*>* parameters() =0;
 };
 
 template<class T>
@@ -65,28 +65,37 @@ class BoltzmannDistribution: public PolicyDistribution<T>
 {
   protected:
     ActionList* actions;
-    SparseVector<T>* xa;
+    SparseVector<T>* avg;
     DenseVector<double>* distribution;
+    std::vector<SparseVector<T>*>* u;
   public:
     BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
-        actions(actions), xa(new SparseVector<T>(numFeatures)),
-            distribution(new DenseVector<double>(actions->getNumActions()))
+        actions(actions), avg(new SparseVector<T>(numFeatures)),
+            distribution(new DenseVector<double>(actions->getNumActions())),
+            u(new std::vector<SparseVector<T>*>)
     {
+
+      u->push_back(new SparseVector<T>(numFeatures));
     }
     virtual ~BoltzmannDistribution()
     {
-      delete xa;
+      delete avg;
       delete distribution;
+      for (typename std::vector<SparseVector<T>*>::iterator iter = u->begin();
+          iter != u->end(); ++iter)
+        delete *iter;
+      u->clear();
+      delete u;
     }
 
-    void update(const SparseVector<T>& u,
-        const std::vector<SparseVector<T>*>& xas)
+    void update(const std::vector<SparseVector<T>*>& xas)
     {
       distribution->clear();
+      SparseVector<T>* _u = u->at(0);
       double sum = 0;
       for (unsigned int a = 0; a < xas.size(); a++)
       {
-        distribution->at(a) = exp(u.dot(*xas.at(a)));
+        distribution->at(a) = exp(_u->dot(*xas.at(a)));
         sum += distribution->at(a);
       }
       assert(sum);
@@ -95,19 +104,14 @@ class BoltzmannDistribution: public PolicyDistribution<T>
 
     }
 
-    void update(const std::vector<SparseVector<T>*>& xas)
-    {
-      assert(false);
-    }
-
     const SparseVector<T>& computeGradLog(
         const std::vector<SparseVector<T>*>& xas, const Action& action)
     {
-      xa->clear();
+      avg->clear();
+      avg->addToSelf(*xas.at(action));
       for (unsigned int b = 0; b < xas.size(); b++)
-        xa->addToSelf(-distribution->at(b), *xas.at(b));
-      xa->addToSelf(*xas.at(action));
-      return *xa;
+        avg->addToSelf(-distribution->at(b), *xas.at(b));
+      return *avg;
     }
 
     double pi(const Action& action) const
@@ -134,13 +138,12 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     }
     const Action& sampleBestAction() const
     {
-      /*unsigned int maxa = 0;
-       for (unsigned int a = 1; a < actions->getNumActions(); a++)
-       {
-       if (distribution->at(a) >= distribution->at(maxa)) maxa = a;
-       }
-       return actions->at(maxa);*/
       return sampleAction();
+    }
+
+    std::vector<SparseVector<T>*>* parameters()
+    {
+      return u;
     }
 };
 
