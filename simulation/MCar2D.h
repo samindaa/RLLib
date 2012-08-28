@@ -8,6 +8,8 @@
 #ifndef MCAR2D_H_
 #define MCAR2D_H_
 
+#include <iostream>
+#include <fstream>
 #include "Env.h"
 
 class MCar2D: public Env<float>
@@ -25,6 +27,8 @@ class MCar2D: public Env<float>
     float POS_WIDTH; // the tile width for position
     float VEL_WIDTH; // the tile width for velocity
 
+    std::ofstream outfile;
+
   public:
     MCar2D() :
         Env<float>(2, 3), mcar_position(0), mcar_velocity(0),
@@ -34,10 +38,12 @@ class MCar2D: public Env<float>
     {
       for (unsigned int a = 0; a < actions->getNumActions(); a++)
         actions->add(a, a);
+      outfile.open("mcar.txt");
     }
 
     virtual ~MCar2D()
     {
+      outfile.close();
     }
 
     void update()
@@ -45,6 +51,9 @@ class MCar2D: public Env<float>
       DenseVector<float>& vars = *__vars;
       vars[0] = mcar_position / POS_WIDTH;
       vars[1] = mcar_velocity / VEL_WIDTH;
+
+      if (outfile.is_open() && getOn())
+        outfile << mcar_position  << std::endl;
     }
 
     // Profiles

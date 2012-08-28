@@ -35,8 +35,8 @@ class Simulator
     std::vector<double> xTest;
 
   public:
-    Simulator(Control<T, O>* agent, Env<O>* env) :
-        maxTestRuns(20), agent(agent), env(env), action(0),
+    Simulator(Control<T, O>* agent, Env<O>* env, int maxTestRuns = 20) :
+        maxTestRuns(maxTestRuns), agent(agent), env(env), action(0),
             x_t(new DenseVector<O>(env->getVars().dimension())),
             x_tp1(new DenseVector<O>(env->getVars().dimension()))
     {
@@ -59,6 +59,7 @@ class Simulator
 
         for (int episode = 0; episode < maxEpisodes; episode++)
         {
+          env->setOn(false);
           env->initialize();
           x_t->set(env->getVars());
           action = &agent->initialize(*x_t);
@@ -99,6 +100,7 @@ class Simulator
     {
       for (int run = 0; run < maxRuns; run++)
       {
+        env->setOn(true);
         env->initialize();
         action = &agent->proposeAction(env->getVars());
         int steps = 0;

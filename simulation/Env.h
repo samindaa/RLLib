@@ -21,11 +21,12 @@ class Env
     int numActions;
     DenseVector<O>* __vars;
     ActionList* actions;
+    bool itsOn;
 
   public:
     Env(int numVars, int numActions) :
         numActions(numActions), __vars(new DenseVector<O>(numVars)),
-            actions(new TabularActionList(numActions))
+            actions(new TabularActionList(numActions)), itsOn(false)
     {
     }
 
@@ -41,6 +42,15 @@ class Env
     virtual bool endOfEpisode() const =0;
     virtual float r() const =0;
     virtual float z() const =0;
+    virtual void setOn(const bool& itsOn)
+    {
+      this->itsOn = itsOn;
+    }
+
+    virtual bool getOn() const
+    {
+      return itsOn;
+    }
 
     ActionList& getActionList() const
     {

@@ -452,23 +452,26 @@ void testOffPACSwingPendulum()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getActionList());
 
-  double alpha_v = 0.1 / projector->vectorNorm();
-  double alpha_w = .005 / projector->vectorNorm();
+  double alpha_v = 0.05 / projector->vectorNorm();
+  double alpha_w = .0 / projector->vectorNorm();
   double gamma = 0.99;
+  double lambda = 0;
   Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
-      0.4, critice);
-  double alpha_u = 0.5 / projector->vectorNorm();
+      lambda, critice);
+  double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getActionList());
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
   ActorOffPolicy<double, float>* actor =
-      new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
+      new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
           actore);
 
   Policy<double>* behavior = new RandomPolicy<double>(
       &problem->getActionList());
+  /*Policy<double>* behavior = new RandomBiasPolicy<double>(
+   &problem->getActionList());*/
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
       behavior, critic, actor, toStateAction, projector, gamma);
 
@@ -548,11 +551,11 @@ int main()
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
-  testOffPACMountainCar2();
+//  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
-//  testOffPACSwingPendulum();
+  testOffPACSwingPendulum();
 //  testOffPACSwingPendulum2();
   cout << "## end" << endl;
   return 0;

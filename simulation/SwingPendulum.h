@@ -9,6 +9,7 @@
 #define SWINGPENDULUM_H_
 
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <cmath>
 #include "Env.h"
@@ -20,6 +21,7 @@ class SwingPendulum: public Env<float>
         g, requiredUpTime, upRange;
 
     int upTime;
+    std::ofstream outfile;
   public:
     SwingPendulum() :
         Env(2, 3), uMax(2.0), theta(0), velocity(0), maxTheta(M_PI),
@@ -29,10 +31,12 @@ class SwingPendulum: public Env<float>
     {
       for (unsigned int a = 0; a < actions->getNumActions(); a++)
         actions->add(a, uMax * (a - 1.0));
+      outfile.open("swingPendulum.txt");
     }
 
     virtual ~SwingPendulum()
     {
+      outfile.close();
     }
 
   private:
@@ -48,6 +52,9 @@ class SwingPendulum: public Env<float>
   public:
     void update()
     {
+      if (outfile.is_open() && getOn())
+        outfile << (theta * 180 / M_PI) << " " << cos(theta) << std::endl;
+
       DenseVector<float>& vars = *__vars;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = theta / (2.0 * maxTheta) / 10;
@@ -56,7 +63,8 @@ class SwingPendulum: public Env<float>
     void initialize()
     {
       upTime = 0;
-      theta = (2.0 * drand48() - 1.0) * M_PI; //M_PI_2;
+      //theta = (2.0 * drand48() - 1.0) * M_PI; //M_PI_2;
+      theta = M_PI_2;
       velocity = 0.0;
       normalize(theta);
       update();
@@ -64,7 +72,7 @@ class SwingPendulum: public Env<float>
 
     void step(const Action& a)
     {
-      float thetaAcc = -stepTime * velocity + mass * g * length * sin(theta)
+      float thetaAcc = (-stepTime * velocity) + mass * g * length * sin(theta)
           + a.at();
       velocity = std::max(-maxVelocity,
           std::min(maxVelocity, velocity + thetaAcc));
@@ -77,7 +85,8 @@ class SwingPendulum: public Env<float>
     }
     bool endOfEpisode() const
     {
-      return upTime + 1 >= requiredUpTime / stepTime; // 1000 steps
+      return false;
+      //return upTime + 1 >= requiredUpTime / stepTime; // 1000 steps
     }
     float r() const
     {

@@ -54,7 +54,6 @@ class PolicyDistribution: public Policy<T>
     virtual ~PolicyDistribution()
     {
     }
-    //virtual void update(const std::vector<SparseVector<T>*>& xas) =0;
     virtual const SparseVector<T>& computeGradLog(
         const std::vector<SparseVector<T>*>& xas, const Action& action) =0;
     virtual std::vector<SparseVector<T>*>* parameters() =0;
@@ -172,6 +171,72 @@ class RandomPolicy: public Policy<T>
     const Action& sampleAction() const
     {
       return actions->at(rand() % actions->getNumActions());
+    }
+    const Action& sampleBestAction() const
+    {
+      assert(false);
+      return actions->at(0);
+    }
+};
+
+template<class T>
+class RandomBiasPolicy: public Policy<T>
+{
+  protected:
+    ActionList* actions;
+    const Action* prev;
+    DenseVector<double>* distribution;
+  public:
+    RandomBiasPolicy(ActionList* actions) :
+        actions(actions), prev(&actions->at(0)),
+            distribution(new DenseVector<double>(actions->getNumActions()))
+    {
+    }
+
+    virtual ~RandomBiasPolicy()
+    {
+      delete distribution;
+    }
+
+    void update(const std::vector<SparseVector<T>*>& xas)
+    {
+      // 50% prev action
+      distribution->clear();
+      if (distribution->dimension() == 1) distribution->at(0) = 1.0;
+      else
+      {
+        for (unsigned int a = 0; a < actions->getNumActions(); a++)
+        {
+          if (actions->at(a) == prev) distribution->at(a) = 0.5;
+          else distribution->at(a) = 0.5 / (actions->getNumActions() - 1);
+        }
+      }
+      // chose an action
+      double random = drand48();
+      double sum = 0;
+      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      {
+        sum += distribution->at(a);
+        if (sum >= random)
+        {
+          prev = &actions->at(a);
+          return;
+        }
+      }
+      prev = &actions->at(actions->getNumActions() - 1);
+    }
+    double pi(const Action& action) const
+    {
+      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      {
+        if (action == actions->at(a)) return distribution->at(a);
+      }
+      assert(false);
+      return actions->at(0);
+    }
+    const Action& sampleAction() const
+    {
+      return *prev;
     }
     const Action& sampleBestAction() const
     {

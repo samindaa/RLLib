@@ -147,8 +147,9 @@ class StateActionTilings: public StateToStateAction<T, O>
 
     const std::vector<SparseVector<T>*>& stateActions(const DenseVector<O>& x)
     {
-      for (unsigned int a = 0; a < xas.size(); a++)
-        xas.at(a)->set(projector->project(x, a));
+      assert(actions->getNumActions() == xas.size());
+      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+        xas.at(actions->at(a))->set(projector->project(x, actions->at(a)));
       return xas;
     }
 
