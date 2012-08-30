@@ -89,17 +89,20 @@ class BoltzmannDistribution: public PolicyDistribution<T>
 
     void update(const std::vector<SparseVector<T>*>& xas)
     {
+      assert(actions->dimension() == xas.size());
       distribution->clear();
       SparseVector<T>* _u = u->at(0);
       double sum = 0;
-      for (unsigned int a = 0; a < xas.size(); a++)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
       {
-        distribution->at(a) = exp(_u->dot(*xas.at(a)));
-        sum += distribution->at(a);
+        distribution->at(**a) = exp(_u->dot(*xas.at(**a)));
+        sum += distribution->at(**a);
       }
       assert(sum);
-      for (unsigned int a = 0; a < xas.size(); a++)
-        distribution->at(a) /= sum;
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
+        distribution->at(**a) /= sum;
 
     }
 
@@ -108,29 +111,26 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     {
       avg->clear();
       avg->addToSelf(*xas.at(action));
-      for (unsigned int b = 0; b < xas.size(); b++)
-        avg->addToSelf(-distribution->at(b), *xas.at(b));
+      for (ActionList::const_iterator b = actions->begin(); b != actions->end();
+          ++b)
+        avg->addToSelf(-distribution->at(**b), *xas.at(**b));
       return *avg;
     }
 
     double pi(const Action& action) const
     {
-      for (unsigned int a = 0; a < actions->dimension(); a++)
-      {
-        if (action == actions->at(a)) return distribution->at(a);
-      }
-      assert(false);
-      return distribution->at(0);
+      return distribution->at(action);
 
     }
     const Action& sampleAction() const
     {
       double random = drand48();
       double sum = 0;
-      for (unsigned int a = 0; a < actions->dimension(); a++)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
       {
-        sum += distribution->at(a);
-        if (sum >= random) return actions->at(a);
+        sum += distribution->at(**a);
+        if (sum >= random) return **a;
       }
       return actions->at(actions->dimension() - 1);
 
@@ -205,35 +205,34 @@ class RandomBiasPolicy: public Policy<T>
       if (distribution->dimension() == 1) distribution->at(0) = 1.0;
       else
       {
-        for (unsigned int a = 0; a < actions->dimension(); a++)
+        for (ActionList::const_iterator a = actions->begin();
+            a != actions->end(); ++a)
         {
-          if (actions->at(a) == prev) distribution->at(a) = 0.5;
-          else distribution->at(a) = 0.5 / (actions->dimension() - 1);
+          if (**a == *prev) distribution->at(**a) = 0.5;
+          else distribution->at(**a) = 0.5 / (actions->dimension() - 1);
         }
       }
       // chose an action
       double random = drand48();
       double sum = 0;
-      for (unsigned int a = 0; a < actions->dimension(); a++)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
       {
-        sum += distribution->at(a);
+        sum += distribution->at(**a);
         if (sum >= random)
         {
-          prev = &actions->at(a);
+          prev = *a;
           return;
         }
       }
       prev = &actions->at(actions->dimension() - 1);
     }
+
     double pi(const Action& action) const
     {
-      for (unsigned int a = 0; a < actions->dimension(); a++)
-      {
-        if (action == actions->at(a)) return distribution->at(a);
-      }
-      assert(false);
-      return actions->at(0);
+      return distribution->at(action);
     }
+
     const Action& sampleAction() const
     {
       return *prev;
