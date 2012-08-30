@@ -103,13 +103,13 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
       const std::vector<SparseVector<T>*>& xas_tp1 =
           SarsaControl<T, O>::toStateAction->stateActions(x_tp1);
 
-      for (unsigned int action = 0; action < actions->dimension(); action++)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
       {
-        double pi = SarsaControl<T, O>::acting->pi(actions->at(action));
+        double pi = SarsaControl<T, O>::acting->pi(**a);
         if (pi == 0) continue;
         phi_bar_tp1->addToSelf(pi,
-            SarsaControl<T, O>::toStateAction->stateAction(xas_tp1,
-                actions->at(action)));
+            SarsaControl<T, O>::toStateAction->stateAction(xas_tp1, **a));
       }
 
       const Action& a_tp1 = SarsaControl<T, O>::acting->decide(xas_tp1);
@@ -176,12 +176,12 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
           toStateAction->stateActions(x_tp1);
       target->decide(xas_tp1);
       phi_bar_tp1->clear();
-      for (unsigned int action = 0; action < actions->dimension(); action++)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
       {
-        double pi = target->pi(actions->at(action));
+        double pi = target->pi(**a);
         if (pi == 0) continue;
-        phi_bar_tp1->addToSelf(pi,
-            toStateAction->stateAction(xas_tp1, actions->at(action)));
+        phi_bar_tp1->addToSelf(pi, toStateAction->stateAction(xas_tp1, **a));
       }
 
       gq->update(*phi_t, *phi_bar_tp1, rho_t, r_tp1, z_tp1);

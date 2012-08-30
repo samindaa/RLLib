@@ -549,8 +549,8 @@ int main()
 //  testProjectorMachineLearning();
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
-//  testGreedyGQMountainCar();
-  testOffPACMountainCar();
+  testGreedyGQMountainCar();
+//  testOffPACMountainCar();
 //  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();
