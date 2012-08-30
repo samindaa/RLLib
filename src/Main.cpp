@@ -165,8 +165,8 @@ void testProjectorMachineLearning()
 void testSarsaMountainCar()
 {
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, false);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
@@ -198,15 +198,15 @@ void testExpectedSarsaMountainCar()
 {
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, false);
+      1000000, 10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
-  double alpha = 0.1 / projector->vectorNorm();
+  double alpha = 0.2 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.9;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
-  double epsilon = 0.1;
+  double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
       &problem->getActionList(), epsilon);
   OnPolicyControlLearner<double, float>* control = new ExpectedSarsaControl<
@@ -550,12 +550,12 @@ int main()
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
+  testOffPACMountainCar();
 //  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
-  testOffPACSwingPendulum();
+//  testOffPACSwingPendulum();
 //  testOffPACSwingPendulum2();
   cout << "## end" << endl;
   return 0;

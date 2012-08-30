@@ -103,7 +103,7 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
       const std::vector<SparseVector<T>*>& xas_tp1 =
           SarsaControl<T, O>::toStateAction->stateActions(x_tp1);
 
-      for (unsigned int action = 0; action < actions->getNumActions(); action++)
+      for (unsigned int action = 0; action < actions->dimension(); action++)
       {
         double pi = SarsaControl<T, O>::acting->pi(actions->at(action));
         if (pi == 0) continue;
@@ -176,7 +176,7 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
           toStateAction->stateActions(x_tp1);
       target->decide(xas_tp1);
       phi_bar_tp1->clear();
-      for (unsigned int action = 0; action < actions->getNumActions(); action++)
+      for (unsigned int action = 0; action < actions->dimension(); action++)
       {
         double pi = target->pi(actions->at(action));
         if (pi == 0) continue;

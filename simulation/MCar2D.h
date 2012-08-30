@@ -36,7 +36,7 @@ class MCar2D: public Env<float>
             mcar_max_velocity(0.07), mcar_goal_position(0.5),
             POS_WIDTH(1.7 / 10.0), VEL_WIDTH(0.14 / 10.0)
     {
-      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      for (unsigned int a = 0; a < actions->dimension(); a++)
         actions->add(a, a);
       outfile.open("mcar.txt");
     }

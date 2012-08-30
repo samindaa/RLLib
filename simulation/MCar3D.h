@@ -64,7 +64,7 @@ class MCar3D: public Env<float>
             mcar_Ystep(1.7 / 10.0), mcar_Dxstep(0.14 / 10.0),
             mcar_Dystep(0.14 / 10.0)
     {
-      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      for (unsigned int a = 0; a < actions->dimension(); a++)
         actions->add(a, a);
     }
 

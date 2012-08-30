@@ -70,7 +70,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
   public:
     BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
         actions(actions), avg(new SparseVector<T>(numFeatures)),
-            distribution(new DenseVector<double>(actions->getNumActions())),
+            distribution(new DenseVector<double>(actions->dimension())),
             u(new std::vector<SparseVector<T>*>)
     {
 
@@ -115,24 +115,24 @@ class BoltzmannDistribution: public PolicyDistribution<T>
 
     double pi(const Action& action) const
     {
-      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      for (unsigned int a = 0; a < actions->dimension(); a++)
       {
         if (action == actions->at(a)) return distribution->at(a);
       }
       assert(false);
-      return actions->at(0);
+      return distribution->at(0);
 
     }
     const Action& sampleAction() const
     {
       double random = drand48();
       double sum = 0;
-      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      for (unsigned int a = 0; a < actions->dimension(); a++)
       {
         sum += distribution->at(a);
         if (sum >= random) return actions->at(a);
       }
-      return actions->at(actions->getNumActions() - 1);
+      return actions->at(actions->dimension() - 1);
 
     }
     const Action& sampleBestAction() const
@@ -166,11 +166,11 @@ class RandomPolicy: public Policy<T>
     }
     double pi(const Action& a) const
     {
-      return 1.0 / actions->getNumActions();
+      return 1.0 / actions->dimension();
     }
     const Action& sampleAction() const
     {
-      return actions->at(rand() % actions->getNumActions());
+      return actions->at(rand() % actions->dimension());
     }
     const Action& sampleBestAction() const
     {
@@ -189,7 +189,7 @@ class RandomBiasPolicy: public Policy<T>
   public:
     RandomBiasPolicy(ActionList* actions) :
         actions(actions), prev(&actions->at(0)),
-            distribution(new DenseVector<double>(actions->getNumActions()))
+            distribution(new DenseVector<double>(actions->dimension()))
     {
     }
 
@@ -205,16 +205,16 @@ class RandomBiasPolicy: public Policy<T>
       if (distribution->dimension() == 1) distribution->at(0) = 1.0;
       else
       {
-        for (unsigned int a = 0; a < actions->getNumActions(); a++)
+        for (unsigned int a = 0; a < actions->dimension(); a++)
         {
           if (actions->at(a) == prev) distribution->at(a) = 0.5;
-          else distribution->at(a) = 0.5 / (actions->getNumActions() - 1);
+          else distribution->at(a) = 0.5 / (actions->dimension() - 1);
         }
       }
       // chose an action
       double random = drand48();
       double sum = 0;
-      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      for (unsigned int a = 0; a < actions->dimension(); a++)
       {
         sum += distribution->at(a);
         if (sum >= random)
@@ -223,11 +223,11 @@ class RandomBiasPolicy: public Policy<T>
           return;
         }
       }
-      prev = &actions->at(actions->getNumActions() - 1);
+      prev = &actions->at(actions->dimension() - 1);
     }
     double pi(const Action& action) const
     {
-      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      for (unsigned int a = 0; a < actions->dimension(); a++)
       {
         if (action == actions->at(a)) return distribution->at(a);
       }
@@ -252,14 +252,12 @@ class Greedy: public DiscreteActionPolicy<T>
     Predictor<T>* predictor;
     ActionList* actions;
     double* actionValues;
-    double bestValue;
     const Action* bestAction;
 
   public:
     Greedy(Predictor<T>* predictor, ActionList* actions) :
         predictor(predictor), actions(actions),
-            actionValues(new double[actions->getNumActions()]), bestValue(0),
-            bestAction(0)
+            actionValues(new double[actions->dimension()]), bestAction(0)
     {
     }
 
@@ -272,22 +270,18 @@ class Greedy: public DiscreteActionPolicy<T>
 
     void updateActionValues(const std::vector<SparseVector<T>*>& xas_tp1)
     {
-      for (unsigned int i = 0; i < actions->getNumActions(); i++)
-        actionValues[i] = predictor->predict(*xas_tp1.at(i));
+      for (ActionList::const_iterator iter = actions->begin();
+          iter != actions->end(); ++iter)
+        actionValues[**iter] = predictor->predict(*xas_tp1.at(**iter));
     }
 
     void findBestAction()
     {
-      bestValue = actionValues[0];
       bestAction = &actions->at(0);
-      for (unsigned int i = 0; i < actions->getNumActions(); i++)
+      for (unsigned int i = 1; i < actions->dimension(); i++)
       {
-        double value = actionValues[i];
-        if (value > bestValue)
-        {
-          bestValue = value;
+        if (actionValues[i] > actionValues[*bestAction])
           bestAction = &actions->at(i);
-        }
       }
     }
 
@@ -332,15 +326,15 @@ class EpsilonGreedy: public Greedy<T>
     const Action& sampleAction() const
     {
       if (drand48() < epsilon) return (*Greedy<T>::actions)[rand()
-          % Greedy<T>::actions->getNumActions()];
+          % Greedy<T>::actions->dimension()];
       else return *Greedy<T>::bestAction;
     }
 
     double pi(const Action& a) const
     {
-      double probability = (a == Greedy<T>::bestAction) ?
+      double probability = (a == *Greedy<T>::bestAction) ?
           1.0 - epsilon : 0.0;
-      return probability + epsilon / Greedy<T>::actions->getNumActions();
+      return probability + epsilon / Greedy<T>::actions->dimension();
     }
 
 };

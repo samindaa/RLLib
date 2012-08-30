@@ -29,7 +29,7 @@ class SwingPendulum: public Env<float>
             length(1.0), g(9.8), requiredUpTime(10.0 /*seconds*/),
             upRange(M_PI_4 /*seconds*/), upTime(0)
     {
-      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      for (unsigned int a = 0; a < actions->dimension(); a++)
         actions->add(a, uMax * (a - 1.0));
       outfile.open("swingPendulum.txt");
     }

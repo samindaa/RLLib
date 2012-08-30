@@ -41,12 +41,7 @@ class Action
 
     const bool operator==(const Action& that) const
     {
-      return this == &that;
-    }
-
-    const bool operator==(const Action* that) const
-    {
-      return this == that;
+      return id == that.id;
     }
 
 };
@@ -60,13 +55,33 @@ class ActionList
     {
     }
 
-    virtual const unsigned int getNumActions() const =0;
+    virtual const unsigned int dimension() const =0;
     virtual const Action& operator[](const int& index) const =0;
     virtual const Action& at(const int& index) const =0;
     virtual void add(const int& index, const double& value) =0;
 
     typedef std::vector<Action*>::iterator iterator;
     typedef std::vector<Action*>::const_iterator const_iterator;
+
+    iterator begin()
+    {
+      return actions.begin();
+    }
+
+    const_iterator begin() const
+    {
+      return actions.begin();
+    }
+
+    iterator end()
+    {
+      return actions.end();
+    }
+
+    const_iterator end() const
+    {
+    return actions.end();
+  }
 
 };
 
@@ -101,7 +116,7 @@ class TabularActionList: public ActionList
       actions.at(index)->add(value);
     }
 
-    const unsigned int getNumActions() const
+    const unsigned int dimension() const
     {
       return actions.size();
     }
@@ -134,7 +149,7 @@ class StateActionTilings: public StateToStateAction<T, O>
     StateActionTilings(Projector<T, O>* projector, ActionList* actions) :
         projector(projector), actions(actions)
     {
-      for (unsigned int i = 0; i < actions->getNumActions(); i++)
+      for (unsigned int i = 0; i < actions->dimension(); i++)
         xas.push_back(new SparseVector<T>(projector->dimension()));
     }
     ~StateActionTilings()
@@ -147,8 +162,8 @@ class StateActionTilings: public StateToStateAction<T, O>
 
     const std::vector<SparseVector<T>*>& stateActions(const DenseVector<O>& x)
     {
-      assert(actions->getNumActions() == xas.size());
-      for (unsigned int a = 0; a < actions->getNumActions(); a++)
+      assert(actions->dimension() == xas.size());
+      for (unsigned int a = 0; a < actions->dimension(); a++)
         xas.at(actions->at(a))->set(projector->project(x, actions->at(a)));
       return xas;
     }
@@ -157,7 +172,7 @@ class StateActionTilings: public StateToStateAction<T, O>
         const Action& action) const
     {
       const SparseVector<T>& xa = *xas.at(0);
-      for (unsigned int index = 1; index < actions->getNumActions(); index++)
+      for (unsigned int index = 1; index < actions->dimension(); index++)
         if (action == actions->at(index)) return *xas.at(index);
       return xa;
     }
