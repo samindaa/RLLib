@@ -80,8 +80,8 @@ class ActionList
 
     const_iterator end() const
     {
-    return actions.end();
-  }
+      return actions.end();
+    }
 
 };
 
@@ -163,18 +163,16 @@ class StateActionTilings: public StateToStateAction<T, O>
     const std::vector<SparseVector<T>*>& stateActions(const DenseVector<O>& x)
     {
       assert(actions->dimension() == xas.size());
-      for (unsigned int a = 0; a < actions->dimension(); a++)
-        xas.at(actions->at(a))->set(projector->project(x, actions->at(a)));
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
+        xas.at(**a)->set(projector->project(x, **a));
       return xas;
     }
 
     const SparseVector<T>& stateAction(const std::vector<SparseVector<T>*>& xas,
         const Action& action) const
     {
-      const SparseVector<T>& xa = *xas.at(0);
-      for (unsigned int index = 1; index < actions->dimension(); index++)
-        if (action == actions->at(index)) return *xas.at(index);
-      return xa;
+      return *xas.at(action);
     }
 };
 
