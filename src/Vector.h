@@ -164,7 +164,7 @@ class DenseVector: public Vector<T>
 
 /**
  * @use Tile coding; traces etc, where only a handful of features are
- *      active out of billions of features; O(M) << O(N).
+ *      active in out of billions of features; O(M) << O(N).
  */
 template<class T>
 class SparseVector: public Vector<T>
@@ -178,7 +178,7 @@ class SparseVector: public Vector<T>
     int* activeIndexes;
     T* values;
   public:
-    // @@>>TODO: this is the tricky implementation
+
     SparseVector(const int& capacity = 1) :
         indexesPositionLength(capacity), activeLength(10), numActive(0),
             indexesPosition(new int[capacity]), activeIndexes(new int[10]),
