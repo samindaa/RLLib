@@ -14,18 +14,18 @@
 #include "Projector.h"
 
 template<class T>
-class FeatureVectors
+class Representations
 {
   protected:
     std::vector<SparseVector<T>*>* phis;
   public:
-    FeatureVectors(const int& numFeatures, const int& numActions) :
+    Representations(const int& numFeatures, const int& numActions) :
         phis(new std::vector<SparseVector<T>*>())
     {
       for (int i = 0; i < numActions; i++)
         phis->push_back(new SparseVector<T>(numFeatures));
     }
-    ~FeatureVectors()
+    ~Representations()
     {
       for (typename std::vector<SparseVector<T>*>::iterator iter =
           phis->begin(); iter != phis->end(); ++iter)
@@ -80,7 +80,7 @@ class StateToStateAction
     {
     }
     virtual const SparseVector<T>& stateAction(const DenseVector<O>& x) =0;
-    virtual const FeatureVectors<T>& stateActions(const DenseVector<O>& x) =0;
+    virtual const Representations<T>& stateActions(const DenseVector<O>& x) =0;
     virtual const Projector<T, O>& getProjector() const =0;
 };
 
@@ -91,11 +91,11 @@ class StateActionTilings: public StateToStateAction<T, O>
   protected:
     Projector<T, O>* projector;
     ActionList* actions;
-    FeatureVectors<T>* phis;
+    Representations<T>* phis;
   public:
     StateActionTilings(Projector<T, O>* projector, ActionList* actions) :
         projector(projector), actions(actions),
-            phis(new FeatureVectors<T>(projector->dimension(),
+            phis(new Representations<T>(projector->dimension(),
                     actions->dimension()))
     {
     }
@@ -111,7 +111,7 @@ class StateActionTilings: public StateToStateAction<T, O>
       return projector->project(x);
     }
 
-    const FeatureVectors<T>& stateActions(const DenseVector<O>& x)
+    const Representations<T>& stateActions(const DenseVector<O>& x)
     {
       assert(actions->dimension() == phis->dimension());
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();

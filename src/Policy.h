@@ -25,12 +25,12 @@ class Policy
     virtual ~Policy()
     {
     }
-    virtual void update(const FeatureVectors<T>& phis) =0;
+    virtual void update(const Representations<T>& phis) =0;
     virtual double pi(const Action& a) const =0;
     virtual const Action& sampleAction() const =0;
     virtual const Action& sampleBestAction() const =0;
 
-    const Action& decide(const FeatureVectors<T>& phis)
+    const Action& decide(const Representations<T>& phis)
     {
       update(phis);
       return sampleAction();
@@ -55,7 +55,7 @@ class PolicyDistribution: public Policy<T>
     virtual ~PolicyDistribution()
     {
     }
-    virtual const SparseVector<T>& computeGradLog(const FeatureVectors<T>& phis,
+    virtual const SparseVector<T>& computeGradLog(const Representations<T>& phis,
         const Action& action) =0;
     virtual SparseVector<T>* parameters() =0;
 };
@@ -98,7 +98,7 @@ class NormalDistribution: public PolicyDistribution<T>
       delete x_sigma;
     }
 
-    void update(const FeatureVectors<T>& xs)
+    void update(const Representations<T>& xs)
     {
       assert(xs.dimension()==actions->dimension());
       mean = u_mean->dot(xs.at(actions->at(0))) + mean0;
@@ -158,7 +158,7 @@ class NormalDistribution: public PolicyDistribution<T>
       return actions->at(0);
     }
 
-    const SparseVector<T>& computeGradLog(const FeatureVectors<T>& xs,
+    const SparseVector<T>& computeGradLog(const Representations<T>& xs,
         const Action& action)
     {
       assert(actions->dimension() == 1);
@@ -207,7 +207,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       delete u;
     }
 
-    void update(const FeatureVectors<T>& xas)
+    void update(const Representations<T>& xas)
     {
       assert(actions->dimension() == xas.dimension());
       distribution->clear();
@@ -225,7 +225,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
 
     }
 
-    const SparseVector<T>& computeGradLog(const FeatureVectors<T>& xas,
+    const SparseVector<T>& computeGradLog(const Representations<T>& xas,
         const Action& action)
     {
       avg->clear();
@@ -280,7 +280,7 @@ class RandomPolicy: public Policy<T>
     {
     }
 
-    void update(const FeatureVectors<T>& xas)
+    void update(const Representations<T>& xas)
     {
     }
     double pi(const Action& a) const
@@ -317,7 +317,7 @@ class RandomBiasPolicy: public Policy<T>
       delete distribution;
     }
 
-    void update(const FeatureVectors<T>& xas)
+    void update(const Representations<T>& xas)
     {
       // 50% prev action
       distribution->clear();
@@ -386,7 +386,7 @@ class Greedy: public DiscreteActionPolicy<T>
 
   private:
 
-    void updateActionValues(const FeatureVectors<T>& xas_tp1)
+    void updateActionValues(const Representations<T>& xas_tp1)
     {
       for (ActionList::const_iterator iter = actions->begin();
           iter != actions->end(); ++iter)
@@ -405,7 +405,7 @@ class Greedy: public DiscreteActionPolicy<T>
 
   public:
 
-    void update(const FeatureVectors<T>& xas_tp1)
+    void update(const Representations<T>& xas_tp1)
     {
       updateActionValues(xas_tp1);
       findBestAction();

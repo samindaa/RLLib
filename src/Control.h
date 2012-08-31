@@ -54,10 +54,10 @@ class ActorOffPolicy
     }
     virtual void initialize() =0;
     virtual void reset() =0;
-    virtual void update(const FeatureVectors<T>& xas_t, const Action& a_t,
+    virtual void update(const Representations<T>& xas_t, const Action& a_t,
         double const& rho_t, double const& gamma_t, double delta_t) =0;
-    virtual void updateParameters(const FeatureVectors<T>& xas) =0;
-    virtual const Action& proposeAction(const FeatureVectors<T>& xas) =0;
+    virtual void updateParameters(const Representations<T>& xas) =0;
+    virtual const Action& proposeAction(const Representations<T>& xas) =0;
     virtual double pi(const Action& a) const =0;
 
 };
@@ -72,10 +72,10 @@ class ActorOnPolicy
 
     virtual void initialize() =0;
     virtual void reset() =0;
-    virtual void update(const FeatureVectors<T>& xas_t, const Action& a_t,
+    virtual void update(const Representations<T>& xas_t, const Action& a_t,
         double delta_t) =0;
-    virtual const Action& proposeAction(const FeatureVectors<T>& xas) =0;
-    virtual const Action& decide(const FeatureVectors<T>& xas) =0;
+    virtual const Action& proposeAction(const Representations<T>& xas) =0;
+    virtual const Action& decide(const Representations<T>& xas) =0;
 };
 
 #endif /* CONTROL_H_ */
