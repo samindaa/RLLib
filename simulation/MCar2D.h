@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include "Env.h"
 
 class MCar2D: public Env<float>
@@ -23,6 +24,7 @@ class MCar2D: public Env<float>
     float mcar_max_position;
     float mcar_max_velocity; // the negative of this in the minimum velocity
     float mcar_goal_position;
+    double mcar_max_action_value;
 
     float POS_WIDTH; // the tile width for position
     float VEL_WIDTH; // the tile width for velocity
@@ -31,13 +33,19 @@ class MCar2D: public Env<float>
 
   public:
     MCar2D() :
-        Env<float>(2, 3), mcar_position(0), mcar_velocity(0),
+        Env<float>(2, 3, 1), mcar_position(0), mcar_velocity(0),
             mcar_min_position(-1.2), mcar_max_position(0.6),
             mcar_max_velocity(0.07), mcar_goal_position(0.5),
-            POS_WIDTH(1.7 / 10.0), VEL_WIDTH(0.14 / 10.0)
+            mcar_max_action_value(1.0), POS_WIDTH(1.7 / 10.0),
+            VEL_WIDTH(0.14 / 10.0)
     {
-      for (unsigned int a = 0; a < actions->dimension(); a++)
-        actions->add(a, a);
+      discreteActions->add(0, -mcar_max_action_value);
+      discreteActions->add(1, 0.0);
+      discreteActions->add(2, mcar_max_action_value);
+
+      // subject to change
+      continuousActions->add(0, 0.0);
+
       outfile.open("mcar.txt");
     }
 
@@ -52,8 +60,7 @@ class MCar2D: public Env<float>
       vars[0] = mcar_position / POS_WIDTH;
       vars[1] = mcar_velocity / VEL_WIDTH;
 
-      if (outfile.is_open() && getOn())
-        outfile << mcar_position  << std::endl;
+      if (outfile.is_open() && getOn()) outfile << mcar_position << std::endl;
     }
 
     // Profiles
@@ -66,8 +73,9 @@ class MCar2D: public Env<float>
 
     void step(const Action& a)
     {
-      mcar_velocity += (a.at() - 1) * 0.001
-          + ::cos(3 * mcar_position) * (-0.0025);
+      float power = std::max(-mcar_max_action_value,
+          std::min(mcar_max_action_value, a.at()));
+      mcar_velocity += power * 0.001 + ::cos(3 * mcar_position) * (-0.0025);
       if (mcar_velocity > mcar_max_velocity) mcar_velocity = mcar_max_velocity;
       if (mcar_velocity < -mcar_max_velocity) mcar_velocity =
           -mcar_max_velocity;

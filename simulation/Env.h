@@ -18,22 +18,25 @@ template<class O>
 class Env
 {
   protected:
-    int numActions;
     DenseVector<O>* __vars;
-    ActionList* actions;
+    ActionList* discreteActions;
+    ActionList* continuousActions;
     bool itsOn;
 
   public:
-    Env(int numVars, int numActions) :
-        numActions(numActions), __vars(new DenseVector<O>(numVars)),
-            actions(new TabularActionList(numActions)), itsOn(false)
+    Env(int numVars, int numDiscreteActions, int numContinuousActions) :
+        __vars(new DenseVector<O>(numVars)),
+            discreteActions(new GeneralActionList(numDiscreteActions)),
+            continuousActions(new GeneralActionList(numContinuousActions)),
+            itsOn(false)
     {
     }
 
     virtual ~Env()
     {
       delete __vars;
-      delete actions;
+      delete discreteActions;
+      delete continuousActions;
     }
 
     virtual void initialize() =0;
@@ -52,14 +55,14 @@ class Env
       return itsOn;
     }
 
-    ActionList& getActionList() const
+    ActionList& getDiscreteActionList() const
     {
-      return *actions;
+      return *discreteActions;
     }
 
-    int getNumActions() const
+    ActionList& getContinuousActionList() const
     {
-      return numActions;
+      return *continuousActions;
     }
 
     const DenseVector<O>& getVars() const

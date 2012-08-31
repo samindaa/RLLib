@@ -17,6 +17,7 @@
 #include "Trace.h"
 #include "Projector.h"
 #include "ControlAlgorithm.h"
+#include "Representation.h"
 #include "../simulation/Simulator.h"
 #include "../simulation/MCar2D.h"
 #include "../simulation/MCar3D.h"
@@ -168,7 +169,7 @@ void testSarsaMountainCar()
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getActionList());
+      double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
   double alpha = 0.2 / projector->vectorNorm();
   double gamma = 0.99;
@@ -176,7 +177,7 @@ void testSarsaMountainCar()
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
-      &problem->getActionList(), epsilon);
+      &problem->getDiscreteActionList(), epsilon);
   OnPolicyControlLearner<double, float>* control = new SarsaControl<double,
       float>(acting, toStateAction, sarsa);
 
@@ -197,20 +198,21 @@ void testSarsaMountainCar()
 void testExpectedSarsaMountainCar()
 {
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 10, false);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getActionList());
+      double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
-  double alpha = 0.2 / projector->vectorNorm();
+  double alpha = 0.25 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.9;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
-      &problem->getActionList(), epsilon);
+      &problem->getDiscreteActionList(), epsilon);
   OnPolicyControlLearner<double, float>* control = new ExpectedSarsaControl<
-      double, float>(acting, toStateAction, sarsa, &problem->getActionList());
+      double, float>(acting, toStateAction, sarsa,
+      &problem->getDiscreteActionList());
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
@@ -234,7 +236,7 @@ void testGreedyGQMountainCar()
   Projector<double, float>* projector = new FullTilings<double, float>(
       1000000 + 1, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getActionList());
+      double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new AMaxTrace<double>(projector->dimension(), 1000);
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
@@ -246,10 +248,11 @@ void testGreedyGQMountainCar()
   //Policy<double>* behavior = new EpsilonGreedy<double>(gq,
   //    &problem->getActionList(), epsilon);
   Policy<double>* behavior = new RandomPolicy<double>(
-      &problem->getActionList());
-  Policy<double>* target = new Greedy<double>(gq, &problem->getActionList());
+      &problem->getDiscreteActionList());
+  Policy<double>* target = new Greedy<double>(gq,
+      &problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(
-      target, behavior, &problem->getActionList(), toStateAction, gq);
+      target, behavior, &problem->getDiscreteActionList(), toStateAction, gq);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
@@ -274,7 +277,7 @@ void testOffPACMountainCar()
   Projector<double, float>* projector = new FullTilings<double, float>(
       1000000 + 1, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getActionList());
+      double, float>(projector, &problem->getDiscreteActionList());
 
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
@@ -284,7 +287,7 @@ void testOffPACMountainCar()
       0.4, critice);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
-      projector->dimension(), &problem->getActionList());
+      projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
   ActorOffPolicy<double, float>* actor =
@@ -292,7 +295,7 @@ void testOffPACMountainCar()
           actore);
 
   Policy<double>* behavior = new RandomPolicy<double>(
-      &problem->getActionList());
+      &problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
       behavior, critic, actor, toStateAction, projector, gamma);
 
@@ -321,7 +324,7 @@ void testOffPACMountainCar2()
   Projector<double, float>* projector = new FullTilings<double, float>(
       1000000 + 1, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getActionList());
+      double, float>(projector, &problem->getDiscreteActionList());
 
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
@@ -331,7 +334,7 @@ void testOffPACMountainCar2()
       0.4, critice);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
-      projector->dimension(), &problem->getActionList());
+      projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
   ActorOffPolicy<double, float>* actor =
@@ -341,7 +344,7 @@ void testOffPACMountainCar2()
   //Policy<double>* behavior = new RandomPolicy<double>(
   //    &problem->getActionList());
   Policy<double>* behavior = new BoltzmannDistribution<double>(
-      projector->dimension(), &problem->getActionList());
+      projector->dimension(), &problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
       behavior, critic, actor, toStateAction, projector, gamma);
 
@@ -369,7 +372,7 @@ void testSarsaMountainCar3D()
   Projector<double, float>* projector = new FullTilings<double, float>(
       1000000 + 1, 16, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getActionList());
+      double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RMaxTrace<double>(projector->dimension(), 1000, 0.001);
   double alpha = 0.15 / projector->vectorNorm();
   double gamma = 0.99;
@@ -377,7 +380,7 @@ void testSarsaMountainCar3D()
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
   double epsilon = 0.1;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
-      &problem->getActionList(), epsilon);
+      &problem->getDiscreteActionList(), epsilon);
   OnPolicyControlLearner<double, float>* control = new SarsaControl<double,
       float>(acting, toStateAction, sarsa);
 
@@ -403,7 +406,7 @@ void testOffPACMountainCar3D()
   Projector<double, float>* projector = new FullTilings<double, float>(
       1000000 + 1, 16, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getActionList());
+      double, float>(projector, &problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .00001 / projector->vectorNorm();
@@ -413,7 +416,7 @@ void testOffPACMountainCar3D()
       0.4, critice);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
-      projector->dimension(), &problem->getActionList());
+      projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
   ActorOffPolicy<double, float>* actor =
@@ -421,7 +424,7 @@ void testOffPACMountainCar3D()
           actore);
 
   Policy<double>* behavior = new RandomPolicy<double>(
-      &problem->getActionList());
+      &problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
       behavior, critic, actor, toStateAction, projector, gamma);
 
@@ -450,7 +453,7 @@ void testOffPACSwingPendulum()
   Projector<double, float>* projector = new FullTilings<double, float>(
       1000000 + 1, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getActionList());
+      double, float>(projector, &problem->getDiscreteActionList());
 
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0 / projector->vectorNorm();
@@ -461,7 +464,7 @@ void testOffPACSwingPendulum()
       lambda, critice);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
-      projector->dimension(), &problem->getActionList());
+      projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
   ActorOffPolicy<double, float>* actor =
@@ -469,7 +472,7 @@ void testOffPACSwingPendulum()
           actore);
 
   Policy<double>* behavior = new RandomPolicy<double>(
-      &problem->getActionList());
+      &problem->getDiscreteActionList());
   /*Policy<double>* behavior = new RandomBiasPolicy<double>(
    &problem->getActionList());*/
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
@@ -492,6 +495,94 @@ void testOffPACSwingPendulum()
   delete sim;
 }
 
+void testOnPolicyCar()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new MCar2D;
+  Projector<double, float>* projector = new FullTilings<double, float>(
+      1000000 + 1, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getContinuousActionList());
+
+  double alpha_v = 1.0 / projector->vectorNorm();
+  double gamma = 1.0;
+  double lambda = 0.9;
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
+      critice);
+  double alpha_u = 0.001 / projector->vectorNorm();
+  PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
+      projector->dimension(), &problem->getContinuousActionList());
+
+  Trace<double>* actore = new AMaxTrace<double>(2 * projector->dimension(),
+      1000);
+  ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
+      lambda, acting, actore);
+
+  OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
+      double, float>(critic, actor, toStateAction, 0);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 100);
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actore;
+  delete actor;
+  delete acting;
+  delete control;
+  delete sim;
+}
+
+void testOnPolicySwingPendulum()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new SwingPendulum;
+  Projector<double, float>* projector = new FullTilings<double, float>(
+      1000000 + 1, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getContinuousActionList());
+
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double gamma = 1.0;
+  double lambda = 0.5;
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
+      critice);
+  double alpha_u = 0.001 / projector->vectorNorm();
+  PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
+      projector->dimension(), &problem->getContinuousActionList());
+
+  Trace<double>* actore = new AMaxTrace<double>(2 * projector->dimension(),
+      1000);
+  ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
+      lambda, acting, actore);
+
+  OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
+      double, float>(critic, actor, toStateAction, .0001);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 1000, 1000);
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actore;
+  delete actor;
+  delete acting;
+  delete control;
+  delete sim;
+}
+
 void testOffPACSwingPendulum2()
 {
   srand(time(0));
@@ -500,7 +591,7 @@ void testOffPACSwingPendulum2()
   Projector<double, float>* projector = new FullTilings<double, float>(
       1000000 + 1, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getActionList());
+      double, float>(projector, &problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .005 / projector->vectorNorm();
@@ -510,7 +601,7 @@ void testOffPACSwingPendulum2()
       0.4, critice);
   double alpha_u = 0.5 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
-      projector->dimension(), &problem->getActionList());
+      projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
   ActorOffPolicy<double, float>* actor =
@@ -520,7 +611,7 @@ void testOffPACSwingPendulum2()
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getActionList());*/
   Policy<double>* behavior = new BoltzmannDistribution<double>(
-      projector->dimension(), &problem->getActionList());
+      projector->dimension(), &problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
       behavior, critic, actor, toStateAction, projector, gamma);
 
@@ -549,14 +640,17 @@ int main()
 //  testProjectorMachineLearning();
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
-  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
+//  testGreedyGQMountainCar();
+  testOffPACMountainCar();
 //  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
 //  testOffPACSwingPendulum();
 //  testOffPACSwingPendulum2();
+
+//  testOnPolicySwingPendulum();
+//  testOnPolicyCar();
   cout << "## end" << endl;
   return 0;
 }

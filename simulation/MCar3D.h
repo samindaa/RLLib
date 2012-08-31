@@ -57,15 +57,18 @@ class MCar3D: public Env<float>
 
   public:
     MCar3D() :
-        Env<float>(4, 5), mcar_Xposition(0), mcar_Yposition(0),
+        Env<float>(4, 5, 1), mcar_Xposition(0), mcar_Yposition(0),
             mcar_Xvelocity(0), mcar_Yvelocity(0), mcar_min_position(-1.2),
             mcar_max_position(0.6), mcar_goal_position(0.5),
             mcar_max_velocity(0.07), offset(0), mcar_Xstep(1.7 / 10.0),
             mcar_Ystep(1.7 / 10.0), mcar_Dxstep(0.14 / 10.0),
             mcar_Dystep(0.14 / 10.0)
     {
-      for (unsigned int a = 0; a < actions->dimension(); a++)
-        actions->add(a, a);
+
+      for (unsigned int a = 0; a < discreteActions->dimension(); a++)
+        discreteActions->add(a, a);
+      // not used
+      continuousActions->add(0, 0.0);
     }
 
     virtual ~MCar3D()

@@ -17,20 +17,26 @@
 class SwingPendulum: public Env<float>
 {
   protected:
-    float uMax, theta, velocity, maxTheta, stepTime, maxVelocity, mass, length,
+    double uMax, theta, velocity, maxTheta, stepTime, maxVelocity, mass, length,
         g, requiredUpTime, upRange;
 
     int upTime;
     std::ofstream outfile;
   public:
     SwingPendulum() :
-        Env(2, 3), uMax(2.0), theta(0), velocity(0), maxTheta(M_PI),
+        Env(2, 3, 1), uMax(2.0), theta(0), velocity(0), maxTheta(M_PI),
             stepTime(0.01), maxVelocity(M_PI_4 / stepTime), mass(1.0),
             length(1.0), g(9.8), requiredUpTime(10.0 /*seconds*/),
             upRange(M_PI_4 /*seconds*/), upTime(0)
     {
-      for (unsigned int a = 0; a < actions->dimension(); a++)
-        actions->add(a, uMax * (a - 1.0));
+
+      discreteActions->add(0, -uMax);
+      discreteActions->add(1, 0.0);
+      discreteActions->add(2, uMax);
+
+      // subject to change
+      continuousActions->add(0, 0.0);
+
       outfile.open("swingPendulum.txt");
     }
 
@@ -72,8 +78,9 @@ class SwingPendulum: public Env<float>
 
     void step(const Action& a)
     {
+      float torque = std::max(-uMax, std::min(uMax, a.at()));
       float thetaAcc = (-stepTime * velocity) + mass * g * length * sin(theta)
-          + a.at();
+          + torque;
       velocity = std::max(-maxVelocity,
           std::min(maxVelocity, velocity + thetaAcc));
       theta += velocity * stepTime;

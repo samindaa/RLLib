@@ -10,9 +10,6 @@
 
 #include <vector>
 
-#include "Vector.h"
-#include "Projector.h"
-
 class Action
 {
   protected:
@@ -34,6 +31,12 @@ class Action
       return values.at(i);
     }
 
+    void update(const unsigned int& i, const double& value)
+    {
+      assert(values.size() != 0 && (i >= 0 && i < values.size()));
+      values[i] = value;
+    }
+
     operator unsigned int() const
     {
       return id;
@@ -42,6 +45,11 @@ class Action
     const bool operator==(const Action& that) const
     {
       return id == that.id;
+    }
+
+    const bool operator!=(const Action& that) const
+    {
+      return id != that.id;
     }
 
 };
@@ -59,6 +67,8 @@ class ActionList
     virtual const Action& operator[](const int& index) const =0;
     virtual const Action& at(const int& index) const =0;
     virtual void add(const int& index, const double& value) =0;
+    virtual void update(const int& actionIndex, const unsigned int& vectorIndex,
+        const double& value) =0;
 
     typedef std::vector<Action*>::iterator iterator;
     typedef std::vector<Action*>::const_iterator const_iterator;
@@ -85,15 +95,15 @@ class ActionList
 
 };
 
-class TabularActionList: public ActionList
+class GeneralActionList: public ActionList
 {
   public:
-    TabularActionList(const int& numActions)
+    GeneralActionList(const int& numActions)
     {
       for (int i = 0; i < numActions; i++)
         actions.push_back(new Action(i));
     }
-    ~TabularActionList()
+    virtual ~GeneralActionList()
     {
       for (std::vector<Action*>::iterator iter = actions.begin();
           iter != actions.end(); ++iter)
@@ -116,63 +126,15 @@ class TabularActionList: public ActionList
       actions.at(index)->add(value);
     }
 
+    void update(const int& actionIndex, const unsigned int& vectorIndex,
+        const double& value)
+    {
+      actions.at(actionIndex)->update(vectorIndex, value);
+    }
+
     const unsigned int dimension() const
     {
       return actions.size();
-    }
-};
-
-template<class T, class O>
-class StateToStateAction
-{
-  public:
-    virtual ~StateToStateAction()
-    {
-    }
-
-    virtual const std::vector<SparseVector<T>*>& stateActions(
-        const DenseVector<O>& x) =0;
-    virtual const SparseVector<T>& stateAction(
-        const std::vector<SparseVector<T>*>& xas,
-        const Action& action) const =0;
-};
-
-// Tile coding base projector to state action
-template<class T, class O>
-class StateActionTilings: public StateToStateAction<T, O>
-{
-  protected:
-    Projector<T, O>* projector;
-    ActionList* actions;
-    std::vector<SparseVector<T>*> xas;
-  public:
-    StateActionTilings(Projector<T, O>* projector, ActionList* actions) :
-        projector(projector), actions(actions)
-    {
-      for (unsigned int i = 0; i < actions->dimension(); i++)
-        xas.push_back(new SparseVector<T>(projector->dimension()));
-    }
-    ~StateActionTilings()
-    {
-      for (typename std::vector<SparseVector<T>*>::iterator iter = xas.begin();
-          iter != xas.end(); ++iter)
-        delete *iter;
-      xas.clear();
-    }
-
-    const std::vector<SparseVector<T>*>& stateActions(const DenseVector<O>& x)
-    {
-      assert(actions->dimension() == xas.size());
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
-        xas.at(**a)->set(projector->project(x, **a));
-      return xas;
-    }
-
-    const SparseVector<T>& stateAction(const std::vector<SparseVector<T>*>& xas,
-        const Action& action) const
-    {
-      return *xas.at(action);
     }
 };
 

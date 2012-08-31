@@ -16,6 +16,7 @@
 #include "Vector.h"
 #include "Action.h"
 #include "Predictor.h"
+#include "Representation.h"
 
 template<class T>
 class Policy
@@ -24,14 +25,14 @@ class Policy
     virtual ~Policy()
     {
     }
-    virtual void update(const std::vector<SparseVector<T>*>& xas) =0;
+    virtual void update(const FeatureVectors<T>& phis) =0;
     virtual double pi(const Action& a) const =0;
     virtual const Action& sampleAction() const =0;
     virtual const Action& sampleBestAction() const =0;
 
-    const Action& decide(const std::vector<SparseVector<T>*>& xas)
+    const Action& decide(const FeatureVectors<T>& phis)
     {
-      update(xas);
+      update(phis);
       return sampleAction();
     }
 };
@@ -54,9 +55,134 @@ class PolicyDistribution: public Policy<T>
     virtual ~PolicyDistribution()
     {
     }
-    virtual const SparseVector<T>& computeGradLog(
-        const std::vector<SparseVector<T>*>& xas, const Action& action) =0;
-    virtual std::vector<SparseVector<T>*>* parameters() =0;
+    virtual const SparseVector<T>& computeGradLog(const FeatureVectors<T>& phis,
+        const Action& action) =0;
+    virtual SparseVector<T>* parameters() =0;
+};
+
+template<class T>
+class NormalDistribution: public PolicyDistribution<T>
+{
+  protected:
+    double mean0, sigma0, mean, sigma, meanStep, sigmaStep, sigma2, a_t;
+    int numFeatures;
+    ActionList* actions;
+    SparseVector<T>* u;
+    SparseVector<T>* grad;
+    SparseVector<T>* u_mean;
+    SparseVector<T>* u_sigma;
+    SparseVector<T>* x_mean;
+    SparseVector<T>* x_sigma;
+  public:
+
+    NormalDistribution(double mean0, double sigma0, const int& numFeatures,
+        ActionList* actions) :
+        mean0(mean0), sigma0(sigma0), mean(0), sigma(0), meanStep(0),
+            sigmaStep(0), sigma2(0), a_t(0), numFeatures(numFeatures),
+            actions(actions), u(new SparseVector<T>(2 * numFeatures)),
+            grad(new SparseVector<T>(2 * numFeatures)),
+            u_mean(new SparseVector<T>(numFeatures)),
+            u_sigma(new SparseVector<T>(numFeatures)),
+            x_mean(new SparseVector<T>(numFeatures)),
+            x_sigma(new SparseVector<T>(numFeatures))
+    {
+    }
+
+    virtual ~NormalDistribution()
+    {
+      delete u;
+      delete grad;
+      delete u_mean;
+      delete u_sigma;
+      delete x_mean;
+      delete x_sigma;
+    }
+
+    void update(const FeatureVectors<T>& xs)
+    {
+      assert(xs.dimension()==actions->dimension());
+      mean = u_mean->dot(xs.at(actions->at(0))) + mean0;
+      sigma = exp(u_sigma->dot(xs.at(actions->at(0)))) * sigma0 + 10e-8;
+      sigma2 = pow(sigma, 2);
+
+      a_t = nextGaussian(mean, sigma);
+      assert(actions->dimension() == 1);
+      actions->update(0, 0, a_t);
+    }
+
+    double pi(const Action& a) const
+    {
+      return exp(-0.5 * pow(a.at() - mean, 2) / sigma2)
+          / sqrt(2 * M_PI * sigma2);
+    }
+
+  private:
+    // http://en.literateprograms.org/Box-Muller_transform_(C)
+    double nextGaussian(const double& mean = 0, const double& stddev = 1.0)
+    {
+      static double n2 = 0.0;
+      static int n2_cached = 0;
+      if (!n2_cached)
+      {
+        double x, y, r;
+        do
+        {
+          x = drand48() - 1;
+          y = drand48() - 1;
+
+          r = x * x + y * y;
+        } while (r == 0.0 || r > 1.0);
+        {
+          double d = sqrt(-2.0 * log(r) / r);
+          double n1 = x * d;
+          n2 = y * d;
+          double result = n1 * stddev + mean;
+          n2_cached = 1;
+          return result;
+        }
+      }
+      else
+      {
+        n2_cached = 0;
+        return n2 * stddev + mean;
+      }
+    }
+  public:
+
+    const Action& sampleAction() const
+    {
+      return actions->at(0);
+    }
+    const Action& sampleBestAction() const
+    {
+      return actions->at(0);
+    }
+
+    const SparseVector<T>& computeGradLog(const FeatureVectors<T>& xs,
+        const Action& action)
+    {
+      assert(actions->dimension() == 1);
+      meanStep = (action.at() - mean) / sigma2;
+      sigmaStep = pow(action.at() - mean, 2) / sigma2 - 1.0;
+
+      x_mean->set(xs.at(action));
+      x_sigma->set(xs.at(action));
+
+      x_mean->multiplyToSelf(meanStep);
+      x_sigma->multiplyToSelf(sigmaStep);
+
+      grad->clear();
+      // 1st vector
+      grad->addToSelf(*x_mean);
+      // 2nd vector
+      grad->addToSelf(1, *x_sigma, numFeatures);
+      return *grad;
+    }
+
+    SparseVector<T>* parameters()
+    {
+      return u;
+    }
 };
 
 template<class T>
@@ -66,37 +192,30 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     ActionList* actions;
     SparseVector<T>* avg;
     DenseVector<double>* distribution;
-    std::vector<SparseVector<T>*>* u;
+    SparseVector<T>* u;
   public:
     BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
         actions(actions), avg(new SparseVector<T>(numFeatures)),
             distribution(new DenseVector<double>(actions->dimension())),
-            u(new std::vector<SparseVector<T>*>)
+            u(new SparseVector<T>(numFeatures))
     {
-
-      u->push_back(new SparseVector<T>(numFeatures));
     }
     virtual ~BoltzmannDistribution()
     {
       delete avg;
       delete distribution;
-      for (typename std::vector<SparseVector<T>*>::iterator iter = u->begin();
-          iter != u->end(); ++iter)
-        delete *iter;
-      u->clear();
       delete u;
     }
 
-    void update(const std::vector<SparseVector<T>*>& xas)
+    void update(const FeatureVectors<T>& xas)
     {
-      assert(actions->dimension() == xas.size());
+      assert(actions->dimension() == xas.dimension());
       distribution->clear();
-      SparseVector<T>* _u = u->at(0);
       double sum = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
-        distribution->at(**a) = exp(_u->dot(*xas.at(**a)));
+        distribution->at(**a) = exp(u->dot(xas.at(**a)));
         sum += distribution->at(**a);
       }
       assert(sum);
@@ -106,14 +225,14 @@ class BoltzmannDistribution: public PolicyDistribution<T>
 
     }
 
-    const SparseVector<T>& computeGradLog(
-        const std::vector<SparseVector<T>*>& xas, const Action& action)
+    const SparseVector<T>& computeGradLog(const FeatureVectors<T>& xas,
+        const Action& action)
     {
       avg->clear();
-      avg->addToSelf(*xas.at(action));
+      avg->addToSelf(xas.at(action));
       for (ActionList::const_iterator b = actions->begin(); b != actions->end();
           ++b)
-        avg->addToSelf(-distribution->at(**b), *xas.at(**b));
+        avg->addToSelf(-distribution->at(**b), xas.at(**b));
       return *avg;
     }
 
@@ -140,7 +259,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       return sampleAction();
     }
 
-    std::vector<SparseVector<T>*>* parameters()
+    SparseVector<T>* parameters()
     {
       return u;
     }
@@ -161,7 +280,7 @@ class RandomPolicy: public Policy<T>
     {
     }
 
-    void update(const std::vector<SparseVector<T>*>& xas)
+    void update(const FeatureVectors<T>& xas)
     {
     }
     double pi(const Action& a) const
@@ -198,7 +317,7 @@ class RandomBiasPolicy: public Policy<T>
       delete distribution;
     }
 
-    void update(const std::vector<SparseVector<T>*>& xas)
+    void update(const FeatureVectors<T>& xas)
     {
       // 50% prev action
       distribution->clear();
@@ -267,11 +386,11 @@ class Greedy: public DiscreteActionPolicy<T>
 
   private:
 
-    void updateActionValues(const std::vector<SparseVector<T>*>& xas_tp1)
+    void updateActionValues(const FeatureVectors<T>& xas_tp1)
     {
       for (ActionList::const_iterator iter = actions->begin();
           iter != actions->end(); ++iter)
-        actionValues[**iter] = predictor->predict(*xas_tp1.at(**iter));
+        actionValues[**iter] = predictor->predict(xas_tp1.at(**iter));
     }
 
     void findBestAction()
@@ -286,7 +405,7 @@ class Greedy: public DiscreteActionPolicy<T>
 
   public:
 
-    void update(const std::vector<SparseVector<T>*>& xas_tp1)
+    void update(const FeatureVectors<T>& xas_tp1)
     {
       updateActionValues(xas_tp1);
       findBestAction();

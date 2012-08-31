@@ -351,6 +351,18 @@ class SparseVector: public Vector<T>
       return *this;
     }
 
+    SparseVector<T>& addToSelf(const double& factor,
+        const SparseVector<T>& that, const int& offset)
+    {
+      for (int position = 0; position < that.numActive; position++)
+      {
+        int index = that.activeIndexes[position] + offset;
+        setNonZeroEntry(index,
+            getEntry(index) + factor * that.values[position]);
+      }
+      return *this;
+    }
+
     SparseVector<T>& addToSelf(const SparseVector<T>& that)
     {
       return addToSelf(1, that);
