@@ -82,6 +82,7 @@ class StateToStateAction
     virtual const SparseVector<T>& stateAction(const DenseVector<O>& x) =0;
     virtual const Representations<T>& stateActions(const DenseVector<O>& x) =0;
     virtual const Projector<T, O>& getProjector() const =0;
+    virtual const ActionList& getActionList() const =0;
 };
 
 // Tile coding base projector to state action
@@ -123,6 +124,11 @@ class StateActionTilings: public StateToStateAction<T, O>
     const Projector<T, O>& getProjector() const
     {
       return *projector;
+    }
+
+    const ActionList& getActionList() const
+    {
+      return *actions;
     }
 };
 

@@ -9,6 +9,7 @@
 #define SIMULATOR_H_
 
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <numeric>
 #include <typeinfo>
@@ -116,6 +117,26 @@ class Simulator
         std::cout.flush();
       }
       std::cout << std::endl;
+    }
+
+    void computeValueFunction() const
+    {
+      if (env->getVars().dimension() == 2) // only for two state variables
+      {
+        std::ofstream out("valueFunction.txt");
+        DenseVector<float> x_t(2);
+        for (float x = -10; x <= 10; x += 0.1)
+        {
+          for (float y = -5; y <= 5; y += 0.1)
+          {
+            x_t[0] = x;
+            x_t[1] = y;
+            out << agent->computeValueFunction(x_t) << " ";
+          }
+          out << std::endl;
+        }
+        out.close();
+      }
     }
 };
 

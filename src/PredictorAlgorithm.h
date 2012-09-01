@@ -15,7 +15,7 @@
 // Simple predictor algorithms
 
 template<class T>
-class TDLambda: Predictor<T>
+class TDLambda: public Predictor<T>
 {
   private:
     double v_t, v_tp1, delta;

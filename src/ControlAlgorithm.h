@@ -70,6 +70,19 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
       return acting->sampleBestAction();
     }
 
+    const double computeValueFunction(const DenseVector<O>& x) const
+    {
+      const Representations<T>& phis = toStateAction->stateActions(x);
+      acting->update(phis);
+      double v_s = 0;
+      // V(s) = \sum_{a \in A} \pi(s,a) * Q(s,a)
+      for (ActionList::const_iterator a =
+          toStateAction->getActionList().begin();
+          a != toStateAction->getActionList().end(); ++a)
+        v_s += acting->pi(**a) * sarsa->predict(phis.at(**a));
+      return v_s;
+    }
+
 };
 
 template<class T, class O>
@@ -195,6 +208,18 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
     {
       target->decide(toStateAction->stateActions(x));
       return target->sampleBestAction();
+    }
+
+    const double computeValueFunction(const DenseVector<O>& x) const
+    {
+      const Representations<T>& phis = toStateAction->stateActions(x);
+      target->update(phis);
+      double v_s = 0;
+      // V(s) = \sum_{a \in A} \pi(s,a) * Q(s,a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
+        v_s += target->pi(**a) * gq->predict(phis.at(**a));
+      return v_s;
     }
 };
 
@@ -326,6 +351,11 @@ class OffPAC: public OffPolicyControlLearner<T, O>
     {
       return actor->proposeAction(toStateAction->stateActions(x));
     }
+
+    const double computeValueFunction(const DenseVector<O>& x) const
+    {
+      return critic->predict(projector->project(x));
+    }
 };
 
 template<class T, class O>
@@ -437,6 +467,13 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
       averageReward += alpha_r * delta_t;
       actor->update(xas_t, a_t, delta_t);
       return actor->decide(toStateAction->stateActions(x_tp1));
+    }
+
+    const double computeValueFunction(const DenseVector<O>& x) const
+    {
+      return critic->predict(
+          toStateAction->stateActions(x).at(
+              toStateAction->getActionList().at(0)));
     }
 };
 

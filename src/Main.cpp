@@ -183,7 +183,8 @@ void testSarsaMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(10, 5000, 100);
+  sim->run(1, 5000, 100);
+  sim->computeValueFunction();
 
   delete problem;
   delete projector;
@@ -216,7 +217,8 @@ void testExpectedSarsaMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(10, 5000, 100);
+  sim->run(1, 5000, 100);
+  sim->computeValueFunction();
 
   delete problem;
   delete projector;
@@ -256,7 +258,8 @@ void testGreedyGQMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(20, 5000, 100);
+  sim->run(1, 5000, 100);
+  sim->computeValueFunction();
 
   delete problem;
   delete projector;
@@ -301,7 +304,8 @@ void testOffPACMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(20, 5000, 100);
+  sim->run(1, 5000, 100);
+  sim->computeValueFunction();
 
   delete problem;
   delete projector;
@@ -526,6 +530,7 @@ void testOnPolicyCar()
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
   sim->run(1, 5000, 100);
+  sim->computeValueFunction();
 
   delete problem;
   delete projector;
@@ -640,8 +645,8 @@ int main()
 //  testProjectorMachineLearning();
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
-//  testGreedyGQMountainCar();
-  testOffPACMountainCar();
+  testGreedyGQMountainCar();
+//  testOffPACMountainCar();
 //  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();

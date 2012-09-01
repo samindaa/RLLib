@@ -25,6 +25,7 @@ class Control
     virtual const Action& step(const DenseVector<O>& x_t, const Action& a_t,
         const DenseVector<O>& x_tp1, const double& r_tp1,
         const double& z_tp1) =0;
+    virtual const double computeValueFunction(const DenseVector<O>& x) const =0;
 };
 
 template<class T, class O>
