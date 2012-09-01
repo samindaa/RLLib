@@ -35,6 +35,7 @@
  ******************************************************************************
  */
 
+//@@>> TODO: a whole bunch of cleaning to do ...
 class MCar3D: public Env<float>
 {
   protected:
@@ -66,9 +67,9 @@ class MCar3D: public Env<float>
     {
 
       for (unsigned int a = 0; a < discreteActions->dimension(); a++)
-        discreteActions->add(a, a);
+        discreteActions->push_back(a, a);
       // not used
-      continuousActions->add(0, 0.0);
+      continuousActions->push_back(0, 0.0);
     }
 
     virtual ~MCar3D()

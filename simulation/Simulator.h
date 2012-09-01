@@ -137,6 +137,9 @@ class Simulator
         }
         out.close();
       }
+
+      // draw
+      env->draw();
     }
 };
 

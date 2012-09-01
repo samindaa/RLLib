@@ -8,6 +8,10 @@
 #ifndef ENV_H_
 #define ENV_H_
 
+#include <limits>
+#include <cmath>
+#include <cstdlib>
+
 #include "../src/Vector.h"
 #include "../src/Action.h"
 
@@ -45,6 +49,8 @@ class Env
     virtual bool endOfEpisode() const =0;
     virtual float r() const =0;
     virtual float z() const =0;
+    virtual void draw() const {}
+
     virtual void setOn(const bool& itsOn)
     {
       this->itsOn = itsOn;
@@ -77,5 +83,45 @@ inline int sgn(T val)
 {
   return (T(0) < val) - (val < T(0));
 }
+
+// Helper class for range management for testing environments
+template<class T>
+class Range
+{
+  private:
+    T minv, maxv;
+
+  public:
+    Range(const T& minv = std::numeric_limits<T>::min(), const T& maxv =
+        std::numeric_limits<T>::max()) :
+        minv(minv), maxv(maxv)
+    {
+    }
+
+    T bound(const T& value) const
+    {
+      return std::max(minv, std::min(maxv, value));
+    }
+
+    bool in(const T& value) const
+    {
+      return value >= minv && value <= maxv;
+    }
+
+    T length() const
+    {
+      return maxv - minv;
+    }
+
+    T min() const
+    {
+      return minv;
+    }
+
+    T max() const
+    {
+      return maxv;
+    }
+};
 
 #endif /* ENV_H_ */

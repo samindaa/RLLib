@@ -17,14 +17,15 @@ class MCar2D: public Env<float>
 {
   protected:
     // Global variables:
-    float mcar_position;
-    float mcar_velocity;
+    float position;
+    float velocity;
 
-    float mcar_min_position;
-    float mcar_max_position;
-    float mcar_max_velocity; // the negative of this in the minimum velocity
-    float mcar_goal_position;
-    double mcar_max_action_value;
+    Range<float>* positionRange;
+    Range<float>* velocityRange;
+    Range<float>* actionRange;
+
+    float targetPosition;
+    float throttleFactor;
 
     float POS_WIDTH; // the tile width for position
     float VEL_WIDTH; // the tile width for velocity
@@ -33,64 +34,63 @@ class MCar2D: public Env<float>
 
   public:
     MCar2D() :
-        Env<float>(2, 3, 1), mcar_position(0), mcar_velocity(0),
-            mcar_min_position(-1.2), mcar_max_position(0.6),
-            mcar_max_velocity(0.07), mcar_goal_position(0.5),
-            mcar_max_action_value(1.0), POS_WIDTH(1.7 / 10.0),
-            VEL_WIDTH(0.14 / 10.0)
+        Env<float>(2, 3, 1), position(0), velocity(0),
+            positionRange(new Range<float>(-1.2, 0.6)),
+            velocityRange(new Range<float>(-0.07, 0.07)),
+            actionRange(new Range<float>(-1.0, 1.0)),
+            targetPosition(positionRange->max()), throttleFactor(1.0),
+            POS_WIDTH(positionRange->length() / 10.0),
+            VEL_WIDTH(velocityRange->length() / 10.0)
     {
-      discreteActions->add(0, -mcar_max_action_value);
-      discreteActions->add(1, 0.0);
-      discreteActions->add(2, mcar_max_action_value);
+      discreteActions->push_back(0, actionRange->min());
+      discreteActions->push_back(1, 0.0);
+      discreteActions->push_back(2, actionRange->max());
 
       // subject to change
-      continuousActions->add(0, 0.0);
+      continuousActions->push_back(0, 0.0);
 
       outfile.open("mcar.txt");
     }
 
     virtual ~MCar2D()
     {
+      delete positionRange;
+      delete velocityRange;
+      delete actionRange;
       outfile.close();
     }
 
     void update()
     {
       DenseVector<float>& vars = *__vars;
-      vars[0] = mcar_position / POS_WIDTH;
-      vars[1] = mcar_velocity / VEL_WIDTH;
+      vars[0] = position / POS_WIDTH;
+      vars[1] = velocity / VEL_WIDTH;
 
-      if (outfile.is_open() && getOn()) outfile << mcar_position << std::endl;
+      if (outfile.is_open() && getOn()) outfile << position << std::endl;
     }
 
     // Profiles
     void initialize()
     {
-      mcar_position = -0.5;
-      mcar_velocity = 0.0;
+      position = -0.5;
+      velocity = 0.0;
       update();
     }
 
     void step(const Action& a)
     {
-      float power = std::max(-mcar_max_action_value,
-          std::min(mcar_max_action_value, a.at()));
-      mcar_velocity += power * 0.001 + ::cos(3 * mcar_position) * (-0.0025);
-      if (mcar_velocity > mcar_max_velocity) mcar_velocity = mcar_max_velocity;
-      if (mcar_velocity < -mcar_max_velocity) mcar_velocity =
-          -mcar_max_velocity;
-      mcar_position += mcar_velocity;
-      if (mcar_position > mcar_max_position) mcar_position = mcar_max_position;
-      if (mcar_position < mcar_min_position) mcar_position = mcar_min_position;
-      if (mcar_position == mcar_min_position && mcar_velocity < 0)
-        mcar_velocity = 0;
-
+      float throttle = actionRange->bound(a.at()) * throttleFactor;
+      velocity = velocityRange->bound(
+          velocity + throttle * 0.001 + cos(3 * position) * (-0.0025));
+      position += velocity;
+      if (position < positionRange->min()) velocity = 0.0;
+      position = positionRange->bound(position);
       update();
     }
 
     bool endOfEpisode() const
     {
-      return (mcar_position >= mcar_goal_position);
+      return (position >= targetPosition);
     }
 
     float r() const

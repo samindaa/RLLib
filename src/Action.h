@@ -21,7 +21,7 @@ class Action
     {
     }
 
-    void add(const double& value)
+    void push_back(const double& value)
     {
       values.push_back(value);
     }
@@ -66,7 +66,7 @@ class ActionList
     virtual const unsigned int dimension() const =0;
     virtual const Action& operator[](const int& index) const =0;
     virtual const Action& at(const int& index) const =0;
-    virtual void add(const int& index, const double& value) =0;
+    virtual void push_back(const int& index, const double& value) =0;
     virtual void update(const int& actionIndex, const unsigned int& vectorIndex,
         const double& value) =0;
 
@@ -121,9 +121,9 @@ class GeneralActionList: public ActionList
       return *actions.at(index);
     }
 
-    void add(const int& index, const double& value)
+    void push_back(const int& index, const double& value)
     {
-      actions.at(index)->add(value);
+      actions.at(index)->push_back(value);
     }
 
     void update(const int& actionIndex, const unsigned int& vectorIndex,

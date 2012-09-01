@@ -22,6 +22,7 @@
 #include "../simulation/MCar2D.h"
 #include "../simulation/MCar3D.h"
 #include "../simulation/SwingPendulum.h"
+#include "../simulation/ContinuousGridworld.h"
 
 using namespace std;
 
@@ -204,7 +205,7 @@ void testExpectedSarsaMountainCar()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
-  double alpha = 0.25 / projector->vectorNorm();
+  double alpha = 0.1 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.9;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
@@ -304,7 +305,56 @@ void testOffPACMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 100);
+  sim->run(10, 5000, 100);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actore;
+  delete actor;
+  delete behavior;
+  delete target;
+  delete control;
+  delete sim;
+}
+
+void testOffPACContinuousGridworld()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new ContinuousGridworld;
+  Projector<double, float>* projector = new FullTilings<double, float>(
+      1000000 + 1, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getDiscreteActionList());
+
+  double alpha_v = 0.05 / projector->vectorNorm();
+  double alpha_w = 0.0 / projector->vectorNorm();
+  double gamma = 0.99;
+  double lambda = 0.6;
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
+      lambda, critice);
+  double alpha_u = 0.001 / projector->vectorNorm();
+  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
+      projector->dimension(), &problem->getDiscreteActionList());
+
+  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
+  ActorOffPolicy<double, float>* actor =
+      new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
+          actore);
+
+  Policy<double>* behavior = new RandomPolicy<double>(
+      &problem->getDiscreteActionList());
+  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
+      behavior, critic, actor, toStateAction, projector, gamma);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 5000);
   sim->computeValueFunction();
 
   delete problem;
@@ -645,8 +695,9 @@ int main()
 //  testProjectorMachineLearning();
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
-  testGreedyGQMountainCar();
+//  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
+  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();
