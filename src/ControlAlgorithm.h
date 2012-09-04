@@ -194,6 +194,8 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       }
 
       gq->update(*phi_t, *phi_bar_tp1, rho_t, r_tp1, z_tp1);
+      // Next cycle update the target policy
+      target->update(xas_tp1);
       const Action& a_tp1 = behavior->decide(xas_tp1);
       phi_t->set(xas_tp1.at(a_tp1));
       return a_tp1;
@@ -261,7 +263,7 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
 
     }
 
-    void updateParameters(const Representations<T>& xas)
+    void updatePolicy(const Representations<T>& xas)
     {
       policy->update(xas);
     }
@@ -276,6 +278,7 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     {
       u->clear();
       e->clear();
+      initialized = false;
     }
 
     double pi(const Action& a) const
@@ -331,7 +334,7 @@ class OffPAC: public OffPolicyControlLearner<T, O>
       phi_tp1->set(projector->project(x_tp1));
 
       const Representations<T>& xas_t = toStateAction->stateActions(x_t);
-      actor->updateParameters(xas_t);
+      actor->updatePolicy(xas_t);
       rho_t = actor->pi(a_t) / behavior->pi(a_t);
 
       delta_t = critic->update(*phi_t, *phi_tp1, rho_t, gamma_t, r_tp1, z_tp1);

@@ -57,7 +57,7 @@ class ActorOffPolicy
     virtual void reset() =0;
     virtual void update(const Representations<T>& xas_t, const Action& a_t,
         double const& rho_t, double const& gamma_t, double delta_t) =0;
-    virtual void updateParameters(const Representations<T>& xas) =0;
+    virtual void updatePolicy(const Representations<T>& xas) =0;
     virtual const Action& proposeAction(const Representations<T>& xas) =0;
     virtual double pi(const Action& a) const =0;
 

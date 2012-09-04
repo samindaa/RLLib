@@ -45,11 +45,14 @@ class MCar2D: public Env<float>
       discreteActions->push_back(0, actionRange->min());
       discreteActions->push_back(1, 0.0);
       discreteActions->push_back(2, actionRange->max());
+      /*int i = 0;
+       for (float p = actionRange->min(); p <= actionRange->max(); p += 0.02)
+       discreteActions->push_back(i++, p);*/
 
       // subject to change
       continuousActions->push_back(0, 0.0);
 
-      outfile.open("mcar.txt");
+      outfile.open("visualization/mcar.txt");
     }
 
     virtual ~MCar2D()

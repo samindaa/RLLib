@@ -18,12 +18,13 @@ class ContinuousGridworld: public Env<float>
     Range<float>* observationRange;
     Range<float>* actionRange;
     float absoluteNoise;
+    DenseVector<float>* observations;
 
   public:
     ContinuousGridworld() :
         Env<float>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)),
-            actionRange(new Range<float>(-0.05, 0.05)),
-            absoluteNoise(0.1 * 5.0 / 2.0)
+            actionRange(new Range<float>(-0.05, 0.05)), absoluteNoise(0.025),
+            observations(new DenseVector<float>(2))
     {
       // discrete actions
       for (unsigned int i = 0; i < discreteActions->dimension(); i++)
@@ -46,31 +47,39 @@ class ContinuousGridworld: public Env<float>
     {
       delete observationRange;
       delete actionRange;
+      delete observations;
     }
 
     void initialize()
     {
-      __vars->at(0) = 0.2;
-      __vars->at(1) = 0.4;
+      observations->at(0) = 0.2;
+      observations->at(1) = 0.4;
+      update();
     }
 
     void update()
     { // nothing
+      // unit generalization
+      for (int i = 0; i < __vars->dimension(); i++)
+        __vars->at(i) = observations->at(i) * 10.0;
+      //std::cout << __vars->at(0) << " " << __vars->at(1) << " || ";
     }
 
     void step(const Action& action)
     {
       float noise = drand48() * absoluteNoise - (absoluteNoise / 2.0);
-      for (int i = 0; i < __vars->dimension(); i++)
-        __vars->at(i) = observationRange->bound(
-            __vars->at(i) + actionRange->bound(action.at(i) + noise));
+      for (int i = 0; i < observations->dimension(); i++)
+        observations->at(i) = observationRange->bound(
+            observations->at(i) + actionRange->bound(action.at(i) + noise));
+      update();
     }
 
     bool endOfEpisode() const
     {
+      // L1-norm
       float distance = 0;
-      for (int i = 0; i < __vars->dimension(); i++)
-        distance += fabs(1.0 - __vars->at(i));
+      for (int i = 0; i < observations->dimension(); i++)
+        distance += fabs(1.0 - observations->at(i));
       return distance < 0.1;
     }
 
@@ -82,8 +91,8 @@ class ContinuousGridworld: public Env<float>
 
     float r() const
     {
-      float px = __vars->at(0);
-      float py = __vars->at(1);
+      float px = observations->at(0);
+      float py = observations->at(1);
       return -1.0
           - 2.0
               * (N(px, 0.3, 0.1) * N(py, 0.6, 0.03)
@@ -98,20 +107,20 @@ class ContinuousGridworld: public Env<float>
 
     void draw() const
     {
-      std::ofstream out("env.txt");
+      std::ofstream oute("visualization/continuousGridworld.txt");
       for (float px = observationRange->min(); px <= observationRange->max();
           px += 0.01)
       {
         for (float py = observationRange->min(); py <= observationRange->max();
             py += 0.01)
-          out
+          oute
               << (N(px, 0.3, 0.1) * N(py, 0.6, 0.03)
                   + N(px, 0.4, 0.03) * N(py, 0.5, 0.1)
                   + N(px, 0.8, 0.03) * N(py, 0.9, 0.1)) << " ";
 
-        out << std::endl;
+        oute << std::endl;
       }
-      out.close();
+      oute.close();
     }
 };
 

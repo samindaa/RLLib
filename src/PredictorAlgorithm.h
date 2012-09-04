@@ -129,6 +129,7 @@ class Sarsa: public Predictor<T>
     {
       e->clear();
       v->clear();
+      initialized = false;
     }
 
     int dimension() const
@@ -207,6 +208,7 @@ class GQ: public Predictor<T>
       e->clear();
       v->clear();
       w->clear();
+      initialized = false;
     }
 
     int dimension() const
@@ -296,6 +298,7 @@ class GTDLambda: public Predictor<T>
       e->clear();
       v->clear();
       w->clear();
+      initialized = false;
     }
 
     int dimension() const

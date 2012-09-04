@@ -55,8 +55,8 @@ class PolicyDistribution: public Policy<T>
     virtual ~PolicyDistribution()
     {
     }
-    virtual const SparseVector<T>& computeGradLog(const Representations<T>& phis,
-        const Action& action) =0;
+    virtual const SparseVector<T>& computeGradLog(
+        const Representations<T>& phis, const Action& action) =0;
     virtual SparseVector<T>* parameters() =0;
 };
 
@@ -191,11 +191,13 @@ class BoltzmannDistribution: public PolicyDistribution<T>
   protected:
     ActionList* actions;
     SparseVector<T>* avg;
+    SparseVector<T>* grad;
     DenseVector<double>* distribution;
     SparseVector<T>* u;
   public:
     BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
         actions(actions), avg(new SparseVector<T>(numFeatures)),
+            grad(new SparseVector<T>(numFeatures)),
             distribution(new DenseVector<double>(actions->dimension())),
             u(new SparseVector<T>(numFeatures))
     {
@@ -203,6 +205,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     virtual ~BoltzmannDistribution()
     {
       delete avg;
+      delete grad;
       delete distribution;
       delete u;
     }
@@ -211,29 +214,29 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     {
       assert(actions->dimension() == xas.dimension());
       distribution->clear();
+      avg->clear();
       double sum = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
         distribution->at(**a) = exp(u->dot(xas.at(**a)));
+        assert(!isnan(distribution->at(**a)) && !isinf(distribution->at(**a)));
         sum += distribution->at(**a);
+        avg->addToSelf(distribution->at(**a), xas.at(**a));
       }
       assert(sum);
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
         distribution->at(**a) /= sum;
-
+      avg->multiplyToSelf(1.0 / sum);
     }
 
     const SparseVector<T>& computeGradLog(const Representations<T>& xas,
         const Action& action)
     {
-      avg->clear();
-      avg->addToSelf(xas.at(action));
-      for (ActionList::const_iterator b = actions->begin(); b != actions->end();
-          ++b)
-        avg->addToSelf(-distribution->at(**b), xas.at(**b));
-      return *avg;
+      grad->set(xas.at(action));
+      grad->substractToSelf(*avg);
+      return *grad;
     }
 
     double pi(const Action& action) const

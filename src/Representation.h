@@ -96,7 +96,8 @@ class StateActionTilings: public StateToStateAction<T, O>
   public:
     StateActionTilings(Projector<T, O>* projector, ActionList* actions) :
         projector(projector), actions(actions),
-            phis(new Representations<T>(projector->dimension(),
+            phis(
+                new Representations<T>(projector->dimension(),
                     actions->dimension()))
     {
     }
@@ -108,7 +109,7 @@ class StateActionTilings: public StateToStateAction<T, O>
 
     const SparseVector<T>& stateAction(const DenseVector<O>& x)
     {
-      assert( actions->dimension() == phis->dimension());
+      assert(actions->dimension() == phis->dimension());
       return projector->project(x);
     }
 
