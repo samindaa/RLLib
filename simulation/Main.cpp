@@ -237,7 +237,7 @@ void testGreedyGQMountainCar()
   srand48(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, true);
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new AMaxTrace<double>(projector->dimension(), 1000);
@@ -279,7 +279,7 @@ void testOffPACMountainCar()
   srand48(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, true);
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -329,7 +329,7 @@ void testOffPACContinuousGridworld()
   srand48(time(0));
   Env<float>* problem = new ContinuousGridworld;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, true);
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -378,7 +378,7 @@ void testOffPACMountainCar2()
   srand48(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, true);
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -426,7 +426,7 @@ void testSarsaMountainCar3D()
 {
   Env<float>* problem = new MCar3D;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 16, true);
+      1000000, 16, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RMaxTrace<double>(projector->dimension(), 1000, 0.001);
@@ -460,7 +460,7 @@ void testOffPACMountainCar3D()
   srand48(time(0));
   Env<float>* problem = new MCar3D;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 16, true);
+      1000000, 16, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -507,7 +507,7 @@ void testOffPACSwingPendulum()
   srand48(time(0));
   Env<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, true);
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -558,7 +558,7 @@ void testOnPolicyCar()
   srand48(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, true);
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
@@ -603,7 +603,7 @@ void testOnPolicySwingPendulum()
   srand48(time(0));
   Env<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, true);
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
@@ -647,7 +647,7 @@ void testOffPACSwingPendulum2()
   srand48(time(0));
   Env<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000 + 1, 10, true);
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -708,13 +708,13 @@ int main(int argc, char** argv)
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
+  testOffPACMountainCar();
 //  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
-  testOffPACSwingPendulum();
+//  testOffPACSwingPendulum();
 //  testOffPACSwingPendulum2();
 
 //  testOnPolicySwingPendulum();
