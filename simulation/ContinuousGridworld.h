@@ -19,6 +19,7 @@ class ContinuousGridworld: public Env<float>
     Range<float>* actionRange;
     float absoluteNoise;
     DenseVector<float>* observations;
+    std::ofstream outpath;
 
   public:
     ContinuousGridworld() :
@@ -41,6 +42,7 @@ class ContinuousGridworld: public Env<float>
       }
 
       // continuous actions are not setup for this problem
+      outpath.open("visualization/continuousGridworldPath.txt");
     }
 
     virtual ~ContinuousGridworld()
@@ -48,6 +50,7 @@ class ContinuousGridworld: public Env<float>
       delete observationRange;
       delete actionRange;
       delete observations;
+      outpath.close();
     }
 
     void initialize()
@@ -63,6 +66,12 @@ class ContinuousGridworld: public Env<float>
       for (int i = 0; i < __vars->dimension(); i++)
         __vars->at(i) = observations->at(i) * 10.0;
       //std::cout << __vars->at(0) << " " << __vars->at(1) << " || ";
+      if (getOn())
+      {
+        for (int i = 0; i < __vars->dimension(); i++)
+          outpath << __vars->at(i) << " ";
+        outpath << std::endl;
+      }
     }
 
     void step(const Action& action)

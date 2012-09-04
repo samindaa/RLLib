@@ -390,6 +390,7 @@ class Actor: public ActorOnPolicy<T, O>
     {
       u->clear();
       e->clear();
+      initialized = false;
     }
     void update(const Representations<T>& xas_t, const Action& a_t,
         double delta_t)

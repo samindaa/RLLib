@@ -285,7 +285,7 @@ void testOffPACMountainCar()
 
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
-  double lambda = 0.2;
+  double lambda = 0.4;
   double gamma = 0.99;
   Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
@@ -356,7 +356,7 @@ void testOffPACContinuousGridworld()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(10, 5000, 3000);
+  sim->run(1, 5000, 5000);
   sim->computeValueFunction();
 
   delete problem;
@@ -511,14 +511,14 @@ void testOffPACSwingPendulum()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
-  double alpha_v = 0.05 / projector->vectorNorm();
-  double alpha_w = .0 / projector->vectorNorm();
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_w = .0001 / projector->vectorNorm();
   double gamma = 0.99;
-  double lambda = 0;
+  double lambda = 0.4;
   Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
       lambda, critice);
-  double alpha_u = 1.0 / projector->vectorNorm();
+  double alpha_u = 0.5 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
@@ -536,7 +536,8 @@ void testOffPACSwingPendulum()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 200);
+  sim->run(1, 2000, 200);
+  sim->computeValueFunction();
 
   delete problem;
   delete projector;
@@ -689,6 +690,15 @@ void testOffPACSwingPendulum2()
   delete sim;
 }
 
+void testSimple()
+{
+  double a = 2.0 / 10;
+  double b = 1.0 / 2.0 / 10;
+  double c = 1.0 / a;
+  cout << b << endl;
+  cout << c << endl;
+}
+
 int main(int argc, char** argv)
 {
   cout << "## start" << endl; // prints @@ start
@@ -698,17 +708,18 @@ int main(int argc, char** argv)
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
-  testOffPACMountainCar();
+//  testOffPACMountainCar();
 //  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
-//  testOffPACSwingPendulum();
+  testOffPACSwingPendulum();
 //  testOffPACSwingPendulum2();
 
 //  testOnPolicySwingPendulum();
 //  testOnPolicyCar();
+//  testSimple();
   cout << endl;
   cout << "## end" << endl;
   return 0;
