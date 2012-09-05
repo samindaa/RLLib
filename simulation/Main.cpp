@@ -236,8 +236,8 @@ void testGreedyGQMountainCar()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 10, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new AMaxTrace<double>(projector->dimension(), 1000);
@@ -278,8 +278,8 @@ void testOffPACMountainCar()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 10, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -328,8 +328,8 @@ void testOffPACContinuousGridworld()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new ContinuousGridworld;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 10, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -377,8 +377,8 @@ void testOffPACMountainCar2()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 10, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -425,8 +425,8 @@ void testOffPACMountainCar2()
 void testSarsaMountainCar3D()
 {
   Env<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 16, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      16, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RMaxTrace<double>(projector->dimension(), 1000, 0.001);
@@ -459,8 +459,8 @@ void testOffPACMountainCar3D()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 16, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      16, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -506,8 +506,8 @@ void testOffPACSwingPendulum()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 10, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -527,16 +527,16 @@ void testOffPACSwingPendulum()
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
           actore);
 
-  Policy<double>* behavior = new RandomPolicy<double>(
+  /*Policy<double>* behavior = new RandomPolicy<double>(
+   &problem->getDiscreteActionList());*/
+  Policy<double>* behavior = new RandomBiasPolicy<double>(
       &problem->getDiscreteActionList());
-  /*Policy<double>* behavior = new RandomBiasPolicy<double>(
-   &problem->getActionList());*/
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
       behavior, critic, actor, toStateAction, projector, gamma);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 2000, 200);
+  sim->run(1, 3000, 200);
   sim->computeValueFunction();
 
   delete problem;
@@ -557,8 +557,8 @@ void testOnPolicyCar()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 10, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
@@ -602,8 +602,8 @@ void testOnPolicySwingPendulum()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 10, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
@@ -646,8 +646,8 @@ void testOffPACSwingPendulum2()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new FullTilings<double, float>(
-      1000000, 10, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -708,8 +708,8 @@ int main(int argc, char** argv)
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
-  testOffPACMountainCar();
-//  testOffPACContinuousGridworld();
+//  testOffPACMountainCar();
+  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();

@@ -29,7 +29,7 @@ class SwingPendulum: public Env<float>
     std::ofstream outfile;
   public:
     SwingPendulum() :
-        Env(2, 3, 1), uMax(3.5/*Doya's paper 5.0*/), stepTime(0.01), theta(0),
+        Env(2, 3, 1), uMax(3.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0),
             velocity(0), maxVelocity(M_PI_4 / stepTime),
             actionRange(new Range<float>(-uMax, uMax)),
             thetaRange(new Range<float>(-M_PI, M_PI)),

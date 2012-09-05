@@ -125,9 +125,9 @@ class Simulator
       {
         std::ofstream out("visualization/valueFunction.txt");
         DenseVector<float> x_t(2);
-        for (float x = -10; x <= 10; x += 0.1)
+        for (float x = 0; x <= 10; x += 0.1)
         {
-          for (float y = -10; y <= 10; y += 0.1)
+          for (float y = 0; y <= 10; y += 0.1)
           {
             x_t[0] = x;
             x_t[1] = y;
