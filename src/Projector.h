@@ -8,7 +8,7 @@
 #ifndef PROJECTOR_H_
 #define PROJECTOR_H_
 
-#include "tiles.h"
+#include "Tiles.h"
 #include "Vector.h"
 /**
  * Feature extractor for function approximation.

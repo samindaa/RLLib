@@ -184,7 +184,7 @@ void testSarsaMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 100);
+  sim->run(10, 5000, 100);
   sim->computeValueFunction();
 
   delete problem;
@@ -705,11 +705,11 @@ int main(int argc, char** argv)
 //  testSparseVector();
 //  testProjector();
 //  testProjectorMachineLearning();
-//  testSarsaMountainCar();
+  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
-  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
 //  testSarsaMountainCar3D();
