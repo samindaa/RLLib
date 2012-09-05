@@ -163,7 +163,7 @@ class RMaxTrace: public RTrace<T>
       {
         ATrace<T>::threshold += 0.1 * ATrace<T>::threshold;
         ATrace<T>::clearBelowThreshold();
-        std::cout << "@@>> cullingTraces " << ATrace<T>::threshold << std::endl;
+        //std::cout << "@@>> cullingTraces " << ATrace<T>::threshold << std::endl;
       }
     }
 

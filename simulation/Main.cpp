@@ -421,12 +421,54 @@ void testOffPACMountainCar2()
   delete sim;
 }
 
+void testGreedyGQMountainCar2()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new MCar3D;
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, false);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getDiscreteActionList());
+  Trace<double>* e = new RMaxTrace<double>(projector->dimension(), 1000, 0.001);
+  double alpha_v = 0.05 / projector->vectorNorm();
+  double alpha_w = .001 / projector->vectorNorm();
+  double gamma_tp1 = 0.99;
+  double beta_tp1 = 1.0 - gamma_tp1;
+  double lambda_t = 0.95;
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
+  //double epsilon = 0.01;
+  Policy<double>* behavior = new EpsilonGreedy<double>(gq,
+      &problem->getDiscreteActionList(), 0.01);
+  /*Policy<double>* behavior = new RandomPolicy<double>(
+   &problem->getDiscreteActionList());*/
+  Policy<double>* target = new Greedy<double>(gq,
+      &problem->getDiscreteActionList());
+  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(
+      target, behavior, &problem->getDiscreteActionList(), toStateAction, gq);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 1000);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete gq;
+  delete behavior;
+  delete target;
+  delete control;
+  delete sim;
+}
+
 // 3D
 void testSarsaMountainCar3D()
 {
   Env<float>* problem = new MCar3D;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-      16, true);
+      10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RMaxTrace<double>(projector->dimension(), 1000, 0.001);
@@ -460,23 +502,23 @@ void testOffPACMountainCar3D()
   srand48(time(0));
   Env<float>* problem = new MCar3D;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-      16, true);
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
-  double alpha_w = .00001 / projector->vectorNorm();
+  double alpha_w = .001 / projector->vectorNorm();
   double gamma = 0.99;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 2000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
-      0.4, critice);
+      0.1, critice);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 2000);
   ActorOffPolicy<double, float>* actor =
-      new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
+      new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.1, target,
           actore);
 
   Policy<double>* behavior = new RandomPolicy<double>(
@@ -486,7 +528,8 @@ void testOffPACMountainCar3D()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(20, 5000, 1000);
+  sim->run(1, 5000, 1000);
+  sim->computeValueFunction();
 
   delete problem;
   delete projector;
@@ -536,7 +579,7 @@ void testOffPACSwingPendulum()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 3000, 200);
+  sim->run(1, 3000, 1);
   sim->computeValueFunction();
 
   delete problem;
@@ -705,13 +748,14 @@ int main(int argc, char** argv)
 //  testSparseVector();
 //  testProjector();
 //  testProjectorMachineLearning();
-  testSarsaMountainCar();
+//  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
+  testGreedyGQMountainCar2();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
 //  testOffPACSwingPendulum();

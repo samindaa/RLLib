@@ -35,141 +35,124 @@
  ******************************************************************************
  */
 
-//@@>> TODO: a whole bunch of cleaning to do ...
 class MCar3D: public Env<float>
 {
   protected:
-    float mcar_Xposition;
-    float mcar_Yposition;
-    float mcar_Xvelocity;
-    float mcar_Yvelocity;
 
-    float mcar_min_position;
-    float mcar_max_position;
-    float mcar_goal_position;
-    float mcar_max_velocity;
+    float xposition;
+    float yposition;
+    float xvelocity;
+    float yvelocity;
 
     float offset;
+    float targetPosition;
 
-    float mcar_Xstep;
-    float mcar_Ystep;
-    float mcar_Dxstep;
-    float mcar_Dystep;
+    Range<float>* positionRange;
+    Range<float>* velocityRange;
+
+    float xstep;
+    float ystep;
+    float dxstep;
+    float dystep;
+
+    std::ofstream out;
 
   public:
     MCar3D() :
-        Env<float>(4, 5, 1), mcar_Xposition(0), mcar_Yposition(0),
-            mcar_Xvelocity(0), mcar_Yvelocity(0), mcar_min_position(-1.2),
-            mcar_max_position(0.6), mcar_goal_position(0.5),
-            mcar_max_velocity(0.07), offset(0), mcar_Xstep(1.7 / 10.0),
-            mcar_Ystep(1.7 / 10.0), mcar_Dxstep(0.14 / 10.0),
-            mcar_Dystep(0.14 / 10.0)
+        Env<float>(4, 5, 1), xposition(0), yposition(0), xvelocity(0),
+            yvelocity(0), offset(0), targetPosition(0.5),
+            positionRange(new Range<float>(-1.2, 0.5)),
+            velocityRange(new Range<float>(-0.07, 0.07)),
+            xstep(positionRange->length() / 10.0),
+            ystep(positionRange->length() / 10.0),
+            dxstep(velocityRange->length() / 10.0),
+            dystep(velocityRange->length() / 10.0)
     {
 
       for (unsigned int a = 0; a < discreteActions->dimension(); a++)
         discreteActions->push_back(a, a);
       // not used
       continuousActions->push_back(0, 0.0);
+      out.open("visualization/mcar3D.txt");
     }
 
     virtual ~MCar3D()
     {
+      delete positionRange;
+      delete velocityRange;
+      out.close();
     }
 
   private:
 
     void set_initial_position_random()
     {
-      mcar_Xposition = mcar_min_position
-          + ((double) rand() / ((double) RAND_MAX + 1))
-              * ((mcar_max_position - 0.2) - mcar_min_position);
-      mcar_Yposition = mcar_min_position
-          + ((double) rand() / ((double) RAND_MAX + 1))
-              * ((mcar_max_position - 0.2) - mcar_min_position);
-      mcar_Xvelocity = 0.0;
-      mcar_Yvelocity = 0.0;
+      xposition = positionRange->min()
+          + drand48() * ((positionRange->max() - 0.2) - positionRange->min());
+      yposition = positionRange->min()
+          + drand48() * ((positionRange->max() - 0.2) - positionRange->min());
+      xvelocity = 0.0;
+      yvelocity = 0.0;
     }
 
     void set_initial_position_at_bottom()
     {
-      mcar_Xposition = 0.; //-M_PI / 6.0 + offset;
-      mcar_Yposition = 0.; //-M_PI / 6.0 + offset;
-      mcar_Xvelocity = 0.;
-      mcar_Yvelocity = 0.;
+      xposition = 0.; //-M_PI / 6.0 + offset;
+      yposition = 0.; //-M_PI / 6.0 + offset;
+      xvelocity = 0.;
+      yvelocity = 0.;
     }
 
-    void update_velocity(const int& act)
+    void update_velocity(const Action& act)
     {
 
       switch (act)
       {
       case 0:
-        mcar_Xvelocity += cos(3 * mcar_Xposition) * (-0.0025);
-        mcar_Yvelocity += cos(3 * mcar_Yposition) * (-0.0025);
+        xvelocity += cos(3 * xposition) * (-0.0025);
+        yvelocity += cos(3 * yposition) * (-0.0025);
         break;
       case 1:
-        mcar_Xvelocity += -0.001 + cos(3 * mcar_Xposition) * (-0.0025);
-        mcar_Yvelocity += cos(3 * mcar_Yposition) * (-0.0025);
+        xvelocity += -0.001 + cos(3 * xposition) * (-0.0025);
+        yvelocity += cos(3 * yposition) * (-0.0025);
         break;
       case 2:
-        mcar_Xvelocity += +0.001 + cos(3 * mcar_Xposition) * (-0.0025);
-        mcar_Yvelocity += cos(3 * mcar_Yposition) * (-0.0025);
+        xvelocity += +0.001 + cos(3 * xposition) * (-0.0025);
+        yvelocity += cos(3 * yposition) * (-0.0025);
         break;
       case 3:
-        mcar_Xvelocity += cos(3 * mcar_Xposition) * (-0.0025);
-        mcar_Yvelocity += -0.001 + cos(3 * mcar_Yposition) * (-0.0025);
+        xvelocity += cos(3 * xposition) * (-0.0025);
+        yvelocity += -0.001 + cos(3 * yposition) * (-0.0025);
         break;
       case 4:
-        mcar_Xvelocity += cos(3 * mcar_Xposition) * (-0.0025);
-        mcar_Yvelocity += +0.001 + cos(3 * mcar_Yposition) * (-0.0025);
+        xvelocity += cos(3 * xposition) * (-0.0025);
+        yvelocity += +0.001 + cos(3 * yposition) * (-0.0025);
         break;
       }
 
-      //mcar_Xvelocity *= get_gaussian(1.0,std_dev_eff);
-      //mcar_Yvelocity *= get_gaussian(1.0,std_dev_eff);
-
-      if (mcar_Xvelocity > mcar_max_velocity) mcar_Xvelocity =
-          mcar_max_velocity;
-      else if (mcar_Xvelocity < -mcar_max_velocity) mcar_Xvelocity =
-          -mcar_max_velocity;
-      if (mcar_Yvelocity > mcar_max_velocity) mcar_Yvelocity =
-          mcar_max_velocity;
-      else if (mcar_Yvelocity < -mcar_max_velocity) mcar_Yvelocity =
-          -mcar_max_velocity;
-
+      //xvelocity *= get_gaussian(1.0,std_dev_eff);
+      //yvelocity *= get_gaussian(1.0,std_dev_eff);
+      xvelocity = velocityRange->bound(xvelocity);
+      yvelocity = velocityRange->bound(yvelocity);
     }
 
     void update_position()
     {
-      mcar_Xposition += mcar_Xvelocity;
-      mcar_Yposition += mcar_Yvelocity;
-
-      if (mcar_Xposition > mcar_max_position) mcar_Xposition =
-          mcar_max_position;
-      if (mcar_Xposition < mcar_min_position) mcar_Xposition =
-          mcar_min_position;
-      if (mcar_Xposition == mcar_max_position && mcar_Xvelocity > 0)
-        mcar_Xvelocity = 0;
-      if (mcar_Xposition == mcar_min_position && mcar_Xvelocity < 0)
-        mcar_Xvelocity = 0;
-
-      if (mcar_Yposition > mcar_max_position) mcar_Yposition =
-          mcar_max_position;
-      if (mcar_Yposition < mcar_min_position) mcar_Yposition =
-          mcar_min_position;
-      if (mcar_Yposition == mcar_max_position && mcar_Yvelocity > 0)
-        mcar_Yvelocity = 0;
-      if (mcar_Yposition == mcar_min_position && mcar_Yvelocity < 0)
-        mcar_Yvelocity = 0;
+      xposition += xvelocity;
+      yposition += yvelocity;
+      xposition = positionRange->bound(xposition);
+      yposition = positionRange->bound(yposition);
     }
 
     void update()
     {
       DenseVector<float>& vars = *__vars;
-      vars[0] = mcar_Xposition / mcar_Xstep;
-      vars[1] = mcar_Yposition / mcar_Ystep;
-      vars[2] = mcar_Xvelocity / mcar_Dxstep;
-      vars[3] = mcar_Yvelocity / mcar_Dystep;
+      vars[0] = xposition / xstep;
+      vars[1] = yposition / ystep;
+      vars[2] = xvelocity / dxstep;
+      vars[3] = yvelocity / dystep;
+      if (out.is_open() && getOn())
+        out << xposition << " " << yposition << std::endl;
     }
 
   public:
@@ -182,15 +165,14 @@ class MCar3D: public Env<float>
 
     void step(const Action& a)
     {
-      update_velocity(a.at());
+      update_velocity(a);
       update_position();
       update();
     }
 
     bool endOfEpisode() const
     {
-      return ((mcar_Xposition >= mcar_goal_position)
-          && (mcar_Yposition >= mcar_goal_position));
+      return ((xposition >= targetPosition) && (yposition >= targetPosition));
     }
 
     float r() const
