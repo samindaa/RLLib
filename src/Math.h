@@ -9,6 +9,7 @@
 #define MATH_H_
 
 #include <cmath>
+#include <limits>
 
 // Helper class for range management for testing environments
 template<class T>

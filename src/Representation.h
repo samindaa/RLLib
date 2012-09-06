@@ -31,6 +31,7 @@ class Representations
           phis->begin(); iter != phis->end(); ++iter)
         delete *iter;
       phis->clear();
+      delete phis;
     }
 
     const unsigned int dimension() const

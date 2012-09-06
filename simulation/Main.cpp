@@ -172,7 +172,7 @@ void testSarsaMountainCar()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
-  double alpha = 0.2 / projector->vectorNorm();
+  double alpha = 0.25 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.9;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
@@ -218,7 +218,7 @@ void testExpectedSarsaMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 100);
+  sim->run(5, 5000, 100);
   sim->computeValueFunction();
 
   delete problem;
@@ -240,7 +240,7 @@ void testGreedyGQMountainCar()
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
-  Trace<double>* e = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
@@ -259,7 +259,7 @@ void testGreedyGQMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(5, 5000, 100);
+  sim->run(10, 5000, 100);
   sim->computeValueFunction();
 
   delete problem;
@@ -287,14 +287,14 @@ void testOffPACMountainCar()
   double alpha_w = .0001 / projector->vectorNorm();
   double lambda = 0.4;
   double gamma = 0.99;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
       lambda, critice);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* actore = new ATrace<double>(projector->dimension());
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
           actore);
@@ -323,6 +323,48 @@ void testOffPACMountainCar()
   delete sim;
 }
 
+void testGreedyGQContinuousGridworld()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new ContinuousGridworld;
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, false);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getDiscreteActionList());
+  Trace<double>* e = new ATrace<double>(projector->dimension());
+  double alpha_v = 0.01 / projector->vectorNorm();
+  double alpha_w = .0001 / projector->vectorNorm();
+  double gamma_tp1 = 0.99;
+  double beta_tp1 = 1.0 - gamma_tp1;
+  double lambda_t = 0.1;
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
+  //double epsilon = 0.01;
+  /*Policy<double>* behavior = new EpsilonGreedy<double>(gq,
+   &problem->getDiscreteActionList(), 0.01);*/
+  Policy<double>* behavior = new RandomPolicy<double>(
+      &problem->getDiscreteActionList());
+  Policy<double>* target = new Greedy<double>(gq,
+      &problem->getDiscreteActionList());
+  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(
+      target, behavior, &problem->getDiscreteActionList(), toStateAction, gq);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 5000);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete gq;
+  delete behavior;
+  delete target;
+  delete control;
+  delete sim;
+}
+
 void testOffPACContinuousGridworld()
 {
   srand(time(0));
@@ -337,14 +379,14 @@ void testOffPACContinuousGridworld()
   double alpha_w = 0.0001 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.4;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
       lambda, critice);
   double alpha_u = 0.001 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* actore = new ATrace<double>(projector->dimension());
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
           actore);
@@ -385,17 +427,19 @@ void testOffPACMountainCar2()
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma = 0.99;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
-      0.4, critice);
+      0.4, criticeML);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* actore = new ATrace<double>(projector->dimension());
+  Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
-          actore);
+          actoreML);
 
   //Policy<double>* behavior = new RandomPolicy<double>(
   //    &problem->getActionList());
@@ -412,8 +456,10 @@ void testOffPACMountainCar2()
   delete projector;
   delete toStateAction;
   delete critice;
+  delete criticeML;
   delete critic;
   delete actore;
+  delete actoreML;
   delete actor;
   delete behavior;
   delete target;
@@ -427,19 +473,20 @@ void testGreedyGQMountainCar2()
   srand48(time(0));
   Env<float>* problem = new MCar3D;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-      10, false);
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
-  Trace<double>* e = new RMaxTrace<double>(projector->dimension(), 1000, 0.001);
-  double alpha_v = 0.05 / projector->vectorNorm();
-  double alpha_w = .001 / projector->vectorNorm();
+  Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
+  Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_w = .0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
   double beta_tp1 = 1.0 - gamma_tp1;
-  double lambda_t = 0.95;
-  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
+  double lambda_t = 0.6;
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, eML);
   //double epsilon = 0.01;
   Policy<double>* behavior = new EpsilonGreedy<double>(gq,
-      &problem->getDiscreteActionList(), 0.01);
+      &problem->getDiscreteActionList(), 0.1);
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getDiscreteActionList());*/
   Policy<double>* target = new Greedy<double>(gq,
@@ -449,13 +496,14 @@ void testGreedyGQMountainCar2()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 1000);
+  sim->run(1, 2000, 5000);
   sim->computeValueFunction();
 
   delete problem;
   delete projector;
   delete toStateAction;
   delete e;
+  delete eML;
   delete gq;
   delete behavior;
   delete target;
@@ -471,11 +519,13 @@ void testSarsaMountainCar3D()
       10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
-  Trace<double>* e = new RMaxTrace<double>(projector->dimension(), 1000, 0.001);
+
+  Trace<double>* e = new RTrace<double>(projector->dimension(), 0.001);
+  Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
   double alpha = 0.15 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.8;
-  Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
+  Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, eML);
   double epsilon = 0.1;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
       &problem->getDiscreteActionList(), epsilon);
@@ -490,6 +540,7 @@ void testSarsaMountainCar3D()
   delete projector;
   delete toStateAction;
   delete e;
+  delete eML;
   delete sarsa;
   delete acting;
   delete control;
@@ -509,17 +560,19 @@ void testOffPACMountainCar3D()
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .001 / projector->vectorNorm();
   double gamma = 0.99;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 2000);
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
-      0.1, critice);
+      0.1, criticeML);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 2000);
+  Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
+  Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.1, target,
-          actore);
+          actoreML);
 
   Policy<double>* behavior = new RandomPolicy<double>(
       &problem->getDiscreteActionList());
@@ -535,8 +588,10 @@ void testOffPACMountainCar3D()
   delete projector;
   delete toStateAction;
   delete critice;
+  delete criticeML;
   delete critic;
   delete actore;
+  delete actoreML;
   delete actor;
   delete behavior;
   delete target;
@@ -558,17 +613,19 @@ void testOffPACSwingPendulum()
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.4;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
+  Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
-      lambda, critice);
+      lambda, criticeML);
   double alpha_u = 0.5 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
+  Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
-          actore);
+          actoreML);
 
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getDiscreteActionList());*/
@@ -586,8 +643,10 @@ void testOffPACSwingPendulum()
   delete projector;
   delete toStateAction;
   delete critice;
+  delete criticeML;
   delete critic;
   delete actore;
+  delete actoreML;
   delete actor;
   delete behavior;
   delete target;
@@ -608,15 +667,14 @@ void testOnPolicyCar()
   double alpha_v = 1.0 / projector->vectorNorm();
   double gamma = 1.0;
   double lambda = 0.9;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
       critice);
   double alpha_u = 0.001 / projector->vectorNorm();
   PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
       projector->dimension(), &problem->getContinuousActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(2 * projector->dimension(),
-      1000);
+  Trace<double>* actore = new AMaxTrace<double>(2 * projector->dimension());
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
       lambda, acting, actore);
 
@@ -653,15 +711,14 @@ void testOnPolicySwingPendulum()
   double alpha_v = 0.1 / projector->vectorNorm();
   double gamma = 1.0;
   double lambda = 0.5;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
       critice);
   double alpha_u = 0.001 / projector->vectorNorm();
   PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
       projector->dimension(), &problem->getContinuousActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(2 * projector->dimension(),
-      1000);
+  Trace<double>* actore = new AMaxTrace<double>(2 * projector->dimension());
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
       lambda, acting, actore);
 
@@ -697,17 +754,19 @@ void testOffPACSwingPendulum2()
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .005 / projector->vectorNorm();
   double gamma = 0.99;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
+  Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
-      0.4, critice);
+      0.4, criticeML);
   double alpha_u = 0.5 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(projector->dimension(), 1000);
+  Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
+  Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
-          actore);
+          actoreML);
 
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getActionList());*/
@@ -724,8 +783,10 @@ void testOffPACSwingPendulum2()
   delete projector;
   delete toStateAction;
   delete critice;
+  delete criticeML;
   delete critic;
   delete actore;
+  delete actoreML;
   delete actor;
   delete behavior;
   delete target;
@@ -752,10 +813,11 @@ int main(int argc, char** argv)
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
-//  testOffPACContinuousGridworld();
+//  testGreedyGQContinuousGridworld();
+  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
-  testGreedyGQMountainCar2();
+//  testGreedyGQMountainCar2();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
 //  testOffPACSwingPendulum();

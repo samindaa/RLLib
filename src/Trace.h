@@ -9,6 +9,7 @@
 #define TRACE_H_
 #include <iostream>
 #include "Vector.h"
+#include "Math.h"
 
 template<class T>
 class Trace
@@ -21,6 +22,9 @@ class Trace
     virtual void multiplyToSelf(const double& factor) =0;
     virtual void clear() =0;
     virtual const SparseVector<T>& vect() const =0;
+
+    virtual void updateThreshold() =0;
+    virtual void controlThreshold() =0;
 };
 
 template<class T>
@@ -43,7 +47,7 @@ class ATrace: public Trace<T>
 
   public:
 
-    virtual void clearBelowThreshold()
+    virtual void controlThreshold() //clearBelowThreshold
     {
       const T* values = vector->getValues();
       const int* indexes = vector->getActiveIndexes();
@@ -65,7 +69,8 @@ class ATrace: public Trace<T>
     void update(const double& lambda, const SparseVector<T>& phi)
     {
       updateVector(lambda, phi);
-      clearBelowThreshold();
+      adjustUpdate();
+      controlThreshold();
     }
 
     void multiplyToSelf(const double& factor)
@@ -82,36 +87,44 @@ class ATrace: public Trace<T>
     {
       return *vector;
     }
+
+    void updateThreshold()
+    {
+      threshold += 0.1 * threshold;
+    }
+
+  protected:
+    virtual void adjustUpdate()
+    { // Nothing to be adjusted.
+    }
+
 };
 
 template<class T>
 class AMaxTrace: public ATrace<T>
 {
   protected:
-    int nonZeroTraces;
+    double maximumValue;
   public:
-    AMaxTrace(const int& capacity, const int& nonZeroTraces,
-        const double& threshold = 1e-8) :
-        ATrace<T>(capacity, threshold), nonZeroTraces(nonZeroTraces)
+    AMaxTrace(const int& capacity, const double& threshold = 1e-8,
+        const double& maximumValue = 1.0) :
+        ATrace<T>(capacity, threshold), maximumValue(maximumValue)
     {
     }
 
-  private:
-    void cullingTraces()
+  public:
+
+    void adjustUpdate()
     {
-      while (ATrace<T>::vector->numActiveEntries() > nonZeroTraces)
+      const T* values = ATrace<T>::vector->getValues();
+      const int* indexes = ATrace<T>::vector->getActiveIndexes();
+
+      for (int i = 0; i < ATrace<T>::vector->numActiveEntries(); i++)
       {
-        ATrace<T>::threshold += 0.1 * ATrace<T>::threshold;
-        ATrace<T>::clearBelowThreshold();
-        std::cout << "@@>> cullingTraces " << ATrace<T>::threshold << std::endl;
+        T absValue = fabs(values[i]);
+        if (absValue > maximumValue)
+          ATrace<T>::vector->setEntry(indexes[i], sgn(absValue) * maximumValue);
       }
-    }
-
-  public:
-    void updateVector(const double& lambda, const SparseVector<T>& phi)
-    {
-      cullingTraces();
-      ATrace<T>::updateVector(lambda, phi);
     }
 };
 
@@ -145,33 +158,55 @@ class RTrace: public ATrace<T>
 };
 
 template<class T>
-class RMaxTrace: public RTrace<T>
+class MaxLengthTrace: public Trace<T>
 {
   protected:
-    int nonZeroTraces;
+    Trace<T>* trace;
+    int maximumLength;
+
   public:
-    RMaxTrace(const int& capacity, const int& nonZeroTraces,
-        const double& threshold = 1e-8) :
-        RTrace<T>(capacity, threshold), nonZeroTraces(nonZeroTraces)
+    MaxLengthTrace(Trace<T>* trace, const int& maximumLength) :
+        trace(trace), maximumLength(maximumLength)
     {
     }
 
-  private:
-    void cullingTraces()
+    virtual ~MaxLengthTrace()
     {
-      while (ATrace<T>::vector->numActiveEntries() > nonZeroTraces)
+    }
+
+  public:
+
+    void update(const double& lambda, const SparseVector<T>& phi)
+    {
+      trace->update(lambda, phi);
+      controlThreshold();
+    }
+    void multiplyToSelf(const double& factor)
+    {
+      trace->multiplyToSelf(factor);
+    }
+
+    void clear()
+    {
+      trace->clear();
+    }
+    const SparseVector<T>& vect() const
+    {
+      return trace->vect();
+    }
+
+    void updateThreshold()
+    {
+      trace->updateThreshold();
+    }
+    void controlThreshold()
+    {
+      while (trace->vect().numActiveEntries() > maximumLength)
       {
-        ATrace<T>::threshold += 0.1 * ATrace<T>::threshold;
-        ATrace<T>::clearBelowThreshold();
+        updateThreshold();
+        trace->controlThreshold();
         //std::cout << "@@>> cullingTraces " << ATrace<T>::threshold << std::endl;
       }
-    }
-
-  public:
-    void updateVector(const double& lambda, const SparseVector<T>& phi)
-    {
-      cullingTraces();
-      RTrace<T>::updateVector(lambda, phi);
     }
 };
 
