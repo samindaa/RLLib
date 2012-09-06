@@ -478,11 +478,11 @@ void testGreedyGQMountainCar2()
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
-  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_v = 0.125 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
   double beta_tp1 = 1.0 - gamma_tp1;
-  double lambda_t = 0.6;
+  double lambda_t = 0.4;
   GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, eML);
   //double epsilon = 0.01;
   Policy<double>* behavior = new EpsilonGreedy<double>(gq,
@@ -814,10 +814,10 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
-//  testGreedyGQMountainCar2();
+  testGreedyGQMountainCar2();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
 //  testOffPACSwingPendulum();
