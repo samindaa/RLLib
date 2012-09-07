@@ -105,7 +105,7 @@ if 1,
    view([30 50]);
    surf(X, Y, Z);
    pause;
-   pause(20);
+   pause(10);
    hold on;   
    for k = 1 : size(M, 1)
        h2 = plot3(M(k, 1), M(k,2),(sin(3*M(k, 1))+sin(3*M(k, 2))), ...

@@ -18,6 +18,7 @@
 #include "../src/Projector.h"
 #include "../src/ControlAlgorithm.h"
 #include "../src/Representation.h"
+#include "../src/SupervisedAlgorithm.h"
 #include "Simulator.h"
 #include "MCar2D.h"
 #include "MCar3D.h"
@@ -134,8 +135,8 @@ void testProjectorMachineLearning()
   int memorySize = 512;
   int numTiling = 32;
   FullTilings<double, float> coder(memorySize, numTiling, true);
-  SparseVector<double> w(memorySize);
   DenseVector<float> x(numObservations);
+  Adaline<double> lms(coder.dimension(), 0.1 / coder.vectorNorm());
   int traininCounter = 0;
   while (++traininCounter < 100)
   {
@@ -144,21 +145,19 @@ void testProjectorMachineLearning()
     {
       x[0] = iter->first / (2 * M_PI) / 0.25; // normalized and unit generalized
       const SparseVector<double>& phi = coder.project(x);
-      double result = w.dot(phi);
-      double alpha = 0.1 / coder.vectorNorm();
-      w.addToSelf(alpha * (iter->second - result), phi);
+      lms.learn(phi, iter->second);
     }
   }
 
   // output
-  ofstream outFile("mest.dat");
+  ofstream outFile("visualization/mest.dat");
   for (multimap<double, double>::const_iterator iter = X.begin();
       iter != X.end(); ++iter)
   {
     x[0] = iter->first / (2 * M_PI) / 0.25;
     const SparseVector<double>& phi = coder.project(x);
     if (outFile.is_open())
-      outFile << iter->first << " " << iter->second << " " << w.dot(phi)
+      outFile << iter->first << " " << iter->second << " " << lms.predict(phi)
           << endl;
   }
   outFile.close();
@@ -808,7 +807,7 @@ int main(int argc, char** argv)
   cout << "## start" << endl; // prints @@ start
 //  testSparseVector();
 //  testProjector();
-//  testProjectorMachineLearning();
+  testProjectorMachineLearning();
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
@@ -817,7 +816,7 @@ int main(int argc, char** argv)
 //  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
-  testGreedyGQMountainCar2();
+//  testGreedyGQMountainCar2();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
 //  testOffPACSwingPendulum();
