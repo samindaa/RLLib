@@ -12,7 +12,8 @@
 #include "Vector.h"
 #include "Policy.h"
 
-namespace RLLib {
+namespace RLLib
+{
 
 template<class T, class O>
 class Control
@@ -28,6 +29,9 @@ class Control
         const DenseVector<O>& x_tp1, const double& r_tp1,
         const double& z_tp1) =0;
     virtual const double computeValueFunction(const DenseVector<O>& x) const =0;
+
+    virtual void persist(const std::string& f) const =0;
+    virtual void resurrect(const std::string& f) =0;
 };
 
 template<class T, class O>
@@ -62,6 +66,9 @@ class ActorOffPolicy
     virtual void updatePolicy(const Representations<T>& xas) =0;
     virtual const Action& proposeAction(const Representations<T>& xas) =0;
     virtual double pi(const Action& a) const =0;
+
+    virtual void persist(const std::string& f) const =0;
+    virtual void resurrect(const std::string& f) =0;
 
 };
 

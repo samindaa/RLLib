@@ -10,7 +10,8 @@
 
 #include "Supervised.h"
 
-namespace RLLib {
+namespace RLLib
+{
 
 template<class T>
 class Adaline: public LearningAlgorithm<T>
@@ -44,6 +45,15 @@ class Adaline: public LearningAlgorithm<T>
     void learn(const SparseVector<T>& x, const T& y)
     {
       w->addToSelf(alpha * (y - predict(x)), x);
+    }
+
+    void persist(const std::string& f) const
+    {
+      w->persist(f);
+    }
+    void resurrect(const std::string& f)
+    {
+      w->resurrect(f);
     }
 };
 

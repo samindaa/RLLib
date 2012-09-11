@@ -10,7 +10,8 @@
 
 #include "Predictor.h"
 
-namespace RLLib {
+namespace RLLib
+{
 
 template<class T>
 class LearningAlgorithm: public Predictor<T>

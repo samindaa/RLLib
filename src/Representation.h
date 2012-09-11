@@ -13,7 +13,8 @@
 #include "Vector.h"
 #include "Projector.h"
 
-namespace RLLib {
+namespace RLLib
+{
 
 template<class T>
 class Representations

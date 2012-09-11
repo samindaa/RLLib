@@ -12,7 +12,8 @@
 #include "Vector.h"
 #include "Trace.h"
 
-namespace RLLib {
+namespace RLLib
+{
 
 // Simple predictor algorithms
 template<class T>
@@ -76,6 +77,16 @@ class TDLambda: public Predictor<T>
     double predict(const SparseVector<T>& phi) const
     {
       return v->dot(phi);
+    }
+
+    void persist(const std::string& f) const
+    {
+      v->persist(f);
+    }
+
+    void resurrect(const std::string& f)
+    {
+      v->resurrect(f);
     }
 };
 
@@ -141,6 +152,16 @@ class Sarsa: public Predictor<T>
     double predict(const SparseVector<T>& phi_sa) const
     {
       return v->dot(phi_sa);
+    }
+
+    void persist(const std::string& f) const
+    {
+      v->persist(f);
+    }
+
+    void resurrect(const std::string& f)
+    {
+      v->resurrect(f);
     }
 };
 
@@ -220,6 +241,15 @@ class GQ: public Predictor<T>
     double predict(const SparseVector<T>& phi_sa) const
     {
       return v->dot(phi_sa);
+    }
+
+    void persist(const std::string& f) const
+    {
+      v->persist(f);
+    }
+    void resurrect(const std::string& f)
+    {
+      v->resurrect(f);
     }
 };
 
@@ -310,6 +340,15 @@ class GTDLambda: public Predictor<T>
     double predict(const SparseVector<T>& phi) const
     {
       return v->dot(phi);
+    }
+
+    void persist(const std::string& f) const
+    {
+      v->persist(f);
+    }
+    void resurrect(const std::string& f)
+    {
+      v->resurrect(f);
     }
 
 };

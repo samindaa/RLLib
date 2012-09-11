@@ -11,7 +11,8 @@
 #include <cmath>
 #include <limits>
 
-namespace RLLib {
+namespace RLLib
+{
 
 // Helper class for range management for testing environments
 template<class T>

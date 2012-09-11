@@ -18,7 +18,8 @@
 #include "Predictor.h"
 #include "Representation.h"
 
-namespace RLLib {
+namespace RLLib
+{
 
 template<class T>
 class Policy

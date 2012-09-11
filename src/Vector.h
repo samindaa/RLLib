@@ -43,17 +43,17 @@ class Vector
     virtual double euclideanNorm() const =0;
     virtual T* operator()() const =0; // return the data as an array
 
-    virtual void persist(const std::string& f) =0;
+    virtual void persist(const std::string& f) const =0;
     virtual void resurrect(const std::string& f) =0;
 
   protected:
-    template<class U> void write(std::ostream &o, U& value)
+    template<class U> void write(std::ostream &o, U& value) const
     {
       char *s = (char *) &value;
       o.write(s, sizeof(value));
     }
 
-    template<class U> void read(std::istream &i, U& value)
+    template<class U> void read(std::istream &i, U& value) const
     {
       char *s = (char *) &value;
       i.read(s, sizeof(value));
@@ -178,7 +178,7 @@ class DenseVector: public Vector<T>
         data[i] = that.data[i];
     }
 
-    void persist(const std::string& f)
+    void persist(const std::string& f) const
     {
       std::ofstream of;
       of.open(f.c_str(), std::ofstream::out);
@@ -524,7 +524,7 @@ class SparseVector: public Vector<T>
       return values;
     }
 
-    void persist(const std::string& f)
+    void persist(const std::string& f) const
     {
       std::ofstream of;
       of.open(f.c_str(), std::ofstream::out);
@@ -537,6 +537,9 @@ class SparseVector: public Vector<T>
         Vector<T>::write(of, indexesPositionLength);
         // Write numActive (int)
         Vector<T>::write(of, numActive);
+        // Verbose
+        printf("vectorType=%i capacity=%i numActive=%i\n", vectorType,
+            indexesPositionLength, numActive);
         // Write active indexes
         for (int position = 0; position < numActive; position++)
           Vector<T>::write(of, activeIndexes[position]);
@@ -566,6 +569,7 @@ class SparseVector: public Vector<T>
         int rnumActive;
         Vector<T>::read(ifs, rnumActive);
         assert(indexesPositionLength == rcapacity);
+        // Verbose
         printf("vectorType=%i rcapacity=%i rnumActive=%i\n", vectorType,
             rcapacity, rnumActive);
         // Read active indexes

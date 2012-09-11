@@ -11,7 +11,8 @@
 #include "Tiles.h"
 #include "Vector.h"
 
-namespace RLLib {
+namespace RLLib
+{
 
 /**
  * Feature extractor for function approximation.

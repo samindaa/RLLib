@@ -16,7 +16,8 @@
 #include "PredictorAlgorithm.h"
 #include "Representation.h"
 
-namespace RLLib {
+namespace RLLib
+{
 
 // Simple control algorithm
 template<class T, class O>
@@ -83,6 +84,15 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
           a != toStateAction->getActionList().end(); ++a)
         v_s += acting->pi(**a) * sarsa->predict(phis.at(**a));
       return v_s;
+    }
+
+    void persist(const std::string& f) const
+    {
+      sarsa->persist(f);
+    }
+    void resurrect(const std::string& f)
+    {
+      sarsa->resurrect(f);
     }
 
 };
@@ -225,6 +235,15 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
         v_s += target->pi(**a) * gq->predict(phis.at(**a));
       return v_s;
     }
+
+    void persist(const std::string& f) const
+    {
+      gq->persist(f);
+    }
+    void resurrect(const std::string& f)
+    {
+      gq->resurrect(f);
+    }
 };
 
 template<class T, class O>
@@ -286,6 +305,15 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     double pi(const Action& a) const
     {
       return policy->pi(a);
+    }
+
+    void persist(const std::string& f) const
+    {
+      u->persist(f);
+    }
+    void resurrect(const std::string& f)
+    {
+      u->resurrect(f);
     }
 };
 
@@ -360,6 +388,26 @@ class OffPAC: public OffPolicyControlLearner<T, O>
     const double computeValueFunction(const DenseVector<O>& x) const
     {
       return critic->predict(projector->project(x));
+    }
+
+    void persist(const std::string& f) const
+    {
+      std::string fcritic(f);
+      fcritic.append(".critic");
+      critic->persist(fcritic);
+      std::string factor(f);
+      factor.append(".actor");
+      actor->persist(factor);
+    }
+
+    void resurrect(const std::string& f)
+    {
+      std::string fcritic(f);
+      fcritic.append(".critic");
+      critic->resurrect(fcritic);
+      std::string factor(f);
+      factor.append(".actor");
+      actor->resurrect(factor);
     }
 };
 
@@ -481,6 +529,16 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
           toStateAction->stateActions(x).at(
               toStateAction->getActionList().at(0)));
     }
+
+    void persist(const std::string& f) const
+    {
+      //@@>> TODO:
+    }
+    void resurrect(const std::string& f)
+    {
+      //@@>> TODO:
+    }
+
 };
 
 } // namespace RLLib

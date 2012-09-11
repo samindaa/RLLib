@@ -307,8 +307,13 @@ void testOffPACMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(5, 5000, 100);
+  sim->run(1, 5000, 100);
   sim->computeValueFunction();
+  control->persist("visualization/mcar_offpac.data");
+
+  control->reset();
+  control->resurrect("visualization/mcar_offpac.data");
+  sim->test(20, 5000);
 
   delete problem;
   delete projector;
@@ -803,16 +808,41 @@ void testSimple()
   cout << c << endl;
 }
 
+void testPersistResurrect()
+{
+  srand(time(0));
+  srand48(time(0));
+  SparseVector<float> a(20);
+  for (int i = 0; i < 10; i++)
+    a.insertEntry(i, drand48());
+  cout << a << endl;
+  a.persist(string("testsv.dat"));
+
+  SparseVector<float> b(20);
+  b.resurrect(string("testsv.dat"));
+  cout << b << endl;
+
+  DenseVector<float> d(20);
+  for (int i = 0; i < 10; i++)
+    d[i] = drand48();
+  cout << d << endl;
+  d.persist(string("testdv.dat"));
+
+  DenseVector<float> e(20);
+  e.resurrect(string("testdv.dat"));
+  cout << e << endl;
+}
+
 int main(int argc, char** argv)
 {
   cout << "## start" << endl; // prints @@ start
 //  testSparseVector();
 //  testProjector();
 //  testProjectorMachineLearning();
-  testSarsaMountainCar();
+//  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
+  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
 //  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
@@ -826,6 +856,7 @@ int main(int argc, char** argv)
 //  testOnPolicySwingPendulum();
 //  testOnPolicyCar();
 //  testSimple();
+//  testPersistResurrect();
   cout << endl;
   cout << "## end" << endl;
   return 0;

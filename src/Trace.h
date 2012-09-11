@@ -11,7 +11,8 @@
 #include "Vector.h"
 #include "Math.h"
 
-namespace RLLib {
+namespace RLLib
+{
 
 template<class T>
 class Trace
