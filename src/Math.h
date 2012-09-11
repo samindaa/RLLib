@@ -52,6 +52,11 @@ class Range
     {
       return maxv;
     }
+
+    T center() const
+    {
+      return min() + (length() / 2.0);
+    }
 };
 
 template<typename T>
@@ -73,8 +78,8 @@ class Gaussian
     }
 
     // http://en.literateprograms.org/Box-Muller_transform_(C)
-    inline double nextGaussian(const double& mean = 0, const double& stddev =
-        1.0)
+    inline static double nextGaussian(const double& mean = 0,
+        const double& stddev = 1.0)
     {
       static double n2 = 0.0;
       static int n2_cached = 0;

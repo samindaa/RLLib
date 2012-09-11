@@ -586,11 +586,11 @@ class SparseVector: public Vector<T>
         ifs.close();
 
         delete[] ractiveIndexes;
-        std::cout << "## DenseVector persist=" << f << std::endl;
+        std::cout << "## SparseVector resurrected=" << f << std::endl;
       }
       else
       {
-        std::cerr << "ERROR! (resurrected) file=" << f << std::endl;
+        std::cerr << "ERROR! (resurrect) file=" << f << std::endl;
         exit(-1);
       }
     }

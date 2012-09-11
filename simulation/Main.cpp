@@ -406,6 +406,12 @@ void testOffPACContinuousGridworld()
   sim->run(1, 5000, 5000);
   sim->computeValueFunction();
 
+  control->persist("visualization/cgw_offpac.data");
+
+  control->reset();
+  control->resurrect("visualization/cgw_offpac.data");
+  sim->test(100, 5000);
+
   delete problem;
   delete projector;
   delete toStateAction;
@@ -716,16 +722,18 @@ void testOnPolicySwingPendulum()
   double alpha_v = 0.1 / projector->vectorNorm();
   double gamma = 1.0;
   double lambda = 0.5;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 2000);
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
-      critice);
+      criticeML);
   double alpha_u = 0.001 / projector->vectorNorm();
-  PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
-      projector->dimension(), &problem->getContinuousActionList());
+  PolicyDistribution<double>* acting = new NormalDistributionScaled<double>(0,
+      1.0, projector->dimension(), &problem->getContinuousActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(2 * projector->dimension());
+  Trace<double>* actore = new ATrace<double>(2 * projector->dimension());
+  Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 2000);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
-      lambda, acting, actore);
+      lambda, acting, actoreML);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
       double, float>(critic, actor, toStateAction, .0001);
@@ -738,8 +746,10 @@ void testOnPolicySwingPendulum()
   delete projector;
   delete toStateAction;
   delete critice;
+  delete criticeML;
   delete critic;
   delete actore;
+  delete actoreML;
   delete actor;
   delete acting;
   delete control;
@@ -842,9 +852,9 @@ int main(int argc, char** argv)
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
-  testOffPACMountainCar();
+//  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-//  testOffPACContinuousGridworld();
+  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
 //  testGreedyGQMountainCar2();

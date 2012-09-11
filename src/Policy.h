@@ -12,11 +12,13 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 #include "Vector.h"
 #include "Action.h"
 #include "Predictor.h"
 #include "Representation.h"
+#include "Math.h"
 
 namespace RLLib
 {
@@ -67,27 +69,25 @@ template<class T>
 class NormalDistribution: public PolicyDistribution<T>
 {
   protected:
-    double mean0, sigma0, mean, sigma, meanStep, sigmaStep, sigma2, a_t;
-    int numFeatures;
-    ActionList* actions;
+    double mean0, sigma0, mean, sigma, meanStep, sigmaStep, a_t;
     SparseVector<T>* u;
     SparseVector<T>* grad;
     SparseVector<T>* u_mean;
     SparseVector<T>* u_sigma;
     SparseVector<T>* x_mean;
     SparseVector<T>* x_sigma;
+    ActionList* actions;
   public:
 
     NormalDistribution(double mean0, double sigma0, const int& numFeatures,
         ActionList* actions) :
         mean0(mean0), sigma0(sigma0), mean(0), sigma(0), meanStep(0),
-            sigmaStep(0), sigma2(0), a_t(0), numFeatures(numFeatures),
-            actions(actions), u(new SparseVector<T>(2 * numFeatures)),
-            grad(new SparseVector<T>(2 * numFeatures)),
+            sigmaStep(0), a_t(0), u(new SparseVector<T>(2 * numFeatures)),
+            grad(new SparseVector<T>(u->dimension())),
             u_mean(new SparseVector<T>(numFeatures)),
             u_sigma(new SparseVector<T>(numFeatures)),
             x_mean(new SparseVector<T>(numFeatures)),
-            x_sigma(new SparseVector<T>(numFeatures))
+            x_sigma(new SparseVector<T>(numFeatures)), actions(actions)
     {
     }
 
@@ -103,53 +103,22 @@ class NormalDistribution: public PolicyDistribution<T>
 
     void update(const Representations<T>& xs)
     {
-      assert(xs.dimension()==actions->dimension());
-      mean = u_mean->dot(xs.at(actions->at(0))) + mean0;
-      sigma = exp(u_sigma->dot(xs.at(actions->at(0)))) * sigma0 + 10e-8;
-      sigma2 = pow(sigma, 2);
+      // N(mu,var) for single action only
+      assert((xs.dimension() == 1) && (actions->dimension() == 1));
+      const SparseVector<T>& x = xs.at(actions->at(0));
+      mean = u_mean->dot(x) + mean0;
+      sigma = exp(u_sigma->dot(x)) * sigma0
+          + std::numeric_limits<double>::min();
 
-      a_t = nextGaussian(mean, sigma);
-      assert(actions->dimension() == 1);
+      a_t = Gaussian::nextGaussian(mean, sigma);
       actions->update(0, 0, a_t);
     }
 
     double pi(const Action& a) const
     {
-      return exp(-0.5 * pow(a.at() - mean, 2) / sigma2)
-          / sqrt(2 * M_PI * sigma2);
+      return Gaussian::probability(a.at(0), mean, sigma);
     }
 
-  private:
-    // http://en.literateprograms.org/Box-Muller_transform_(C)
-    double nextGaussian(const double& mean = 0, const double& stddev = 1.0)
-    {
-      static double n2 = 0.0;
-      static int n2_cached = 0;
-      if (!n2_cached)
-      {
-        double x, y, r;
-        do
-        {
-          x = drand48() - 1;
-          y = drand48() - 1;
-
-          r = x * x + y * y;
-        } while (r == 0.0 || r > 1.0);
-        {
-          double d = sqrt(-2.0 * log(r) / r);
-          double n1 = x * d;
-          n2 = y * d;
-          double result = n1 * stddev + mean;
-          n2_cached = 1;
-          return result;
-        }
-      }
-      else
-      {
-        n2_cached = 0;
-        return n2 * stddev + mean;
-      }
-    }
   public:
 
     const Action& sampleAction() const
@@ -158,18 +127,24 @@ class NormalDistribution: public PolicyDistribution<T>
     }
     const Action& sampleBestAction() const
     {
-      return actions->at(0);
+      return actions->at(0); // small std after learning
+    }
+
+    virtual void updateStep(const Action& action)
+    {
+      meanStep = (action.at() - mean) / (sigma * sigma);
+      sigmaStep = pow(((action.at() - mean) / sigma), 2) - 1.0;
     }
 
     const SparseVector<T>& computeGradLog(const Representations<T>& xs,
         const Action& action)
     {
-      assert(actions->dimension() == 1);
-      meanStep = (action.at() - mean) / sigma2;
-      sigmaStep = pow(action.at() - mean, 2) / sigma2 - 1.0;
+      assert((xs.dimension() == 1) && (actions->dimension() == 1));
+      updateStep(action);
+      const SparseVector<T>& x = xs.at(action);
 
-      x_mean->set(xs.at(action));
-      x_sigma->set(xs.at(action));
+      x_mean->set(x);
+      x_sigma->set(x);
 
       x_mean->multiplyToSelf(meanStep);
       x_sigma->multiplyToSelf(sigmaStep);
@@ -178,13 +153,109 @@ class NormalDistribution: public PolicyDistribution<T>
       // 1st vector
       grad->addToSelf(*x_mean);
       // 2nd vector
-      grad->addToSelf(1, *x_sigma, numFeatures);
+      grad->addToSelf(1, *x_sigma, x_mean->dimension());
       return *grad;
     }
 
     SparseVector<T>* parameters()
     {
       return u;
+    }
+};
+
+template<class T>
+class NormalDistributionScaled: public NormalDistribution<T>
+{
+  public:
+    NormalDistributionScaled(double mean0, double sigma0,
+        const int& numFeatures, ActionList* actions) :
+        NormalDistribution<T>(mean0, sigma0, numFeatures, actions)
+    {
+    }
+    virtual ~NormalDistributionScaled()
+    {
+    }
+
+    void updateStep(const Action& action)
+    {
+      NormalDistribution<T>::meanStep = (action.at()
+          - NormalDistribution<T>::mean);
+      NormalDistribution<T>::sigmaStep = pow(
+          action.at() - NormalDistribution<T>::mean, 2)
+          - pow(NormalDistribution<T>::sigma, 2);
+    }
+
+};
+
+template<class T>
+class ScaledPolicyDistribution: public PolicyDistribution<T>
+{
+  protected:
+    PolicyDistribution<T>* policy;
+    Range<T>* policyRange;
+    Range<T>* problemRange;
+  public:
+    ScaledPolicyDistribution(PolicyDistribution<T>* policy,
+        Range<T>* policyRange, Range<T>* problemRange) :
+        policy(policy), policyRange(policyRange), problemRange(problemRange)
+    {
+    }
+    virtual ~ScaledPolicyDistribution()
+    {
+    }
+
+  private:
+    double normalize(const Range<T>& range, const Action& a) const
+    {
+      return (a.at() - range.center()) / (range.length() / 2.0);
+    }
+
+    double scale(const Range<T>& range, const double& a) const
+    {
+      return (a * (range.length() / 2.0)) + range.center();
+    }
+
+    void policyToProblem(Action& policyAction) const
+    {
+      double normalizedAction = normalize(*policyRange, policyAction);
+      policyAction.update(0, scale(*problemRange, normalizedAction));
+    }
+
+    void problemToPolicy(Action& problemAction) const
+    {
+      double normalizedAction = normalize(*problemRange, problemAction);
+      problemAction.update(0, scale(*policyRange, normalizedAction));
+    }
+
+  public:
+
+    void update(const Representations<T>& phis)
+    {
+      policy->update(phis);
+    }
+    double pi(const Action& a) const
+    {
+      //@@>>TODO
+      return 0;
+    }
+    const Action& sampleAction() const
+    {
+      return policy->sampleAction();
+    }
+    const Action& sampleBestAction() const
+    {
+      return policy->sampleBestAction();
+    }
+
+    const SparseVector<T>& computeGradLog(const Representations<T>& phis,
+        const Action& action)
+    {
+      //@@>> TODO: FixMe
+      return policy->computeGradLog(phis, action);
+    }
+    SparseVector<T>* parameters()
+    {
+      return policy->parameters();
     }
 };
 

@@ -480,10 +480,8 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
         StateToStateAction<T, O>* toStateAction, double alpha_r) :
         delta_t(0), critic(critic), actor(actor), alpha_r(alpha_r),
             averageReward(0), toStateAction(toStateAction),
-            phi_t(
-                new SparseVector<T>(toStateAction->getProjector().dimension())),
-            phi_tp1(
-                new SparseVector<T>(toStateAction->getProjector().dimension()))
+            phi_t(new SparseVector<T>(toStateAction->getProjector().dimension())),
+            phi_tp1(new SparseVector<T>(toStateAction->getProjector().dimension()))
     {
     }
 
