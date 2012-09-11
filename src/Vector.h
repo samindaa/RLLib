@@ -10,10 +10,13 @@
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <cassert>
+#include <cstdio>
 
-namespace RLLib {
+namespace RLLib
+{
 
 // Forward declarations
 template<class T> class DenseVector;
@@ -39,6 +42,22 @@ class Vector
     virtual double maxNorm() const =0;
     virtual double euclideanNorm() const =0;
     virtual T* operator()() const =0; // return the data as an array
+
+    virtual void persist(const std::string& f) =0;
+    virtual void resurrect(const std::string& f) =0;
+
+  protected:
+    template<class U> void write(std::ostream &o, U& value)
+    {
+      char *s = (char *) &value;
+      o.write(s, sizeof(value));
+    }
+
+    template<class U> void read(std::istream &i, U& value)
+    {
+      char *s = (char *) &value;
+      i.read(s, sizeof(value));
+    }
 };
 
 template<class T>
@@ -157,6 +176,54 @@ class DenseVector: public Vector<T>
       assert(capacity == that.capacity);
       for (int i = 0; i < capacity; i++)
         data[i] = that.data[i];
+    }
+
+    void persist(const std::string& f)
+    {
+      std::ofstream of;
+      of.open(f.c_str(), std::ofstream::out);
+      if (of.is_open())
+      {
+        // write vector type (int)
+        int vectorType = 0;
+        Vector<T>::write(of, vectorType);
+        // write data size (int)
+        Vector<T>::write(of, capacity);
+        // write data
+        for (int j = 0; j < capacity; j++)
+          Vector<T>::write(of, data[j]);
+        of.close();
+        std::cout << "## DenseVector persisted=" << f << std::endl;
+      }
+      else std::cerr << "ERROR! (persist) file=" << f << std::endl;
+    }
+
+    void resurrect(const std::string& f)
+    {
+      std::ifstream ifs;
+      ifs.open(f.c_str(), std::ifstream::in);
+      if (ifs.is_open())
+      {
+        // Read vector type;
+        int vectorType;
+        Vector<T>::read(ifs, vectorType);
+        assert(vectorType == 0);
+        // Read capacity
+        int rcapacity;
+        Vector<T>::read(ifs, rcapacity);
+        assert(capacity == rcapacity);
+        printf("vectorType=%i rcapacity=%i \n", vectorType, rcapacity);
+        // Read data
+        for (int j = 0; j < capacity; j++)
+          Vector<T>::read(ifs, data[j]);
+        ifs.close();
+        std::cout << "## DenseVector persist=" << f << std::endl;
+      }
+      else
+      {
+        std::cerr << "ERROR! (resurrected) file=" << f << std::endl;
+        exit(-1);
+      }
     }
 
     template<class O> friend std::ostream& operator<<(std::ostream& out,
@@ -455,6 +522,73 @@ class SparseVector: public Vector<T>
     T* operator()() const
     {
       return values;
+    }
+
+    void persist(const std::string& f)
+    {
+      std::ofstream of;
+      of.open(f.c_str(), std::ofstream::out);
+      if (of.is_open())
+      {
+        // Write vector type (int)
+        int vectorType = 1;
+        Vector<T>::write(of, vectorType);
+        // Write indexesPositionLength (int)
+        Vector<T>::write(of, indexesPositionLength);
+        // Write numActive (int)
+        Vector<T>::write(of, numActive);
+        // Write active indexes
+        for (int position = 0; position < numActive; position++)
+          Vector<T>::write(of, activeIndexes[position]);
+        // Write active values
+        for (int position = 0; position < numActive; position++)
+          Vector<T>::write(of, values[position]);
+        of.close();
+        std::cout << "## SparseVector persisted=" << f << std::endl;
+      }
+      else std::cerr << "ERROR! (persist) file=" << f << std::endl;
+    }
+
+    void resurrect(const std::string& f)
+    {
+      std::ifstream ifs;
+      ifs.open(f.c_str(), std::ifstream::in);
+      if (ifs.is_open())
+      {
+        // Read vector type;
+        int vectorType;
+        Vector<T>::read(ifs, vectorType);
+        assert(vectorType == 1);
+        // Read indexesPositionLength
+        int rcapacity;
+        Vector<T>::read(ifs, rcapacity);
+        // Read numActive
+        int rnumActive;
+        Vector<T>::read(ifs, rnumActive);
+        assert(indexesPositionLength == rcapacity);
+        printf("vectorType=%i rcapacity=%i rnumActive=%i\n", vectorType,
+            rcapacity, rnumActive);
+        // Read active indexes
+        int* ractiveIndexes = new int[rnumActive];
+        for (int position = 0; position < rnumActive; position++)
+          Vector<T>::read(ifs, ractiveIndexes[position]);
+        // Read active values
+        for (int position = 0; position < rnumActive; position++)
+        {
+          T rvalue;
+          Vector<T>::read(ifs, rvalue);
+          insertEntry(ractiveIndexes[position], rvalue);
+        }
+        ifs.close();
+
+        delete[] ractiveIndexes;
+        std::cout << "## DenseVector persist=" << f << std::endl;
+      }
+      else
+      {
+        std::cerr << "ERROR! (resurrected) file=" << f << std::endl;
+        exit(-1);
+      }
     }
 
     template<class O> friend std::ostream& operator<<(std::ostream& out,
