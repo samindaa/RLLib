@@ -10,6 +10,9 @@
 
 #include <vector>
 
+namespace RLLib
+{
+
 class Action
 {
   protected:
@@ -137,5 +140,7 @@ class GeneralActionList: public ActionList
       return actions.size();
     }
 };
+
+} // namespace RLLib
 
 #endif /* ACTION_H_ */

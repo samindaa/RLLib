@@ -10,6 +10,8 @@
 
 #include "Supervised.h"
 
+namespace RLLib {
+
 template<class T>
 class Adaline: public LearningAlgorithm<T>
 {
@@ -49,5 +51,7 @@ template<class T>
 class Autostep
 { // @@TODO
 };
+
+} // namespace RLLib
 
 #endif /* SUPERVISEDALGORITHM_H_ */

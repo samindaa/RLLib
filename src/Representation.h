@@ -13,6 +13,8 @@
 #include "Vector.h"
 #include "Projector.h"
 
+namespace RLLib {
+
 template<class T>
 class Representations
 {
@@ -133,5 +135,7 @@ class StateActionTilings: public StateToStateAction<T, O>
       return *actions;
     }
 };
+
+} // namespace RLLib
 
 #endif /* REPRESENTATION_H_ */

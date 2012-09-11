@@ -10,6 +10,8 @@
 
 #include "Vector.h"
 
+namespace RLLib {
+
 template<class T>
 class Predictor
 {
@@ -21,5 +23,7 @@ class Predictor
     virtual double predict(const SparseVector<T>& x) const =0;
     virtual void reset() =0;
 };
+
+} // namespace RLLib
 
 #endif /* PREDICTOR_H_ */

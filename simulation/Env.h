@@ -16,6 +16,8 @@
 #include "../src/Action.h"
 #include "../src/Math.h"
 
+using namespace RLLib;
+
 /*
  * Represent an environment, a plant or an simulation.
  */

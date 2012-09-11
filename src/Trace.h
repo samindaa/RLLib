@@ -11,6 +11,8 @@
 #include "Vector.h"
 #include "Math.h"
 
+namespace RLLib {
+
 template<class T>
 class Trace
 {
@@ -209,5 +211,7 @@ class MaxLengthTrace: public Trace<T>
       }
     }
 };
+
+} // namespace RLLib
 
 #endif /* TRACE_H_ */

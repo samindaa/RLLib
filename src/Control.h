@@ -12,6 +12,8 @@
 #include "Vector.h"
 #include "Policy.h"
 
+namespace RLLib {
+
 template<class T, class O>
 class Control
 {
@@ -78,5 +80,7 @@ class ActorOnPolicy
     virtual const Action& proposeAction(const Representations<T>& xas) =0;
     virtual const Action& decide(const Representations<T>& xas) =0;
 };
+
+} // namespace RLLib
 
 #endif /* CONTROL_H_ */

@@ -13,6 +13,8 @@
 #include <cmath>
 #include <cassert>
 
+namespace RLLib {
+
 // Forward declarations
 template<class T> class DenseVector;
 template<class T> class SparseVector;
@@ -481,5 +483,7 @@ std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that)
         << that.getEntry(that.activeIndexes[position]) << "] ";
   return out;
 }
+
+} // namespace RLLib
 
 #endif /* VECTOR_H_ */

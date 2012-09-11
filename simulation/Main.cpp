@@ -26,6 +26,7 @@
 #include "ContinuousGridworld.h"
 
 using namespace std;
+using namespace RLLib;
 
 void testFullVector()
 {
@@ -807,8 +808,8 @@ int main(int argc, char** argv)
   cout << "## start" << endl; // prints @@ start
 //  testSparseVector();
 //  testProjector();
-  testProjectorMachineLearning();
-//  testSarsaMountainCar();
+//  testProjectorMachineLearning();
+  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();

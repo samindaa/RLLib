@@ -10,6 +10,9 @@
 
 #include "Tiles.h"
 #include "Vector.h"
+
+namespace RLLib {
+
 /**
  * Feature extractor for function approximation.
  * @class T feature type
@@ -113,5 +116,7 @@ class FullTilings: public Projector<T, O>
 class IndependentTilings
 {
 };
+
+} // namespace RLLib
 
 #endif /* PROJECTOR_H_ */

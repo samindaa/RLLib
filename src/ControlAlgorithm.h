@@ -16,6 +16,8 @@
 #include "PredictorAlgorithm.h"
 #include "Representation.h"
 
+namespace RLLib {
+
 // Simple control algorithm
 template<class T, class O>
 class SarsaControl: public OnPolicyControlLearner<T, O>
@@ -480,5 +482,7 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
               toStateAction->getActionList().at(0)));
     }
 };
+
+} // namespace RLLib
 
 #endif /* CONTROLALGORITHM_H_ */

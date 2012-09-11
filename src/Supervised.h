@@ -10,6 +10,8 @@
 
 #include "Predictor.h"
 
+namespace RLLib {
+
 template<class T>
 class LearningAlgorithm: public Predictor<T>
 {
@@ -19,5 +21,7 @@ class LearningAlgorithm: public Predictor<T>
     }
     virtual void learn(const SparseVector<T>& x, const T& y) = 0;
 };
+
+} // namespace RLLib
 
 #endif /* SUPERVISED_H_ */

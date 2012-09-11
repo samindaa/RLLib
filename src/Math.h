@@ -11,6 +11,8 @@
 #include <cmath>
 #include <limits>
 
+namespace RLLib {
+
 // Helper class for range management for testing environments
 template<class T>
 class Range
@@ -101,5 +103,7 @@ class Gaussian
       }
     }
 };
+
+} // namespace RLLib
 
 #endif /* MATH_H_ */

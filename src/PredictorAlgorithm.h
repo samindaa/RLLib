@@ -12,8 +12,9 @@
 #include "Vector.h"
 #include "Trace.h"
 
-// Simple predictor algorithms
+namespace RLLib {
 
+// Simple predictor algorithms
 template<class T>
 class TDLambda: public Predictor<T>
 {
@@ -312,5 +313,7 @@ class GTDLambda: public Predictor<T>
     }
 
 };
+
+} // namespace RLLib
 
 #endif /* PREDICTORALGORITHM_H_ */

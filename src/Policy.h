@@ -18,6 +18,8 @@
 #include "Predictor.h"
 #include "Representation.h"
 
+namespace RLLib {
+
 template<class T>
 class Policy
 {
@@ -459,5 +461,7 @@ class EpsilonGreedy: public Greedy<T>
     }
 
 };
+
+} // namespace RLLib
 
 #endif /* POLICY_H_ */
