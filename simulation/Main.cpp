@@ -425,7 +425,96 @@ void testOffPACContinuousGridworld()
   delete sim;
 }
 
-void testOffPACMountainCar2()
+// ====================== Mountain Car 3D =====================================
+
+// Mountain Car 3D projector
+template<class T, class O>
+class MountainCar3DTilesProjector: public Projector<T, O>
+{
+  protected:
+    SparseVector<double>* vector;
+    int* activeTiles;
+
+  public:
+    MountainCar3DTilesProjector() :
+        vector(new SparseVector<T>(10e5 + 1)), activeTiles(new int[48])
+    {
+      // Consistent hashing
+      int dummy_tiles[1];
+      float dummy_vars[1];
+      srand(0);
+      tiles(dummy_tiles, 1, 1, dummy_vars, 0); // initializes tiling code
+      srand(time(0));
+    }
+
+    virtual ~MountainCar3DTilesProjector()
+    {
+      delete vector;
+      delete[] activeTiles;
+    }
+
+    const SparseVector<T>& project(const DenseVector<O>& x, int h1)
+    {
+      vector->clear();
+      // all 4
+      tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension(),
+          h1);
+      // 3 of 4
+      static DenseVector<O> x3(3);
+      static int x3o[4][3] = { { 0, 1, 2 }, { 1, 2, 3 }, { 2, 3, 0 },
+                               { 1, 3, 0 } };
+      for (int i = 0; i < 4; i++)
+      {
+        for (int j = 0; j < 3; j++)
+          x3[j] = x[x3o[i][j]];
+        tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(),
+            x3.dimension(), h1);
+      }
+      // 2 of 6
+      static DenseVector<O> x2(2);
+      static int x2o[6][2] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 0, 3 }, { 0, 2 },
+                               { 1, 3 } };
+      for (int i = 0; i < 6; i++)
+      {
+        for (int j = 0; j < 2; j++)
+          x2[j] = x[x2o[i][j]];
+        tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(),
+            x2.dimension(), h1);
+      }
+
+      // 4 of 1
+      static DenseVector<O> x1(1);
+      static int x1o[4] = { 0, 1, 2, 3 };
+      for (int i = 0; i < 4; i++)
+      {
+        x1[0] = x[x1o[i]];
+        tiles(&activeTiles[36 + i], 3, vector->dimension() - 1, x1(),
+            x1.dimension(), h1);
+      }
+
+      // bias
+      vector->insertLast(1.0);
+      for (int* i = activeTiles; i < activeTiles + 48; ++i)
+        vector->insertEntry(*i, 1.0);
+
+      return *vector;
+    }
+    const SparseVector<T>& project(const DenseVector<O>& x)
+    {
+      assert(false);
+      return *vector;
+    }
+    double vectorNorm() const
+    {
+      return 48 + 1;
+    }
+    int dimension() const
+    {
+      return vector->dimension();
+    }
+};
+
+void testOffPACMountainCar3D_1()
 {
   srand(time(0));
   srand48(time(0));
@@ -478,22 +567,24 @@ void testOffPACMountainCar2()
   delete sim;
 }
 
-void testGreedyGQMountainCar2()
+void testGreedyGQMountainCar3D()
 {
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-      10, true);
+  /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+   10, true);*/
+  Projector<double, float>* projector = new MountainCar3DTilesProjector<double,
+      float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
-  double alpha_v = 0.125 / projector->vectorNorm();
+  double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
   double beta_tp1 = 1.0 - gamma_tp1;
-  double lambda_t = 0.4;
+  double lambda_t = 0.8;
   GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, eML);
   //double epsilon = 0.01;
   Policy<double>* behavior = new EpsilonGreedy<double>(gq,
@@ -507,7 +598,7 @@ void testGreedyGQMountainCar2()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 2000, 5000);
+  sim->run(5, 5000, 500);
   sim->computeValueFunction();
 
   delete problem;
@@ -526,8 +617,10 @@ void testGreedyGQMountainCar2()
 void testSarsaMountainCar3D()
 {
   Env<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-      10, false);
+  /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+   10, false);*/
+  Projector<double, float>* projector = new MountainCar3DTilesProjector<double,
+      float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -535,7 +628,7 @@ void testSarsaMountainCar3D()
   Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
   double alpha = 0.15 / projector->vectorNorm();
   double gamma = 0.99;
-  double lambda = 0.8;
+  double lambda = 0.95;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, eML);
   double epsilon = 0.1;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
@@ -558,7 +651,7 @@ void testSarsaMountainCar3D()
   delete sim;
 }
 
-void testOffPACMountainCar3D()
+void testOffPACMountainCar3D_2()
 {
   srand(time(0));
   srand48(time(0));
@@ -609,6 +702,8 @@ void testOffPACMountainCar3D()
   delete control;
   delete sim;
 }
+
+// ====================== Mountain Car 3D =====================================
 
 void testOffPACSwingPendulum()
 {
@@ -854,10 +949,10 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworld();
 //  testOffPACMountainCar2();
 
-//  testGreedyGQMountainCar2();
+  testGreedyGQMountainCar3D();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D();
 //  testOffPACSwingPendulum();

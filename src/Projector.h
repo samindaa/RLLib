@@ -42,13 +42,13 @@ class FullTilings: public Projector<T, O>
   protected:
     int numTiling;
     bool includeActiveFeature;
-    SparseVector<double>* vector;
+    SparseVector<T>* vector;
     int* activeTiles;
   public:
     FullTilings(const int& memorySize, const int& numTiling,
         bool includeActiveFeature = true) :
         numTiling(numTiling), includeActiveFeature(includeActiveFeature),
-            vector(new SparseVector<double>(includeActiveFeature ?
+            vector(new SparseVector<T>(includeActiveFeature ?
                 memorySize + 1 : memorySize)), activeTiles(new int[numTiling])
     {
       // Consistent hashing
