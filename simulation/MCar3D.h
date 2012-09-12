@@ -158,8 +158,8 @@ class MCar3D: public Env<float>
   public:
     void initialize()
     {
-      set_initial_position_at_bottom();
-//      set_initial_position_random();
+//      set_initial_position_at_bottom();
+      set_initial_position_random();
       update();
     }
 
