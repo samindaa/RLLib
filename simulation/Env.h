@@ -8,10 +8,6 @@
 #ifndef ENV_H_
 #define ENV_H_
 
-#include <limits>
-#include <cmath>
-#include <cstdlib>
-
 #include "../src/Vector.h"
 #include "../src/Action.h"
 #include "../src/Math.h"

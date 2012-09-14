@@ -10,7 +10,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <cmath>
 #include "Env.h"
 
 class MCar2D: public Env<float>

@@ -24,6 +24,7 @@
 #include "MCar3D.h"
 #include "SwingPendulum.h"
 #include "ContinuousGridworld.h"
+#include "Acrobot.h"
 
 using namespace std;
 using namespace RLLib;
@@ -425,18 +426,16 @@ void testOffPACContinuousGridworld()
   delete sim;
 }
 
-// ====================== Mountain Car 3D =====================================
-
-// Mountain Car 3D projector
+// ====================== Advanced projector ===================================
 template<class T, class O>
-class MountainCar3DTilesProjector: public Projector<T, O>
+class AdvancedTilesProjector: public Projector<T, O>
 {
   protected:
     SparseVector<double>* vector;
     int* activeTiles;
 
   public:
-    MountainCar3DTilesProjector() :
+    AdvancedTilesProjector() :
         vector(new SparseVector<T>(10e5 + 1)), activeTiles(new int[48])
     {
       // Consistent hashing
@@ -447,7 +446,7 @@ class MountainCar3DTilesProjector: public Projector<T, O>
       srand(time(0));
     }
 
-    virtual ~MountainCar3DTilesProjector()
+    virtual ~AdvancedTilesProjector()
     {
       delete vector;
       delete[] activeTiles;
@@ -501,9 +500,52 @@ class MountainCar3DTilesProjector: public Projector<T, O>
     }
     const SparseVector<T>& project(const DenseVector<O>& x)
     {
-      assert(false);
+
+      vector->clear();
+      // all 4
+      tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension());
+      // 3 of 4
+      static DenseVector<O> x3(3);
+      static int x3o[4][3] = { { 0, 1, 2 }, { 1, 2, 3 }, { 2, 3, 0 },
+                               { 1, 3, 0 } };
+      for (int i = 0; i < 4; i++)
+      {
+        for (int j = 0; j < 3; j++)
+          x3[j] = x[x3o[i][j]];
+        tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(),
+            x3.dimension());
+      }
+      // 2 of 6
+      static DenseVector<O> x2(2);
+      static int x2o[6][2] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 0, 3 }, { 0, 2 },
+                               { 1, 3 } };
+      for (int i = 0; i < 6; i++)
+      {
+        for (int j = 0; j < 2; j++)
+          x2[j] = x[x2o[i][j]];
+        tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(),
+            x2.dimension());
+      }
+
+      // 4 of 1
+      static DenseVector<O> x1(1);
+      static int x1o[4] = { 0, 1, 2, 3 };
+      for (int i = 0; i < 4; i++)
+      {
+        x1[0] = x[x1o[i]];
+        tiles(&activeTiles[36 + i], 3, vector->dimension() - 1, x1(),
+            x1.dimension());
+      }
+
+      for (int* i = activeTiles; i < activeTiles + 48; ++i)
+        vector->insertEntry(*i, 1.0);
+
+      // bias
+      //vector->insertLast(1.0);
+
       return *vector;
     }
+
     double vectorNorm() const
     {
       return 48 + 1;
@@ -512,6 +554,14 @@ class MountainCar3DTilesProjector: public Projector<T, O>
     {
       return vector->dimension();
     }
+};
+
+// ====================== Mountain Car 3D =====================================
+// Mountain Car 3D projector
+template<class T, class O>
+class MountainCar3DTilesProjector: public AdvancedTilesProjector<T, O>
+{
+  public:
 };
 
 void testOffPACMountainCar3D_1()
@@ -580,7 +630,7 @@ void testGreedyGQMountainCar3D()
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
-  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_v = 0.2 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
   double beta_tp1 = 1.0 - gamma_tp1;
@@ -598,7 +648,7 @@ void testGreedyGQMountainCar3D()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(5, 5000, 500);
+  sim->run(1, 5000, 3000);
   sim->computeValueFunction();
 
   delete problem;
@@ -913,6 +963,115 @@ void testSimple()
   cout << c << endl;
 }
 
+// ====================== Acrobot projector ===================================
+
+template<class T, class O>
+class AcrobotTilesProjector: public AdvancedTilesProjector<T, O>
+{
+  public:
+};
+
+void testOffPACAcrobot()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new Acrobot;
+  Projector<double, float>* projector =
+      new AcrobotTilesProjector<double, float>();
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getDiscreteActionList());
+
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_w = .0001 / projector->vectorNorm();
+  double gamma = 0.99;
+  double lambda = 0.1;
+  Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
+  Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
+  GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
+      lambda, criticeML);
+  double alpha_u = 0.001 / projector->vectorNorm();
+  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
+      projector->dimension(), &problem->getDiscreteActionList());
+
+  Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
+  Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
+  ActorOffPolicy<double, float>* actor =
+      new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
+          actoreML);
+
+  /*Policy<double>* behavior = new RandomPolicy<double>(
+   &problem->getDiscreteActionList());*/
+  Policy<double>* behavior = new RandomBiasPolicy<double>(
+      &problem->getDiscreteActionList());
+  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
+      behavior, critic, actor, toStateAction, projector, gamma);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 1000);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete criticeML;
+  delete critic;
+  delete actore;
+  delete actoreML;
+  delete actor;
+  delete behavior;
+  delete target;
+  delete control;
+  delete sim;
+}
+
+void testGreedyGQAcrobot()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new Acrobot;
+  /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+   10, true);*/
+  Projector<double, float>* projector =
+      new AcrobotTilesProjector<double, float>();
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getDiscreteActionList());
+  Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
+  Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
+  double alpha_v = 0.5 / projector->vectorNorm();
+  double alpha_w = .001 / projector->vectorNorm();
+  double gamma_tp1 = 0.99;
+  double beta_tp1 = 1.0 - gamma_tp1;
+  double lambda_t = 0.8;
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, eML);
+  //double epsilon = 0.01;
+  Policy<double>* behavior = new EpsilonGreedy<double>(gq,
+      &problem->getDiscreteActionList(), 0.1);
+  /*Policy<double>* behavior = new RandomPolicy<double>(
+   &problem->getDiscreteActionList());*/
+  Policy<double>* target = new Greedy<double>(gq,
+      &problem->getDiscreteActionList());
+  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(
+      target, behavior, &problem->getDiscreteActionList(), toStateAction, gq);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 300);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete eML;
+  delete gq;
+  delete behavior;
+  delete target;
+  delete control;
+  delete sim;
+}
+
 void testPersistResurrect()
 {
   srand(time(0));
@@ -938,30 +1097,40 @@ void testPersistResurrect()
   cout << e << endl;
 }
 
+void testExp()
+{
+  cout << exp(200) << endl;
+}
+
 int main(int argc, char** argv)
 {
   cout << "## start" << endl; // prints @@ start
-//  testSparseVector();
-//  testProjector();
-//  testProjectorMachineLearning();
-//  testSarsaMountainCar();
-//  testExpectedSarsaMountainCar();
-//  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
-//  testGreedyGQContinuousGridworld();
-//  testOffPACContinuousGridworld();
-//  testOffPACMountainCar2();
+  testSparseVector();
+  testProjector();
+  testProjectorMachineLearning();
+  testSarsaMountainCar();
+  testExpectedSarsaMountainCar();
+  testGreedyGQMountainCar();
+  testOffPACMountainCar();
+  testGreedyGQContinuousGridworld();
+  testOffPACContinuousGridworld();
+  testOffPACMountainCar3D_1();
 
   testGreedyGQMountainCar3D();
-//  testSarsaMountainCar3D();
-//  testOffPACMountainCar3D();
-//  testOffPACSwingPendulum();
-//  testOffPACSwingPendulum2();
+  testSarsaMountainCar3D();
+  testOffPACMountainCar3D_2();
+  testOffPACSwingPendulum();
+  testOffPACSwingPendulum2();
+  testOffPACAcrobot();
+  testGreedyGQAcrobot();
 
-//  testOnPolicySwingPendulum();
-//  testOnPolicyCar();
+  testOnPolicySwingPendulum();
+  testOnPolicyCar();
+
+  // some simple stuff
 //  testSimple();
 //  testPersistResurrect();
+//  testExp();
   cout << endl;
   cout << "## end" << endl;
   return 0;

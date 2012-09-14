@@ -75,6 +75,7 @@ class Simulator
           } while (!env->endOfEpisode() && steps < maxSteps);
 
           std::cout << steps << " ";
+          //std::cout << "x";
           std::cout.flush();
 
         }

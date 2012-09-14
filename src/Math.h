@@ -14,6 +14,17 @@
 namespace RLLib
 {
 
+// Some number checking
+template<class T>
+class Boundedness
+{
+  public:
+    inline static bool checkValue(const T& value)
+    {
+      return !isnan(value) && !isinf(value);
+    }
+};
+
 // Helper class for range management for testing environments
 template<class T>
 class Range

@@ -116,7 +116,7 @@ if 1,
                  'MarkerSize',10);    
              axis([-1.2, 0.6, -1.2, 0.6, -2, 2]);
              title('MCar3D: An Optimal Policy');
-             pause(0.1);
+             pause(0.005);
              delete(h2);
    end
    hold off;

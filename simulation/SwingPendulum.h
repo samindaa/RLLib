@@ -10,8 +10,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
-#include <cmath>
 #include "Env.h"
 
 class SwingPendulum: public Env<float>

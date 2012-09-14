@@ -255,6 +255,7 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     PolicyDistribution<T>* policy;
     Trace<T>* e;
     SparseVector<T>* u;
+    std::ofstream out;
 
   public:
     ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t,
@@ -262,10 +263,12 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
         initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda),
             policy(policy), e(e), u(policy->parameters())
     {
+      out.open("actor_u.txt");
     }
 
     virtual ~ActorLambdaOffPolicy()
     {
+      out.close();
     }
 
     void initialize()
@@ -281,7 +284,6 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
       e->update(gamma_t * lambda, policy->computeGradLog(xas_t, a_t));
       e->multiplyToSelf(rho_t);
       u->addToSelf(alpha_u * delta_t, e->vect());
-
     }
 
     void updatePolicy(const Representations<T>& xas)
@@ -365,9 +367,12 @@ class OffPAC: public OffPolicyControlLearner<T, O>
 
       const Representations<T>& xas_t = toStateAction->stateActions(x_t);
       actor->updatePolicy(xas_t);
+      behavior->update(xas_t);
       rho_t = actor->pi(a_t) / behavior->pi(a_t);
 
+      Boundedness<double>::checkValue(rho_t);
       delta_t = critic->update(*phi_t, *phi_tp1, rho_t, gamma_t, r_tp1, z_tp1);
+      Boundedness<double>::checkValue(delta_t);
       actor->update(xas_t, a_t, rho_t, gamma_t, delta_t);
 
       const Representations<T>& xas_tp1 = toStateAction->stateActions(x_tp1);
@@ -480,8 +485,10 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
         StateToStateAction<T, O>* toStateAction, double alpha_r) :
         delta_t(0), critic(critic), actor(actor), alpha_r(alpha_r),
             averageReward(0), toStateAction(toStateAction),
-            phi_t(new SparseVector<T>(toStateAction->getProjector().dimension())),
-            phi_tp1(new SparseVector<T>(toStateAction->getProjector().dimension()))
+            phi_t(
+                new SparseVector<T>(toStateAction->getProjector().dimension())),
+            phi_tp1(
+                new SparseVector<T>(toStateAction->getProjector().dimension()))
     {
     }
 
