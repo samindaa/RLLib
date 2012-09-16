@@ -75,8 +75,9 @@ class FullTilings: public Projector<T, O>
             x.dimension(), h1);
         vector->insertLast(1.0);
       }
-      else tiles(activeTiles, numTiling, vector->dimension(), x(),
-          x.dimension(), h1);
+      else
+        tiles(activeTiles, numTiling, vector->dimension(), x(), x.dimension(),
+            h1);
 
       for (int* i = activeTiles; i < activeTiles + numTiling; ++i)
         vector->insertEntry(*i, 1.0);
@@ -92,8 +93,8 @@ class FullTilings: public Projector<T, O>
             x.dimension());
         vector->insertLast(1.0);
       }
-      else tiles(activeTiles, numTiling, vector->dimension(), x(),
-          x.dimension());
+      else
+        tiles(activeTiles, numTiling, vector->dimension(), x(), x.dimension());
 
       for (int* i = activeTiles; i < activeTiles + numTiling; ++i)
         vector->insertEntry(*i, 1.0);

@@ -57,10 +57,13 @@ class SwingPendulum: public Env<float>
   private:
     double normalize(float data)
     {
-      if (data < M_PI && data >= -M_PI) return data;
+      if (data < M_PI && data >= -M_PI)
+        return data;
       float ndata = data - ((int) (data / 2.0 * M_PI)) * 2.0 * M_PI;
-      if (ndata >= M_PI) ndata -= 2.0 * M_PI;
-      else if (ndata < -M_PI) ndata += 2.0 * M_PI;
+      if (ndata >= M_PI)
+        ndata -= 2.0 * M_PI;
+      else if (ndata < -M_PI)
+        ndata += 2.0 * M_PI;
       return ndata;
     }
 
@@ -78,8 +81,10 @@ class SwingPendulum: public Env<float>
     void initialize()
     {
       upTime = 0;
-      if (getOn()) theta = M_PI;
-      else theta = (drand48() - 0.5) * 2.0 * M_PI;
+      if (getOn())
+        theta = M_PI;
+      else
+        theta = (drand48() - 0.5) * 2.0 * M_PI;
       //theta = M_PI_2;
       velocity = 0.0;
       normalize(theta);

@@ -329,7 +329,8 @@ class BoltzmannDistribution: public PolicyDistribution<T>
           ++a)
       {
         sum += distribution->at(**a);
-        if (sum >= random) return **a;
+        if (sum >= random)
+          return **a;
       }
       return actions->at(actions->dimension() - 1);
 
@@ -401,14 +402,17 @@ class RandomBiasPolicy: public Policy<T>
     {
       // 50% prev action
       distribution->clear();
-      if (distribution->dimension() == 1) distribution->at(0) = 1.0;
+      if (distribution->dimension() == 1)
+        distribution->at(0) = 1.0;
       else
       {
         for (ActionList::const_iterator a = actions->begin();
             a != actions->end(); ++a)
         {
-          if (**a == *prev) distribution->at(**a) = 0.5;
-          else distribution->at(**a) = 0.5 / (actions->dimension() - 1);
+          if (**a == *prev)
+            distribution->at(**a) = 0.5;
+          else
+            distribution->at(**a) = 0.5 / (actions->dimension() - 1);
         }
       }
       // chose an action
@@ -523,9 +527,10 @@ class EpsilonGreedy: public Greedy<T>
 
     const Action& sampleAction() const
     {
-      if (drand48() < epsilon) return (*Greedy<T>::actions)[rand()
-          % Greedy<T>::actions->dimension()];
-      else return *Greedy<T>::bestAction;
+      if (drand48() < epsilon)
+        return (*Greedy<T>::actions)[rand() % Greedy<T>::actions->dimension()];
+      else
+        return *Greedy<T>::bestAction;
     }
 
     double pi(const Action& a) const

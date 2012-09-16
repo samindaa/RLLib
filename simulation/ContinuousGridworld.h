@@ -37,8 +37,10 @@ class ContinuousGridworld: public Env<float>
       {
         unsigned int dimension = i / 2;
         unsigned int dimensionAction = i % 2;
-        if (dimensionAction == 0) discreteActions->update(i, dimension, -1.0);
-        else discreteActions->update(i, dimension, 1.0);
+        if (dimensionAction == 0)
+          discreteActions->update(i, dimension, -1.0);
+        else
+          discreteActions->update(i, dimension, 1.0);
       }
 
       // continuous actions are not setup for this problem

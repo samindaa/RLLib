@@ -68,7 +68,8 @@ class MCar2D: public Env<float>
       vars[0] = position / POS_WIDTH;
       vars[1] = velocity / VEL_WIDTH;
 
-      if (outfile.is_open() && getOn()) outfile << position << std::endl;
+      if (outfile.is_open() && getOn())
+        outfile << position << std::endl;
     }
 
     // Profiles
@@ -85,7 +86,8 @@ class MCar2D: public Env<float>
       velocity = velocityRange->bound(
           velocity + throttle * 0.001 + cos(3 * position) * (-0.0025));
       position += velocity;
-      if (position < positionRange->min()) velocity = 0.0;
+      if (position < positionRange->min())
+        velocity = 0.0;
       position = positionRange->bound(position);
       update();
     }

@@ -48,7 +48,9 @@ class Env
     virtual bool endOfEpisode() const =0;
     virtual float r() const =0;
     virtual float z() const =0;
-    virtual void draw() const {}
+    virtual void draw() const
+    {
+    }
 
     virtual void setOn(const bool& itsOn)
     {

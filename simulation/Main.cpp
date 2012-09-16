@@ -411,7 +411,7 @@ void testOffPACContinuousGridworld()
 
   control->reset();
   control->resurrect("visualization/cgw_offpac.data");
-  sim->test(100, 5000);
+  sim->test(100, 2000);
 
   delete problem;
   delete projector;
@@ -1105,27 +1105,27 @@ void testExp()
 int main(int argc, char** argv)
 {
   cout << "## start" << endl; // prints @@ start
-  testSparseVector();
-  testProjector();
-  testProjectorMachineLearning();
-  testSarsaMountainCar();
-  testExpectedSarsaMountainCar();
-  testGreedyGQMountainCar();
-  testOffPACMountainCar();
-  testGreedyGQContinuousGridworld();
+//  testSparseVector();
+//  testProjector();
+//  testProjectorMachineLearning();
+//  testSarsaMountainCar();
+//  testExpectedSarsaMountainCar();
+//  testGreedyGQMountainCar();
+//  testOffPACMountainCar();
+//  testGreedyGQContinuousGridworld();
   testOffPACContinuousGridworld();
-  testOffPACMountainCar3D_1();
+//  testOffPACMountainCar3D_1();
 
-  testGreedyGQMountainCar3D();
-  testSarsaMountainCar3D();
-  testOffPACMountainCar3D_2();
-  testOffPACSwingPendulum();
-  testOffPACSwingPendulum2();
-  testOffPACAcrobot();
-  testGreedyGQAcrobot();
+//  testGreedyGQMountainCar3D();
+//  testSarsaMountainCar3D();
+//  testOffPACMountainCar3D_2();
+//  testOffPACSwingPendulum();
+//  testOffPACSwingPendulum2();
+//  testOffPACAcrobot();
+//  testGreedyGQAcrobot();
 
-  testOnPolicySwingPendulum();
-  testOnPolicyCar();
+//  testOnPolicySwingPendulum();
+//  testOnPolicyCar();
 
   // some simple stuff
 //  testSimple();

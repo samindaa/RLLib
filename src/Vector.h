@@ -151,7 +151,8 @@ class DenseVector: public Vector<T>
       {
         for (int i = 1; i < capacity; i++)
         {
-          if (fabs(data[i]) > maxv) maxv = fabs(data[i]);
+          if (fabs(data[i]) > maxv)
+            maxv = fabs(data[i]);
         }
       }
       return maxv;
@@ -195,7 +196,8 @@ class DenseVector: public Vector<T>
         of.close();
         std::cout << "## DenseVector persisted=" << f << std::endl;
       }
-      else std::cerr << "ERROR! (persist) file=" << f << std::endl;
+      else
+        std::cerr << "ERROR! (persist) file=" << f << std::endl;
     }
 
     void resurrect(const std::string& f)
@@ -332,19 +334,23 @@ class SparseVector: public Vector<T>
     void removeEntry(const int& index)
     {
       int position = indexesPosition[index];
-      if (position != -1) removeEntry(position, index);
+      if (position != -1)
+        removeEntry(position, index);
     }
 
     void setEntry(const int& index, const T& value)
     {
-      if (value == 0) removeEntry(index);
-      else setNonZeroEntry(index, value);
+      if (value == 0)
+        removeEntry(index);
+      else
+        setNonZeroEntry(index, value);
     }
 
   private:
     void allocate(int sizeRequired)
     {
-      if (activeLength >= sizeRequired) return;
+      if (activeLength >= sizeRequired)
+        return;
       int newCapacity = (sizeRequired * 3) / 2 + 1;
       int* newActiveIndexes = new int[newCapacity];
       T* newValues = new T[newCapacity];
@@ -396,8 +402,10 @@ class SparseVector: public Vector<T>
     void setNonZeroEntry(const int& index, const T& value)
     {
       int position = indexesPosition[index];
-      if (position != -1) updateEntry(index, value, position);
-      else insertEntry(index, value);
+      if (position != -1)
+        updateEntry(index, value, position);
+      else
+        insertEntry(index, value);
     }
 
   public:
@@ -470,8 +478,10 @@ class SparseVector: public Vector<T>
     double dot(const SparseVector<T>& that) const
     {
       assert(dimension() == that.dimension());
-      if (numActive < that.numActive) return dot(*this, that);
-      else return dot(that, *this);
+      if (numActive < that.numActive)
+        return dot(*this, that);
+      else
+        return dot(that, *this);
     }
 
     // Shallow copy of that to this.
@@ -509,7 +519,8 @@ class SparseVector: public Vector<T>
       {
         for (int position = 1; position < numActive; position++)
         {
-          if (fabs(values[position]) > maxv) maxv = fabs(values[position]);
+          if (fabs(values[position]) > maxv)
+            maxv = fabs(values[position]);
         }
       }
       return maxv;
@@ -549,7 +560,8 @@ class SparseVector: public Vector<T>
         of.close();
         std::cout << "## SparseVector persisted=" << f << std::endl;
       }
-      else std::cerr << "ERROR! (persist) file=" << f << std::endl;
+      else
+        std::cerr << "ERROR! (persist) file=" << f << std::endl;
     }
 
     void resurrect(const std::string& f)
