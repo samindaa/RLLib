@@ -293,7 +293,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
-        distribution->at(**a) = min(max(exp(u->dot(xas.at(**a))), 1e-6), 100.0);
+        distribution->at(**a) = max(1e-6, min(exp(u->dot(xas.at(**a))), 100.0));
         Boundedness<double>::checkValue(distribution->at(**a));
         sum += distribution->at(**a);
         avg->addToSelf(distribution->at(**a), xas.at(**a));
