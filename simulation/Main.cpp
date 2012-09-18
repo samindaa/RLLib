@@ -487,7 +487,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       for (int i = 0; i < 4; i++)
       {
         x1[0] = x[x1o[i]];
-        tiles(&activeTiles[36 + i], 3, vector->dimension() - 1, x1(),
+        tiles(&activeTiles[36 + i * 3], 3, vector->dimension() - 1, x1(),
             x1.dimension(), h1);
       }
 
@@ -541,7 +541,7 @@ class AdvancedTilesProjector: public Projector<T, O>
         vector->insertEntry(*i, 1.0);
 
       // bias
-      //vector->insertLast(1.0);
+      vector->insertLast(1.0);
 
       return *vector;
     }
@@ -648,7 +648,7 @@ void testGreedyGQMountainCar3D()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 3000);
+  sim->run(1, 5000, 10);
   sim->computeValueFunction();
 
   delete problem;
@@ -1113,10 +1113,10 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworld();
 //  testOffPACMountainCar3D_1();
 
-//  testGreedyGQMountainCar3D();
+  testGreedyGQMountainCar3D();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D_2();
 //  testOffPACSwingPendulum();
