@@ -25,6 +25,7 @@
 #include "SwingPendulum.h"
 #include "ContinuousGridworld.h"
 #include "Acrobot.h"
+#include "RandlovBike.h"
 
 using namespace std;
 using namespace RLLib;
