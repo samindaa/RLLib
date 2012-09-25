@@ -69,7 +69,7 @@ template<class T>
 class NormalDistribution: public PolicyDistribution<T>
 {
   protected:
-    double mean0, sigma0, mean, sigma, meanStep, sigmaStep, a_t;
+    double mean0, stddev0, mean, stddev, meanStep, stddevStep, sigma2;
     SparseVector<T>* u;
     SparseVector<T>* grad;
     SparseVector<T>* u_mean;
@@ -79,10 +79,10 @@ class NormalDistribution: public PolicyDistribution<T>
     ActionList* actions;
   public:
 
-    NormalDistribution(double mean0, double sigma0, const int& numFeatures,
+    NormalDistribution(double mean0, double stddev0, const int& numFeatures,
         ActionList* actions) :
-        mean0(mean0), sigma0(sigma0), mean(0), sigma(0), meanStep(0),
-            sigmaStep(0), a_t(0), u(new SparseVector<T>(2 * numFeatures)),
+        mean0(mean0), stddev0(stddev0), mean(0), stddev(0), meanStep(0),
+            stddevStep(0), sigma2(0), u(new SparseVector<T>(2 * numFeatures)),
             grad(new SparseVector<T>(u->dimension())),
             u_mean(new SparseVector<T>(numFeatures)),
             u_sigma(new SparseVector<T>(numFeatures)),
@@ -103,20 +103,19 @@ class NormalDistribution: public PolicyDistribution<T>
 
     void update(const Representations<T>& xs)
     {
-      // N(mu,var) for single action only
+      // N(mu,var) for single action, single representation only
       assert((xs.dimension() == 1) && (actions->dimension() == 1));
       const SparseVector<T>& x = xs.at(actions->at(0));
       mean = u_mean->dot(x) + mean0;
-      sigma = exp(u_sigma->dot(x)) * sigma0
-          + std::numeric_limits<double>::min();
-
-      a_t = Gaussian::nextGaussian(mean, sigma);
-      actions->update(0, 0, a_t);
+      stddev = exp(u_sigma->dot(x)) * stddev0
+          + std::numeric_limits<double>::epsilon();
+      sigma2 = pow(stddev, 2);
+      actions->update(0, 0, Random::nextStandardGaussian() * stddev + mean);
     }
 
     double pi(const Action& a) const
     {
-      return Gaussian::probability(a.at(0), mean, sigma);
+      return Random::gaussianProbability(a.at(0), mean, stddev);
     }
 
   public:
@@ -132,8 +131,9 @@ class NormalDistribution: public PolicyDistribution<T>
 
     virtual void updateStep(const Action& action)
     {
-      meanStep = (action.at() - mean) / (sigma * sigma);
-      sigmaStep = pow(((action.at() - mean) / sigma), 2) - 1.0;
+      double a = action.at(0);
+      meanStep = (a - mean) / sigma2;
+      stddevStep = pow(a - mean, 2) / sigma2 - 1.0;
     }
 
     const SparseVector<T>& computeGradLog(const Representations<T>& xs,
@@ -147,7 +147,7 @@ class NormalDistribution: public PolicyDistribution<T>
       x_sigma->set(x);
 
       x_mean->multiplyToSelf(meanStep);
-      x_sigma->multiplyToSelf(sigmaStep);
+      x_sigma->multiplyToSelf(stddevStep);
 
       grad->clear();
       // 1st vector
@@ -167,9 +167,9 @@ template<class T>
 class NormalDistributionScaled: public NormalDistribution<T>
 {
   public:
-    NormalDistributionScaled(double mean0, double sigma0,
+    NormalDistributionScaled(double mean0, double stddev0,
         const int& numFeatures, ActionList* actions) :
-        NormalDistribution<T>(mean0, sigma0, numFeatures, actions)
+        NormalDistribution<T>(mean0, stddev0, numFeatures, actions)
     {
     }
     virtual ~NormalDistributionScaled()
@@ -178,11 +178,10 @@ class NormalDistributionScaled: public NormalDistribution<T>
 
     void updateStep(const Action& action)
     {
-      NormalDistribution<T>::meanStep = (action.at()
-          - NormalDistribution<T>::mean);
-      NormalDistribution<T>::sigmaStep = pow(
-          action.at() - NormalDistribution<T>::mean, 2)
-          - pow(NormalDistribution<T>::sigma, 2);
+      double a = action.at(0);
+      NormalDistribution<T>::meanStep = (a - NormalDistribution<T>::mean);
+      NormalDistribution<T>::stddevStep = pow(a - NormalDistribution<T>::mean,
+          2) - NormalDistribution<T>::sigma2;
     }
 
 };
@@ -233,17 +232,23 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
     {
       policy->update(phis);
     }
+
     double pi(const Action& a) const
     {
-      //@@>>TODO
-      return 0;
+      Action tmp(1000);
+      tmp.push_back(a.at(0));
+      return policy->pi(problemToPolicy(tmp));
     }
+
     const Action& sampleAction() const
     {
+      //@@>>TODO:
       return policy->sampleAction();
     }
+
     const Action& sampleBestAction() const
     {
+      //@@>>TODO:
       return policy->sampleBestAction();
     }
 

@@ -201,7 +201,8 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
           ++a)
       {
         double pi = target->pi(**a);
-        if (pi == 0) continue;
+        if (pi == 0)
+          continue;
         phi_bar_tp1->addToSelf(pi, xas_tp1.at(**a));
       }
 
@@ -255,7 +256,6 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     PolicyDistribution<T>* policy;
     Trace<T>* e;
     SparseVector<T>* u;
-    std::ofstream out;
 
   public:
     ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t,
@@ -263,14 +263,13 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
         initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda),
             policy(policy), e(e), u(policy->parameters())
     {
-      out.open("actor_u.txt");
     }
 
     virtual ~ActorLambdaOffPolicy()
     {
-      out.close();
     }
 
+  public:
     void initialize()
     {
       e->clear();
@@ -485,10 +484,8 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
         StateToStateAction<T, O>* toStateAction, double alpha_r) :
         delta_t(0), critic(critic), actor(actor), alpha_r(alpha_r),
             averageReward(0), toStateAction(toStateAction),
-            phi_t(
-                new SparseVector<T>(toStateAction->getProjector().dimension())),
-            phi_tp1(
-                new SparseVector<T>(toStateAction->getProjector().dimension()))
+            phi_t(new SparseVector<T>(toStateAction->getProjector().dimension())),
+            phi_tp1(new SparseVector<T>(toStateAction->getProjector().dimension()))
     {
     }
 

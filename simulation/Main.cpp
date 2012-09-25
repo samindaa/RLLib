@@ -169,14 +169,14 @@ void testProjectorMachineLearning()
 void testSarsaMountainCar()
 {
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-      10, false);
+  Projector<double, float>* projector = new FullTilings<double, float>(10000,
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
-  double alpha = 0.25 / projector->vectorNorm();
+  double alpha = 0.15 / projector->vectorNorm();
   double gamma = 0.99;
-  double lambda = 0.9;
+  double lambda = 0.3;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
@@ -203,13 +203,13 @@ void testExpectedSarsaMountainCar()
 {
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-      10, false);
+      10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
-  double alpha = 0.1 / projector->vectorNorm();
+  double alpha = 0.2 / projector->vectorNorm();
   double gamma = 0.99;
-  double lambda = 0.9;
+  double lambda = 0.3;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
@@ -220,7 +220,7 @@ void testExpectedSarsaMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(5, 5000, 100);
+  sim->run(5, 5000, 200);
   sim->computeValueFunction();
 
   delete problem;
@@ -405,7 +405,7 @@ void testOffPACContinuousGridworld()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 5000);
+  sim->run(1, 5000, 3000);
   sim->computeValueFunction();
 
   control->persist("visualization/cgw_offpac.data");
@@ -453,6 +453,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       delete[] activeTiles;
     }
 
+  public:
     const SparseVector<T>& project(const DenseVector<O>& x, int h1)
     {
       vector->clear();
@@ -482,7 +483,7 @@ class AdvancedTilesProjector: public Projector<T, O>
             x2.dimension(), h1);
       }
 
-      // 4 of 1
+      // 3 of 4 of 1
       static DenseVector<O> x1(1);
       static int x1o[4] = { 0, 1, 2, 3 };
       for (int i = 0; i < 4; i++)
@@ -816,22 +817,22 @@ void testOnPolicyCar()
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new FullTilings<double, float>(1000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
-  double alpha_v = 1.0 / projector->vectorNorm();
+  double alpha_v = 0.01 / projector->vectorNorm();
   double gamma = 1.0;
-  double lambda = 0.9;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
+  double lambda = 0.1;
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
       critice);
-  double alpha_u = 0.001 / projector->vectorNorm();
+  double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
       projector->dimension(), &problem->getContinuousActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(2 * projector->dimension());
+  Trace<double>* actore = new ATrace<double>(2 * projector->dimension());
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
       lambda, acting, actore);
 
@@ -1040,7 +1041,7 @@ void testGreedyGQAcrobot()
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
-  double alpha_v = 0.5 / projector->vectorNorm();
+  double alpha_v = 0.2 / projector->vectorNorm();
   double alpha_w = .001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
   double beta_tp1 = 1.0 - gamma_tp1;
@@ -1058,7 +1059,7 @@ void testGreedyGQAcrobot()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 300);
+  sim->run(1, 5000, 500);
   sim->computeValueFunction();
 
   delete problem;
@@ -1114,10 +1115,10 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-//  testOffPACContinuousGridworld();
+  testOffPACContinuousGridworld();
 //  testOffPACMountainCar3D_1();
 
-  testGreedyGQMountainCar3D();
+//  testGreedyGQMountainCar3D();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D_2();
 //  testOffPACSwingPendulum();

@@ -77,11 +77,37 @@ inline int sgn(T val)
 }
 
 // Important distributions
-
-class Gaussian
+class Random
 {
   public:
-    inline static float probability(const float& x, const float& mu,
+
+    // [0..1]
+    inline static float randomFloat()
+    {
+      return float(rand()) * (1.f / static_cast<float>(RAND_MAX));
+    }
+
+    // [0..1]
+    inline static double randomDouble()
+    {
+      return double(rand()) / RAND_MAX;
+    }
+
+    // A gaussian random deviate
+    inline static double nextStandardGaussian()
+    {
+      double r, v1, v2;
+      do
+      {
+        v1 = 2.0 * randomDouble() - 1.0;
+        v2 = 2.0 * randomDouble() - 1.0;
+        r = v1 * v1 + v2 * v2;
+      } while (r >= 1.0 || r == 0);
+      const double fac(sqrt(-2.0 * log(r) / r));
+      return v1 * fac;
+    }
+
+    inline static double gaussianProbability(const float& x, const float& mu,
         const float& sigma)
     {
       return exp(-pow((x - mu), 2) / (2.0 * pow(sigma, 2)))
@@ -89,8 +115,7 @@ class Gaussian
     }
 
     // http://en.literateprograms.org/Box-Muller_transform_(C)
-    inline static double nextGaussian(const double& mean = 0,
-        const double& stddev = 1.0)
+    inline static double nextGaussian(const double& mean, const double& stddev)
     {
       static double n2 = 0.0;
       static int n2_cached = 0;
@@ -118,6 +143,21 @@ class Gaussian
         n2_cached = 0;
         return n2 * stddev + mean;
       }
+    }
+
+    inline float sampleNormalDistribution(float b)
+    {
+      float result(0.0f);
+      for (int i = 0; i < 12; i++)
+        result += 2.0f * ((randomFloat() - 0.5f) * b);
+      return result / 2.0f;
+    }
+
+    inline float sampleTriangularDistribution(float b)
+    {
+      float randResult = 2.0f * ((randomFloat() - 0.5f) * b)
+          + 2.0f * ((randomFloat() - 0.5f) * b);
+      return (sqrt(6.0f) / 2.0f) * randResult;
     }
 };
 

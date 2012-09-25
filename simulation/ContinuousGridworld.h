@@ -96,7 +96,7 @@ class ContinuousGridworld: public Env<float>
 
     float N(const float& p, const float& mu, const float& sigma) const
     {
-      return Gaussian::probability(p, mu, sigma);
+      return Random::gaussianProbability(p, mu, sigma);
     }
 
     float r() const

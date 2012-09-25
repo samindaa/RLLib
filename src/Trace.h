@@ -58,8 +58,10 @@ class ATrace: public Trace<T>
       while (i < vector->numActiveEntries())
       {
         T absValue = fabs(values[i]);
-        if (absValue <= threshold) vector->removeEntry(indexes[i]);
-        else i++;
+        if (absValue <= threshold)
+          vector->removeEntry(indexes[i]);
+        else
+          i++;
       }
     }
 
@@ -93,12 +95,41 @@ class ATrace: public Trace<T>
 
     void updateThreshold()
     {
-      threshold += 0.1 * threshold;
+      threshold += 0.1 * threshold; // A small update
     }
 
   protected:
     virtual void adjustUpdate()
     { // Nothing to be adjusted.
+    }
+
+};
+
+template<class T>
+class RTrace: public ATrace<T>
+{
+  public:
+    RTrace(const int& capacity, const double& threshold = 1e-8) :
+        ATrace<T>(capacity, threshold)
+    {
+    }
+    virtual ~RTrace()
+    {
+    }
+
+  private:
+    void replaceWith(const SparseVector<T>& phi)
+    {
+      const int* indexes = phi.getActiveIndexes();
+      for (const int* index = indexes; index < indexes + phi.numActiveEntries();
+          ++index)
+        ATrace<T>::vector->setEntry(*index, 1.0);
+    }
+  public:
+    virtual void updateVector(const double& lambda, const SparseVector<T>& phi)
+    {
+      ATrace<T>::vector->multiplyToSelf(lambda);
+      replaceWith(phi);
     }
 
 };
@@ -128,34 +159,6 @@ class AMaxTrace: public ATrace<T>
         if (absValue > maximumValue)
           ATrace<T>::vector->setEntry(indexes[i], sgn(absValue) * maximumValue);
       }
-    }
-};
-
-template<class T>
-class RTrace: public ATrace<T>
-{
-  public:
-    RTrace(const int& capacity, const double& threshold = 1e-8) :
-        ATrace<T>(capacity, threshold)
-    {
-    }
-    virtual ~RTrace()
-    {
-    }
-
-  private:
-    void replaceWith(const SparseVector<T>& phi)
-    {
-      const int* indexes = phi.getActiveIndexes();
-      for (const int* index = indexes; index < indexes + phi.numActiveEntries();
-          ++index)
-        ATrace<T>::vector->setEntry(*index, 1.0);
-    }
-  public:
-    virtual void updateVector(const double& lambda, const SparseVector<T>& phi)
-    {
-      ATrace<T>::vector->multiplyToSelf(lambda);
-      replaceWith(phi);
     }
 
 };

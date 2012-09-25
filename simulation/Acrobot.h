@@ -73,10 +73,10 @@ class Acrobot: public Env<float>
     {
       DenseVector<float>& vars = *__vars;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
-      vars[0] = (theta1 / thetaRange->length()) * 6.0;
-      vars[1] = (theta2 / thetaRange->length()) * 6.0;
-      vars[2] = (theta1Dot / theta1DotRange->length()) * 6.0;
-      vars[3] = (theta2Dot / theta2DotRange->length()) * 6.0;
+      vars[0] = (theta1 / thetaRange->length()) * 8.0;
+      vars[1] = (theta2 / thetaRange->length()) * 8.0;
+      vars[2] = (theta1Dot / theta1DotRange->length()) * 8.0;
+      vars[3] = (theta2Dot / theta2DotRange->length()) * 8.0;
     }
 
     void step(const Action& action)
