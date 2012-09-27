@@ -7,7 +7,7 @@ close all;
 V = load('valueFunction.txt');
 E = load('continuousGridworld.txt');
 P = load('continuousGridworldPath.txt');
-if 0,
+if 1,
 figure;
 imagesc(fliplr(V)');
 title('Off-PAC Critic Value Function: MCar2D');
@@ -96,7 +96,7 @@ if 0,
    
 end
 
-if 1,
+if 0,
     h = figure(1);
    M = load('mcar3D.txt');
    x = (-1.2:0.05:0.6);

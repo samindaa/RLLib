@@ -84,6 +84,7 @@ class ActorOnPolicy
     virtual void reset() =0;
     virtual void update(const Representations<T>& xas_t, const Action& a_t,
         double delta_t) =0;
+    virtual void updatePolicy(const Representations<T>& xas) =0;
     virtual const Action& proposeAction(const Representations<T>& xas) =0;
     virtual const Action& decide(const Representations<T>& xas) =0;
 };

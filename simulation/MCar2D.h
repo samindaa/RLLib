@@ -99,7 +99,8 @@ class MCar2D: public Env<float>
 
     float r() const
     {
-      return -1.0;
+      return endOfEpisode() ?
+          0 : -1.0;
     }
 
     float z() const

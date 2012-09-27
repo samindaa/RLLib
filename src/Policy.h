@@ -73,7 +73,7 @@ class NormalDistribution: public PolicyDistribution<T>
     SparseVector<T>* u;
     SparseVector<T>* grad;
     SparseVector<T>* u_mean;
-    SparseVector<T>* u_sigma;
+    SparseVector<T>* u_stddev;
     SparseVector<T>* x_mean;
     SparseVector<T>* x_sigma;
     ActionList* actions;
@@ -85,7 +85,7 @@ class NormalDistribution: public PolicyDistribution<T>
             stddevStep(0), sigma2(0), u(new SparseVector<T>(2 * numFeatures)),
             grad(new SparseVector<T>(u->dimension())),
             u_mean(new SparseVector<T>(numFeatures)),
-            u_sigma(new SparseVector<T>(numFeatures)),
+            u_stddev(new SparseVector<T>(numFeatures)),
             x_mean(new SparseVector<T>(numFeatures)),
             x_sigma(new SparseVector<T>(numFeatures)), actions(actions)
     {
@@ -96,19 +96,38 @@ class NormalDistribution: public PolicyDistribution<T>
       delete u;
       delete grad;
       delete u_mean;
-      delete u_sigma;
+      delete u_stddev;
       delete x_mean;
       delete x_sigma;
     }
 
+  private:
+    void updateParameters()
+    {
+      u_mean->clear();
+      u_stddev->clear();
+      const int* indexes = u->getActiveIndexes();
+      for (const int* index = indexes; index < indexes + u->numActiveEntries();
+          ++index)
+      {
+        T value = u->getEntry(*index);
+        if (*index < u_mean->dimension())
+          u_mean->setEntry(*index, value);
+        else
+          u_stddev->setEntry((*index - u_mean->dimension()), value);
+      }
+    }
+
+  public:
     void update(const Representations<T>& xs)
     {
       // N(mu,var) for single action, single representation only
       assert((xs.dimension() == 1) && (actions->dimension() == 1));
+      updateParameters();
       const SparseVector<T>& x = xs.at(actions->at(0));
       mean = u_mean->dot(x) + mean0;
-      stddev = exp(u_sigma->dot(x)) * stddev0
-          + std::numeric_limits<double>::epsilon();
+      stddev = exp(u_stddev->dot(x)) * stddev0
+          + std::numeric_limits<float>::epsilon();
       sigma2 = pow(stddev, 2);
       actions->update(0, 0, Random::nextStandardGaussian() * stddev + mean);
     }

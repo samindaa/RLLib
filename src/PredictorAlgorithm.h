@@ -20,7 +20,7 @@ template<class T>
 class TDLambda: public Predictor<T>
 {
   private:
-    double v_t, v_tp1, delta;
+    double delta;
     bool initialized;
   protected:
     double alpha, gamma, lambda;
@@ -29,7 +29,7 @@ class TDLambda: public Predictor<T>
   public:
     TDLambda(const double& alpha, const double& gamma, const double& lambda,
         Trace<T>* e) :
-        v_t(0), v_tp1(0), delta(0), initialized(false), alpha(alpha),
+        delta(0), initialized(false), alpha(alpha),
             gamma(gamma), lambda(lambda), e(e),
             v(new SparseVector<T>(e->vect().dimension()))
     {
@@ -53,12 +53,8 @@ class TDLambda: public Predictor<T>
     {
       assert(initialized);
 
-      v_t = v->dot(phi_t);
-      v_tp1 = v->dot(phi_tp1);
-
+      delta = r_tp1 + gamma * v->dot(phi_tp1) - v->dot(phi_t);
       e->update(gamma * lambda, phi_t);
-      delta = r_tp1 + gamma * v_tp1 - v_t;
-
       v->addToSelf(alpha * delta, e->vect());
       return delta;
     }

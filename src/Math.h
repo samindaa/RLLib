@@ -107,11 +107,10 @@ class Random
       return v1 * fac;
     }
 
-    inline static double gaussianProbability(const float& x, const float& mu,
-        const float& sigma)
+    inline static double gaussianProbability(const float& x, const float& m,
+        const float& s)
     {
-      return exp(-pow((x - mu), 2) / (2.0 * pow(sigma, 2)))
-          / (sigma * sqrt(2.0 * M_PI));
+      return exp(-0.5 * pow((x - m) / s, 2)) / (s * sqrt(2.0 * M_PI));
     }
 
     // http://en.literateprograms.org/Box-Muller_transform_(C)

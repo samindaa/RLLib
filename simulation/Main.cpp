@@ -202,14 +202,14 @@ void testSarsaMountainCar()
 void testExpectedSarsaMountainCar()
 {
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new FullTilings<double, float>(10000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
   double alpha = 0.2 / projector->vectorNorm();
   double gamma = 0.99;
-  double lambda = 0.3;
+  double lambda = 0.1;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
@@ -229,6 +229,47 @@ void testExpectedSarsaMountainCar()
   delete e;
   delete sarsa;
   delete acting;
+  delete control;
+  delete sim;
+}
+
+void testGreedyGQOnPolicyMountainCar()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new MCar2D;
+  Projector<double, float>* projector = new FullTilings<double, float>(10000,
+      10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getDiscreteActionList());
+  Trace<double>* e = new ATrace<double>(projector->dimension());
+  double alpha_v = 0.2 / projector->vectorNorm();
+  double alpha_w = .0001 / projector->vectorNorm();
+  double gamma_tp1 = 0.99;
+  double beta_tp1 = 1.0 - gamma_tp1;
+  double lambda_t = 0.8;
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
+  //double epsilon = 0.01;
+  Policy<double>* behavior = new EpsilonGreedy<double>(gq,
+      &problem->getDiscreteActionList(), 0.01);
+
+  Policy<double>* target = new Greedy<double>(gq,
+      &problem->getDiscreteActionList());
+  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(
+      target, behavior, &problem->getDiscreteActionList(), toStateAction, gq);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(10, 5000, 100);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete gq;
+  delete behavior;
+  delete target;
   delete control;
   delete sim;
 }
@@ -309,7 +350,7 @@ void testOffPACMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 100);
+  sim->run(10, 5000, 100);
   sim->computeValueFunction();
   control->persist("visualization/mcar_offpac.data");
 
@@ -631,7 +672,7 @@ void testGreedyGQMountainCar3D()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
-  Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
+  Trace<double>* eML = new MaxLengthTrace<double>(e, 2000);
   double alpha_v = 0.2 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
@@ -650,8 +691,12 @@ void testGreedyGQMountainCar3D()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 10);
-  sim->computeValueFunction();
+  sim->run(1, 5000, 3000);
+  //sim->computeValueFunction();
+  control->persist("visualization/mcar3d_greedy_gq.data");
+  control->reset();
+  control->resurrect("visualization/mcar3d_greedy_gq.data");
+  sim->test(20, 5000);
 
   delete problem;
   delete projector;
@@ -812,23 +857,23 @@ void testOffPACSwingPendulum()
   delete sim;
 }
 
-void testOnPolicyCar()
+void testOnPolicyCar(const int& nbMemory, const double& lambda,
+    const double& gamma, double alpha_v, double alpha_u)
 {
   srand(time(0));
   srand48(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000,
+  Projector<double, float>* projector = new FullTilings<double, float>(nbMemory,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
-  double alpha_v = 0.01 / projector->vectorNorm();
-  double gamma = 1.0;
-  double lambda = 0.1;
+  alpha_v /= projector->vectorNorm();
+  alpha_u /= projector->vectorNorm();
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
       critice);
-  double alpha_u = 1.0 / projector->vectorNorm();
+
   PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
       projector->dimension(), &problem->getContinuousActionList());
 
@@ -854,6 +899,11 @@ void testOnPolicyCar()
   delete acting;
   delete control;
   delete sim;
+}
+
+void testOnPolicyCar()
+{
+  testOnPolicyCar(10000, 0.3, 1.0, 0.1, 0.05);
 }
 
 void testOnPolicySwingPendulum()
@@ -887,7 +937,7 @@ void testOnPolicySwingPendulum()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 1000, 1000);
+  sim->run(1, 1000, 100);
 
   delete problem;
   delete projector;
@@ -1101,7 +1151,9 @@ void testPersistResurrect()
 
 void testExp()
 {
-  cout << exp(200) << endl;
+  //cout << exp(200) << endl;
+  cout << std::numeric_limits<float>::epsilon() << endl;
+  cout << 1e3 << endl;
 }
 
 int main(int argc, char** argv)
@@ -1112,13 +1164,14 @@ int main(int argc, char** argv)
 //  testProjectorMachineLearning();
 //  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
+//  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworld();
 //  testOffPACMountainCar3D_1();
 
-//  testGreedyGQMountainCar3D();
+  testGreedyGQMountainCar3D();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D_2();
 //  testOffPACSwingPendulum();

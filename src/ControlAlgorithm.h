@@ -446,6 +446,7 @@ class Actor: public ActorOnPolicy<T, O>
       e->clear();
       initialized = false;
     }
+
     void update(const Representations<T>& xas_t, const Action& a_t,
         double delta_t)
     {
@@ -454,9 +455,14 @@ class Actor: public ActorOnPolicy<T, O>
       u->addToSelf(alpha_u * delta_t, e->vect());
     }
 
-    const Action& proposeAction(const Representations<T>& xas)
+    void updatePolicy(const Representations<T>& xas)
     {
       policy->update(xas);
+    }
+
+    const Action& proposeAction(const Representations<T>& xas)
+    {
+      updatePolicy(xas);
       return policy->sampleBestAction();
     }
 
@@ -484,8 +490,10 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
         StateToStateAction<T, O>* toStateAction, double alpha_r) :
         delta_t(0), critic(critic), actor(actor), alpha_r(alpha_r),
             averageReward(0), toStateAction(toStateAction),
-            phi_t(new SparseVector<T>(toStateAction->getProjector().dimension())),
-            phi_tp1(new SparseVector<T>(toStateAction->getProjector().dimension()))
+            phi_t(
+                new SparseVector<T>(toStateAction->getProjector().dimension())),
+            phi_tp1(
+                new SparseVector<T>(toStateAction->getProjector().dimension()))
     {
     }
 
@@ -517,10 +525,12 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
     {
       phi_t->set(toStateAction->stateAction(x_t));
       phi_tp1->set(toStateAction->stateAction(x_tp1));
-
-      const Representations<T>& xas_t = toStateAction->stateActions(x_t);
+      // update critic
       delta_t = critic->update(*phi_t, *phi_tp1, r_tp1 - averageReward);
       averageReward += alpha_r * delta_t;
+      // update actor
+      const Representations<T>& xas_t = toStateAction->stateActions(x_t);
+      actor->updatePolicy(xas_t);
       actor->update(xas_t, a_t, delta_t);
       return actor->decide(toStateAction->stateActions(x_tp1));
     }
