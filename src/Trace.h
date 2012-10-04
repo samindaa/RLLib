@@ -55,7 +55,7 @@ class ATrace: public Trace<T>
       const T* values = vector->getValues();
       const int* indexes = vector->getActiveIndexes();
       int i = 0;
-      while (i < vector->numActiveEntries())
+      while (i < vector->nbActiveEntries())
       {
         T absValue = fabs(values[i]);
         if (absValue <= threshold)
@@ -121,7 +121,7 @@ class RTrace: public ATrace<T>
     void replaceWith(const SparseVector<T>& phi)
     {
       const int* indexes = phi.getActiveIndexes();
-      for (const int* index = indexes; index < indexes + phi.numActiveEntries();
+      for (const int* index = indexes; index < indexes + phi.nbActiveEntries();
           ++index)
         ATrace<T>::vector->setEntry(*index, 1.0);
     }
@@ -153,7 +153,7 @@ class AMaxTrace: public ATrace<T>
       const T* values = ATrace<T>::vector->getValues();
       const int* indexes = ATrace<T>::vector->getActiveIndexes();
 
-      for (int i = 0; i < ATrace<T>::vector->numActiveEntries(); i++)
+      for (int i = 0; i < ATrace<T>::vector->nbActiveEntries(); i++)
       {
         T absValue = fabs(values[i]);
         if (absValue > maximumValue)
@@ -207,7 +207,7 @@ class MaxLengthTrace: public Trace<T>
     }
     void controlThreshold()
     {
-      while (trace->vect().numActiveEntries() > maximumLength)
+      while (trace->vect().nbActiveEntries() > maximumLength)
       {
         updateThreshold();
         trace->controlThreshold();

@@ -107,7 +107,7 @@ class NormalDistribution: public PolicyDistribution<T>
       u_mean->clear();
       u_stddev->clear();
       const int* indexes = u->getActiveIndexes();
-      for (const int* index = indexes; index < indexes + u->numActiveEntries();
+      for (const int* index = indexes; index < indexes + u->nbActiveEntries();
           ++index)
       {
         T value = u->getEntry(*index);

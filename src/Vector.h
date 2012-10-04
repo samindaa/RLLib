@@ -243,8 +243,8 @@ class SparseVector: public Vector<T>
 {
   protected:
     int indexesPositionLength;
-    int activeLength;
-    int numActive;
+    int activeIndexesLength;
+    int nbActive;
 
     int* indexesPosition;
     int* activeIndexes;
@@ -252,9 +252,10 @@ class SparseVector: public Vector<T>
   public:
 
     SparseVector(const int& capacity = 1) :
-        indexesPositionLength(capacity), activeLength(10), numActive(0),
-            indexesPosition(new int[capacity]), activeIndexes(new int[10]),
-            values(new T[10])
+        indexesPositionLength(capacity), activeIndexesLength(10), nbActive(0),
+            indexesPosition(new int[indexesPositionLength]),
+            activeIndexes(new int[activeIndexesLength]),
+            values(new T[activeIndexesLength])
     {
       std::fill(indexesPosition, indexesPosition + capacity, -1);
     }
@@ -268,16 +269,17 @@ class SparseVector: public Vector<T>
 
     SparseVector(const SparseVector<T>& that) :
         indexesPositionLength(that.indexesPositionLength),
-            activeLength(that.activeLength), numActive(that.numActive),
+            activeIndexesLength(that.activeIndexesLength),
+            nbActive(that.nbActive),
             indexesPosition(new int[that.indexesPositionLength]),
-            activeIndexes(new int[that.activeLength]),
-            values(new T[that.activeLength])
+            activeIndexes(new int[that.activeIndexesLength]),
+            values(new T[that.activeIndexesLength])
     {
       std::copy(that.indexesPosition,
           that.indexesPosition + that.indexesPositionLength, indexesPosition);
-      std::copy(that.activeIndexes, that.activeIndexes + that.numActive,
+      std::copy(that.activeIndexes, that.activeIndexes + that.nbActive,
           activeIndexes);
-      std::copy(that.values, that.values + that.numActive, values);
+      std::copy(that.values, that.values + that.nbActive, values);
     }
     SparseVector<T>& operator=(const SparseVector& that)
     {
@@ -287,17 +289,17 @@ class SparseVector: public Vector<T>
         delete[] activeIndexes;
         delete[] values;
         indexesPositionLength = that.indexesPositionLength;
-        activeLength = that.activeLength;
-        numActive = that.numActive;
+        activeIndexesLength = that.activeIndexesLength;
+        nbActive = that.nbActive;
         indexesPosition = new int[indexesPositionLength];
-        activeIndexes = new int[activeLength];
-        values = new T[activeLength];
+        activeIndexes = new int[activeIndexesLength];
+        values = new T[activeIndexesLength];
 
         std::copy(that.indexesPosition,
             that.indexesPosition + that.indexesPositionLength, indexesPosition);
-        std::copy(that.activeIndexes, that.activeIndexes + that.numActive,
+        std::copy(that.activeIndexes, that.activeIndexes + that.nbActive,
             activeIndexes);
-        std::copy(that.values, that.values + that.numActive, values);
+        std::copy(that.values, that.values + that.nbActive, values);
 
       }
       return *this;
@@ -326,9 +328,9 @@ class SparseVector: public Vector<T>
 
     void removeEntry(const int& position, const int& index)
     {
-      swapEntry(numActive - 1, position);
-      indexesPosition[activeIndexes[numActive - 1]] = -1;
-      numActive--;
+      swapEntry(nbActive - 1, position);
+      indexesPosition[activeIndexes[nbActive - 1]] = -1;
+      nbActive--;
     }
 
   public:
@@ -350,20 +352,21 @@ class SparseVector: public Vector<T>
   private:
     void allocate(int sizeRequired)
     {
-      if (activeLength >= sizeRequired)
+      if (activeIndexesLength >= sizeRequired)
         return;
       int newCapacity = (sizeRequired * 3) / 2 + 1;
       int* newActiveIndexes = new int[newCapacity];
       T* newValues = new T[newCapacity];
 
-      std::copy(activeIndexes, activeIndexes + activeLength, newActiveIndexes);
-      std::fill(newActiveIndexes + activeLength, newActiveIndexes + newCapacity,
-          0);
+      std::copy(activeIndexes, activeIndexes + activeIndexesLength,
+          newActiveIndexes);
+      std::fill(newActiveIndexes + activeIndexesLength,
+          newActiveIndexes + newCapacity, 0);
 
-      std::copy(values, values + activeLength, newValues);
-      std::fill(newValues + activeLength, newValues + newCapacity, 0);
+      std::copy(values, values + activeIndexesLength, newValues);
+      std::fill(newValues + activeIndexesLength, newValues + newCapacity, 0);
 
-      activeLength = newCapacity;
+      activeIndexesLength = newCapacity;
       // remove old pointers
       delete[] activeIndexes;
       delete[] values;
@@ -374,11 +377,11 @@ class SparseVector: public Vector<T>
 
     void appendEntry(const int& index, const T& value)
     {
-      allocate(numActive + 1);
-      activeIndexes[numActive] = index;
-      values[numActive] = value;
-      indexesPosition[index] = numActive;
-      numActive++;
+      allocate(nbActive + 1);
+      activeIndexes[nbActive] = index;
+      values[nbActive] = value;
+      indexesPosition[index] = nbActive;
+      nbActive++;
     }
 
   public:
@@ -412,15 +415,15 @@ class SparseVector: public Vector<T>
   public:
     void clear()
     {
-      for (int i = 0; i < numActive; i++)
+      for (int i = 0; i < nbActive; i++)
         indexesPosition[activeIndexes[i]] = -1;
-      numActive = 0;
+      nbActive = 0;
     }
 
     SparseVector<T>& addToSelf(const double& factor,
         const SparseVector<T>& that)
     {
-      for (int position = 0; position < that.numActive; position++)
+      for (int position = 0; position < that.nbActive; position++)
       {
         int index = that.activeIndexes[position];
         setNonZeroEntry(index,
@@ -432,7 +435,7 @@ class SparseVector: public Vector<T>
     SparseVector<T>& addToSelf(const double& factor,
         const SparseVector<T>& that, const int& offset)
     {
-      for (int position = 0; position < that.numActive; position++)
+      for (int position = 0; position < that.nbActive; position++)
       {
         int index = that.activeIndexes[position] + offset;
         setNonZeroEntry(index,
@@ -459,7 +462,7 @@ class SparseVector: public Vector<T>
         return *this;
       }
 
-      for (T* position = values; position < values + numActive; ++position)
+      for (T* position = values; position < values + nbActive; ++position)
         *position *= factor;
       return *this;
     }
@@ -468,7 +471,7 @@ class SparseVector: public Vector<T>
     double dot(const SparseVector<T>& _this, const SparseVector<T>& _that) const
     {
       double tmp = 0;
-      for (int position = 0; position < _this.numActive; position++)
+      for (int position = 0; position < _this.nbActive; position++)
         tmp += _that.getEntry(_this.activeIndexes[position])
             * _this.values[position];
       return tmp;
@@ -479,7 +482,7 @@ class SparseVector: public Vector<T>
     double dot(const SparseVector<T>& that) const
     {
       assert(dimension() == that.dimension());
-      if (numActive < that.numActive)
+      if (nbActive < that.nbActive)
         return dot(*this, that);
       else
         return dot(that, *this);
@@ -489,7 +492,7 @@ class SparseVector: public Vector<T>
     void set(const SparseVector<T>& that)
     {
       clear();
-      for (int i = 0; i < that.numActive; i++)
+      for (int i = 0; i < that.nbActive; i++)
         insertEntry(that.activeIndexes[i], that.values[i]);
     }
 
@@ -503,9 +506,9 @@ class SparseVector: public Vector<T>
       return activeIndexes;
     }
 
-    int numActiveEntries() const
+    int nbActiveEntries() const
     {
-      return numActive;
+      return nbActive;
     }
 
     int dimension() const
@@ -514,11 +517,11 @@ class SparseVector: public Vector<T>
     }
     double maxNorm() const
     {
-      double maxv = numActive > 0 ?
+      double maxv = nbActive > 0 ?
           fabs(values[0]) : 0.0;
-      if (numActive > 0)
+      if (nbActive > 0)
       {
-        for (int position = 1; position < numActive; position++)
+        for (int position = 1; position < nbActive; position++)
         {
           if (fabs(values[position]) > maxv)
             maxv = fabs(values[position]);
@@ -548,15 +551,15 @@ class SparseVector: public Vector<T>
         // Write indexesPositionLength (int)
         Vector<T>::write(of, indexesPositionLength);
         // Write numActive (int)
-        Vector<T>::write(of, numActive);
+        Vector<T>::write(of, nbActive);
         // Verbose
-        printf("vectorType=%i capacity=%i numActive=%i\n", vectorType,
-            indexesPositionLength, numActive);
+        printf("vectorType=%i capacity=%i nbActive=%i\n", vectorType,
+            indexesPositionLength, nbActive);
         // Write active indexes
-        for (int position = 0; position < numActive; position++)
+        for (int position = 0; position < nbActive; position++)
           Vector<T>::write(of, activeIndexes[position]);
         // Write active values
-        for (int position = 0; position < numActive; position++)
+        for (int position = 0; position < nbActive; position++)
           Vector<T>::write(of, values[position]);
         of.close();
         std::cout << "## SparseVector persisted=" << f << std::endl;
@@ -579,18 +582,18 @@ class SparseVector: public Vector<T>
         int rcapacity;
         Vector<T>::read(ifs, rcapacity);
         // Read numActive
-        int rnumActive;
-        Vector<T>::read(ifs, rnumActive);
+        int rnbActive;
+        Vector<T>::read(ifs, rnbActive);
         assert(indexesPositionLength == rcapacity);
         // Verbose
-        printf("vectorType=%i rcapacity=%i rnumActive=%i\n", vectorType,
-            rcapacity, rnumActive);
+        printf("vectorType=%i rcapacity=%i rnbActive=%i\n", vectorType,
+            rcapacity, rnbActive);
         // Read active indexes
-        int* ractiveIndexes = new int[rnumActive];
-        for (int position = 0; position < rnumActive; position++)
+        int* ractiveIndexes = new int[rnbActive];
+        for (int position = 0; position < rnbActive; position++)
           Vector<T>::read(ifs, ractiveIndexes[position]);
         // Read active values
-        for (int position = 0; position < rnumActive; position++)
+        for (int position = 0; position < rnbActive; position++)
         {
           T rvalue;
           Vector<T>::read(ifs, rvalue);
@@ -629,7 +632,7 @@ std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that)
     out << that.indexesPosition[index] << " ";
   out << std::endl;
 
-  for (int position = 0; position < that.numActive; position++)
+  for (int position = 0; position < that.nbActive; position++)
     out << "[p=" << position << " i=" << that.activeIndexes[position] << " v="
         << that.getEntry(that.activeIndexes[position]) << "] ";
   return out;

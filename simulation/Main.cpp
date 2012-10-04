@@ -82,9 +82,9 @@ void testSparseVector()
 
   cout << a << endl;
   cout << b << endl;
-  cout << a.numActiveEntries() << " " << b.numActiveEntries() << endl;
+  cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
   b.removeEntry(2);
-  cout << a.numActiveEntries() << " " << b.numActiveEntries() << endl;
+  cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
   cout << a << endl;
   cout << b << endl;
   cout << "dot=" << a.dot(b) << endl;
@@ -1166,12 +1166,12 @@ int main(int argc, char** argv)
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
+  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
 //  testOffPACContinuousGridworld();
 //  testOffPACMountainCar3D_1();
 
-  testGreedyGQMountainCar3D();
+//  testGreedyGQMountainCar3D();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D_2();
 //  testOffPACSwingPendulum();
