@@ -69,53 +69,27 @@ template<class T>
 class NormalDistribution: public PolicyDistribution<T>
 {
   protected:
-    double mean0, stddev0, mean, stddev, meanStep, stddevStep, sigma2;
-    SparseVector<T>* u;
+    double mean0, stddev0, mean, stddev, meanStep, stddevStep;
+    SparseVector<T>* u; // Policy gradient algorithms
+    SparseVector<T>* x; // features
     SparseVector<T>* grad;
-    SparseVector<T>* u_mean;
-    SparseVector<T>* u_stddev;
-    SparseVector<T>* x_mean;
-    SparseVector<T>* x_sigma;
     ActionList* actions;
   public:
 
     NormalDistribution(double mean0, double stddev0, const int& numFeatures,
         ActionList* actions) :
         mean0(mean0), stddev0(stddev0), mean(0), stddev(0), meanStep(0),
-            stddevStep(0), sigma2(0), u(new SparseVector<T>(2 * numFeatures)),
-            grad(new SparseVector<T>(u->dimension())),
-            u_mean(new SparseVector<T>(numFeatures)),
-            u_stddev(new SparseVector<T>(numFeatures)),
-            x_mean(new SparseVector<T>(numFeatures)),
-            x_sigma(new SparseVector<T>(numFeatures)), actions(actions)
+            stddevStep(0), u(new SparseVector<T>(numFeatures + 1)),
+            x(new SparseVector<T>(u->dimension())),
+            grad(new SparseVector<T>(u->dimension())), actions(actions)
     {
     }
 
     virtual ~NormalDistribution()
     {
       delete u;
+      delete x;
       delete grad;
-      delete u_mean;
-      delete u_stddev;
-      delete x_mean;
-      delete x_sigma;
-    }
-
-  private:
-    void updateParameters()
-    {
-      u_mean->clear();
-      u_stddev->clear();
-      const int* indexes = u->getActiveIndexes();
-      for (const int* index = indexes; index < indexes + u->nbActiveEntries();
-          ++index)
-      {
-        T value = u->getEntry(*index);
-        if (*index < u_mean->dimension())
-          u_mean->setEntry(*index, value);
-        else
-          u_stddev->setEntry((*index - u_mean->dimension()), value);
-      }
     }
 
   public:
@@ -123,13 +97,10 @@ class NormalDistribution: public PolicyDistribution<T>
     {
       // N(mu,var) for single action, single representation only
       assert((xs.dimension() == 1) && (actions->dimension() == 1));
-      updateParameters();
-      const SparseVector<T>& x = xs.at(actions->at(0));
-      mean = u_mean->dot(x) + mean0;
-      stddev = exp(u_stddev->dot(x)) * stddev0
-          + std::numeric_limits<float>::epsilon();
-      sigma2 = pow(stddev, 2);
-      actions->update(0, 0, Random::nextStandardGaussian() * stddev + mean);
+      x->set(xs.at(actions->at(0)));
+      mean = u->dot(*x) + mean0;
+      stddev = u->getEntry(u->dimension() - 1);
+      actions->update(0, 0, Random::nextGaussian(mean, stddev));
     }
 
     double pi(const Action& a) const
@@ -151,8 +122,9 @@ class NormalDistribution: public PolicyDistribution<T>
     virtual void updateStep(const Action& action)
     {
       double a = action.at(0);
-      meanStep = (a - mean) / sigma2;
-      stddevStep = pow(a - mean, 2) / sigma2 - 1.0;
+      meanStep = (a - mean) / (pow(stddev, 2) + 0.000001);
+      stddevStep = (pow((a - mean), 2) - pow(stddev, 2))
+          / (pow(stddev, 3) + 0.000001);
     }
 
     const SparseVector<T>& computeGradLog(const Representations<T>& xs,
@@ -160,126 +132,18 @@ class NormalDistribution: public PolicyDistribution<T>
     {
       assert((xs.dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
-      const SparseVector<T>& x = xs.at(action);
-
-      x_mean->set(x);
-      x_sigma->set(x);
-
-      x_mean->multiplyToSelf(meanStep);
-      x_sigma->multiplyToSelf(stddevStep);
+      x->set(xs.at(actions->at(0)));
 
       grad->clear();
-      // 1st vector
-      grad->addToSelf(*x_mean);
-      // 2nd vector
-      grad->addToSelf(1, *x_sigma, x_mean->dimension());
+      grad->addToSelf(*x);
+      grad->multiplyToSelf(meanStep);
+      grad->insertLast(stddevStep);
       return *grad;
     }
 
     SparseVector<T>* parameters()
     {
       return u;
-    }
-};
-
-template<class T>
-class NormalDistributionScaled: public NormalDistribution<T>
-{
-  public:
-    NormalDistributionScaled(double mean0, double stddev0,
-        const int& numFeatures, ActionList* actions) :
-        NormalDistribution<T>(mean0, stddev0, numFeatures, actions)
-    {
-    }
-    virtual ~NormalDistributionScaled()
-    {
-    }
-
-    void updateStep(const Action& action)
-    {
-      double a = action.at(0);
-      NormalDistribution<T>::meanStep = (a - NormalDistribution<T>::mean);
-      NormalDistribution<T>::stddevStep = pow(a - NormalDistribution<T>::mean,
-          2) - NormalDistribution<T>::sigma2;
-    }
-
-};
-
-template<class T>
-class ScaledPolicyDistribution: public PolicyDistribution<T>
-{
-  protected:
-    PolicyDistribution<T>* policy;
-    Range<T>* policyRange;
-    Range<T>* problemRange;
-  public:
-    ScaledPolicyDistribution(PolicyDistribution<T>* policy,
-        Range<T>* policyRange, Range<T>* problemRange) :
-        policy(policy), policyRange(policyRange), problemRange(problemRange)
-    {
-    }
-    virtual ~ScaledPolicyDistribution()
-    {
-    }
-
-  private:
-    double normalize(const Range<T>& range, const Action& a) const
-    {
-      return (a.at() - range.center()) / (range.length() / 2.0);
-    }
-
-    double scale(const Range<T>& range, const double& a) const
-    {
-      return (a * (range.length() / 2.0)) + range.center();
-    }
-
-    void policyToProblem(Action& policyAction) const
-    {
-      double normalizedAction = normalize(*policyRange, policyAction);
-      policyAction.update(0, scale(*problemRange, normalizedAction));
-    }
-
-    void problemToPolicy(Action& problemAction) const
-    {
-      double normalizedAction = normalize(*problemRange, problemAction);
-      problemAction.update(0, scale(*policyRange, normalizedAction));
-    }
-
-  public:
-
-    void update(const Representations<T>& phis)
-    {
-      policy->update(phis);
-    }
-
-    double pi(const Action& a) const
-    {
-      Action tmp(1000);
-      tmp.push_back(a.at(0));
-      return policy->pi(problemToPolicy(tmp));
-    }
-
-    const Action& sampleAction() const
-    {
-      //@@>>TODO:
-      return policy->sampleAction();
-    }
-
-    const Action& sampleBestAction() const
-    {
-      //@@>>TODO:
-      return policy->sampleBestAction();
-    }
-
-    const SparseVector<T>& computeGradLog(const Representations<T>& phis,
-        const Action& action)
-    {
-      //@@>> TODO: FixMe
-      return policy->computeGradLog(phis, action);
-    }
-    SparseVector<T>* parameters()
-    {
-      return policy->parameters();
     }
 };
 
@@ -317,8 +181,8 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
-        distribution->at(**a) = max(1e-6, min(exp(u->dot(xas.at(**a))), 100.0));
-        Boundedness<double>::checkValue(distribution->at(**a));
+        distribution->at(**a) = exp(u->dot(xas.at(**a)));
+        Boundedness::checkValue(distribution->at(**a));
         sum += distribution->at(**a);
         avg->addToSelf(distribution->at(**a), xas.at(**a));
       }
@@ -327,7 +191,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
           ++a)
       {
         distribution->at(**a) /= sum;
-        Boundedness<double>::checkValue(distribution->at(**a));
+        Boundedness::checkValue(distribution->at(**a));
       }
       avg->multiplyToSelf(1.0 / sum);
     }

@@ -157,7 +157,7 @@ class AMaxTrace: public ATrace<T>
       {
         T absValue = fabs(values[i]);
         if (absValue > maximumValue)
-          ATrace<T>::vector->setEntry(indexes[i], sgn(absValue) * maximumValue);
+          ATrace<T>::vector->setEntry(indexes[i], Signum::valueOf(absValue) * maximumValue);
       }
     }
 

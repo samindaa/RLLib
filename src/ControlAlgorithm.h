@@ -369,9 +369,9 @@ class OffPAC: public OffPolicyControlLearner<T, O>
       behavior->update(xas_t);
       rho_t = actor->pi(a_t) / behavior->pi(a_t);
 
-      Boundedness<double>::checkValue(rho_t);
+      Boundedness::checkValue(rho_t);
       delta_t = critic->update(*phi_t, *phi_tp1, rho_t, gamma_t, r_tp1, z_tp1);
-      Boundedness<double>::checkValue(delta_t);
+      Boundedness::checkValue(delta_t);
       actor->update(xas_t, a_t, rho_t, gamma_t, delta_t);
 
       const Representations<T>& xas_tp1 = toStateAction->stateActions(x_tp1);
@@ -468,6 +468,7 @@ class Actor: public ActorOnPolicy<T, O>
 
     const Action& decide(const Representations<T>& xas)
     {
+      updatePolicy(xas);
       return policy->decide(xas);
     }
 };
@@ -490,10 +491,8 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
         StateToStateAction<T, O>* toStateAction, double alpha_r) :
         delta_t(0), critic(critic), actor(actor), alpha_r(alpha_r),
             averageReward(0), toStateAction(toStateAction),
-            phi_t(
-                new SparseVector<T>(toStateAction->getProjector().dimension())),
-            phi_tp1(
-                new SparseVector<T>(toStateAction->getProjector().dimension()))
+            phi_t(new SparseVector<T>(toStateAction->getProjector().dimension())),
+            phi_tp1(new SparseVector<T>(toStateAction->getProjector().dimension()))
     {
     }
 

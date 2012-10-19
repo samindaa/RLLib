@@ -259,7 +259,7 @@ class RandlovBike: public Env<float>
         omega_d_dot = (h * M * g * sin(phi)
             - cos(phi)
                 * (I_dc * sigma_dot * theta_dot
-                    + sgn(theta) * v * v
+                    + Signum::valueOf(theta) * v * v
                         * (Md * R * (1.0 / rf + 1.0 / rb) + M * h / rCM)))
             / I_bike;
         theta_d_dot = (T - I_dv * omega_dot * sigma_dot) / I_dl;
@@ -273,24 +273,24 @@ class RandlovBike: public Env<float>
         if (fabs(theta) > 1.3963)
         { /* handlebars cannot turn more than
          80 degrees */
-          theta = sgn(theta) * 1.3963;
+          theta = Signum::valueOf(theta) * 1.3963;
         }
 
         /* New position of front tyre */
         temp = v * dt / (2 * rf);
         if (temp > 1)
-          temp = sgn(psi + theta) * pi / 2;
+          temp = Signum::valueOf(psi + theta) * pi / 2;
         else
-          temp = sgn(psi + theta) * asin(temp);
+          temp = Signum::valueOf(psi + theta) * asin(temp);
         xf += v * dt * (-sin(psi + theta + temp));
         yf += v * dt * cos(psi + theta + temp);
 
         /* New position of back tyre */
         temp = v * dt / (2 * rb);
         if (temp > 1)
-          temp = sgn(psi) * pi / 2;
+          temp = Signum::valueOf(psi) * pi / 2;
         else
-          temp = sgn(psi) * asin(temp);
+          temp = Signum::valueOf(psi) * asin(temp);
         xb += v * dt * (-sin(psi + temp));
         yb += v * dt * (cos(psi + temp));
 
@@ -311,7 +311,7 @@ class RandlovBike: public Env<float>
           if (temp > 0)
             psi = atan((xb - xf) / temp);
           else
-            psi = sgn(xb - xf) * (pi / 2) - atan(temp / (xb - xf));
+            psi = Signum::valueOf(xb - xf) * (pi / 2) - atan(temp / (xb - xf));
         }
 
         psi_goal = calc_angle_to_goal(xf, xb, yf, yb);

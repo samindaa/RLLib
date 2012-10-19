@@ -446,7 +446,7 @@ class SparseVector: public Vector<T>
 
     SparseVector<T>& addToSelf(const SparseVector<T>& that)
     {
-      return addToSelf(1, that);
+      return addToSelf(1.0, that);
     }
 
     SparseVector<T>& substractToSelf(const SparseVector<T>& that)

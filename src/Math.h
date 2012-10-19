@@ -15,10 +15,11 @@ namespace RLLib
 {
 
 // Some number checking
-template<class T>
+
 class Boundedness
 {
   public:
+    template<class T>
     inline static bool checkValue(const T& value)
     {
       return !isnan(value) && !isinf(value);
@@ -70,11 +71,15 @@ class Range
     }
 };
 
-template<typename T>
-inline int sgn(T val)
+class Signum
 {
-  return (T(0) < val) - (val < T(0));
-}
+  public:
+    template<typename T>
+    inline static int valueOf(const T& val)
+    {
+      return (T(0) < val) - (val < T(0));
+    }
+};
 
 // Important distributions
 class Random
@@ -94,7 +99,7 @@ class Random
     }
 
     // A gaussian random deviate
-    inline static double nextStandardGaussian()
+    inline static double nextNormalGaussian()
     {
       double r, v1, v2;
       do

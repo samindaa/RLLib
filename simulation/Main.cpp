@@ -9,8 +9,14 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <string>
 #include <map>
 #include <fstream>
+#include <istream>
+#include <ostream>
+#include <iterator>
+#include <sstream>
+#include <algorithm>
 
 // From the RLLib
 #include "../src/Vector.h"
@@ -19,6 +25,10 @@
 #include "../src/ControlAlgorithm.h"
 #include "../src/Representation.h"
 #include "../src/SupervisedAlgorithm.h"
+// Eigen
+//#include "../Eigen/Dense"
+
+// Simulation
 #include "Simulator.h"
 #include "MCar2D.h"
 #include "MCar3D.h"
@@ -26,6 +36,10 @@
 #include "ContinuousGridworld.h"
 #include "Acrobot.h"
 #include "RandlovBike.h"
+#include "PoleBalancing.h"
+#include "TorquedPendulum.h"
+
+#include "../util/Spline.h"
 
 using namespace std;
 using namespace RLLib;
@@ -468,6 +482,65 @@ void testOffPACContinuousGridworld()
   delete sim;
 }
 
+void testOffPACContinuousGridworldOPtimized()
+{
+  srand(time(0));
+  srand48(time(0));
+  Env<float>* problem = new ContinuousGridworld;
+  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+      10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+      double, float>(projector, &problem->getDiscreteActionList());
+
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_w = 0.0001 / projector->vectorNorm();
+  double gamma = 0.99;
+  double lambda = 0.4;
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
+  GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
+      lambda, criticeML);
+  double alpha_u = 0.001 / projector->vectorNorm();
+  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
+      projector->dimension(), &problem->getDiscreteActionList());
+
+  Trace<double>* actore = new ATrace<double>(projector->dimension());
+  Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
+  ActorOffPolicy<double, float>* actor =
+      new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
+          actoreML);
+
+  Policy<double>* behavior = new RandomPolicy<double>(
+      &problem->getDiscreteActionList());
+  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
+      behavior, critic, actor, toStateAction, projector, gamma);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 5000);
+  sim->computeValueFunction();
+
+  control->persist("visualization/cgw_offpac.data");
+
+  control->reset();
+  control->resurrect("visualization/cgw_offpac.data");
+  sim->test(100, 2000);
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete criticeML;
+  delete critic;
+  delete actore;
+  delete actor;
+  delete actoreML;
+  delete behavior;
+  delete target;
+  delete control;
+  delete sim;
+}
+
 // ====================== Advanced projector ===================================
 template<class T, class O>
 class AdvancedTilesProjector: public Projector<T, O>
@@ -877,7 +950,7 @@ void testOnPolicyCar(const int& nbMemory, const double& lambda,
   PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
       projector->dimension(), &problem->getContinuousActionList());
 
-  Trace<double>* actore = new ATrace<double>(2 * projector->dimension());
+  Trace<double>* actore = new ATrace<double>(projector->dimension() + 1);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
       lambda, acting, actore);
 
@@ -903,7 +976,7 @@ void testOnPolicyCar(const int& nbMemory, const double& lambda,
 
 void testOnPolicyCar()
 {
-  testOnPolicyCar(10000, 0.3, 1.0, 0.1, 0.05);
+  testOnPolicyCar(10000, 0, 1.0, 1.0, 0.1);
 }
 
 void testOnPolicySwingPendulum()
@@ -924,8 +997,10 @@ void testOnPolicySwingPendulum()
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
       criticeML);
   double alpha_u = 0.001 / projector->vectorNorm();
-  PolicyDistribution<double>* acting = new NormalDistributionScaled<double>(0,
-      1.0, projector->dimension(), &problem->getContinuousActionList());
+  /*PolicyDistribution<double>* acting = new NormalDistributionScaled<double>(0,
+   1.0, projector->dimension(), &problem->getContinuousActionList());*/
+  PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
+      projector->dimension(), &problem->getContinuousActionList());
 
   Trace<double>* actore = new ATrace<double>(2 * projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 2000);
@@ -1124,6 +1199,43 @@ void testGreedyGQAcrobot()
   delete sim;
 }
 
+void testPoleBalancingPlant()
+{
+  srand(time(0));
+  srand48(time(0));
+  PoleBalancing poleBalancing;
+  VectorXd x(4);
+  VectorXd k(4);
+  k << 10, 15, -90, -25;
+
+  ActionList& actions = poleBalancing.getContinuousActionList();
+
+  for (int r = 0; r < 1; r++)
+  {
+    cout << "*** start *** " << endl;
+    poleBalancing.initialize();
+    int round = 0;
+    do
+    {
+      const DenseVector<float>& vars = poleBalancing.getVars();
+      for (int i = 0; i < vars.dimension(); i++)
+        x[i] = vars[i];
+      cout << "x=" << x.transpose() << endl;
+
+      // **** action ***
+      VectorXd noise(1);
+      noise(0) = Random::nextNormalGaussian() * 0.1;
+      VectorXd u = k.transpose() * x + noise;
+      actions.update(0, 0, (float) u(0));
+
+      poleBalancing.step(actions.at(0));
+      cout << "r=" << poleBalancing.r() << endl;
+      ++round;
+      cout << "round=" << round << endl;
+    } while (!poleBalancing.endOfEpisode());
+  }
+}
+
 void testPersistResurrect()
 {
   srand(time(0));
@@ -1156,6 +1268,136 @@ void testExp()
   cout << 1e3 << endl;
 }
 
+void testEigen3()
+{
+  using Eigen::MatrixXf;
+  using Eigen::VectorXf;
+  MatrixXf m(2, 2);
+  m(0, 0) = 3;
+  m(1, 0) = 2.5;
+  m(0, 1) = -1;
+  m(1, 1) = m(1, 0) + m(0, 1);
+  cout << m << endl;
+
+  //
+  cout << "*** diagonal ***" << endl;
+  VectorXf d;
+  d.resize(4);
+  cout << d << endl;
+  d << 0.1, 0.1, 0.1, 0.1;
+  MatrixXf sigma0 = d.asDiagonal();
+  cout << sigma0 << endl;
+
+  //
+  cout << "*** sample from multivariate normal ***" << endl;
+
+}
+
+void testTorquedPendulum()
+{
+  double m = 1.0;
+  double l = 1.0;
+  double mu = 0.01;
+  double dt = 0.01;
+
+  cout << "TorquedPendulum u TMAX" << endl;
+
+  double d4 = 2.0;
+  double d5 = 50;
+
+  TorquedPendulum torquedPendulum(m, l, mu, dt);
+
+  torquedPendulum.setu(d4);
+  torquedPendulum.setx(0, M_PI_2);
+
+  while (torquedPendulum.gett() < d5)
+  {
+    cout << torquedPendulum.gett() << " " << torquedPendulum.getx(0) << " "
+        << torquedPendulum.getx(1) << endl;
+    torquedPendulum.nextstep();
+    torquedPendulum.nextcopy();
+  }
+}
+
+void testCubicSpline()
+{
+  Spline spline;
+
+  for (double x = -5; x <= 5; x++)
+    spline.addPoint(x, sin(x));
+  spline.setLowBC(Spline::FIXED_1ST_DERIV_BC, 0);
+  spline.setHighBC(Spline::FIXED_1ST_DERIV_BC, 0);
+
+  std::ofstream of("/home/sam/Tmp/CSplines/spline.natural.dat");
+  for (double x = -5; x <= 5; x += 0.1)
+    of << x << " " << spline(x) << "\n";
+  of.close();
+}
+
+void testMotion()
+{
+  Spline spline;
+  std::ifstream inf(
+      "/home/sam/projects/workspace_robocanes/RLLib/visualization/j_balance_1");
+
+  spline.setLowBC(Spline::FIXED_1ST_DERIV_BC, 0);
+  spline.setHighBC(Spline::FIXED_1ST_DERIV_BC, 0);
+
+  map<int, vector<double> > motions;
+
+  std::string str;
+  while (std::getline(inf, str))
+  {
+    //std::cout << str << '\n';
+    std::stringstream strstr(str);
+
+    // use stream iterators to copy the stream to the vector as whitespace separated strings
+    std::istream_iterator<std::string> it(strstr);
+    std::istream_iterator<std::string> end;
+    std::vector<std::string> results(it, end);
+
+    std::vector<double> resultsToDouble;
+    for (std::vector<std::string>::iterator iter = results.begin();
+        iter != results.end(); ++iter)
+    {
+      stringstream ss(*iter);
+      double tmp;
+      ss >> tmp;
+      resultsToDouble.push_back(tmp);
+    }
+    motions.insert(make_pair(motions.size(), resultsToDouble));
+  }
+
+  cout << "*** write some down *** " << endl;
+  std::ofstream of("/home/sam/Tmp/CSplines/motions.natural.dat");
+  std::ofstream of2("/home/sam/Tmp/CSplines/motions.dat");
+  int cTime = 0;
+  for (map<int, vector<double> >::const_iterator iter = motions.begin();
+      iter != motions.end(); ++iter)
+  {
+    cTime += iter->second[0];
+    spline.addPoint(cTime, iter->second[3]);
+  }
+
+  // every 20ms
+  int startTime = motions[0][0];
+  for (int tt = startTime; tt <= cTime; tt += 20)
+  {
+    of << tt << " " << spline(tt) << endl;
+  }
+
+  cTime = 0;
+  for (map<int, vector<double> >::const_iterator iter = motions.begin();
+      iter != motions.end(); ++iter)
+  {
+    cTime += iter->second[0];
+    of2 << cTime << " " << iter->second[3] << " " << spline(cTime) << endl;
+  }
+  of.close();
+  of2.close();
+
+}
+
 int main(int argc, char** argv)
 {
   cout << "## start" << endl; // prints @@ start
@@ -1166,9 +1408,10 @@ int main(int argc, char** argv)
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
-  testOffPACMountainCar();
+//  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
 //  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
 
 //  testGreedyGQMountainCar3D();
@@ -1182,10 +1425,16 @@ int main(int argc, char** argv)
 //  testOnPolicySwingPendulum();
 //  testOnPolicyCar();
 
-  // some simple stuff
+//  testPoleBalancingPlant();
+//  testTorquedPendulum();
+
+// some simple stuff
 //  testSimple();
 //  testPersistResurrect();
 //  testExp();
+//  testEigen3();
+//  testCubicSpline();
+  testMotion();
   cout << endl;
   cout << "## end" << endl;
   return 0;
