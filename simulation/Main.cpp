@@ -1410,7 +1410,7 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-//  testOffPACContinuousGridworld();
+  testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
 
@@ -1434,7 +1434,7 @@ int main(int argc, char** argv)
 //  testExp();
 //  testEigen3();
 //  testCubicSpline();
-  testMotion();
+//  testMotion();
   cout << endl;
   cout << "## end" << endl;
   return 0;

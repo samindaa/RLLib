@@ -178,10 +178,22 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       distribution->clear();
       avg->clear();
       double sum = 0;
+      // The exponential function may become very large and overflow.
+      // Therefore, we multiply top and bottom of the hypothesis by the same
+      // constant without changing the output.
+      double maxValue = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
-        distribution->at(**a) = exp(u->dot(xas.at(**a)));
+        double tmp = u->dot(xas.at(**a));
+        if (tmp > maxValue)
+          maxValue = tmp;
+      }
+
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
+      {
+        distribution->at(**a) = exp(u->dot(xas.at(**a)) - maxValue);
         Boundedness::checkValue(distribution->at(**a));
         sum += distribution->at(**a);
         avg->addToSelf(distribution->at(**a), xas.at(**a));
