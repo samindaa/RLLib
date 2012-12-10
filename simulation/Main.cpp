@@ -903,16 +903,16 @@ void testOffPACSwingPendulum()
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
           actoreML);
 
-  /*Policy<double>* behavior = new RandomPolicy<double>(
-   &problem->getDiscreteActionList());*/
-  Policy<double>* behavior = new RandomBiasPolicy<double>(
+  Policy<double>* behavior = new RandomPolicy<double>(
       &problem->getDiscreteActionList());
+  /*Policy<double>* behavior = new RandomBiasPolicy<double>(
+   &problem->getDiscreteActionList());*/
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
       behavior, critic, actor, toStateAction, projector, gamma);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 3000, 1);
+  sim->run(1, 5000, 200);
   sim->computeValueFunction();
 
   delete problem;
@@ -1111,12 +1111,12 @@ void testOffPACAcrobot()
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma = 0.99;
-  double lambda = 0.1;
+  double lambda = 0.4;
   Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
   Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
       lambda, criticeML);
-  double alpha_u = 0.001 / projector->vectorNorm();
+  double alpha_u = 0.0001 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
@@ -1135,7 +1135,7 @@ void testOffPACAcrobot()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 1000);
+  sim->run(1, 5000, 500);
   sim->computeValueFunction();
 
   delete problem;
