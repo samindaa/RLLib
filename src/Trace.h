@@ -39,8 +39,8 @@ class ATrace: public Trace<T>
     SparseVector<T>* vector;
   public:
     ATrace(const int& numFeatures, const double& threshold = 1e-8) :
-        defaultThreshold(threshold), threshold(threshold),
-            vector(new SparseVector<T>(numFeatures))
+        defaultThreshold(threshold), threshold(threshold), vector(
+            new SparseVector<T>(numFeatures))
     {
     }
     virtual ~ATrace()
@@ -157,7 +157,8 @@ class AMaxTrace: public ATrace<T>
       {
         T absValue = fabs(values[i]);
         if (absValue > maximumValue)
-          ATrace<T>::vector->setEntry(indexes[i], Signum::valueOf(absValue) * maximumValue);
+          ATrace<T>::vector->setEntry(indexes[i],
+              Signum::valueOf(absValue) * maximumValue);
       }
     }
 
@@ -213,6 +214,92 @@ class MaxLengthTrace: public Trace<T>
         trace->controlThreshold();
         //std::cout << "@@>> cullingTraces " << ATrace<T>::threshold << std::endl;
       }
+    }
+};
+
+template<class T>
+class MultiTrace
+{
+  protected:
+    typename std::vector<Trace<T>*>* traces;
+  public:
+    typedef typename std::vector<Trace<T>*>::iterator iterator;
+    typedef typename std::vector<Trace<T>*>::const_iterator const_iterator;
+
+    MultiTrace() :
+        traces(new std::vector<Trace<T>*>())
+    {
+    }
+
+    ~MultiTrace()
+    {
+      traces->clear();
+      delete traces;
+    }
+
+    MultiTrace(const MultiTrace<T>& that) :
+        traces(new std::vector<Trace<T>*>())
+    {
+      for (typename MultiTrace<T>::iterator iter = that.begin();
+          iter != that.end(); ++iter)
+        traces->push_back(*iter);
+    }
+
+    MultiTrace<T>& operator=(const MultiTrace<T>& that)
+    {
+      if (this != that)
+      {
+        traces->clear();
+        delete traces;
+        traces = new MultiTrace<T>();
+        for (typename MultiTrace<T>::iterator iter = that.begin();
+            iter != that.end(); ++iter)
+          traces->push_back(*iter);
+      }
+      return *this;
+    }
+
+    void push_back(Trace<T>* trace)
+    {
+      traces->push_back(trace);
+    }
+
+    iterator begin()
+    {
+      return traces->begin();
+    }
+
+    const_iterator begin() const
+    {
+      return traces->begin();
+    }
+
+    iterator end()
+    {
+      return traces->end();
+    }
+
+    const_iterator end() const
+    {
+      return traces->end();
+    }
+
+    unsigned int dimension() const
+    {
+      return traces->size();
+    }
+
+    Trace<T>* at(const unsigned index) const
+    {
+      assert(index >= 0 && index < dimension());
+      return traces->at(index);
+    }
+
+    void clear()
+    {
+      for (typename MultiTrace<T>::iterator iter = begin(); iter != end();
+          ++iter)
+        (*iter)->clear();
     }
 };
 

@@ -352,9 +352,11 @@ void testOffPACMountainCar()
       projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actore);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
-          actore);
+          actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(
       &problem->getDiscreteActionList());
@@ -378,6 +380,7 @@ void testOffPACMountainCar()
   delete critice;
   delete critic;
   delete actore;
+  delete actoreTraces;
   delete actor;
   delete behavior;
   delete target;
@@ -449,9 +452,11 @@ void testOffPACContinuousGridworld()
       projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actore);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
-          actore);
+          actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(
       &problem->getDiscreteActionList());
@@ -460,7 +465,7 @@ void testOffPACContinuousGridworld()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 3000);
+  sim->run(5, 5000, 3000);
   sim->computeValueFunction();
 
   control->persist("visualization/cgw_offpac.data");
@@ -475,6 +480,7 @@ void testOffPACContinuousGridworld()
   delete critice;
   delete critic;
   delete actore;
+  delete actoreTraces;
   delete actor;
   delete behavior;
   delete target;
@@ -506,9 +512,11 @@ void testOffPACContinuousGridworldOPtimized()
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
-          actoreML);
+          actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(
       &problem->getDiscreteActionList());
@@ -535,6 +543,7 @@ void testOffPACContinuousGridworldOPtimized()
   delete actore;
   delete actor;
   delete actoreML;
+  delete actoreTraces;
   delete behavior;
   delete target;
   delete control;
@@ -576,8 +585,12 @@ class AdvancedTilesProjector: public Projector<T, O>
           h1);
       // 3 of 4
       static DenseVector<O> x3(3);
-      static int x3o[4][3] = { { 0, 1, 2 }, { 1, 2, 3 }, { 2, 3, 0 },
-                               { 1, 3, 0 } };
+      static int x3o[4][3] =
+      {
+      { 0, 1, 2 },
+      { 1, 2, 3 },
+      { 2, 3, 0 },
+      { 1, 3, 0 } };
       for (int i = 0; i < 4; i++)
       {
         for (int j = 0; j < 3; j++)
@@ -587,8 +600,14 @@ class AdvancedTilesProjector: public Projector<T, O>
       }
       // 2 of 6
       static DenseVector<O> x2(2);
-      static int x2o[6][2] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 0, 3 }, { 0, 2 },
-                               { 1, 3 } };
+      static int x2o[6][2] =
+      {
+      { 0, 1 },
+      { 1, 2 },
+      { 2, 3 },
+      { 0, 3 },
+      { 0, 2 },
+      { 1, 3 } };
       for (int i = 0; i < 6; i++)
       {
         for (int j = 0; j < 2; j++)
@@ -599,7 +618,8 @@ class AdvancedTilesProjector: public Projector<T, O>
 
       // 3 of 4 of 1
       static DenseVector<O> x1(1);
-      static int x1o[4] = { 0, 1, 2, 3 };
+      static int x1o[4] =
+      { 0, 1, 2, 3 };
       for (int i = 0; i < 4; i++)
       {
         x1[0] = x[x1o[i]];
@@ -622,8 +642,12 @@ class AdvancedTilesProjector: public Projector<T, O>
       tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension());
       // 3 of 4
       static DenseVector<O> x3(3);
-      static int x3o[4][3] = { { 0, 1, 2 }, { 1, 2, 3 }, { 2, 3, 0 },
-                               { 1, 3, 0 } };
+      static int x3o[4][3] =
+      {
+      { 0, 1, 2 },
+      { 1, 2, 3 },
+      { 2, 3, 0 },
+      { 1, 3, 0 } };
       for (int i = 0; i < 4; i++)
       {
         for (int j = 0; j < 3; j++)
@@ -633,8 +657,14 @@ class AdvancedTilesProjector: public Projector<T, O>
       }
       // 2 of 6
       static DenseVector<O> x2(2);
-      static int x2o[6][2] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 0, 3 }, { 0, 2 },
-                               { 1, 3 } };
+      static int x2o[6][2] =
+      {
+      { 0, 1 },
+      { 1, 2 },
+      { 2, 3 },
+      { 0, 3 },
+      { 0, 2 },
+      { 1, 3 } };
       for (int i = 0; i < 6; i++)
       {
         for (int j = 0; j < 2; j++)
@@ -645,7 +675,8 @@ class AdvancedTilesProjector: public Projector<T, O>
 
       // 4 of 1
       static DenseVector<O> x1(1);
-      static int x1o[4] = { 0, 1, 2, 3 };
+      static int x1o[4] =
+      { 0, 1, 2, 3 };
       for (int i = 0; i < 4; i++)
       {
         x1[0] = x[x1o[i]];
@@ -703,9 +734,11 @@ void testOffPACMountainCar3D_1()
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
-          actoreML);
+          actoreTraces);
 
   //Policy<double>* behavior = new RandomPolicy<double>(
   //    &problem->getActionList());
@@ -726,6 +759,7 @@ void testOffPACMountainCar3D_1()
   delete critic;
   delete actore;
   delete actoreML;
+  delete actoreTraces;
   delete actor;
   delete behavior;
   delete target;
@@ -844,9 +878,11 @@ void testOffPACMountainCar3D_2()
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.1, target,
-          actoreML);
+          actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(
       &problem->getDiscreteActionList());
@@ -866,6 +902,7 @@ void testOffPACMountainCar3D_2()
   delete critic;
   delete actore;
   delete actoreML;
+  delete actoreTraces;
   delete actor;
   delete behavior;
   delete target;
@@ -899,9 +936,11 @@ void testOffPACSwingPendulum()
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
-          actoreML);
+          actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(
       &problem->getDiscreteActionList());
@@ -923,6 +962,7 @@ void testOffPACSwingPendulum()
   delete critic;
   delete actore;
   delete actoreML;
+  delete actoreTraces;
   delete actor;
   delete behavior;
   delete target;
@@ -951,8 +991,10 @@ void testOnPolicyCar(const int& nbMemory, const double& lambda,
       projector->dimension(), &problem->getContinuousActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension() + 1);
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actore);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
-      lambda, acting, actore);
+      lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
       double, float>(critic, actor, toStateAction, 0);
@@ -968,6 +1010,7 @@ void testOnPolicyCar(const int& nbMemory, const double& lambda,
   delete critice;
   delete critic;
   delete actore;
+  delete actoreTraces;
   delete actor;
   delete acting;
   delete control;
@@ -1004,8 +1047,10 @@ void testOnPolicySwingPendulum()
 
   Trace<double>* actore = new ATrace<double>(2 * projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 2000);
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actoreML);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
-      lambda, acting, actoreML);
+      lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
       double, float>(critic, actor, toStateAction, .0001);
@@ -1022,6 +1067,7 @@ void testOnPolicySwingPendulum()
   delete critic;
   delete actore;
   delete actoreML;
+  delete actoreTraces;
   delete actor;
   delete acting;
   delete control;
@@ -1051,9 +1097,11 @@ void testOffPACSwingPendulum2()
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
-          actoreML);
+          actoreTraces);
 
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getActionList());*/
@@ -1074,6 +1122,7 @@ void testOffPACSwingPendulum2()
   delete critic;
   delete actore;
   delete actoreML;
+  delete actoreTraces;
   delete actor;
   delete behavior;
   delete target;
@@ -1122,9 +1171,11 @@ void testOffPACAcrobot()
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
-          actoreML);
+          actoreTraces);
 
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getDiscreteActionList());*/
@@ -1146,6 +1197,7 @@ void testOffPACAcrobot()
   delete critic;
   delete actore;
   delete actoreML;
+  delete actoreTraces;
   delete actor;
   delete behavior;
   delete target;
@@ -1408,9 +1460,9 @@ int main(int argc, char** argv)
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
+  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
 

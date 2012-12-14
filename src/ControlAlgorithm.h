@@ -32,8 +32,8 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
   public:
     SarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction,
         Sarsa<T>* sarsa) :
-        acting(acting), toStateAction(toStateAction), sarsa(sarsa),
-            xa_t(new SparseVector<T>(sarsa->dimension()))
+        acting(acting), toStateAction(toStateAction), sarsa(sarsa), xa_t(
+            new SparseVector<T>(sarsa->dimension()))
     {
     }
 
@@ -108,9 +108,8 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
     ExpectedSarsaControl(Policy<T>* acting,
         StateToStateAction<T, O>* toStateAction, Sarsa<T>* sarsa,
         ActionList* actions) :
-        SarsaControl<T, O>(acting, toStateAction, sarsa),
-            phi_bar_tp1(new SparseVector<T>(sarsa->dimension())),
-            actions(actions)
+        SarsaControl<T, O>(acting, toStateAction, sarsa), phi_bar_tp1(
+            new SparseVector<T>(sarsa->dimension())), actions(actions)
     {
     }
     virtual ~ExpectedSarsaControl()
@@ -165,10 +164,9 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
   public:
     GreedyGQ(Policy<T>* target, Policy<T>* behavior, ActionList* actions,
         StateToStateAction<T, O>* toStateAction, GQ<T>* gq) :
-        rho_t(0), target(target), behavior(behavior), actions(actions),
-            toStateAction(toStateAction), gq(gq),
-            phi_t(new SparseVector<T>(gq->dimension())),
-            phi_bar_tp1(new SparseVector<T>(gq->dimension()))
+        rho_t(0), target(target), behavior(behavior), actions(actions), toStateAction(
+            toStateAction), gq(gq), phi_t(new SparseVector<T>(gq->dimension())), phi_bar_tp1(
+            new SparseVector<T>(gq->dimension()))
     {
     }
 
@@ -254,14 +252,14 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     bool initialized;
     double alpha_u, gamma_t, lambda;
     PolicyDistribution<T>* policy;
-    Trace<T>* e;
-    SparseVector<T>* u;
+    MultiTrace<T>* e;
+    MultiSparseVector<T>* u;
 
   public:
     ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t,
-        const double& lambda, PolicyDistribution<T>* policy, Trace<T>* e) :
-        initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda),
-            policy(policy), e(e), u(policy->parameters())
+        const double& lambda, PolicyDistribution<T>* policy, MultiTrace<T>* e) :
+        initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda), policy(
+            policy), e(e), u(policy->parameters())
     {
     }
 
@@ -280,9 +278,14 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
         double const& rho_t, double const& gamma_t, double delta_t)
     {
       assert(initialized);
-      e->update(gamma_t * lambda, policy->computeGradLog(xas_t, a_t));
-      e->multiplyToSelf(rho_t);
-      u->addToSelf(alpha_u * delta_t, e->vect());
+      const MultiSparseVector<T>& gradLog = policy->computeGradLog(xas_t, a_t);
+      for (unsigned int i = 0; i < e->dimension(); i++)
+      {
+        e->at(i)->update(gamma_t * lambda, gradLog[i]);
+        e->at(i)->multiplyToSelf(rho_t);
+        u->at(i)->addToSelf(alpha_u * delta_t, e->at(i)->vect());
+      }
+
     }
 
     void updatePolicy(const Representations<T>& xas)
@@ -337,11 +340,10 @@ class OffPAC: public OffPolicyControlLearner<T, O>
     OffPAC(Policy<T>* behavior, GTDLambda<T>* critic,
         ActorOffPolicy<T, O>* actor, StateToStateAction<T, O>* toStateAction,
         Projector<T, O>* projector, const double& gamma_t) :
-        rho_t(0), delta_t(0), behavior(behavior), critic(critic), actor(actor),
-            toStateAction(toStateAction), projector(projector),
-            gamma_t(gamma_t),
-            phi_t(new SparseVector<T>(projector->dimension())),
-            phi_tp1(new SparseVector<T>(projector->dimension()))
+        rho_t(0), delta_t(0), behavior(behavior), critic(critic), actor(actor), toStateAction(
+            toStateAction), projector(projector), gamma_t(gamma_t), phi_t(
+            new SparseVector<T>(projector->dimension())), phi_tp1(
+            new SparseVector<T>(projector->dimension()))
     {
     }
 
@@ -422,16 +424,16 @@ class Actor: public ActorOnPolicy<T, O>
     bool initialized;
     double alpha_u, gamma, lambda;
     PolicyDistribution<T>* policy;
-    Trace<T>* e;
-    SparseVector<T>* u;
+    MultiTrace<T>* e;
+    MultiSparseVector<T>* u;
 
   public:
     Actor(const double& alpha_u, const double& gamma, const double& lambda,
-        PolicyDistribution<T>* policy, Trace<T>* e) :
-        initialized(false), alpha_u(alpha_u), gamma(gamma), lambda(lambda),
-            policy(policy), e(e), u(policy->parameters())
+        PolicyDistribution<T>* policy, MultiTrace<T>* e) :
+        initialized(false), alpha_u(alpha_u), gamma(gamma), lambda(lambda), policy(
+            policy), e(e), u(policy->parameters())
     {
-      assert(e->vect().dimension() == u->dimension());
+      //assert(e->vect().dimension() == u->dimension());
     }
 
     void initialize()
@@ -451,8 +453,12 @@ class Actor: public ActorOnPolicy<T, O>
         double delta_t)
     {
       assert(initialized);
-      e->update(gamma * lambda, policy->computeGradLog(xas_t, a_t));
-      u->addToSelf(alpha_u * delta_t, e->vect());
+      const MultiSparseVector<T>& gradLog = policy->computeGradLog(xas_t, a_t);
+      for (unsigned int i = 0; i < e->dimension(); i++)
+      {
+        e->at(i)->update(gamma * lambda, gradLog[i]);
+        u->at(i)->addToSelf(alpha_u * delta_t, e->at(i)->vect());
+      }
     }
 
     void updatePolicy(const Representations<T>& xas)
@@ -489,10 +495,10 @@ class AverageRewardActorCritic: public OnPolicyControlLearner<T, O>
   public:
     AverageRewardActorCritic(TDLambda<T>* critic, ActorOnPolicy<T, O>* actor,
         StateToStateAction<T, O>* toStateAction, double alpha_r) :
-        delta_t(0), critic(critic), actor(actor), alpha_r(alpha_r),
-            averageReward(0), toStateAction(toStateAction),
-            phi_t(new SparseVector<T>(toStateAction->getProjector().dimension())),
-            phi_tp1(new SparseVector<T>(toStateAction->getProjector().dimension()))
+        delta_t(0), critic(critic), actor(actor), alpha_r(alpha_r), averageReward(
+            0), toStateAction(toStateAction), phi_t(
+            new SparseVector<T>(toStateAction->getProjector().dimension())), phi_tp1(
+            new SparseVector<T>(toStateAction->getProjector().dimension()))
     {
     }
 

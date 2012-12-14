@@ -9,7 +9,7 @@ CFLAGS = -I.
 all: Main
 
 Main:
-	g++ $(CFLAGS) simulation/Main.cpp -o Main
+	g++ -O3 $(CFLAGS) simulation/Main.cpp -o Main
 
 clean:
 	rm Main

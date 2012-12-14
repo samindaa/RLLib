@@ -146,8 +146,7 @@ class DenseVector: public Vector<T>
     }
     double maxNorm() const
     {
-      double maxv = capacity > 0 ?
-          fabs(data[0]) : 0.0;
+      double maxv = capacity > 0 ? fabs(data[0]) : 0.0;
       if (capacity > 0)
       {
         for (int i = 1; i < capacity; i++)
@@ -252,10 +251,9 @@ class SparseVector: public Vector<T>
   public:
 
     SparseVector(const int& capacity = 1) :
-        indexesPositionLength(capacity), activeIndexesLength(10), nbActive(0),
-            indexesPosition(new int[indexesPositionLength]),
-            activeIndexes(new int[activeIndexesLength]),
-            values(new T[activeIndexesLength])
+        indexesPositionLength(capacity), activeIndexesLength(10), nbActive(0), indexesPosition(
+            new int[indexesPositionLength]), activeIndexes(
+            new int[activeIndexesLength]), values(new T[activeIndexesLength])
     {
       std::fill(indexesPosition, indexesPosition + capacity, -1);
     }
@@ -268,12 +266,11 @@ class SparseVector: public Vector<T>
     }
 
     SparseVector(const SparseVector<T>& that) :
-        indexesPositionLength(that.indexesPositionLength),
-            activeIndexesLength(that.activeIndexesLength),
-            nbActive(that.nbActive),
-            indexesPosition(new int[that.indexesPositionLength]),
-            activeIndexes(new int[that.activeIndexesLength]),
-            values(new T[that.activeIndexesLength])
+        indexesPositionLength(that.indexesPositionLength), activeIndexesLength(
+            that.activeIndexesLength), nbActive(that.nbActive), indexesPosition(
+            new int[that.indexesPositionLength]), activeIndexes(
+            new int[that.activeIndexesLength]), values(
+            new T[that.activeIndexesLength])
     {
       std::copy(that.indexesPosition,
           that.indexesPosition + that.indexesPositionLength, indexesPosition);
@@ -398,8 +395,7 @@ class SparseVector: public Vector<T>
     const T getEntry(const int& index) const
     {
       int position = indexesPosition[index];
-      return position != -1 ?
-          values[position] : T(0);
+      return position != -1 ? values[position] : T(0);
     }
 
   private:
@@ -517,8 +513,7 @@ class SparseVector: public Vector<T>
     }
     double maxNorm() const
     {
-      double maxv = nbActive > 0 ?
-          fabs(values[0]) : 0.0;
+      double maxv = nbActive > 0 ? fabs(values[0]) : 0.0;
       if (nbActive > 0)
       {
         for (int position = 1; position < nbActive; position++)
@@ -613,6 +608,129 @@ class SparseVector: public Vector<T>
 
     template<class O> friend std::ostream& operator<<(std::ostream& out,
         const SparseVector<O>& that);
+};
+
+template<class T>
+class MultiSparseVector
+{
+  protected:
+    typename std::vector<SparseVector<T>*>* vectors;
+  public:
+    typedef typename std::vector<SparseVector<T>*>::iterator iterator;
+    typedef typename std::vector<SparseVector<T>*>::const_iterator const_iterator;
+
+    MultiSparseVector() :
+        vectors(new std::vector<SparseVector<T>*>())
+    {
+    }
+
+    ~MultiSparseVector()
+    {
+      vectors->clear();
+      delete vectors;
+    }
+
+    MultiSparseVector(const MultiSparseVector<T>& that) :
+        vectors(new std::vector<SparseVector<T>*>())
+    {
+      for (typename MultiSparseVector<T>::iterator iter = that.begin();
+          iter != that.end(); ++iter)
+        vectors->push_back(*iter);
+    }
+
+    MultiSparseVector<T>& operator=(const MultiSparseVector<T>& that)
+    {
+      if (this != that)
+      {
+        vectors->clear();
+        delete vectors;
+        vectors = new MultiSparseVector<T>();
+        for (typename MultiSparseVector<T>::iterator iter = that.begin();
+            iter != that.end(); ++iter)
+          vectors->push_back(*iter);
+      }
+      return *this;
+    }
+
+    void push_back(SparseVector<T>* vector)
+    {
+      vectors->push_back(vector);
+    }
+
+    iterator begin()
+    {
+      return vectors->begin();
+    }
+
+    const_iterator begin() const
+    {
+      return vectors->begin();
+    }
+
+    iterator end()
+    {
+      return vectors->end();
+    }
+
+    const_iterator end() const
+    {
+      return vectors->end();
+    }
+
+    void clear()
+    {
+      for (typename MultiSparseVector<T>::iterator iter = begin();
+          iter != end(); ++iter)
+        (*iter)->clear();
+    }
+
+    unsigned int dimension() const
+    {
+      return vectors->size();
+    }
+
+    const SparseVector<T>& operator[](const unsigned index) const
+    {
+      assert(index >= 0 && index < dimension());
+      return *vectors->at(index);
+    }
+
+    SparseVector<T>* at(const unsigned index) const
+    {
+      assert(index >= 0 && index < dimension());
+      return vectors->at(index);
+    }
+
+    void persist(std::string f) const
+    {
+      int i = 0;
+      for (typename MultiSparseVector<T>::const_iterator iter = begin();
+          iter != end(); ++iter)
+      {
+        std::string fi(f);
+        std::stringstream ss;
+        ss << "." << i;
+        fi.append(ss.str());
+        (*iter)->persist(fi);
+        ++i;
+      }
+    }
+
+    void resurrect(std::string f) const
+    {
+      int i = 0;
+      for (typename MultiSparseVector<T>::const_iterator iter = begin();
+          iter != end(); ++iter)
+      {
+        std::string fi(f);
+        std::stringstream ss;
+        ss << "." << i;
+        fi.append(ss.str());
+        (*iter)->resurrect(fi);
+        ++i;
+      }
+    }
+
 };
 
 // Global implementations
