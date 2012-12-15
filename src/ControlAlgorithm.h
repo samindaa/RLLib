@@ -186,11 +186,16 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       return a_0;
     }
 
+    virtual double computeRho(const Action& a_t)
+    {
+      return target->pi(a_t) / behavior->pi(a_t);
+    }
+
     const Action& step(const DenseVector<O>& x_t, const Action& a_t,
         const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
     {
 
-      rho_t = target->pi(a_t) / behavior->pi(a_t);
+      rho_t = computeRho(a_t);
 
       const Representations<T>& xas_tp1 = toStateAction->stateActions(x_tp1);
       target->update(xas_tp1);
@@ -242,6 +247,24 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
     void resurrect(const std::string& f)
     {
       gq->resurrect(f);
+    }
+};
+
+template<class T, class O>
+class GQOnPolicyControl: public GreedyGQ<T, O>
+{
+  public:
+    GQOnPolicyControl(Policy<T>* acting, ActionList* actions,
+        StateToStateAction<T, O>* toStateAction, GQ<T>* gq) :
+        GreedyGQ<T, O>(acting, acting, actions, toStateAction, gq)
+    {
+    }
+    virtual ~GQOnPolicyControl()
+    {
+    }
+    virtual double computeRho(const Action& a_t)
+    {
+      return 1.0;
     }
 };
 

@@ -257,24 +257,23 @@ void testGreedyGQOnPolicyMountainCar()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
-  double alpha_v = 0.2 / projector->vectorNorm();
-  double alpha_w = .0001 / projector->vectorNorm();
-  double gamma_tp1 = 0.99;
+  double alpha_v = 0.05 / projector->vectorNorm();
+  double alpha_w = 0.0 / projector->vectorNorm();
+  double gamma_tp1 = 0.9;
   double beta_tp1 = 1.0 - gamma_tp1;
-  double lambda_t = 0.8;
+  double lambda_t = 0.1;
   GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
   //double epsilon = 0.01;
-  Policy<double>* behavior = new EpsilonGreedy<double>(gq,
+  Policy<double>* acting = new EpsilonGreedy<double>(gq,
       &problem->getDiscreteActionList(), 0.01);
 
-  Policy<double>* target = new Greedy<double>(gq,
-      &problem->getDiscreteActionList());
-  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(
-      target, behavior, &problem->getDiscreteActionList(), toStateAction, gq);
+  OffPolicyControlLearner<double, float>* control = new GQOnPolicyControl<
+      double, float>(acting, &problem->getDiscreteActionList(), toStateAction,
+      gq);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(10, 5000, 100);
+  sim->run(1, 5000, 300);
   sim->computeValueFunction();
 
   delete problem;
@@ -282,8 +281,7 @@ void testGreedyGQOnPolicyMountainCar()
   delete toStateAction;
   delete e;
   delete gq;
-  delete behavior;
-  delete target;
+  delete acting;
   delete control;
   delete sim;
 }
