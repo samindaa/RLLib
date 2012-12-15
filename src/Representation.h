@@ -99,10 +99,9 @@ class StateActionTilings: public StateToStateAction<T, O>
     Representations<T>* phis;
   public:
     StateActionTilings(Projector<T, O>* projector, ActionList* actions) :
-        projector(projector), actions(actions),
-            phis(
-                new Representations<T>(projector->dimension(),
-                    actions->dimension()))
+        projector(projector), actions(actions), phis(
+            new Representations<T>(projector->dimension(),
+                actions->dimension()))
     {
     }
 

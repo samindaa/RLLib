@@ -32,8 +32,8 @@ class Policy
     }
     virtual void update(const Representations<T>& phis) =0;
     virtual double pi(const Action& a) const =0;
-    virtual const Action& sampleAction() const =0;
-    virtual const Action& sampleBestAction() const =0;
+    virtual const Action& sampleAction() =0;
+    virtual const Action& sampleBestAction() =0;
 
     const Action& decide(const Representations<T>& phis)
     {
@@ -69,44 +69,55 @@ template<class T>
 class NormalDistribution: public PolicyDistribution<T>
 {
   protected:
-    double mean0, stddev0, mean, stddev, meanStep, stddevStep;
-    SparseVector<T>* u; // Policy gradient algorithms
-    SparseVector<T>* x; // features
-    SparseVector<T>* grad;
+    double initialMean, initialStddev, sigma2;
+    double mean, stddev, meanStep, stddevStep;
+    SparseVector<T>* u_mean;
+    SparseVector<T>* u_stddev;
+    SparseVector<T>* gradMean;
+    SparseVector<T>* gradStddev;
+    SparseVector<T>* x;
     ActionList* actions;
     MultiSparseVector<T>* multiu;
     MultiSparseVector<T>* multigrad;
   public:
 
-    NormalDistribution(double mean0, double stddev0, const int& numFeatures,
-        ActionList* actions) :
-        mean0(mean0), stddev0(stddev0), mean(0), stddev(0), meanStep(0), stddevStep(
-            0), u(new SparseVector<T>(numFeatures + 1)), x(
-            new SparseVector<T>(u->dimension())), grad(
-            new SparseVector<T>(u->dimension())), actions(actions), multiu(
+    NormalDistribution(const double& initialMean, const double& initialStddev,
+        const int& nbFeatures, ActionList* actions) :
+        initialMean(initialMean), initialStddev(initialStddev), sigma2(0), mean(
+            0), stddev(0), meanStep(0), stddevStep(0), u_mean(
+            new SparseVector<T>(nbFeatures)), u_stddev(
+            new SparseVector<T>(nbFeatures)), gradMean(
+            new SparseVector<T>(u_mean->dimension())), gradStddev(
+            new SparseVector<T>(u_stddev->dimension())), x(
+            new SparseVector<T>(nbFeatures)), actions(actions), multiu(
             new MultiSparseVector<T>()), multigrad(new MultiSparseVector<T>())
     {
-      // TODO: populate multi-sparse vectors
+      multiu->push_back(u_mean);
+      multiu->push_back(u_stddev);
+      multigrad->push_back(gradMean);
+      multigrad->push_back(gradStddev);
     }
 
     virtual ~NormalDistribution()
     {
-      delete u;
+      delete u_mean;
+      delete u_stddev;
+      delete gradMean;
+      delete gradStddev;
       delete x;
-      delete grad;
       delete multiu;
       delete multigrad;
     }
 
   public:
-    void update(const Representations<T>& xs)
+    void update(const Representations<T>& xs_t)
     {
       // N(mu,var) for single action, single representation only
-      assert((xs.dimension() == 1) && (actions->dimension() == 1));
-      x->set(xs.at(actions->at(0)));
-      mean = u->dot(*x) + mean0;
-      stddev = u->getEntry(u->dimension() - 1);
-      actions->update(0, 0, Random::nextGaussian(mean, stddev));
+      assert((xs_t.dimension() == 1) && (actions->dimension() == 1));
+      x->set(xs_t.at(actions->at(0)));
+      mean = u_mean->dot(*x) + initialMean;
+      stddev = exp(u_stddev->dot(*x)) * initialStddev + 10e-8;
+      sigma2 = stddev * stddev;
     }
 
     double pi(const Action& a) const
@@ -116,21 +127,22 @@ class NormalDistribution: public PolicyDistribution<T>
 
   public:
 
-    const Action& sampleAction() const
+    const Action& sampleAction()
     {
+      actions->update(0, 0, Random::nextNormalGaussian() * stddev + mean);
       return actions->at(0);
     }
-    const Action& sampleBestAction() const
+    const Action& sampleBestAction()
     {
-      return actions->at(0); // small std after learning
+      actions->update(0, 0, Random::nextNormalGaussian() * stddev + mean);
+      return actions->at(0);
     }
 
     virtual void updateStep(const Action& action)
     {
       double a = action.at(0);
-      meanStep = (a - mean) / (pow(stddev, 2) + 0.000001);
-      stddevStep = (pow((a - mean), 2) - pow(stddev, 2))
-          / (pow(stddev, 3) + 0.000001);
+      meanStep = (a - mean) / sigma2;
+      stddevStep = (a - mean) * (a - mean) / sigma2 - 1.0;
     }
 
     const MultiSparseVector<T>& computeGradLog(const Representations<T>& xs,
@@ -139,12 +151,11 @@ class NormalDistribution: public PolicyDistribution<T>
       assert((xs.dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
       x->set(xs.at(actions->at(0)));
+      gradMean->set(*x);
+      gradMean->multiplyToSelf(meanStep);
+      gradStddev->set(*x);
+      gradStddev->multiplyToSelf(meanStep);
 
-      grad->clear();
-      grad->addToSelf(*x);
-      grad->multiplyToSelf(meanStep);
-      grad->insertLast(stddevStep);
-      //return *grad;
       return *multigrad;
     }
 
@@ -153,6 +164,31 @@ class NormalDistribution: public PolicyDistribution<T>
       //return u;
       return multiu;
     }
+};
+
+template<class T>
+class NormalDistributionScaled: public NormalDistribution<T>
+{
+  public:
+
+    typedef NormalDistribution<T> Base;
+
+    NormalDistributionScaled(const double& initialMean,
+        const double& initialStddev, const int& nbFeatures, ActionList* actions) :
+        NormalDistribution<T>(initialMean, initialStddev, nbFeatures, actions)
+    {
+    }
+    virtual ~NormalDistributionScaled()
+    {
+    }
+
+    virtual void updateStep(const Action& action)
+    {
+      double a = action.at(0);
+      Base::meanStep = (a - Base::mean);
+      Base::stddevStep = (a - Base::mean) * (a - Base::mean) - Base::sigma2;
+    }
+
 };
 
 template<class T>
@@ -238,7 +274,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       return distribution->at(action);
 
     }
-    const Action& sampleAction() const
+    const Action& sampleAction()
     {
       double random = drand48();
       double sum = 0;
@@ -252,7 +288,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       return actions->at(actions->dimension() - 1);
 
     }
-    const Action& sampleBestAction() const
+    const Action& sampleBestAction()
     {
       return sampleAction();
     }
@@ -285,11 +321,11 @@ class RandomPolicy: public Policy<T>
     {
       return 1.0 / actions->dimension();
     }
-    const Action& sampleAction() const
+    const Action& sampleAction()
     {
       return actions->at(rand() % actions->dimension());
     }
-    const Action& sampleBestAction() const
+    const Action& sampleBestAction()
     {
       assert(false);
       return actions->at(0);
@@ -353,11 +389,11 @@ class RandomBiasPolicy: public Policy<T>
       return distribution->at(action);
     }
 
-    const Action& sampleAction() const
+    const Action& sampleAction()
     {
       return *prev;
     }
-    const Action& sampleBestAction() const
+    const Action& sampleBestAction()
     {
       assert(false);
       return actions->at(0);
@@ -417,12 +453,12 @@ class Greedy: public DiscreteActionPolicy<T>
       return (bestAction == &a) ? 1.0 : 0;
     }
 
-    const Action& sampleAction() const
+    const Action& sampleAction()
     {
       return *bestAction;
     }
 
-    const Action& sampleBestAction() const
+    const Action& sampleBestAction()
     {
       return *bestAction;
     }

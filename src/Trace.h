@@ -123,7 +123,7 @@ class RTrace: public ATrace<T>
       const int* indexes = phi.getActiveIndexes();
       for (const int* index = indexes; index < indexes + phi.nbActiveEntries();
           ++index)
-        ATrace<T>::vector->setEntry(*index, 1.0);
+        ATrace<T>::vector->setEntry(*index, phi.getEntry(*index));
     }
   public:
     virtual void updateVector(const double& lambda, const SparseVector<T>& phi)
