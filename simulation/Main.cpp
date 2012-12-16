@@ -48,10 +48,9 @@ void testFullVector()
 {
   DenseVector<float> v(10);
   cout << v << endl;
-  srand48(time(0));
   for (int i = 0; i < v.dimension(); i++)
   {
-    double k = drand48();
+    double k = Random::randomDouble();
     v[i] = k;
     cout << k << " ";
   }
@@ -73,7 +72,7 @@ void testFullVector()
 
 void testSparseVector()
 {
-  srand48(time(0));
+  srand(time(0));
   /*SparseVector<> s(16);
    cout << s << endl;
 
@@ -112,20 +111,20 @@ void testSparseVector()
 
 void testProjector()
 {
-  srand48(time(0));
+  srand(time(0));
 
   int numObservations = 2;
   int memorySize = 512;
   int numTiling = 32;
   SparseVector<double> w(memorySize);
   for (int t = 0; t < 50; t++)
-    w.insertEntry(rand() % memorySize, drand48());
+    w.insertEntry(rand() % memorySize, Random::randomDouble());
   FullTilings<double, float> coder(memorySize, numTiling, true);
   DenseVector<float> x(numObservations);
   for (int p = 0; p < 5; p++)
   {
     for (int o = 0; o < numObservations; o++)
-      x[o] = drand48() / 0.25;
+      x[o] = Random::randomDouble() / 0.25;
     const SparseVector<double>& vect = coder.project(x);
     cout << w << endl;
     cout << vect << endl;
@@ -138,11 +137,11 @@ void testProjectorMachineLearning()
 {
   // simple sine curve estimation
   // training samples
-  srand48(time(0));
+  srand(time(0));
   multimap<double, double> X;
   for (int i = 0; i < 100; i++)
   {
-    double x = -M_PI_2 + 2 * M_PI * drand48(); // @@>> input noise?
+    double x = -M_PI_2 + 2 * M_PI * Random::randomDouble(); // @@>> input noise?
     double y = sin(2 * x); // @@>> output noise?
     X.insert(make_pair(x, y));
   }
@@ -250,7 +249,6 @@ void testExpectedSarsaMountainCar()
 void testGreedyGQOnPolicyMountainCar()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(10000,
       10, true);
@@ -289,7 +287,6 @@ void testGreedyGQOnPolicyMountainCar()
 void testGreedyGQMountainCar()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, true);
@@ -331,7 +328,6 @@ void testGreedyGQMountainCar()
 void testOffPACMountainCar()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, true);
@@ -340,7 +336,7 @@ void testOffPACMountainCar()
 
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
-  double lambda = 0.4;
+  double lambda = 0.4 * 0;
   double gamma = 0.99;
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
@@ -389,7 +385,6 @@ void testOffPACMountainCar()
 void testGreedyGQContinuousGridworld()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new ContinuousGridworld;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, false);
@@ -431,7 +426,6 @@ void testGreedyGQContinuousGridworld()
 void testOffPACContinuousGridworld()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new ContinuousGridworld;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, true);
@@ -489,7 +483,6 @@ void testOffPACContinuousGridworld()
 void testOffPACContinuousGridworldOPtimized()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new ContinuousGridworld;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, true);
@@ -712,7 +705,6 @@ class MountainCar3DTilesProjector: public AdvancedTilesProjector<T, O>
 void testOffPACMountainCar3D_1()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, true);
@@ -768,7 +760,6 @@ void testOffPACMountainCar3D_1()
 void testGreedyGQMountainCar3D()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new MCar3D;
   /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
    10, true);*/
@@ -856,7 +847,6 @@ void testSarsaMountainCar3D()
 void testOffPACMountainCar3D_2()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new MCar3D;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, true);
@@ -913,7 +903,6 @@ void testOffPACMountainCar3D_2()
 void testOffPACSwingPendulum()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, true);
@@ -972,7 +961,6 @@ void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
     const double& gamma, double alpha_v, double alpha_u)
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(nbMemory,
       10, false);
@@ -1022,7 +1010,6 @@ void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
 void testOnPolicyBoltzmannATraceCar()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new MCar2D;
 
   Projector<double, float>* projector = new FullTilings<double, float>(10000,
@@ -1072,7 +1059,6 @@ void testOnPolicyBoltzmannATraceCar()
 void testOnPolicyBoltzmannRTraceCar()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new MCar2D;
 
   Projector<double, float>* projector = new FullTilings<double, float>(10000,
@@ -1127,39 +1113,39 @@ void testOnPolicyContinousActionCar()
 void testOnPolicySwingPendulum()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-      10, true);
+  Projector<double, float>* projector = new FullTilings<double, float>(1000, 10,
+      true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_u = 0.05 / projector->vectorNorm();
   double gamma = 1.0;
   double lambda = 0.5;
+
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 2000);
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
       criticeML);
-  double alpha_u = 0.001 / projector->vectorNorm();
-  /*PolicyDistribution<double>* acting = new NormalDistributionScaled<double>(0,
-   1.0, projector->dimension(), &problem->getContinuousActionList());*/
-  PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
-      projector->dimension(), &problem->getContinuousActionList());
 
-  Trace<double>* actore = new ATrace<double>(2 * projector->dimension());
-  Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 2000);
+  PolicyDistribution<double>* acting = new NormalDistributionScaled<double>(0,
+      1.0, projector->dimension(), &problem->getContinuousActionList());
+
+  Trace<double>* actore1 = new ATrace<double>(projector->dimension());
+  Trace<double>* actore2 = new ATrace<double>(projector->dimension());
   MultiTrace<double>* actoreTraces = new MultiTrace<double>();
-  actoreTraces->push_back(actoreML);
+  actoreTraces->push_back(actore1);
+  actoreTraces->push_back(actore2);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
       lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
-      double, float>(critic, actor, toStateAction, .0001);
+      double, float>(critic, actor, toStateAction, 0.01);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 1000, 100);
+  sim->run(1, 5000, 50);
 
   delete problem;
   delete projector;
@@ -1167,8 +1153,8 @@ void testOnPolicySwingPendulum()
   delete critice;
   delete criticeML;
   delete critic;
-  delete actore;
-  delete actoreML;
+  delete actore1;
+  delete actore2;
   delete actoreTraces;
   delete actor;
   delete acting;
@@ -1179,7 +1165,6 @@ void testOnPolicySwingPendulum()
 void testOffPACSwingPendulum2()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new FullTilings<double, float>(1000000,
       10, true);
@@ -1252,7 +1237,6 @@ class AcrobotTilesProjector: public AdvancedTilesProjector<T, O>
 void testOffPACAcrobot()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new Acrobot;
   Projector<double, float>* projector =
       new AcrobotTilesProjector<double, float>();
@@ -1310,7 +1294,6 @@ void testOffPACAcrobot()
 void testGreedyGQAcrobot()
 {
   srand(time(0));
-  srand48(time(0));
   Env<float>* problem = new Acrobot;
   /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
    10, true);*/
@@ -1356,7 +1339,6 @@ void testGreedyGQAcrobot()
 void testPoleBalancingPlant()
 {
   srand(time(0));
-  srand48(time(0));
   PoleBalancing poleBalancing;
   VectorXd x(4);
   VectorXd k(4);
@@ -1393,10 +1375,9 @@ void testPoleBalancingPlant()
 void testPersistResurrect()
 {
   srand(time(0));
-  srand48(time(0));
   SparseVector<float> a(20);
   for (int i = 0; i < 10; i++)
-    a.insertEntry(i, drand48());
+    a.insertEntry(i, Random::randomDouble());
   cout << a << endl;
   a.persist(string("testsv.dat"));
 
@@ -1406,7 +1387,7 @@ void testPersistResurrect()
 
   DenseVector<float> d(20);
   for (int i = 0; i < 10; i++)
-    d[i] = drand48();
+    d[i] = Random::randomDouble();
   cout << d << endl;
   d.persist(string("testdv.dat"));
 
@@ -1564,7 +1545,7 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-//  testOffPACContinuousGridworld();
+  testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
 
@@ -1577,7 +1558,7 @@ int main(int argc, char** argv)
 //  testGreedyGQAcrobot();
 
 //  testOnPolicySwingPendulum();
-  testOnPolicyContinousActionCar();
+//  testOnPolicyContinousActionCar();
 //  testOnPolicyBoltzmannATraceCar();
 //  testOnPolicyBoltzmannRTraceCar();
 

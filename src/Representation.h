@@ -121,7 +121,12 @@ class StateActionTilings: public StateToStateAction<T, O>
       assert(actions->dimension() == phis->dimension());
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
-        phis->set(projector->project(x, **a), **a);
+      {
+        if (actions->dimension() == 1)
+          phis->set(projector->project(x), **a); // projection from whole space
+        else
+          phis->set(projector->project(x, **a), **a);
+      }
       return *phis;
     }
 

@@ -128,8 +128,8 @@ class Random
         double x, y, r;
         do
         {
-          x = drand48() - 1;
-          y = drand48() - 1;
+          x = randomDouble() - 1;
+          y = randomDouble() - 1;
 
           r = x * x + y * y;
         } while (r == 0.0 || r > 1.0);

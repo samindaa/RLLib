@@ -78,7 +78,7 @@ class ContinuousGridworld: public Env<float>
 
     void step(const Action& action)
     {
-      float noise = drand48() * absoluteNoise - (absoluteNoise / 2.0);
+      float noise = Random::randomFloat() * absoluteNoise - (absoluteNoise / 2.0);
       for (int i = 0; i < observations->dimension(); i++)
         observations->at(i) = observationRange->bound(
             observations->at(i) + actionRange->bound(action.at(i) + noise));

@@ -276,7 +276,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     }
     const Action& sampleAction()
     {
-      double random = drand48();
+      double random = Random::randomDouble();
       double sum = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
@@ -369,7 +369,7 @@ class RandomBiasPolicy: public Policy<T>
         }
       }
       // chose an action
-      double random = drand48();
+      double random = Random::randomDouble();
       double sum = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
@@ -479,7 +479,7 @@ class EpsilonGreedy: public Greedy<T>
 
     const Action& sampleAction() const
     {
-      if (drand48() < epsilon)
+      if (Random::randomDouble() < epsilon)
         return (*Greedy<T>::actions)[rand() % Greedy<T>::actions->dimension()];
       else
         return *Greedy<T>::bestAction;

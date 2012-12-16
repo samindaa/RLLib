@@ -9,6 +9,7 @@
 #define RANDLOVBIKE_H_
 
 #include "Env.h"
+#include "../src/Math.h"
 #include <iostream>
 #include <cmath>
 
@@ -46,21 +47,20 @@ class RandlovBike: public Env<float>
 
   public:
     RandlovBike() :
-        Env<float>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0),
-            reinforcement(0), isTerminal(false), omega(0), omega_dot(0),
-            omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(0),
-            yf(0), xb(0), yb(0), psi_goal(0), aux_state(0), R1(-1.0), R2(0.0),
-            R3(+1.0),
-            // +0.01
-            R_FACTOR(0.0001), NO_STATES2(20),
+        Env<float>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(
+            0), isTerminal(false), omega(0), omega_dot(0), omega_d_dot(0), theta(
+            0), theta_dot(0), theta_d_dot(0), xf(0), yf(0), xb(0), yb(0), psi_goal(
+            0), aux_state(0), R1(-1.0), R2(0.0), R3(+1.0),
+        // +0.01
+        R_FACTOR(0.0001), NO_STATES2(20),
 
-            dt(0.01), v(10.0 / 3.6), g(9.82), dCM(0.3), c(0.66), h(0.94),
-            Mc(15.0), Md(1.7), Mp(60.0), M(Mc + Mp), R(0.34),
-            /* tyre radius */
-            sigma_dot(v / R),
-            I_bike((13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)),
-            I_dc(Md * R * R), I_dv((3.0 / 2) * Md * R * R),
-            I_dl((1.0 / 2) * Md * R * R), l(1.11), pi(3.1415927)
+        dt(0.01), v(10.0 / 3.6), g(9.82), dCM(0.3), c(0.66), h(0.94), Mc(15.0), Md(
+            1.7), Mp(60.0), M(Mc + Mp), R(0.34),
+        /* tyre radius */
+        sigma_dot(v / R), I_bike(
+            (13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)), I_dc(
+            Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl(
+            (1.0 / 2) * Md * R * R), l(1.11), pi(3.1415927)
     {
 
       for (unsigned int i = 0; i < discreteActions->dimension(); i++)
@@ -70,8 +70,7 @@ class RandlovBike: public Env<float>
   private:
     enum OperationMode
     {
-      start = 0,
-      execute_action,
+      start = 0, execute_action,
     };
 
     float calc_dist_to_goal(float xf, float xb, float yf, float yb)
@@ -221,7 +220,7 @@ class RandlovBike: public Env<float>
 
       T = 2 * ((action / 3) - 1);
       d = 0.02 * ((action % 3) - 1);
-      d = d + 0.04 * (0.5 - drand48()); /* Max noise is 2 cm */
+      d = d + 0.04 * (0.5 - Random::randomDouble()); /* Max noise is 2 cm */
 
       switch (to_do)
       {

@@ -34,12 +34,15 @@ class Simulator
     DenseVector<O>* x_tp1;
 
     std::vector<double> xTest;
+    double episodeR;
+    double episodeZ;
 
   public:
     Simulator(Control<T, O>* agent, Env<O>* env, int maxTestRuns = 20) :
-        maxTestRuns(maxTestRuns), agent(agent), env(env), action(0),
-            x_t(new DenseVector<O>(env->getVars().dimension())),
-            x_tp1(new DenseVector<O>(env->getVars().dimension()))
+        maxTestRuns(maxTestRuns), agent(agent), env(env), action(0), x_t(
+            new DenseVector<O>(env->getVars().dimension())), x_tp1(
+            new DenseVector<O>(env->getVars().dimension())), episodeR(0), episodeZ(
+            0)
     {
     }
 
@@ -65,16 +68,20 @@ class Simulator
           x_t->set(env->getVars());
           action = &agent->initialize(*x_t);
           int steps = 0;
+          episodeR = 0;
+          episodeZ = 0;
           do
           {
             env->step(*action);
             x_tp1->set(env->getVars());
             ++steps;
+            episodeR += env->r();
+            episodeZ += env->z();
             action = &agent->step(*x_t, *action, *x_tp1, env->r(), env->z());
             x_t->set(*x_tp1);
           } while (!env->endOfEpisode() && steps < maxSteps);
 
-          std::cout << steps << " ";
+          std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
           //std::cout << "x";
           std::cout.flush();
 
@@ -105,16 +112,19 @@ class Simulator
         env->setOn(true);
         env->initialize();
         action = &agent->proposeAction(env->getVars());
+        episodeR = episodeZ = 0;
         int steps = 0;
         do
         {
           env->step(*action);
           ++steps;
+          episodeR += env->r();
+          episodeZ += env->z();
           action = &agent->proposeAction(env->getVars());
         } while (!env->endOfEpisode() && steps < maxSteps);
 
         xTest.push_back(steps);
-        std::cout << steps << " ";
+        std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
         std::cout.flush();
       }
       std::cout << std::endl;

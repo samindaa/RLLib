@@ -81,11 +81,11 @@ class SwingPendulum: public Env<float>
     void initialize()
     {
       upTime = 0;
-      if (getOn())
-        theta = M_PI;
-      else
-        theta = (drand48() - 0.5) * 2.0 * M_PI;
-      //theta = M_PI_2;
+      //if (getOn())
+      //  theta = M_PI_2;
+      //else
+      //  theta = (drand48() - 0.5) * 2.0 * M_PI;
+      theta = M_PI_2;
       velocity = 0.0;
       normalize(theta);
       update();
