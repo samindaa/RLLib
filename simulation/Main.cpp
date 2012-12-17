@@ -186,7 +186,7 @@ void testSarsaMountainCar()
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
-  Trace<double>* e = new RTrace<double>(projector->dimension());
+  Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha = 0.15 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.3;
@@ -1539,13 +1539,13 @@ int main(int argc, char** argv)
 //  testSparseVector();
 //  testProjector();
 //  testProjectorMachineLearning();
-//  testSarsaMountainCar();
+  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
 
