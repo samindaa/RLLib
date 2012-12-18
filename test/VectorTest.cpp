@@ -213,6 +213,73 @@ class SparseVectorTest
       assert(3.0 == a->maxNorm());
     }
 
+    void testFullVector()
+    {
+      DVecFloatType v(10);
+      cout << v << endl;
+      for (int i = 0; i < v.dimension(); i++)
+      {
+        double k = Random::nextDouble();
+        v[i] = k;
+        cout << k << " ";
+      }
+      cout << endl;
+      cout << v << endl;
+      DVecFloatType d;
+      cout << d << endl;
+      d = v;
+      d * 100;
+      cout << d << endl;
+      cout << d.maxNorm() << endl;
+
+      DVecFloatType i(5);
+      i[0] = 1.0;
+      cout << i << endl;
+      cout << i.maxNorm() << endl;
+      cout << i.euclideanNorm() << endl;
+    }
+
+    void testSparseVector()
+    {
+
+      SVecFloatType a(20);
+      SVecFloatType b(20);
+      for (int i = 0; i < 5; i++)
+      {
+        a.insertEntry(i, 1);
+        b.insertEntry(i, 2);
+      }
+
+      cout << a << endl;
+      cout << b << endl;
+      cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
+      b.removeEntry(2);
+      cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
+      cout << a << endl;
+      cout << b << endl;
+      cout << "dot=" << a.dot(b) << endl;
+      cout << a.addToSelf(b) << endl;
+      a.clear();
+      b.clear();
+      cout << a << endl;
+      cout << b << endl;
+    }
+
+    void testEbeMultiply()
+    {
+      SVecDoubleType* a2 = newVector((double[]
+          )
+          { 3, 4, 5 }, 3);
+      SVecDoubleType* a1 = newVector((double[]
+          )
+          { -1, 1, 2 }, 3);
+
+      SVecDoubleType* c = newVector((double[]
+          )
+          { -3, 4, 10 }, 3);
+      checkVectorEquals(*c, a2->ebeMultiplyToSelf(*a1));
+    }
+
   public:
     void run()
     {
@@ -227,6 +294,9 @@ class SparseVectorTest
       testMethods.push_back(&SparseVectorTest::testMinus);
       testMethods.push_back(&SparseVectorTest::testMapTimes);
       testMethods.push_back(&SparseVectorTest::testMaxNorm);
+      testMethods.push_back(&SparseVectorTest::testFullVector);
+      testMethods.push_back(&SparseVectorTest::testSparseVector);
+      testMethods.push_back(&SparseVectorTest::testEbeMultiply);
 
       int methodCounter = 0;
       cout << "*** nbTests=" << testMethods.size() << endl;

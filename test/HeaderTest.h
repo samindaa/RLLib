@@ -9,12 +9,17 @@
 #define HEADERTEST_H_
 
 #include <iostream>
-#include <vector>
-#include <algorithm>
-#include <limits>
-#include <cassert>
 #include <cstdlib>
 #include <ctime>
+#include <string>
+#include <map>
+#include <fstream>
+#include <istream>
+#include <ostream>
+#include <iterator>
+#include <sstream>
+#include <algorithm>
+#include <limits>
 
 #include "Vector.h"
 #include "Trace.h"
@@ -24,6 +29,8 @@ using namespace std;
 using namespace RLLib;
 
 typedef SparseVector<double> SVecDoubleType;
+typedef SparseVector<float> SVecFloatType;
+typedef DenseVector<float> DVecFloatType;
 typedef Trace<double> TraceDoubleType;
 typedef ATrace<double> ATraceDoubleType;
 typedef RTrace<double> RTraceDoubleType;

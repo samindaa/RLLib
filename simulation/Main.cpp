@@ -24,7 +24,6 @@
 #include "Projector.h"
 #include "ControlAlgorithm.h"
 #include "Representation.h"
-#include "SupervisedAlgorithm.h"
 // Eigen
 //#include "../Eigen/Dense"
 
@@ -43,71 +42,6 @@
 
 using namespace std;
 using namespace RLLib;
-
-void testFullVector()
-{
-  DenseVector<float> v(10);
-  cout << v << endl;
-  for (int i = 0; i < v.dimension(); i++)
-  {
-    double k = Random::nextDouble();
-    v[i] = k;
-    cout << k << " ";
-  }
-  cout << endl;
-  cout << v << endl;
-  DenseVector<float> d;
-  cout << d << endl;
-  d = v;
-  d * 100;
-  cout << d << endl;
-  cout << d.maxNorm() << endl;
-
-  DenseVector<float> i(5);
-  i[0] = 1.0;
-  cout << i << endl;
-  cout << i.maxNorm() << endl;
-  cout << i.euclideanNorm() << endl;
-}
-
-void testSparseVector()
-{
-  srand(time(0));
-  /*SparseVector<> s(16);
-   cout << s << endl;
-
-   for (int i = 0; i < s.dimension() ; i++)
-   {
-   double k = drand48();
-   s.insertEntry(i, k);
-   cout << "[i=" << i << " v=" << k << "] ";
-   }
-   cout << endl;
-   cout << s << endl;*/
-
-  SparseVector<float> a(20);
-  SparseVector<float> b(20);
-  for (int i = 0; i < 5; i++)
-  {
-    a.insertEntry(i, 1);
-    b.insertEntry(i, 2);
-  }
-
-  cout << a << endl;
-  cout << b << endl;
-  cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
-  b.removeEntry(2);
-  cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
-  cout << a << endl;
-  cout << b << endl;
-  cout << "dot=" << a.dot(b) << endl;
-  cout << a.addToSelf(b) << endl;
-  a.clear();
-  b.clear();
-  cout << a << endl;
-  cout << b << endl;
-
-}
 
 void testProjector()
 {
@@ -131,52 +65,6 @@ void testProjector()
     cout << w.dot(vect) << endl;
     cout << "---------" << endl;
   }
-}
-
-void testProjectorMachineLearning()
-{
-  // simple sine curve estimation
-  // training samples
-  srand(time(0));
-  multimap<double, double> X;
-  for (int i = 0; i < 100; i++)
-  {
-    double x = -M_PI_2 + 2 * M_PI * Random::nextDouble(); // @@>> input noise?
-    double y = sin(2 * x); // @@>> output noise?
-    X.insert(make_pair(x, y));
-  }
-
-  // train
-  int numObservations = 1;
-  int memorySize = 512;
-  int numTiling = 32;
-  FullTilings<double, float> coder(memorySize, numTiling, true);
-  DenseVector<float> x(numObservations);
-  Adaline<double> lms(coder.dimension(), 0.1 / coder.vectorNorm());
-  int traininCounter = 0;
-  while (++traininCounter < 100)
-  {
-    for (multimap<double, double>::const_iterator iter = X.begin();
-        iter != X.end(); ++iter)
-    {
-      x[0] = iter->first / (2 * M_PI) / 0.25; // normalized and unit generalized
-      const SparseVector<double>& phi = coder.project(x);
-      lms.learn(phi, iter->second);
-    }
-  }
-
-  // output
-  ofstream outFile("visualization/mest.dat");
-  for (multimap<double, double>::const_iterator iter = X.begin();
-      iter != X.end(); ++iter)
-  {
-    x[0] = iter->first / (2 * M_PI) / 0.25;
-    const SparseVector<double>& phi = coder.project(x);
-    if (outFile.is_open())
-      outFile << iter->first << " " << iter->second << " " << lms.predict(phi)
-          << endl;
-  }
-  outFile.close();
 }
 
 void testSarsaMountainCar()
@@ -480,6 +368,67 @@ void testOffPACContinuousGridworld()
   delete control;
   delete sim;
 }
+
+/*
+ void testOffPACOnPolicyContinuousGridworld()
+ {
+ srand(time(0));
+ Env<float>* problem = new ContinuousGridworld;
+ Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+ 10, true);
+ StateToStateAction<double, float>* toStateAction = new StateActionTilings<
+ double, float>(projector, &problem->getDiscreteActionList());
+
+ double alpha_v = 0.1 / projector->vectorNorm();
+ double alpha_w = 0.0001 / projector->vectorNorm();
+ double gamma = 0.99;
+ double lambda = 0.3;
+ Trace<double>* critice = new ATrace<double>(projector->dimension());
+ GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
+ lambda, critice);
+ double alpha_u = 0.001 / projector->vectorNorm();
+ PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
+ projector->dimension(), &problem->getDiscreteActionList());
+
+ Trace<double>* actore = new ATrace<double>(projector->dimension());
+ MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+ actoreTraces->push_back(actore);
+ ActorOffPolicy<double, float>* actor =
+ new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
+ actoreTraces);
+
+ //Policy<double>* behavior = new RandomPolicy<double>(
+ //    &problem->getDiscreteActionList());
+ Policy<double>* behavior = new EpsilonGreedy<double>(critic,
+ &problem->getDiscreteActionList(), 0.01);
+ OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(
+ behavior, critic, actor, toStateAction, projector, gamma);
+
+ Simulator<double, float>* sim = new Simulator<double, float>(control,
+ problem);
+ sim->run(1, 5000, 3000);
+ sim->computeValueFunction();
+
+ control->persist("visualization/cgw_offpac.data");
+
+ control->reset();
+ control->resurrect("visualization/cgw_offpac.data");
+ sim->test(100, 2000);
+
+ delete problem;
+ delete projector;
+ delete toStateAction;
+ delete critice;
+ delete critic;
+ delete actore;
+ delete actoreTraces;
+ delete actor;
+ delete target;
+ delete behavior;
+ delete control;
+ delete sim;
+ }
+ */
 
 void testOffPACContinuousGridworldOPtimized()
 {
@@ -1546,9 +1495,10 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-//  testOffPACContinuousGridworld();
+  testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
+//  testOffPACOnPolicyContinuousGridworld();
 
 //  testGreedyGQMountainCar3D();
 //  testSarsaMountainCar3D();
@@ -1560,7 +1510,7 @@ int main(int argc, char** argv)
 
 //  testOnPolicySwingPendulum();
 //  testOnPolicyContinousActionCar();
-  testOnPolicyBoltzmannATraceCar();
+//  testOnPolicyBoltzmannATraceCar();
 //  testOnPolicyBoltzmannRTraceCar();
 
 //  testPoleBalancingPlant();

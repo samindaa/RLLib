@@ -422,6 +422,7 @@ class SparseVector: public Vector<T>
     SparseVector<T>& addToSelf(const double& factor,
         const SparseVector<T>& that)
     {
+      assert(dimension() == that.dimension());
       for (int position = 0; position < that.nbActive; position++)
       {
         int index = that.activeIndexes[position];
@@ -454,6 +455,32 @@ class SparseVector: public Vector<T>
       return *this;
     }
 
+    SparseVector<T>& absToSelf()
+    {
+      for (T* position = values; position < values + nbActive; ++position)
+        *position = fabs(*position);
+      return *this;
+    }
+
+    SparseVector<T>& ebeMultiplyToSelf(const SparseVector<T>& that)
+    {
+      assert(dimension() == that.dimension());
+      int position = 0;
+      while (position < nbActive)
+      {
+        int index = activeIndexes[position];
+        T value = values[position] * that.getEntry(index);
+        if (value != 0)
+        {
+          values[position] = value;
+          ++position;
+        }
+        else
+          removeEntry(position, index);
+      }
+      return *this;
+    }
+
   private:
     double dot(const SparseVector<T>& _this, const SparseVector<T>& _that) const
     {
@@ -481,20 +508,31 @@ class SparseVector: public Vector<T>
     }
 
     // Shallow copy of that to this.
-    void set(const SparseVector<T>& that)
+    SparseVector<T>& set(const SparseVector<T>& that)
     {
       assert(dimension() == that.dimension());
       clear();
       for (int i = 0; i < that.nbActive; i++)
         setNonZeroEntry(that.activeIndexes[i], that.values[i]);
+      return *this;
     }
 
-    void set(const SparseVector<T>& that, const T& value)
+    SparseVector<T>& set(const SparseVector<T>& that, const T& value)
     {
       assert(dimension() == that.dimension());
       clear();
       for (int i = 0; i < that.nbActive; i++)
         setNonZeroEntry(that.activeIndexes[i], value);
+      return *this;
+    }
+
+    SparseVector<T>& set(const T& value)
+    {
+      // This will set 'value' to all the elements
+      clear();
+      for (int index = 0; index < indexesPositionLength; index++)
+        setNonZeroEntry(index, value);
+      return *this;
     }
 
     const T* getValues() const
