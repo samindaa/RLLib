@@ -9,9 +9,9 @@
 #define POLEBALANCING_H_
 
 #include "Env.h"
-#include "../Eigen/Dense"
-#include "../Eigen/Eigenvalues"
-#include "../src/Math.h"
+#include "Eigen/Dense"
+#include "Eigen/Eigenvalues"
+#include "Math.h"
 
 using Eigen::VectorXd;
 using Eigen::MatrixXd;

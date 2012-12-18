@@ -11,7 +11,10 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
+#include <functional>
+#include <numeric>
 #include <cmath>
 #include <cassert>
 #include <cstdio>
@@ -428,7 +431,6 @@ class SparseVector: public Vector<T>
       return *this;
     }
 
-
     SparseVector<T>& addToSelf(const SparseVector<T>& that)
     {
       return addToSelf(1.0, that);
@@ -473,6 +475,11 @@ class SparseVector: public Vector<T>
         return dot(that, *this);
     }
 
+    double sum() const
+    {
+      return std::accumulate(values, values + nbActive, 0.0);
+    }
+
     // Shallow copy of that to this.
     void set(const SparseVector<T>& that)
     {
@@ -489,6 +496,11 @@ class SparseVector: public Vector<T>
     const int* getActiveIndexes() const
     {
       return activeIndexes;
+    }
+
+    const int* getIndexesPosition() const
+    {
+      return indexesPosition;
     }
 
     int nbActiveEntries() const

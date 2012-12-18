@@ -11,7 +11,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include "../Eigen/Dense"
+#include "Eigen/Dense"
 
 using Eigen::VectorXd;
 using Eigen::MatrixXd;

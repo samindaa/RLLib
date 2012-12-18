@@ -8,7 +8,7 @@
 #ifndef DYNAMICS_H_
 #define DYNAMICS_H_
 
-#include "../src/Vector.h"
+#include "Vector.h"
 
 class Dynamics
 {

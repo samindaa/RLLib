@@ -14,7 +14,7 @@
 #include <numeric>
 #include <typeinfo>
 
-#include "../src/Control.h"
+#include "Control.h"
 #include "Env.h"
 
 #include <iostream>

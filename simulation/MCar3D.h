@@ -87,9 +87,9 @@ class MCar3D: public Env<float>
     void set_initial_position_random()
     {
       xposition = positionRange->min()
-          + Random::randomFloat() * ((positionRange->max() - 0.2) - positionRange->min());
+          + Random::nextFloat() * ((positionRange->max() - 0.2) - positionRange->min());
       yposition = positionRange->min()
-          + Random::randomFloat() * ((positionRange->max() - 0.2) - positionRange->min());
+          + Random::nextFloat() * ((positionRange->max() - 0.2) - positionRange->min());
       xvelocity = 0.0;
       yvelocity = 0.0;
     }

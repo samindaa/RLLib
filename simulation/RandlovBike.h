@@ -9,7 +9,7 @@
 #define RANDLOVBIKE_H_
 
 #include "Env.h"
-#include "../src/Math.h"
+#include "Math.h"
 #include <iostream>
 #include <cmath>
 
@@ -220,7 +220,7 @@ class RandlovBike: public Env<float>
 
       T = 2 * ((action / 3) - 1);
       d = 0.02 * ((action % 3) - 1);
-      d = d + 0.04 * (0.5 - Random::randomDouble()); /* Max noise is 2 cm */
+      d = d + 0.04 * (0.5 - Random::nextDouble()); /* Max noise is 2 cm */
 
       switch (to_do)
       {

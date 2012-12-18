@@ -19,12 +19,12 @@
 #include <algorithm>
 
 // From the RLLib
-#include "../src/Vector.h"
-#include "../src/Trace.h"
-#include "../src/Projector.h"
-#include "../src/ControlAlgorithm.h"
-#include "../src/Representation.h"
-#include "../src/SupervisedAlgorithm.h"
+#include "Vector.h"
+#include "Trace.h"
+#include "Projector.h"
+#include "ControlAlgorithm.h"
+#include "Representation.h"
+#include "SupervisedAlgorithm.h"
 // Eigen
 //#include "../Eigen/Dense"
 
@@ -39,7 +39,7 @@
 #include "PoleBalancing.h"
 #include "TorquedPendulum.h"
 
-#include "../util/Spline.h"
+#include "util/Spline.h"
 
 using namespace std;
 using namespace RLLib;
@@ -50,7 +50,7 @@ void testFullVector()
   cout << v << endl;
   for (int i = 0; i < v.dimension(); i++)
   {
-    double k = Random::randomDouble();
+    double k = Random::nextDouble();
     v[i] = k;
     cout << k << " ";
   }
@@ -118,13 +118,13 @@ void testProjector()
   int numTiling = 32;
   SparseVector<double> w(memorySize);
   for (int t = 0; t < 50; t++)
-    w.insertEntry(rand() % memorySize, Random::randomDouble());
+    w.insertEntry(rand() % memorySize, Random::nextDouble());
   FullTilings<double, float> coder(memorySize, numTiling, true);
   DenseVector<float> x(numObservations);
   for (int p = 0; p < 5; p++)
   {
     for (int o = 0; o < numObservations; o++)
-      x[o] = Random::randomDouble() / 0.25;
+      x[o] = Random::nextDouble() / 0.25;
     const SparseVector<double>& vect = coder.project(x);
     cout << w << endl;
     cout << vect << endl;
@@ -141,7 +141,7 @@ void testProjectorMachineLearning()
   multimap<double, double> X;
   for (int i = 0; i < 100; i++)
   {
-    double x = -M_PI_2 + 2 * M_PI * Random::randomDouble(); // @@>> input noise?
+    double x = -M_PI_2 + 2 * M_PI * Random::nextDouble(); // @@>> input noise?
     double y = sin(2 * x); // @@>> output noise?
     X.insert(make_pair(x, y));
   }
@@ -181,12 +181,13 @@ void testProjectorMachineLearning()
 
 void testSarsaMountainCar()
 {
+  srand(time(0));
   Env<float>* problem = new MCar2D;
   Projector<double, float>* projector = new FullTilings<double, float>(10000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
-  Trace<double>* e = new ATrace<double>(projector->dimension());
+  Trace<double>* e = new RTrace<double>(projector->dimension());
   double alpha = 0.15 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.3;
@@ -199,7 +200,7 @@ void testSarsaMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(10, 5000, 100);
+  sim->run(1, 5000, 300);
   sim->computeValueFunction();
 
   delete problem;
@@ -1377,7 +1378,7 @@ void testPersistResurrect()
   srand(time(0));
   SparseVector<float> a(20);
   for (int i = 0; i < 10; i++)
-    a.insertEntry(i, Random::randomDouble());
+    a.insertEntry(i, Random::nextDouble());
   cout << a << endl;
   a.persist(string("testsv.dat"));
 
@@ -1387,7 +1388,7 @@ void testPersistResurrect()
 
   DenseVector<float> d(20);
   for (int i = 0; i < 10; i++)
-    d[i] = Random::randomDouble();
+    d[i] = Random::nextDouble();
   cout << d << endl;
   d.persist(string("testdv.dat"));
 
@@ -1539,7 +1540,7 @@ int main(int argc, char** argv)
 //  testSparseVector();
 //  testProjector();
 //  testProjectorMachineLearning();
-  testSarsaMountainCar();
+//  testSarsaMountainCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
@@ -1559,7 +1560,7 @@ int main(int argc, char** argv)
 
 //  testOnPolicySwingPendulum();
 //  testOnPolicyContinousActionCar();
-//  testOnPolicyBoltzmannATraceCar();
+  testOnPolicyBoltzmannATraceCar();
 //  testOnPolicyBoltzmannRTraceCar();
 
 //  testPoleBalancingPlant();

@@ -87,13 +87,13 @@ class Random
   public:
 
     // [0..1]
-    inline static float randomFloat()
+    inline static float nextFloat()
     {
       return float(rand()) * (1.f / static_cast<float>(RAND_MAX));
     }
 
     // [0..1]
-    inline static double randomDouble()
+    inline static double nextDouble()
     {
       return double(rand()) / RAND_MAX;
     }
@@ -104,8 +104,8 @@ class Random
       double r, v1, v2;
       do
       {
-        v1 = 2.0 * randomDouble() - 1.0;
-        v2 = 2.0 * randomDouble() - 1.0;
+        v1 = 2.0 * nextDouble() - 1.0;
+        v2 = 2.0 * nextDouble() - 1.0;
         r = v1 * v1 + v2 * v2;
       } while (r >= 1.0 || r == 0);
       const double fac(sqrt(-2.0 * log(r) / r));
@@ -128,8 +128,8 @@ class Random
         double x, y, r;
         do
         {
-          x = randomDouble() - 1;
-          y = randomDouble() - 1;
+          x = nextDouble() - 1;
+          y = nextDouble() - 1;
 
           r = x * x + y * y;
         } while (r == 0.0 || r > 1.0);
@@ -153,14 +153,14 @@ class Random
     {
       float result(0.0f);
       for (int i = 0; i < 12; i++)
-        result += 2.0f * ((randomFloat() - 0.5f) * b);
+        result += 2.0f * ((nextFloat() - 0.5f) * b);
       return result / 2.0f;
     }
 
     inline float sampleTriangularDistribution(float b)
     {
-      float randResult = 2.0f * ((randomFloat() - 0.5f) * b)
-          + 2.0f * ((randomFloat() - 0.5f) * b);
+      float randResult = 2.0f * ((nextFloat() - 0.5f) * b)
+          + 2.0f * ((nextFloat() - 0.5f) * b);
       return (sqrt(6.0f) / 2.0f) * randResult;
     }
 };

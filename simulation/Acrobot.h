@@ -58,10 +58,10 @@ class Acrobot: public Env<float>
       bool isRandomStart = false;
       if (isRandomStart) // random
       {
-        theta1 = Random::randomFloat() - 0.5;
-        theta2 = Random::randomFloat() - 0.5;
-        theta1Dot = Random::randomFloat() - 0.5;
-        theta2Dot = Random::randomFloat() - 0.5;
+        theta1 = Random::nextFloat() - 0.5;
+        theta2 = Random::nextFloat() - 0.5;
+        theta1Dot = Random::nextFloat() - 0.5;
+        theta2Dot = Random::nextFloat() - 0.5;
       }
       else
         theta1 = theta2 = theta1Dot = theta2Dot = 0.0; // not random
@@ -86,7 +86,7 @@ class Acrobot: public Env<float>
 
       //torque is in [-1,1]
       //We'll make noise equal to at most +/- 1
-      float theNoise = transitionNoise * 2.0 * (Random::randomFloat() - 0.5);
+      float theNoise = transitionNoise * 2.0 * (Random::nextFloat() - 0.5);
 
       torque += theNoise;
 

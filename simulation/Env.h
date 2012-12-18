@@ -8,9 +8,9 @@
 #ifndef ENV_H_
 #define ENV_H_
 
-#include "../src/Vector.h"
-#include "../src/Action.h"
-#include "../src/Math.h"
+#include "Vector.h"
+#include "Action.h"
+#include "Math.h"
 
 using namespace RLLib;
 

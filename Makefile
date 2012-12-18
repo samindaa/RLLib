@@ -4,12 +4,17 @@
 # saminda@cs.miami.edu
 # To access RLLib documentation, please visit http://saminda.org
 
-CFLAGS = -I.
+CC = g++
+CFLAGS = -I. -I./src -Wall -Werror -g
 
-all: Main
+all: Main VectorTest
 
 Main:
-	g++ -O3 $(CFLAGS) simulation/Main.cpp -o Main
+	$(CC) $(CFLAGS) simulation/Main.cpp -o Main
+
+VectorTest:
+	$(CC) $(CFLAGS) test/VectorTest.cpp -o VectorTest
 
 clean:
-	rm Main
+	rm -f Main
+	rm -f VectorTest
