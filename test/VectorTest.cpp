@@ -6,30 +6,18 @@
  *
  * Tests for SparseVector
  */
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <limits>
-#include <cassert>
-#include <cstdlib>
-#include <ctime>
 
-#include "Vector.h"
-#include "Math.h"
-
-using namespace std;
-using namespace RLLib;
+#include "HeaderTest.h"
 
 class SparseVectorTest
 {
   protected:
-    typedef SparseVector<double> Type;
     typedef void (SparseVectorTest::*testMethod)();
-    vector<Type*> vectors;
+    vector<SVecDoubleType*> vectors;
     vector<testMethod> testMethods;
 
-    Type* _a;
-    Type* _b;
+    SVecDoubleType* _a;
+    SVecDoubleType* _b;
 
   public:
     SparseVectorTest() :
@@ -40,56 +28,34 @@ class SparseVectorTest
 
     ~SparseVectorTest()
     {
-      for (vector<Type*>::iterator iter = vectors.begin();
+      for (vector<SVecDoubleType*>::iterator iter = vectors.begin();
           iter != vectors.end(); ++iter)
         delete *iter;
       vectors.clear();
+      testMethods.clear();
     }
 
   private:
 
-    bool checkSparseVectorConsistency(const Type& v)
+    SVecDoubleType* newVector(const int& size)
     {
-      const int* indexesPositions = v.getIndexesPosition();
-      const int* activeIndexes = v.getActiveIndexes();
-      int nbActiveCounted = 0;
-      bool positionChecked[v.nbActiveEntries()];
-      std::fill(positionChecked, positionChecked + v.nbActiveEntries(), false);
-      for (int index = 0; index < v.dimension(); index++)
-      {
-        const int position = indexesPositions[index];
-        if (position == -1)
-          continue;
-        if (nbActiveCounted >= v.nbActiveEntries())
-          return false;
-        if (positionChecked[position])
-          return false;
-        if (activeIndexes[position] != index)
-          return false;
-        positionChecked[position] = true;
-        ++nbActiveCounted;
-      }
-      return nbActiveCounted != v.nbActiveEntries() ? false : true;
-    }
-
-    Type* newVector(const int& size)
-    {
-      Type* type = new Type(size);
+      SVecDoubleType* type = new SVecDoubleType(size);
       vectors.push_back(type);
       return type;
     }
 
-    Type* newVector(const double* values, const int& size)
+    SVecDoubleType* newVector(const double* values, const int& size)
     {
-      Type* type = newVector(size);
+      SVecDoubleType* type = newVector(size);
       for (int i = 0; i < size; i++)
         type->setEntry(i, values[i]);
       return type;
     }
 
-    Type* createRandomSparseVector(const int& maxActive, const int& size)
+    SVecDoubleType* createRandomSparseVector(const int& maxActive,
+        const int& size)
     {
-      Type* type = newVector(size);
+      SVecDoubleType* type = newVector(size);
       int nbActive = rand() % maxActive;
       for (int i = 0; i < nbActive; i++)
         type->setEntry(rand() % maxActive, Random::nextDouble() * 2 - 1);
@@ -97,28 +63,10 @@ class SparseVectorTest
       return type;
     }
 
-    bool checkVectorEquals(const Type& a, const Type& b, double margin)
+    void checkVectorOperations(SVecDoubleType& a, SVecDoubleType& b)
     {
-      if (a.dimension() != b.dimension())
-        return false;
-      for (int i = 0; i < a.dimension(); i++)
-      {
-        double diff = fabs(a.getEntry(i) - b.getEntry(i));
-        if (diff > margin)
-          return false;
-      }
-      return true;
-    }
-
-    void checkVectorEquals(Type& a, Type& b)
-    {
-      assert(checkVectorEquals(a, b, numeric_limits<float>::min()));
-    }
-
-    void checkVectorOperations(Type& a, Type& b)
-    {
-      Type pa(a);
-      Type pb(b);
+      SVecDoubleType pa(a);
+      SVecDoubleType pb(b);
       assert(checkSparseVectorConsistency(pa));
       assert(checkSparseVectorConsistency(pb));
       checkVectorEquals(pa, a);
@@ -132,10 +80,10 @@ class SparseVectorTest
   protected:
     void testActiveIndices()
     {
-      Type* a = newVector((double[]
+      SVecDoubleType* a = newVector((double[]
           )
           { 0.0, 3.0, 2.0, 0.0, 1.0 }, 5);
-      Type* b = newVector((double[]
+      SVecDoubleType* b = newVector((double[]
           )
           { 3.0, 4.0, 0.0, 0.0, 4.0 }, 5);
 
@@ -161,11 +109,11 @@ class SparseVectorTest
 
     void testSparseVectorSet()
     {
-      Type* a = newVector((double[]
+      SVecDoubleType* a = newVector((double[]
           )
           { 1.0, 2.0, 2.0, 4.0 }, 4);
 
-      Type* b = newVector((double[]
+      SVecDoubleType* b = newVector((double[]
           )
           { 0.0, 1.0, 0.0, 0.0 }, 4);
       a->set(*b);
@@ -179,8 +127,8 @@ class SparseVectorTest
 
       for (int i = 0; i < 10000; i++)
       {
-        Type* a = createRandomSparseVector(active, size);
-        Type* b = createRandomSparseVector(active, size);
+        SVecDoubleType* a = createRandomSparseVector(active, size);
+        SVecDoubleType* b = createRandomSparseVector(active, size);
         checkVectorOperations(*a, *b);
       }
 
@@ -188,15 +136,15 @@ class SparseVectorTest
 
     void testSetEntry()
     {
-      Type v(*_a);
+      SVecDoubleType v(*_a);
       v.setEntry(1, 3);
-      Type* b = newVector((double[]
+      SVecDoubleType* b = newVector((double[]
           )
           { 0.0, 3.0, 2.0, 0.0, 1.0 }, 5);
       checkVectorEquals(*b, v);
       v.setEntry(0, 0);
       v.setEntry(1, 0);
-      Type* c = newVector((double[]
+      SVecDoubleType* c = newVector((double[]
           )
           { 0.0, 0.0, 2.0, 0.0, 1.0 }, 5);
       checkVectorEquals(*c, v);
@@ -213,16 +161,16 @@ class SparseVectorTest
       assert(16.0 == _a->dot(*_b));
       assert(16.0 == _b->dot(*_a));
 
-      Type c(*_b);
+      SVecDoubleType c(*_b);
       assert(16.0 == _a->dot(c));
       assert(16.0 == c.dot(*_a));
     }
 
     void testPlus()
     {
-      Type a(*_a);
-      Type b(*_b);
-      Type* c = newVector((double[]
+      SVecDoubleType a(*_a);
+      SVecDoubleType b(*_b);
+      SVecDoubleType* c = newVector((double[]
           )
           { 3.0, 7.0, 2.0, 0.0, 5.0 }, 5);
       checkVectorEquals(*c, a.addToSelf(b));
@@ -230,27 +178,27 @@ class SparseVectorTest
 
     void testMinus()
     {
-      Type a(*_a);
-      Type b(*_b);
-      Type* c = newVector((double[]
+      SVecDoubleType a(*_a);
+      SVecDoubleType b(*_b);
+      SVecDoubleType* c = newVector((double[]
           )
           { -3.0, -1.0, 2.0, 0.0, -3.0 }, 5);
-      Type* d = newVector((double[]
+      SVecDoubleType* d = newVector((double[]
           )
           { -3.0, 2.0, 4.0, 0.0, -2.0 }, 5);
       checkVectorEquals(*c, a.substractToSelf(b));
-      Type e(*_a);
+      SVecDoubleType e(*_a);
       checkVectorEquals(*d, e.multiplyToSelf(2.0).substractToSelf(b));
     }
 
     void testMapTimes()
     {
-      Type a(*_a);
-      Type b(*_b);
-      Type* c = newVector((double[]
+      SVecDoubleType a(*_a);
+      SVecDoubleType b(*_b);
+      SVecDoubleType* c = newVector((double[]
           )
           { 0.0, 15.0, 10.0, 0.0, 5.0 }, 5);
-      Type* d = newVector((double[]
+      SVecDoubleType* d = newVector((double[]
           )
           { 0.0, 0.0, 0.0, 0.0, 0.0 }, 5);
       checkVectorEquals(*c, a.multiplyToSelf(5.0));
@@ -259,7 +207,7 @@ class SparseVectorTest
 
     void testMaxNorm()
     {
-      Type* a = newVector((double[]
+      SVecDoubleType* a = newVector((double[]
           )
           { 1.0, -2.0, -3.0, 0.0, 2.0 }, 5);
       assert(3.0 == a->maxNorm());

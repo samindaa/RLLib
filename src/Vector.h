@@ -483,9 +483,18 @@ class SparseVector: public Vector<T>
     // Shallow copy of that to this.
     void set(const SparseVector<T>& that)
     {
+      assert(dimension() == that.dimension());
       clear();
       for (int i = 0; i < that.nbActive; i++)
-        insertEntry(that.activeIndexes[i], that.values[i]);
+        setNonZeroEntry(that.activeIndexes[i], that.values[i]);
+    }
+
+    void set(const SparseVector<T>& that, const T& value)
+    {
+      assert(dimension() == that.dimension());
+      clear();
+      for (int i = 0; i < that.nbActive; i++)
+        setNonZeroEntry(that.activeIndexes[i], value);
     }
 
     const T* getValues() const

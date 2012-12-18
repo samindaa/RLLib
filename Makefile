@@ -7,7 +7,7 @@
 CC = g++
 CFLAGS = -I. -I./src -Wall -Werror -g
 
-all: Main VectorTest
+all: Main VectorTest TraceTest
 
 Main:
 	$(CC) $(CFLAGS) simulation/Main.cpp -o Main
@@ -15,6 +15,11 @@ Main:
 VectorTest:
 	$(CC) $(CFLAGS) test/VectorTest.cpp -o VectorTest
 
+TraceTest:
+	$(CC) $(CFLAGS) test/TraceTest.cpp -o TraceTest
+
+
 clean:
 	rm -f Main
 	rm -f VectorTest
+	rm -f TraceTest
