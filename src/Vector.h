@@ -455,13 +455,6 @@ class SparseVector: public Vector<T>
       return *this;
     }
 
-    SparseVector<T>& absToSelf()
-    {
-      for (T* position = values; position < values + nbActive; ++position)
-        *position = fabs(*position);
-      return *this;
-    }
-
     SparseVector<T>& ebeMultiplyToSelf(const SparseVector<T>& that)
     {
       assert(dimension() == that.dimension());
@@ -477,6 +470,16 @@ class SparseVector: public Vector<T>
         }
         else
           removeEntry(position, index);
+      }
+      return *this;
+    }
+
+    SparseVector<T>& ebeDivideToSelf(const SparseVector<T>& that)
+    {
+      for (int position = 0; position < nbActive; position++)
+      {
+        int index = activeIndexes[position];
+        values[position] /= that.getEntry(index); // prior check
       }
       return *this;
     }
@@ -656,6 +659,40 @@ class SparseVector: public Vector<T>
 
     template<class O> friend std::ostream& operator<<(std::ostream& out,
         const SparseVector<O>& that);
+
+    // Static
+    inline static void absToSelf(SparseVector<T>& that)
+    {
+      for (T* position = that.values; position < that.values + that.nbActive;
+          ++position)
+        *position = fabs(*position);
+    }
+
+    inline static void multiplySelfByExponential(SparseVector<T>& result,
+        const double& factor, const SparseVector<T>& other, const double& min)
+    {
+      const int* activeIndexes = other.getActiveIndexes();
+      for (int i = 0; i < other.nbActiveEntries(); i++)
+      {
+        int index = activeIndexes[i];
+        result.setEntry(index,
+            std::max(min,
+                result.getEntry(index)
+                    * std::exp(factor * other.getEntry(index))));
+      }
+    }
+
+    inline static void positiveMaxToSelf(SparseVector<T>& result,
+        const SparseVector<T>& other)
+    {
+      const int* activeIndexes = other.getActiveIndexes();
+      for (int i = 0; i < other.nbActiveEntries(); i++)
+      {
+        int index = activeIndexes[i];
+        result.setEntry(index,
+            std::max(result.getEntry(index), other.getEntry(index)));
+      }
+    }
 };
 
 template<class T>

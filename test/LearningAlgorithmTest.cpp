@@ -9,10 +9,10 @@
 #include "Projector.h"
 #include "SupervisedAlgorithm.h"
 
-class AdalineTest
+class SupervisedAlgorithmTest
 {
   public:
-    AdalineTest()
+    SupervisedAlgorithmTest()
     {
       srand(time(0));
     }
@@ -21,7 +21,6 @@ class AdalineTest
     {
       // simple sine curve estimation
       // training samples
-      srand(time(0));
       multimap<double, double> X;
       for (int i = 0; i < 100; i++)
       {
@@ -33,41 +32,66 @@ class AdalineTest
       // train
       int numObservations = 1;
       int memorySize = 512;
-      int numTiling = 32;
+      int numTiling = 16;
       FullTilings<double, float> coder(memorySize, numTiling, true);
       DVecFloatType x(numObservations);
-      Adaline<double> lms(coder.dimension(), 0.1 / coder.vectorNorm());
+      Adaline<double> adaline(coder.dimension(), 0.1 / coder.vectorNorm());
+      IDBD<double> idbd(coder.dimension(), 0.001); // This value looks good
+      Autostep<double> autostep(coder.dimension());
       int traininCounter = 0;
+      ofstream outFileError("visualization/learningAlgorithmTestError.dat");
       while (++traininCounter < 100)
       {
         for (multimap<double, double>::const_iterator iter = X.begin();
             iter != X.end(); ++iter)
         {
-          x[0] = iter->first / (2 * M_PI) / 0.25; // normalized and unit generalized
+          x[0] = 2.0 * iter->first / M_PI; // normalized and unit generalized
           const SVecDoubleType& phi = coder.project(x);
-          lms.learn(phi, iter->second);
+          adaline.learn(phi, iter->second);
+          idbd.learn(phi, iter->second);
+          autostep.learn(phi, iter->second);
         }
+
+        // Calculate the error
+        double mse[3] =
+        { 0 };
+        for (multimap<double, double>::const_iterator iterMse = X.begin();
+            iterMse != X.end(); ++iterMse)
+        {
+          x[0] = 2.0 * iterMse->first / M_PI;
+          const SVecDoubleType& phi = coder.project(x);
+          mse[0] += pow(iterMse->second - adaline.predict(phi), 2) / X.size();
+          mse[1] += pow(iterMse->second - idbd.predict(phi), 2) / X.size();
+          mse[2] += pow(iterMse->second - autostep.predict(phi), 2) / X.size();
+        }
+        if (outFileError.is_open())
+          outFileError << mse[0] << " " << mse[1] << " " << mse[2] << endl;
       }
+      outFileError.close();
 
       // output
-      ofstream outFile("visualization/mest.dat");
+      ofstream outFilePrediction(
+          "visualization/learningAlgorithmTestPrediction.dat");
       for (multimap<double, double>::const_iterator iter = X.begin();
           iter != X.end(); ++iter)
       {
-        x[0] = iter->first / (2 * M_PI) / 0.25;
+        x[0] = 2.0 * iter->first / M_PI;
         const SVecDoubleType& phi = coder.project(x);
-        if (outFile.is_open())
-          outFile << iter->first << " " << iter->second << " "
-              << lms.predict(phi) << endl;
+        if (outFilePrediction.is_open())
+          outFilePrediction << iter->first << " " << iter->second << " "
+              << adaline.predict(phi) << " " << idbd.predict(phi) << " "
+              << autostep.predict(phi) << endl;
       }
-      outFile.close();
+      outFilePrediction.close();
     }
 };
 
 int main(int argc, char** argv)
 {
-  AdalineTest adalineTest;
-  adalineTest.run();
+  cout << "*** LearningAlgorithmTest starts " << endl;
+  SupervisedAlgorithmTest supervisedAlgorithmTest;
+  supervisedAlgorithmTest.run();
+  cout << "*** LearningAlgorithmTest ends " << endl;
   return 0;
 }
 
