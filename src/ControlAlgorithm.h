@@ -501,6 +501,15 @@ class Actor: public ActorOnPolicy<T, O>
       updatePolicy(xas);
       return policy->decide(xas);
     }
+
+    void persist(const std::string& f) const
+    {
+      u->persist(f);
+    }
+    void resurrect(const std::string& f)
+    {
+      u->resurrect(f);
+    }
 };
 
 template<class T, class O>
@@ -509,12 +518,14 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
   protected:
     TDLambda<T>* critic;
     ActorOnPolicy<T, O>* actor;
+    Projector<T, O>* projector;
     StateToStateAction<T, O>* toStateAction;
 
   public:
     AbstractActorCritic(TDLambda<T>* critic, ActorOnPolicy<T, O>* actor,
-        StateToStateAction<T, O>* toStateAction) :
-        critic(critic), actor(actor), toStateAction(toStateAction)
+        Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction) :
+        critic(critic), actor(actor), projector(projector), toStateAction(
+            toStateAction)
     {
     }
 
@@ -566,18 +577,27 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
 
     const double computeValueFunction(const DenseVector<O>& x) const
     {
-      return critic->predict(
-          toStateAction->stateActions(x).at(
-              toStateAction->getActionList().at(0)));
+      return critic->predict(projector->project(x));
     }
 
     void persist(const std::string& f) const
     {
-      //@@>> TODO:
+      std::string fcritic(f);
+      fcritic.append(".critic");
+      critic->persist(fcritic);
+      std::string factor(f);
+      factor.append(".actor");
+      actor->persist(factor);
     }
+
     void resurrect(const std::string& f)
     {
-      //@@>> TODO:
+      std::string fcritic(f);
+      fcritic.append(".critic");
+      critic->resurrect(fcritic);
+      std::string factor(f);
+      factor.append(".actor");
+      actor->resurrect(factor);
     }
 
 };
@@ -586,14 +606,15 @@ template<class T, class O>
 class ActorCritic: public AbstractActorCritic<T, O>
 {
   protected:
+    typedef AbstractActorCritic<T, O> Base;
     SparseVector<T>* phi_t;
     SparseVector<T>* phi_tp1;
   public:
     ActorCritic(TDLambda<T>* critic, ActorOnPolicy<T, O>* actor,
-        StateToStateAction<T, O>* toStateAction) :
-        AbstractActorCritic<T, O>(critic, actor, toStateAction), phi_t(
-            new SparseVector<T>(toStateAction->getProjector().dimension())), phi_tp1(
-            new SparseVector<T>(toStateAction->getProjector().dimension()))
+        Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction) :
+        AbstractActorCritic<T, O>(critic, actor, projector, toStateAction), phi_t(
+            new SparseVector<T>(projector->dimension())), phi_tp1(
+            new SparseVector<T>(projector->dimension()))
     {
     }
 
@@ -606,11 +627,10 @@ class ActorCritic: public AbstractActorCritic<T, O>
     double updateCritic(const DenseVector<O>& x_t, const Action& a_t,
         const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
     {
-      phi_t->set(AbstractActorCritic<T, O>::toStateAction->stateAction(x_t));
-      phi_tp1->set(
-          AbstractActorCritic<T, O>::toStateAction->stateAction(x_tp1));
+      phi_t->set(Base::projector->project(x_t));
+      phi_tp1->set(Base::projector->project(x_tp1));
       // Update critic
-      return AbstractActorCritic<T, O>::critic->update(*phi_t, *phi_tp1, r_tp1);
+      return Base::critic->update(*phi_t, *phi_tp1, r_tp1);
     }
 
 };
@@ -619,17 +639,19 @@ template<class T, class O>
 class AverageRewardActorCritic: public AbstractActorCritic<T, O>
 {
   protected:
+    typedef AbstractActorCritic<T, O> Base;
     double alpha_r, averageReward;
     SparseVector<T>* phi_t;
     SparseVector<T>* phi_tp1;
 
   public:
     AverageRewardActorCritic(TDLambda<T>* critic, ActorOnPolicy<T, O>* actor,
-        StateToStateAction<T, O>* toStateAction, double alpha_r) :
-        AbstractActorCritic<T, O>(critic, actor, toStateAction), alpha_r(
+        Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction,
+        double alpha_r) :
+        AbstractActorCritic<T, O>(critic, actor, projector, toStateAction), alpha_r(
             alpha_r), averageReward(0), phi_t(
-            new SparseVector<T>(toStateAction->getProjector().dimension())), phi_tp1(
-            new SparseVector<T>(toStateAction->getProjector().dimension()))
+            new SparseVector<T>(projector->dimension())), phi_tp1(
+            new SparseVector<T>(projector->dimension()))
     {
     }
 
@@ -642,9 +664,8 @@ class AverageRewardActorCritic: public AbstractActorCritic<T, O>
     double updateCritic(const DenseVector<O>& x_t, const Action& a_t,
         const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
     {
-      phi_t->set(AbstractActorCritic<T, O>::toStateAction->stateAction(x_t));
-      phi_tp1->set(
-          AbstractActorCritic<T, O>::toStateAction->stateAction(x_tp1));
+      phi_t->set(Base::projector->project(x_t));
+      phi_tp1->set(Base::projector->project(x_tp1));
       // Update critic
       double delta_t = AbstractActorCritic<T, O>::critic->update(*phi_t,
           *phi_tp1, r_tp1 - averageReward);

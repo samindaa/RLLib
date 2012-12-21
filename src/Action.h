@@ -55,6 +55,11 @@ class Action
       return id != that.id;
     }
 
+    const int getId() const
+    {
+      return id;
+    }
+
 };
 
 class ActionList

@@ -67,6 +67,99 @@ void testProjector()
   }
 }
 
+void testSarsaTabularActionMountainCar()
+{
+  srand(time(0));
+  cout << "time=" << time(0) << endl;
+  Env<float>* problem = new MCar2D;
+  Projector<double, float>* projector = new FullTilings<double, float>(1000, 10,
+      true);
+  StateToStateAction<double, float>* toStateAction = new TabularAction<double,
+      float>(projector, &problem->getDiscreteActionList(), true);
+  Trace<double>* e = new RTrace<double>(toStateAction->dimension());
+
+  cout << "|phi_sa|=" << toStateAction->dimension() << endl;
+  cout << "||.||=" << toStateAction->vectorNorm() << endl;
+
+  double alpha = 0.15 / toStateAction->vectorNorm();
+  double gamma = 0.99;
+  double lambda = 0.3;
+  Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, e);
+  double epsilon = 0.01;
+  Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
+      &problem->getDiscreteActionList(), epsilon);
+  OnPolicyControlLearner<double, float>* control = new SarsaControl<double,
+      float>(acting, toStateAction, sarsa);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 300);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete sarsa;
+  delete acting;
+  delete control;
+  delete sim;
+}
+
+void testOnPolicyBoltzmannRTraceTabularActionCar()
+{
+  srand(time(0));
+  Env<float>* problem = new MCar2D;
+
+  Projector<double, float>* projector = new FullTilings<double, float>(1000, 10,
+      false);
+  StateToStateAction<double, float>* toStateAction = new TabularAction<double,
+      float>(projector, &problem->getDiscreteActionList(), false);
+
+  cout << "|x_t|=" << projector->dimension() << endl;
+  cout << "||.||=" << projector->vectorNorm() << endl;
+  cout << "|phi_sa|=" << toStateAction->dimension() << endl;
+  cout << "||.||=" << toStateAction->vectorNorm() << endl;
+
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_u = 0.01 / projector->vectorNorm();
+  double lambda = 0.3;
+  double gamma = 0.99;
+
+  Trace<double>* critice = new RTrace<double>(projector->dimension());
+  TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
+      critice);
+
+  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(
+      toStateAction->dimension(), &problem->getDiscreteActionList());
+
+  Trace<double>* actore = new RTrace<double>(toStateAction->dimension());
+  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  actoreTraces->push_back(actore);
+  ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
+      lambda, acting, actoreTraces);
+
+  OnPolicyControlLearner<double, float>* control =
+      new ActorCritic<double, float>(critic, actor, projector, toStateAction);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control,
+      problem);
+  sim->run(1, 5000, 300);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actore;
+  delete actoreTraces;
+  delete actor;
+  delete acting;
+  delete control;
+  delete sim;
+}
+
 void testSarsaMountainCar()
 {
   srand(time(0));
@@ -936,7 +1029,7 @@ void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
       lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
-      double, float>(critic, actor, toStateAction, 0.0);
+      double, float>(critic, actor, projector, toStateAction, 0.0);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
@@ -986,7 +1079,7 @@ void testOnPolicyBoltzmannATraceCar()
       lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control =
-      new ActorCritic<double, float>(critic, actor, toStateAction);
+      new ActorCritic<double, float>(critic, actor, projector, toStateAction);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
@@ -1035,7 +1128,7 @@ void testOnPolicyBoltzmannRTraceCar()
       lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control =
-      new ActorCritic<double, float>(critic, actor, toStateAction);
+      new ActorCritic<double, float>(critic, actor, projector, toStateAction);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
@@ -1091,7 +1184,7 @@ void testOnPolicySwingPendulum()
       lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
-      double, float>(critic, actor, toStateAction, 0.01);
+      double, float>(critic, actor, projector, toStateAction, 0.01);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
@@ -1490,12 +1583,14 @@ int main(int argc, char** argv)
 //  testProjector();
 //  testProjectorMachineLearning();
 //  testSarsaMountainCar();
+//  testSarsaTabularActionMountainCar();
+  testOnPolicyBoltzmannRTraceTabularActionCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
 //  testOffPACOnPolicyContinuousGridworld();

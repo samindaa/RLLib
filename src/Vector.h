@@ -484,6 +484,13 @@ class SparseVector: public Vector<T>
       return *this;
     }
 
+    SparseVector<T>& ebeAddConstantToSelf(const double& value)
+    {
+      for (int index = 0; index < indexesPositionLength; index++)
+        setNonZeroEntry(index, value + getEntry(index));
+      return *this;
+    }
+
   private:
     double dot(const SparseVector<T>& _this, const SparseVector<T>& _that) const
     {
@@ -517,6 +524,15 @@ class SparseVector: public Vector<T>
       clear();
       for (int i = 0; i < that.nbActive; i++)
         setNonZeroEntry(that.activeIndexes[i], that.values[i]);
+      return *this;
+    }
+
+    SparseVector<T>& set(const SparseVector<T>& that, const int& offset)
+    {
+      // Dimension check is relaxed.
+      clear();
+      for (int i = 0; i < that.nbActive; i++)
+        setNonZeroEntry(that.activeIndexes[i] + offset, that.values[i]);
       return *this;
     }
 

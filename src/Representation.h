@@ -85,8 +85,9 @@ class StateToStateAction
     }
     virtual const SparseVector<T>& stateAction(const DenseVector<O>& x) =0;
     virtual const Representations<T>& stateActions(const DenseVector<O>& x) =0;
-    virtual const Projector<T, O>& getProjector() const =0;
     virtual const ActionList& getActionList() const =0;
+    virtual double vectorNorm() const =0;
+    virtual int dimension() const =0;
 };
 
 // Tile coding base projector to state action
@@ -130,14 +131,93 @@ class StateActionTilings: public StateToStateAction<T, O>
       return *phis;
     }
 
-    const Projector<T, O>& getProjector() const
+    const ActionList& getActionList() const
     {
-      return *projector;
+      return *actions;
+    }
+
+    double vectorNorm() const
+    {
+      return projector->vectorNorm();
+    }
+
+    int dimension() const
+    {
+      return projector->dimension();
+    }
+};
+
+template<class T, class O>
+class TabularAction: public StateToStateAction<T, O>
+{
+  protected:
+    Projector<T, O>* projector;
+    ActionList* actions;
+    Representations<T>* phis;
+    SparseVector<T>* _phi;
+    bool includeActiveFeature;
+  public:
+    TabularAction(Projector<T, O>* projector, ActionList* actions,
+        bool includeActiveFeature = true) :
+        projector(projector), actions(actions), phis(
+            new Representations<T>(
+                includeActiveFeature ?
+                    actions->dimension() * projector->dimension() + 1 :
+                    actions->dimension() * projector->dimension(),
+                actions->dimension())), _phi(
+            new SparseVector<T>(
+                includeActiveFeature ?
+                    actions->dimension() * projector->dimension() + 1 :
+                    actions->dimension() * projector->dimension())), includeActiveFeature(
+            includeActiveFeature)
+    {
+    }
+
+    ~TabularAction()
+    {
+      delete phis;
+      delete _phi;
+    }
+
+    const SparseVector<T>& stateAction(const DenseVector<O>& x)
+    {
+      assert(actions->dimension() == phis->dimension());
+      return projector->project(x);
+    }
+
+    const Representations<T>& stateActions(const DenseVector<O>& x)
+    {
+      assert(actions->dimension() == phis->dimension());
+      const SparseVector<T>& phi = projector->project(x);
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
+          ++a)
+      {
+        _phi->set(phi, projector->dimension() * (*a)->getId());
+        if (includeActiveFeature)
+          _phi->insertLast(1.0);
+        phis->set(*_phi, **a);
+      }
+      return *phis;
     }
 
     const ActionList& getActionList() const
     {
       return *actions;
+    }
+
+    double vectorNorm() const
+    {
+      return
+          includeActiveFeature ?
+              projector->vectorNorm() + 1 : projector->vectorNorm();
+    }
+
+    int dimension() const
+    {
+      return
+          includeActiveFeature ?
+              actions->dimension() * projector->dimension() + 1 :
+              actions->dimension() * projector->dimension();
     }
 };
 
