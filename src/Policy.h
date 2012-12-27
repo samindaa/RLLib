@@ -60,9 +60,9 @@ class PolicyDistribution: public Policy<T>
     virtual ~PolicyDistribution()
     {
     }
-    virtual const MultiSparseVector<T>& computeGradLog(
+    virtual const SparseVectors<T>& computeGradLog(
         const Representations<T>& phis, const Action& action) =0;
-    virtual MultiSparseVector<T>* parameters() const =0;
+    virtual SparseVectors<T>* parameters() const =0;
 };
 
 template<class T>
@@ -77,8 +77,8 @@ class NormalDistribution: public PolicyDistribution<T>
     SparseVector<T>* gradStddev;
     SparseVector<T>* x;
     ActionList* actions;
-    MultiSparseVector<T>* multiu;
-    MultiSparseVector<T>* multigrad;
+    SparseVectors<T>* multiu;
+    SparseVectors<T>* multigrad;
   public:
 
     NormalDistribution(const double& initialMean, const double& initialStddev,
@@ -90,7 +90,7 @@ class NormalDistribution: public PolicyDistribution<T>
             new SparseVector<T>(u_mean->dimension())), gradStddev(
             new SparseVector<T>(u_stddev->dimension())), x(
             new SparseVector<T>(nbFeatures)), actions(actions), multiu(
-            new MultiSparseVector<T>()), multigrad(new MultiSparseVector<T>())
+            new SparseVectors<T>()), multigrad(new SparseVectors<T>())
     {
       multiu->push_back(u_mean);
       multiu->push_back(u_stddev);
@@ -145,7 +145,7 @@ class NormalDistribution: public PolicyDistribution<T>
       stddevStep = (a - mean) * (a - mean) / sigma2 - 1.0;
     }
 
-    const MultiSparseVector<T>& computeGradLog(const Representations<T>& xs,
+    const SparseVectors<T>& computeGradLog(const Representations<T>& xs,
         const Action& action)
     {
       assert((xs.dimension() == 1) && (actions->dimension() == 1));
@@ -159,7 +159,7 @@ class NormalDistribution: public PolicyDistribution<T>
       return *multigrad;
     }
 
-    MultiSparseVector<T>* parameters() const
+    SparseVectors<T>* parameters() const
     {
       //return u;
       return multiu;
@@ -200,15 +200,15 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     SparseVector<T>* grad;
     DenseVector<double>* distribution;
     SparseVector<T>* u;
-    MultiSparseVector<T>* multiu;
-    MultiSparseVector<T>* multigrad;
+    SparseVectors<T>* multiu;
+    SparseVectors<T>* multigrad;
   public:
     BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
         actions(actions), avg(new SparseVector<T>(numFeatures)), grad(
             new SparseVector<T>(numFeatures)), distribution(
             new DenseVector<double>(actions->dimension())), u(
             new SparseVector<T>(numFeatures)), multiu(
-            new MultiSparseVector<T>()), multigrad(new MultiSparseVector<T>())
+            new SparseVectors<T>()), multigrad(new SparseVectors<T>())
     {
       // Parameter setting
       multiu->push_back(u);
@@ -261,7 +261,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       avg->multiplyToSelf(1.0 / sum);
     }
 
-    const MultiSparseVector<T>& computeGradLog(const Representations<T>& xas,
+    const SparseVectors<T>& computeGradLog(const Representations<T>& xas,
         const Action& action)
     {
       grad->set(xas.at(action));
@@ -293,7 +293,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       return sampleAction();
     }
 
-    MultiSparseVector<T>* parameters() const
+    SparseVectors<T>* parameters() const
     {
       return multiu;
     }

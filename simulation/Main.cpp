@@ -53,7 +53,7 @@ void testProjector()
   SparseVector<double> w(memorySize);
   for (int t = 0; t < 50; t++)
     w.insertEntry(rand() % memorySize, Random::nextDouble());
-  FullTilings<double, float> coder(memorySize, numTiling, true);
+  TileCoderHashing<double, float> coder(memorySize, numTiling, true);
   DenseVector<float> x(numObservations);
   for (int p = 0; p < 5; p++)
   {
@@ -72,7 +72,7 @@ void testSarsaTabularActionMountainCar()
   srand(time(0));
   cout << "time=" << time(0) << endl;
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000, 10,
+  Projector<double, float>* projector = new TileCoderNoHashing<double, float>(1000, 10,
       true);
   StateToStateAction<double, float>* toStateAction = new TabularAction<double,
       float>(projector, &problem->getDiscreteActionList(), true);
@@ -111,7 +111,7 @@ void testOnPolicyBoltzmannRTraceTabularActionCar()
   srand(time(0));
   Env<float>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new FullTilings<double, float>(1000, 10,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10,
       false);
   StateToStateAction<double, float>* toStateAction = new TabularAction<double,
       float>(projector, &problem->getDiscreteActionList(), false);
@@ -134,7 +134,7 @@ void testOnPolicyBoltzmannRTraceTabularActionCar()
       toStateAction->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new RTrace<double>(toStateAction->dimension());
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
       lambda, acting, actoreTraces);
@@ -164,7 +164,7 @@ void testSarsaMountainCar()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(10000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -197,7 +197,7 @@ void testSarsaMountainCar()
 void testExpectedSarsaMountainCar()
 {
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(10000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -232,7 +232,7 @@ void testGreedyGQOnPolicyMountainCar()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(10000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -270,7 +270,7 @@ void testGreedyGQMountainCar()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -311,7 +311,7 @@ void testOffPACMountainCar()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -328,7 +328,7 @@ void testOffPACMountainCar()
       projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
@@ -368,7 +368,7 @@ void testGreedyGQContinuousGridworld()
 {
   srand(time(0));
   Env<float>* problem = new ContinuousGridworld;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
       10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -409,7 +409,7 @@ void testOffPACContinuousGridworld()
 {
   srand(time(0));
   Env<float>* problem = new ContinuousGridworld;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -426,7 +426,7 @@ void testOffPACContinuousGridworld()
       projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
@@ -527,7 +527,7 @@ void testOffPACContinuousGridworldOPtimized()
 {
   srand(time(0));
   Env<float>* problem = new ContinuousGridworld;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -546,7 +546,7 @@ void testOffPACContinuousGridworldOPtimized()
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
@@ -749,7 +749,7 @@ void testOffPACMountainCar3D_1()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -767,7 +767,7 @@ void testOffPACMountainCar3D_1()
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
@@ -891,7 +891,7 @@ void testOffPACMountainCar3D_2()
 {
   srand(time(0));
   Env<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -909,7 +909,7 @@ void testOffPACMountainCar3D_2()
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.1, target,
@@ -947,7 +947,7 @@ void testOffPACSwingPendulum()
 {
   srand(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -966,7 +966,7 @@ void testOffPACSwingPendulum()
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
@@ -1005,7 +1005,7 @@ void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new FullTilings<double, float>(nbMemory,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(nbMemory,
       10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
@@ -1022,7 +1022,7 @@ void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
 
   Trace<double>* actore1 = new ATrace<double>(projector->dimension());
   Trace<double>* actore2 = new ATrace<double>(projector->dimension());
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore1);
   actoreTraces->push_back(actore2);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
@@ -1055,7 +1055,7 @@ void testOnPolicyBoltzmannATraceCar()
   srand(time(0));
   Env<float>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new FullTilings<double, float>(10000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
       10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -1073,7 +1073,7 @@ void testOnPolicyBoltzmannATraceCar()
       projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
       lambda, acting, actoreTraces);
@@ -1104,7 +1104,7 @@ void testOnPolicyBoltzmannRTraceCar()
   srand(time(0));
   Env<float>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new FullTilings<double, float>(10000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
       10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -1122,7 +1122,7 @@ void testOnPolicyBoltzmannRTraceCar()
       projector->dimension(), &problem->getDiscreteActionList());
 
   Trace<double>* actore = new RTrace<double>(projector->dimension());
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
       lambda, acting, actoreTraces);
@@ -1157,7 +1157,7 @@ void testOnPolicySwingPendulum()
 {
   srand(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000, 10,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10,
       true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
@@ -1177,7 +1177,7 @@ void testOnPolicySwingPendulum()
 
   Trace<double>* actore1 = new ATrace<double>(projector->dimension());
   Trace<double>* actore2 = new ATrace<double>(projector->dimension());
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore1);
   actoreTraces->push_back(actore2);
   ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
@@ -1209,7 +1209,7 @@ void testOffPACSwingPendulum2()
 {
   srand(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new FullTilings<double, float>(1000000,
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
       10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
@@ -1227,7 +1227,7 @@ void testOffPACSwingPendulum2()
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, 0.4, target,
@@ -1300,7 +1300,7 @@ void testOffPACAcrobot()
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
-  MultiTrace<double>* actoreTraces = new MultiTrace<double>();
+  Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
@@ -1583,8 +1583,8 @@ int main(int argc, char** argv)
 //  testProjector();
 //  testProjectorMachineLearning();
 //  testSarsaMountainCar();
-//  testSarsaTabularActionMountainCar();
-  testOnPolicyBoltzmannRTraceTabularActionCar();
+  testSarsaTabularActionMountainCar();
+//  testOnPolicyBoltzmannRTraceTabularActionCar();
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();

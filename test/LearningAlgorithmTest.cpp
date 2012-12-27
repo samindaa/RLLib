@@ -33,7 +33,7 @@ class SupervisedAlgorithmTest
       int numObservations = 1;
       int memorySize = 512;
       int numTiling = 16;
-      FullTilings<double, float> coder(memorySize, numTiling, true);
+      TileCoderHashing<double, float> coder(memorySize, numTiling, true);
       DVecFloatType x(numObservations);
       Adaline<double> adaline(coder.dimension(), 0.1 / coder.vectorNorm());
       IDBD<double> idbd(coder.dimension(), 0.001); // This value looks good

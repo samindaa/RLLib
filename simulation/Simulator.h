@@ -51,7 +51,8 @@ class Simulator
       delete x_t;
       delete x_tp1;
     }
-    void run(int maxRuns, int maxSteps, int maxEpisodes)
+    void run(const int& maxRuns, const int& maxSteps, const int& maxEpisodes,
+        const bool& runTest = true)
     {
       std::cout << "## ControlLearner=" << typeid(*agent).name() << std::endl;
       xTest.clear();
@@ -88,21 +89,26 @@ class Simulator
         }
         std::cout << std::endl;
 
-        std::cout << "## test" << std::endl;
-        test(maxTestRuns, maxSteps);
+        if (runTest)
+        {
+          std::cout << "## test" << std::endl;
+          test(maxTestRuns, maxSteps);
+        }
       }
 
-      double xbar = std::accumulate(xTest.begin(), xTest.end(), 0.0)
-          / (double(xTest.size()));
-      std::cout << "## avg length=" << xbar << std::endl;
-      double sigmabar = 0;
-      for (std::vector<double>::const_iterator x = xTest.begin();
-          x != xTest.end(); ++x)
-        sigmabar += pow((*x - xbar), 2);
-      sigmabar = sqrt(sigmabar) / double(xTest.size());
-      double se/*standard error*/= sigmabar / sqrt(double(xTest.size()));
-      std::cout << "## (+- 95%) =" << (se * 2) << std::endl;
-
+      if (runTest)
+      {
+        double xbar = std::accumulate(xTest.begin(), xTest.end(), 0.0)
+            / (double(xTest.size()));
+        std::cout << "## avg length=" << xbar << std::endl;
+        double sigmabar = 0;
+        for (std::vector<double>::const_iterator x = xTest.begin();
+            x != xTest.end(); ++x)
+          sigmabar += pow((*x - xbar), 2);
+        sigmabar = sqrt(sigmabar) / double(xTest.size());
+        double se/*standard error*/= sigmabar / sqrt(double(xTest.size()));
+        std::cout << "## (+- 95%) =" << (se * 2) << std::endl;
+      }
     }
 
     void test(int maxRuns, int maxSteps)

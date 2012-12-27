@@ -275,12 +275,12 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     bool initialized;
     double alpha_u, gamma_t, lambda;
     PolicyDistribution<T>* policy;
-    MultiTrace<T>* e;
-    MultiSparseVector<T>* u;
+    Traces<T>* e;
+    SparseVectors<T>* u;
 
   public:
     ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t,
-        const double& lambda, PolicyDistribution<T>* policy, MultiTrace<T>* e) :
+        const double& lambda, PolicyDistribution<T>* policy, Traces<T>* e) :
         initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda), policy(
             policy), e(e), u(policy->parameters())
     {
@@ -301,7 +301,7 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
         double const& rho_t, double const& gamma_t, double delta_t)
     {
       assert(initialized);
-      const MultiSparseVector<T>& gradLog = policy->computeGradLog(xas_t, a_t);
+      const SparseVectors<T>& gradLog = policy->computeGradLog(xas_t, a_t);
       for (unsigned int i = 0; i < e->dimension(); i++)
       {
         e->at(i)->update(gamma_t * lambda, gradLog[i]);
@@ -447,12 +447,12 @@ class Actor: public ActorOnPolicy<T, O>
     bool initialized;
     double alpha_u, gamma, lambda;
     PolicyDistribution<T>* policy;
-    MultiTrace<T>* e;
-    MultiSparseVector<T>* u;
+    Traces<T>* e;
+    SparseVectors<T>* u;
 
   public:
     Actor(const double& alpha_u, const double& gamma, const double& lambda,
-        PolicyDistribution<T>* policy, MultiTrace<T>* e) :
+        PolicyDistribution<T>* policy, Traces<T>* e) :
         initialized(false), alpha_u(alpha_u), gamma(gamma), lambda(lambda), policy(
             policy), e(e), u(policy->parameters())
     {
@@ -477,7 +477,7 @@ class Actor: public ActorOnPolicy<T, O>
         double delta_t)
     {
       assert(initialized);
-      const MultiSparseVector<T>& gradLog = policy->computeGradLog(xas_t, a_t);
+      const SparseVectors<T>& gradLog = policy->computeGradLog(xas_t, a_t);
       for (unsigned int i = 0; i < e->dimension(); i++)
       {
         e->at(i)->update(gamma * lambda, gradLog[i]);

@@ -218,7 +218,7 @@ class MaxLengthTrace: public Trace<T>
 };
 
 template<class T>
-class MultiTrace
+class Traces
 {
   protected:
     typename std::vector<Trace<T>*>* traces;
@@ -226,33 +226,33 @@ class MultiTrace
     typedef typename std::vector<Trace<T>*>::iterator iterator;
     typedef typename std::vector<Trace<T>*>::const_iterator const_iterator;
 
-    MultiTrace() :
+    Traces() :
         traces(new std::vector<Trace<T>*>())
     {
     }
 
-    ~MultiTrace()
+    ~Traces()
     {
       traces->clear();
       delete traces;
     }
 
-    MultiTrace(const MultiTrace<T>& that) :
+    Traces(const Traces<T>& that) :
         traces(new std::vector<Trace<T>*>())
     {
-      for (typename MultiTrace<T>::iterator iter = that.begin();
+      for (typename Traces<T>::iterator iter = that.begin();
           iter != that.end(); ++iter)
         traces->push_back(*iter);
     }
 
-    MultiTrace<T>& operator=(const MultiTrace<T>& that)
+    Traces<T>& operator=(const Traces<T>& that)
     {
       if (this != that)
       {
         traces->clear();
         delete traces;
-        traces = new MultiTrace<T>();
-        for (typename MultiTrace<T>::iterator iter = that.begin();
+        traces = new Traces<T>();
+        for (typename Traces<T>::iterator iter = that.begin();
             iter != that.end(); ++iter)
           traces->push_back(*iter);
       }
@@ -297,7 +297,7 @@ class MultiTrace
 
     void clear()
     {
-      for (typename MultiTrace<T>::iterator iter = begin(); iter != end();
+      for (typename Traces<T>::iterator iter = begin(); iter != end();
           ++iter)
         (*iter)->clear();
     }

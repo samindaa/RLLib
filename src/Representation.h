@@ -83,7 +83,6 @@ class StateToStateAction
     virtual ~StateToStateAction()
     {
     }
-    virtual const SparseVector<T>& stateAction(const DenseVector<O>& x) =0;
     virtual const Representations<T>& stateActions(const DenseVector<O>& x) =0;
     virtual const ActionList& getActionList() const =0;
     virtual double vectorNorm() const =0;
@@ -109,12 +108,6 @@ class StateActionTilings: public StateToStateAction<T, O>
     ~StateActionTilings()
     {
       delete phis;
-    }
-
-    const SparseVector<T>& stateAction(const DenseVector<O>& x)
-    {
-      assert(actions->dimension() == phis->dimension());
-      return projector->project(x);
     }
 
     const Representations<T>& stateActions(const DenseVector<O>& x)
@@ -177,12 +170,6 @@ class TabularAction: public StateToStateAction<T, O>
     {
       delete phis;
       delete _phi;
-    }
-
-    const SparseVector<T>& stateAction(const DenseVector<O>& x)
-    {
-      assert(actions->dimension() == phis->dimension());
-      return projector->project(x);
     }
 
     const Representations<T>& stateActions(const DenseVector<O>& x)

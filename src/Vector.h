@@ -712,7 +712,7 @@ class SparseVector: public Vector<T>
 };
 
 template<class T>
-class MultiSparseVector
+class SparseVectors
 {
   protected:
     typename std::vector<SparseVector<T>*>* vectors;
@@ -720,33 +720,33 @@ class MultiSparseVector
     typedef typename std::vector<SparseVector<T>*>::iterator iterator;
     typedef typename std::vector<SparseVector<T>*>::const_iterator const_iterator;
 
-    MultiSparseVector() :
+    SparseVectors() :
         vectors(new std::vector<SparseVector<T>*>())
     {
     }
 
-    ~MultiSparseVector()
+    ~SparseVectors()
     {
       vectors->clear();
       delete vectors;
     }
 
-    MultiSparseVector(const MultiSparseVector<T>& that) :
+    SparseVectors(const SparseVectors<T>& that) :
         vectors(new std::vector<SparseVector<T>*>())
     {
-      for (typename MultiSparseVector<T>::iterator iter = that.begin();
+      for (typename SparseVectors<T>::iterator iter = that.begin();
           iter != that.end(); ++iter)
         vectors->push_back(*iter);
     }
 
-    MultiSparseVector<T>& operator=(const MultiSparseVector<T>& that)
+    SparseVectors<T>& operator=(const SparseVectors<T>& that)
     {
       if (this != that)
       {
         vectors->clear();
         delete vectors;
-        vectors = new MultiSparseVector<T>();
-        for (typename MultiSparseVector<T>::iterator iter = that.begin();
+        vectors = new SparseVectors<T>();
+        for (typename SparseVectors<T>::iterator iter = that.begin();
             iter != that.end(); ++iter)
           vectors->push_back(*iter);
       }
@@ -780,7 +780,7 @@ class MultiSparseVector
 
     void clear()
     {
-      for (typename MultiSparseVector<T>::iterator iter = begin();
+      for (typename SparseVectors<T>::iterator iter = begin();
           iter != end(); ++iter)
         (*iter)->clear();
     }
@@ -805,7 +805,7 @@ class MultiSparseVector
     void persist(std::string f) const
     {
       int i = 0;
-      for (typename MultiSparseVector<T>::const_iterator iter = begin();
+      for (typename SparseVectors<T>::const_iterator iter = begin();
           iter != end(); ++iter)
       {
         std::string fi(f);
@@ -820,7 +820,7 @@ class MultiSparseVector
     void resurrect(std::string f) const
     {
       int i = 0;
-      for (typename MultiSparseVector<T>::const_iterator iter = begin();
+      for (typename SparseVectors<T>::const_iterator iter = begin();
           iter != end(); ++iter)
       {
         std::string fi(f);
