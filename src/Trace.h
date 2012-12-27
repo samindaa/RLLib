@@ -250,8 +250,6 @@ class Traces
       if (this != that)
       {
         traces->clear();
-        delete traces;
-        traces = new Traces<T>();
         for (typename Traces<T>::iterator iter = that.begin();
             iter != that.end(); ++iter)
           traces->push_back(*iter);

@@ -744,8 +744,6 @@ class SparseVectors
       if (this != that)
       {
         vectors->clear();
-        delete vectors;
-        vectors = new SparseVectors<T>();
         for (typename SparseVectors<T>::iterator iter = that.begin();
             iter != that.end(); ++iter)
           vectors->push_back(*iter);
@@ -780,8 +778,8 @@ class SparseVectors
 
     void clear()
     {
-      for (typename SparseVectors<T>::iterator iter = begin();
-          iter != end(); ++iter)
+      for (typename SparseVectors<T>::iterator iter = begin(); iter != end();
+          ++iter)
         (*iter)->clear();
     }
 
