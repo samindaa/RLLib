@@ -41,17 +41,16 @@ template<class T, class O>
 class TileCoder: public Projector<T, O>
 {
   protected:
-    int nbTiling;
     bool includeActiveFeature;
     SparseVector<T>* vector;
-    int* theTiles;
+    DenseVector<int>* theTiles;
   public:
     TileCoder(const int& memorySize, const int& numTiling,
         bool includeActiveFeature = true) :
-        nbTiling(numTiling), includeActiveFeature(includeActiveFeature), vector(
+        includeActiveFeature(includeActiveFeature), vector(
             new SparseVector<T>(
                 includeActiveFeature ? memorySize + 1 : memorySize)), theTiles(
-            new int[numTiling])
+            new DenseVector<int>(numTiling))
     {
       // Consistent hashing
       int dummyTiles[1];
@@ -65,28 +64,27 @@ class TileCoder: public Projector<T, O>
     {
 
       delete vector;
-      delete[] theTiles;
+      delete theTiles;
     }
 
-    virtual void coder(int* theTiles, const int& nt, const int& memory,
-        float* floats, const int& nf) =0;
-    virtual void coder(int* theTiles, const int& nt, const int& memory,
-        float* floats, const int& nf, const int& h1) =0;
+    virtual void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
+        const int& memory) =0;
+    virtual void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
+        const int& memory, const int& h1) =0;
 
     const SparseVector<T>& project(const DenseVector<O>& x, int h1)
     {
       vector->clear();
       if (includeActiveFeature)
       {
-        coder(theTiles, nbTiling, vector->dimension() - 1, x(), x.dimension(),
-            h1);
+        coder(*theTiles, x, vector->dimension() - 1, h1);
         vector->insertLast(1.0);
       }
       else
-        coder(theTiles, nbTiling, vector->dimension(), x(), x.dimension(), h1);
+        coder(*theTiles, x, vector->dimension(), h1);
 
-      for (int* i = theTiles; i < theTiles + nbTiling; ++i)
-        vector->insertEntry(*i, 1.0);
+      for (int i = 0; i < theTiles->dimension(); i++)
+        vector->insertEntry(theTiles->at(i), 1.0);
       return *vector;
     }
 
@@ -95,21 +93,23 @@ class TileCoder: public Projector<T, O>
       vector->clear();
       if (includeActiveFeature)
       {
-        coder(theTiles, nbTiling, vector->dimension() - 1, x(), x.dimension());
+        coder(*theTiles, x, vector->dimension() - 1);
         vector->insertLast(1.0);
       }
       else
-        coder(theTiles, nbTiling, vector->dimension(), x(), x.dimension());
+        coder(*theTiles, x, vector->dimension());
 
-      for (int* i = theTiles; i < theTiles + nbTiling; ++i)
-        vector->insertEntry(*i, 1.0);
+      for (int i = 0; i < theTiles->dimension(); i++)
+        vector->insertEntry(theTiles->at(i), 1.0);
       return *vector;
 
     }
 
     double vectorNorm() const
     {
-      return includeActiveFeature ? nbTiling + 1 : nbTiling;
+      return
+          includeActiveFeature ?
+              theTiles->dimension() + 1 : theTiles->dimension();
     }
 
     int dimension() const
@@ -134,16 +134,16 @@ class TileCoderHashing: public TileCoder<T, O>
     {
     }
 
-    void coder(int* theTiles, const int& nt, const int& memory, float* floats,
-        const int& nf)
+    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
+        const int& memory)
     {
-      tiles(theTiles, nt, memory, floats, nf);
+      tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension());
     }
 
-    void coder(int* theTiles, const int& nt, const int& memory, float* floats,
-        const int& nf, const int& h1)
+    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
+        const int& memory, const int& h1)
     {
-      tiles(theTiles, nt, memory, floats, nf, h1);
+      tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension(), h1);
     }
 
 };
@@ -181,18 +181,17 @@ class TileCoderNoHashing: public TileCoder<T, O>
       delete ct;
     }
 
-    void coder(int* theTiles, const int& nt, const int& memory, float* floats,
-        const int& nf)
+    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
+        const int& memory)
     {
-      tiles(theTiles, nt, ct, floats, nf);
+      tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension());
     }
 
-    void coder(int* theTiles, const int& nt, const int& memory, float* floats,
-        const int& nf, const int& h1)
+    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
+        const int& memory, const int& h1)
     {
-      tiles(theTiles, nt, ct, floats, nf, h1);
+      tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension(), h1);
     }
-
 };
 
 // @@>>TODO: Yet to implement
