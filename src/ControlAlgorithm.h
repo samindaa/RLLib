@@ -606,7 +606,7 @@ template<class T, class O>
 class ActorCritic: public AbstractActorCritic<T, O>
 {
   protected:
-    typedef AbstractActorCritic<T, O> Base;
+    typedef AbstractActorCritic<T, O> super;
     SparseVector<T>* phi_t;
     SparseVector<T>* phi_tp1;
   public:
@@ -627,10 +627,10 @@ class ActorCritic: public AbstractActorCritic<T, O>
     double updateCritic(const DenseVector<O>& x_t, const Action& a_t,
         const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
     {
-      phi_t->set(Base::projector->project(x_t));
-      phi_tp1->set(Base::projector->project(x_tp1));
+      phi_t->set(super::projector->project(x_t));
+      phi_tp1->set(super::projector->project(x_tp1));
       // Update critic
-      return Base::critic->update(*phi_t, *phi_tp1, r_tp1);
+      return super::critic->update(*phi_t, *phi_tp1, r_tp1);
     }
 
 };
@@ -639,7 +639,7 @@ template<class T, class O>
 class AverageRewardActorCritic: public AbstractActorCritic<T, O>
 {
   protected:
-    typedef AbstractActorCritic<T, O> Base;
+    typedef AbstractActorCritic<T, O> super;
     double alpha_r, averageReward;
     SparseVector<T>* phi_t;
     SparseVector<T>* phi_tp1;
@@ -664,11 +664,11 @@ class AverageRewardActorCritic: public AbstractActorCritic<T, O>
     double updateCritic(const DenseVector<O>& x_t, const Action& a_t,
         const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
     {
-      phi_t->set(Base::projector->project(x_t));
-      phi_tp1->set(Base::projector->project(x_tp1));
+      phi_t->set(super::projector->project(x_t));
+      phi_tp1->set(super::projector->project(x_tp1));
       // Update critic
-      double delta_t = AbstractActorCritic<T, O>::critic->update(*phi_t,
-          *phi_tp1, r_tp1 - averageReward);
+      double delta_t = super::critic->update(*phi_t, *phi_tp1,
+          r_tp1 - averageReward);
       averageReward += alpha_r * delta_t;
       return delta_t;
     }

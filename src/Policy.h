@@ -151,11 +151,8 @@ class NormalDistribution: public PolicyDistribution<T>
       assert((xs.dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
       x->set(xs.at(actions->at(0)));
-      gradMean->set(*x);
-      gradMean->multiplyToSelf(meanStep);
-      gradStddev->set(*x);
-      gradStddev->multiplyToSelf(meanStep);
-
+      gradMean->set(*x).multiplyToSelf(meanStep);
+      gradStddev->set(*x).multiplyToSelf(meanStep);
       return *multigrad;
     }
 
@@ -171,7 +168,7 @@ class NormalDistributionScaled: public NormalDistribution<T>
 {
   public:
 
-    typedef NormalDistribution<T> Base;
+    typedef NormalDistribution<T> super;
 
     NormalDistributionScaled(const double& initialMean,
         const double& initialStddev, const int& nbFeatures, ActionList* actions) :
@@ -185,8 +182,8 @@ class NormalDistributionScaled: public NormalDistribution<T>
     virtual void updateStep(const Action& action)
     {
       double a = action.at(0);
-      Base::meanStep = (a - Base::mean);
-      Base::stddevStep = (a - Base::mean) * (a - Base::mean) - Base::sigma2;
+      super::meanStep = (a - super::mean);
+      super::stddevStep = (a - super::mean) * (a - super::mean) - super::sigma2;
     }
 
 };
@@ -207,8 +204,8 @@ class BoltzmannDistribution: public PolicyDistribution<T>
         actions(actions), avg(new SparseVector<T>(numFeatures)), grad(
             new SparseVector<T>(numFeatures)), distribution(
             new DenseVector<double>(actions->dimension())), u(
-            new SparseVector<T>(numFeatures)), multiu(
-            new SparseVectors<T>()), multigrad(new SparseVectors<T>())
+            new SparseVector<T>(numFeatures)), multiu(new SparseVectors<T>()), multigrad(
+            new SparseVectors<T>())
     {
       // Parameter setting
       multiu->push_back(u);

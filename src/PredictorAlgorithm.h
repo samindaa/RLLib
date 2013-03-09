@@ -17,7 +17,7 @@ namespace RLLib
 
 // Simple predictor algorithms
 template<class T>
-class TDLambda: public Predictor<T>
+class TDLambda: public OnPolicyTD<T>
 {
   private:
     double delta;
@@ -29,9 +29,8 @@ class TDLambda: public Predictor<T>
   public:
     TDLambda(const double& alpha, const double& gamma, const double& lambda,
         Trace<T>* e) :
-        delta(0), initialized(false), alpha(alpha),
-            gamma(gamma), lambda(lambda), e(e),
-            v(new SparseVector<T>(e->vect().dimension()))
+        delta(0), initialized(false), alpha(alpha), gamma(gamma), lambda(
+            lambda), e(e), v(new SparseVector<T>(e->vect().dimension()))
     {
     }
     virtual ~TDLambda()
@@ -99,9 +98,9 @@ class Sarsa: public Predictor<T>
   public:
     Sarsa(const double& alpha, const double& gamma, const double& lambda,
         Trace<T>* e) :
-        v_t(0), v_tp1(0), delta(0), initialized(false), alpha(alpha),
-            gamma(gamma), lambda(lambda), e(e),
-            v(new SparseVector<T>(e->vect().dimension()))
+        v_t(0), v_tp1(0), delta(0), initialized(false), alpha(alpha), gamma(
+            gamma), lambda(lambda), e(e), v(
+            new SparseVector<T>(e->vect().dimension()))
     {
     }
     virtual ~Sarsa()
@@ -178,10 +177,10 @@ class GQ: public Predictor<T>
   public:
     GQ(const double& alpha_v, const double& alpha_w, const double& beta_tp1,
         const double& lambda_t, Trace<T>* e) :
-        delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w),
-            beta_tp1(beta_tp1), lambda_t(lambda_t), e(e),
-            v(new SparseVector<T>(e->vect().dimension())),
-            w(new SparseVector<T>(e->vect().dimension()))
+        delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), beta_tp1(
+            beta_tp1), lambda_t(lambda_t), e(e), v(
+            new SparseVector<T>(e->vect().dimension())), w(
+            new SparseVector<T>(e->vect().dimension()))
     {
     }
 
@@ -251,7 +250,7 @@ class GQ: public Predictor<T>
 
 // Prediction problems
 template<class T>
-class GTDLambda: public Predictor<T>
+class GTDLambda: public GVF<T>
 {
   private:
     double delta_t;
@@ -266,10 +265,10 @@ class GTDLambda: public Predictor<T>
   public:
     GTDLambda(const double& alpha_v, const double& alpha_w,
         const double& gamma_t, const double& lambda_t, Trace<T>* e) :
-        delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w),
-            gamma_t(gamma_t), lambda_t(lambda_t), e(e),
-            v(new SparseVector<T>(e->vect().dimension())),
-            w(new SparseVector<T>(e->vect().dimension()))
+        delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), gamma_t(
+            gamma_t), lambda_t(lambda_t), e(e), v(
+            new SparseVector<T>(e->vect().dimension())), w(
+            new SparseVector<T>(e->vect().dimension()))
     {
     }
 
@@ -288,7 +287,7 @@ class GTDLambda: public Predictor<T>
 
     double update(const SparseVector<T>& phi_t, const SparseVector<T>& phi_tp1,
         const double& gamma_tp1, const double& lambda_tp1, const double& rho_t,
-        double r_tp1, double z_tp1)
+        const double& r_tp1, const double& z_tp1)
     {
       delta_t = r_tp1 + (1.0 - gamma_tp1) * z_tp1 + gamma_tp1 * v->dot(phi_tp1)
           - v->dot(phi_t);

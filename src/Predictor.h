@@ -28,6 +28,30 @@ class Predictor
     virtual void resurrect(const std::string& f) =0;
 };
 
+template<class T>
+class OnPolicyTD: public Predictor<T>
+{
+  public:
+    virtual ~OnPolicyTD()
+    {
+    }
+    virtual double update(const SparseVector<T>& phi_t,
+        const SparseVector<T>& phi_tp1, double r_tp1) =0;
+};
+
+template<class T>
+class GVF: public Predictor<T>
+{
+  public:
+    virtual ~GVF()
+    {
+    }
+    virtual double update(const SparseVector<T>& phi_t,
+        const SparseVector<T>& phi_tp1, const double& gamma_tp1,
+        const double& lambda_tp1, const double& rho_t, const double& r_tp1,
+        const double& z_tp1) =0;
+};
+
 } // namespace RLLib
 
 #endif /* PREDICTOR_H_ */

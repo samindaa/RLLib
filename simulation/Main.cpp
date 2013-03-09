@@ -318,7 +318,7 @@ void testOffPACMountainCar()
 
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
-  double lambda = 0.4 * 0;
+  double lambda = 0.4;
   double gamma = 0.99;
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
@@ -1588,9 +1588,9 @@ int main(int argc, char** argv)
 //  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
+  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-  testOffPACContinuousGridworld();
+//  testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
 //  testOffPACOnPolicyContinuousGridworld();
