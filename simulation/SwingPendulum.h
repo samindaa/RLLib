@@ -27,13 +27,13 @@ class SwingPendulum: public Env<float>
     std::ofstream outfile;
   public:
     SwingPendulum() :
-        Env(2, 3, 1), uMax(3.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0),
-            velocity(0), maxVelocity(M_PI_4 / stepTime),
-            actionRange(new Range<float>(-uMax, uMax)),
-            thetaRange(new Range<float>(-M_PI, M_PI)),
-            velocityRange(new Range<float>(-maxVelocity, maxVelocity)),
-            mass(1.0), length(1.0), g(9.8), requiredUpTime(10.0 /*seconds*/),
-            upRange(M_PI_4 /*seconds*/), upTime(0)
+        Env(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(
+            0), maxVelocity(M_PI_4 / stepTime), actionRange(
+            new Range<float>(-uMax, uMax)), thetaRange(
+            new Range<float>(-M_PI, M_PI)), velocityRange(
+            new Range<float>(-maxVelocity, maxVelocity)), mass(1.0), length(
+            1.0), g(9.8), requiredUpTime(10.0 /*seconds*/), upRange(
+            M_PI_4 /*seconds*/), upTime(0)
     {
 
       discreteActions->push_back(0, actionRange->min());
@@ -55,16 +55,12 @@ class SwingPendulum: public Env<float>
     }
 
   private:
-    double normalize(float data)
+    void adjustTheta()
     {
-      if (data < M_PI && data >= -M_PI)
-        return data;
-      float ndata = data - ((int) (data / 2.0 * M_PI)) * 2.0 * M_PI;
-      if (ndata >= M_PI)
-        ndata -= 2.0 * M_PI;
-      else if (ndata < -M_PI)
-        ndata += 2.0 * M_PI;
-      return ndata;
+      if (theta >= M_PI)
+        theta -= 2.0 * M_PI;
+      if (theta < -M_PI)
+        theta += 2.0 * M_PI;
     }
 
   public:
@@ -87,7 +83,7 @@ class SwingPendulum: public Env<float>
       //  theta = (drand48() - 0.5) * 2.0 * M_PI;
       theta = M_PI_2;
       velocity = 0.0;
-      normalize(theta);
+      adjustTheta();
       update();
     }
 
@@ -98,9 +94,8 @@ class SwingPendulum: public Env<float>
           + torque;
       velocity = velocityRange->bound(velocity + thetaAcc);
       theta += velocity * stepTime;
-      normalize(theta);
-      upTime = fabs(theta) > upRange ?
-          0 : upTime + 1;
+      adjustTheta();
+      upTime = fabs(theta) > upRange ? 0 : upTime + 1;
 
       update();
     }

@@ -31,7 +31,7 @@ class Policy
     {
     }
     virtual void update(const Representations<T>& phis) =0;
-    virtual double pi(const Action& a) const =0;
+    virtual double pi(const Action& a) =0;
     virtual const Action& sampleAction() =0;
     virtual const Action& sampleBestAction() =0;
 
@@ -120,7 +120,7 @@ class NormalDistribution: public PolicyDistribution<T>
       sigma2 = stddev * stddev;
     }
 
-    double pi(const Action& a) const
+    double pi(const Action& a)
     {
       return Random::gaussianProbability(a.at(0), mean, stddev);
     }
@@ -186,6 +186,91 @@ class NormalDistributionScaled: public NormalDistribution<T>
       super::stddevStep = (a - super::mean) * (a - super::mean) - super::sigma2;
     }
 
+};
+
+template<class T>
+class ScaledPolicyDistribution: public PolicyDistribution<T>
+{
+  protected:
+    ActionList* actions;
+    PolicyDistribution<T>* policy;
+    Range<T>* policyRange;
+    Range<T>* problemRange;
+    Action* a_t;
+
+  public:
+    ScaledPolicyDistribution(ActionList* actions, PolicyDistribution<T>* policy,
+        Range<T>* policyRange, Range<T>* problemRange) :
+        actions(actions), policy(policy), policyRange(policyRange), problemRange(
+            problemRange), a_t(new Action(0))
+    {
+      a_t->push_back(0.0);
+    }
+
+    virtual ~ScaledPolicyDistribution()
+    {
+      delete a_t;
+    }
+
+  private:
+    // From (c, a, min(), max()) to (0, a', -1, 1)
+    double normalize(const Range<T>* range, const double& a)
+    {
+      return (a - range->center()) / (range->length() / 2.0);
+    }
+
+    // From (0, a', -1, 1) to (c, a, min(), max())
+    double scale(const Range<T>* range, const double& a)
+    {
+      return (a * range->length() / 2.0) + range->center();
+    }
+
+    const Action& problemToPolicy(const double& problemAction)
+    {
+      double normalizedAction = normalize(problemRange, problemAction);
+      a_t->update(0, scale(policyRange, normalizedAction));
+      return *a_t;
+    }
+
+    const Action& policyToProblem(const double& policyAction)
+    {
+      double normalizedAction = normalize(policyRange, policyAction);
+      a_t->update(0, scale(problemRange, normalizedAction));
+      return *a_t;
+    }
+
+  public:
+    void update(const Representations<T>& phis)
+    {
+      policy->update(phis);
+    }
+
+    double pi(const Action& a)
+    {
+      return policy->pi(problemToPolicy(a.at(0)));
+    }
+
+    const Action& sampleAction()
+    {
+      actions->update(0, 0, policyToProblem(policy->sampleAction().at(0)));
+      return actions->at(0);
+    }
+
+    const Action& sampleBestAction()
+    {
+      return sampleAction();
+    }
+
+    const SparseVectors<T>& computeGradLog(const Representations<T>& phis,
+        const Action& action)
+    {
+      return policy->computeGradLog(phis, problemToPolicy(action.at(0)));
+    }
+
+    SparseVectors<T>* parameters() const
+    {
+      return policy->parameters();
+    }
 };
 
 template<class T>
@@ -266,7 +351,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       return *multigrad;
     }
 
-    double pi(const Action& action) const
+    double pi(const Action& action)
     {
       return distribution->at(action);
 
@@ -314,7 +399,7 @@ class RandomPolicy: public Policy<T>
     void update(const Representations<T>& xas)
     {
     }
-    double pi(const Action& a) const
+    double pi(const Action& a)
     {
       return 1.0 / actions->dimension();
     }
@@ -381,7 +466,7 @@ class RandomBiasPolicy: public Policy<T>
       prev = &actions->at(actions->dimension() - 1);
     }
 
-    double pi(const Action& action) const
+    double pi(const Action& action)
     {
       return distribution->at(action);
     }
@@ -445,7 +530,7 @@ class Greedy: public DiscreteActionPolicy<T>
       findBestAction();
     }
 
-    double pi(const Action& a) const
+    double pi(const Action& a)
     {
       return (bestAction == &a) ? 1.0 : 0;
     }
@@ -474,7 +559,7 @@ class EpsilonGreedy: public Greedy<T>
     {
     }
 
-    const Action& sampleAction() const
+    const Action& sampleAction()
     {
       if (Random::nextDouble() < epsilon)
         return (*Greedy<T>::actions)[rand() % Greedy<T>::actions->dimension()];
@@ -482,7 +567,7 @@ class EpsilonGreedy: public Greedy<T>
         return *Greedy<T>::bestAction;
     }
 
-    double pi(const Action& a) const
+    double pi(const Action& a)
     {
       double probability = (a == *Greedy<T>::bestAction) ? 1.0 - epsilon : 0.0;
       return probability + epsilon / Greedy<T>::actions->dimension();

@@ -6,10 +6,13 @@
 
 CC = g++
 CFLAGS = -I. -I./src -Wall -Werror -O3
+INCLUDES = Action.h Control.h ControlAlgorithm.h Math.h Policy.h Predictor.h PredictorAlgorithm.h \
+		   Projector.h Representation.h Supervised.h SupervisedAlgorithm.h Tiles.h TilesImpl.h Trace.h \
+		   Vector.h
 
 all: Main VectorTest TraceTest LearningAlgorithmTest
 
-Main:
+Main: 
 	$(CC) $(CFLAGS) simulation/Main.cpp -o Main
 
 VectorTest:

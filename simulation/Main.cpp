@@ -72,8 +72,8 @@ void testSarsaTabularActionMountainCar()
   srand(time(0));
   cout << "time=" << time(0) << endl;
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderNoHashing<double, float>(1000, 10,
-      true);
+  Projector<double, float>* projector = new TileCoderNoHashing<double, float>(
+      1000, 10, true);
   StateToStateAction<double, float>* toStateAction = new TabularAction<double,
       float>(projector, &problem->getDiscreteActionList(), true);
   Trace<double>* e = new RTrace<double>(toStateAction->dimension());
@@ -111,8 +111,8 @@ void testOnPolicyBoltzmannRTraceTabularActionCar()
   srand(time(0));
   Env<float>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10,
-      false);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000, 10, false);
   StateToStateAction<double, float>* toStateAction = new TabularAction<double,
       float>(projector, &problem->getDiscreteActionList(), false);
 
@@ -164,8 +164,8 @@ void testSarsaMountainCar()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      10000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
@@ -197,8 +197,8 @@ void testSarsaMountainCar()
 void testExpectedSarsaMountainCar()
 {
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      10000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
@@ -215,7 +215,7 @@ void testExpectedSarsaMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(5, 5000, 200);
+  sim->run(5, 5000, 300);
   sim->computeValueFunction();
 
   delete problem;
@@ -232,8 +232,8 @@ void testGreedyGQOnPolicyMountainCar()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      10000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -270,8 +270,8 @@ void testGreedyGQMountainCar()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -311,8 +311,8 @@ void testOffPACMountainCar()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -368,8 +368,8 @@ void testGreedyGQContinuousGridworld()
 {
   srand(time(0));
   Env<float>* problem = new ContinuousGridworld;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
-      10, false);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000000, 10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -409,8 +409,8 @@ void testOffPACContinuousGridworld()
 {
   srand(time(0));
   Env<float>* problem = new ContinuousGridworld;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -527,8 +527,8 @@ void testOffPACContinuousGridworldOPtimized()
 {
   srand(time(0));
   Env<float>* problem = new ContinuousGridworld;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -749,8 +749,8 @@ void testOffPACMountainCar3D_1()
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -891,8 +891,8 @@ void testOffPACMountainCar3D_2()
 {
   srand(time(0));
   Env<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -947,8 +947,8 @@ void testOffPACSwingPendulum()
 {
   srand(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -1005,8 +1005,8 @@ void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
 {
   srand(time(0));
   Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(nbMemory,
-      10, false);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      nbMemory, 10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
@@ -1055,8 +1055,8 @@ void testOnPolicyBoltzmannATraceCar()
   srand(time(0));
   Env<float>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
-      10, false);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      10000, 10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -1104,8 +1104,8 @@ void testOnPolicyBoltzmannRTraceCar()
   srand(time(0));
   Env<float>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000,
-      10, false);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      10000, 10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -1157,23 +1157,29 @@ void testOnPolicySwingPendulum()
 {
   srand(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10,
-      true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      10000, 10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
-  double alpha_u = 0.05 / projector->vectorNorm();
+  double alpha_u = 0.001 / projector->vectorNorm();
+  double alpha_r = .0001;
   double gamma = 1.0;
   double lambda = 0.5;
 
   Trace<double>* critice = new ATrace<double>(projector->dimension());
-  Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 2000);
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
-      criticeML);
+      critice);
 
-  PolicyDistribution<double>* acting = new NormalDistributionScaled<double>(0,
-      1.0, projector->dimension(), &problem->getContinuousActionList());
+  PolicyDistribution<double>* policyDistribution = new NormalDistributionScaled<
+      double>(0, 1.0, projector->dimension(),
+      &problem->getContinuousActionList());
+  Range<double> policyRange(-2.0, 2.0);
+  Range<double> problemRange(-2.0, 2.0);
+  PolicyDistribution<double>* acting = new ScaledPolicyDistribution<double>(
+      &problem->getContinuousActionList(), policyDistribution, &policyRange,
+      &problemRange);
 
   Trace<double>* actore1 = new ATrace<double>(projector->dimension());
   Trace<double>* actore2 = new ATrace<double>(projector->dimension());
@@ -1184,22 +1190,22 @@ void testOnPolicySwingPendulum()
       lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
-      double, float>(critic, actor, projector, toStateAction, 0.01);
+      double, float>(critic, actor, projector, toStateAction, alpha_r);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 5000, 50);
+  sim->run(1, 1000, 2000);
 
   delete problem;
   delete projector;
   delete toStateAction;
   delete critice;
-  delete criticeML;
   delete critic;
   delete actore1;
   delete actore2;
   delete actoreTraces;
   delete actor;
+  delete policyDistribution;
   delete acting;
   delete control;
   delete sim;
@@ -1209,8 +1215,8 @@ void testOffPACSwingPendulum2()
 {
   srand(time(0));
   Env<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000,
-      10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(
+      1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getDiscreteActionList());
 
@@ -1585,10 +1591,10 @@ int main(int argc, char** argv)
 //  testSarsaMountainCar();
 //  testSarsaTabularActionMountainCar();
 //  testOnPolicyBoltzmannRTraceTabularActionCar();
-//  testExpectedSarsaMountainCar();
+  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
-  testOffPACMountainCar();
+//  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
 //  testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
