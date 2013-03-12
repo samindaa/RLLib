@@ -13,6 +13,7 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <iostream>
 
 #include "Vector.h"
 #include "Action.h"
@@ -20,6 +21,7 @@
 #include "Representation.h"
 #include "Math.h"
 
+using namespace std;
 namespace RLLib
 {
 
@@ -79,6 +81,7 @@ class NormalDistribution: public PolicyDistribution<T>
     ActionList* actions;
     SparseVectors<T>* multiu;
     SparseVectors<T>* multigrad;
+    const int defaultAction;
   public:
 
     NormalDistribution(const double& initialMean, const double& initialStddev,
@@ -90,7 +93,8 @@ class NormalDistribution: public PolicyDistribution<T>
             new SparseVector<T>(u_mean->dimension())), gradStddev(
             new SparseVector<T>(u_stddev->dimension())), x(
             new SparseVector<T>(nbFeatures)), actions(actions), multiu(
-            new SparseVectors<T>()), multigrad(new SparseVectors<T>())
+            new SparseVectors<T>()), multigrad(new SparseVectors<T>()), defaultAction(
+            0)
     {
       multiu->push_back(u_mean);
       multiu->push_back(u_stddev);
@@ -114,7 +118,7 @@ class NormalDistribution: public PolicyDistribution<T>
     {
       // N(mu,var) for single action, single representation only
       assert((xs_t.dimension() == 1) && (actions->dimension() == 1));
-      x->set(xs_t.at(actions->at(0)));
+      x->set(xs_t.at(actions->at(defaultAction)));
       mean = u_mean->dot(*x) + initialMean;
       stddev = exp(u_stddev->dot(*x)) * initialStddev + 10e-8;
       sigma2 = stddev * stddev;
@@ -122,25 +126,26 @@ class NormalDistribution: public PolicyDistribution<T>
 
     double pi(const Action& a)
     {
-      return Random::gaussianProbability(a.at(0), mean, stddev);
+      return Random::gaussianProbability(a.at(defaultAction), mean, stddev);
     }
 
   public:
 
     const Action& sampleAction()
     {
-      actions->update(0, 0, Random::nextNormalGaussian() * stddev + mean);
-      return actions->at(0);
+      actions->update(defaultAction, defaultAction,
+          Random::nextNormalGaussian() * stddev + mean);
+      return actions->at(defaultAction);
     }
+
     const Action& sampleBestAction()
     {
-      actions->update(0, 0, Random::nextNormalGaussian() * stddev + mean);
-      return actions->at(0);
+      return sampleAction();
     }
 
     virtual void updateStep(const Action& action)
     {
-      double a = action.at(0);
+      double a = action.at(defaultAction);
       meanStep = (a - mean) / sigma2;
       stddevStep = (a - mean) * (a - mean) / sigma2 - 1.0;
     }
@@ -150,9 +155,9 @@ class NormalDistribution: public PolicyDistribution<T>
     {
       assert((xs.dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
-      x->set(xs.at(actions->at(0)));
+      x->set(xs.at(actions->at(defaultAction)));
       gradMean->set(*x).multiplyToSelf(meanStep);
-      gradStddev->set(*x).multiplyToSelf(meanStep);
+      gradStddev->set(*x).multiplyToSelf(stddevStep);
       return *multigrad;
     }
 
@@ -181,9 +186,11 @@ class NormalDistributionScaled: public NormalDistribution<T>
 
     virtual void updateStep(const Action& action)
     {
-      double a = action.at(0);
+      double a = action.at(super::defaultAction);
       super::meanStep = (a - super::mean);
       super::stddevStep = (a - super::mean) * (a - super::mean) - super::sigma2;
+
+      //cout << super::meanStep << " " << super::stddevStep << endl;
     }
 
 };

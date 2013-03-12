@@ -3,6 +3,7 @@
 
 clear all;
 close all;
+clc;
 
 V = load('valueFunction.txt');
 E = load('continuousGridworld.txt');

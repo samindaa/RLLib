@@ -9,6 +9,7 @@
 #define ACTION_H_
 
 #include <vector>
+#include <cassert>
 
 namespace RLLib
 {

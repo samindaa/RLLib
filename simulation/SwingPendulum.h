@@ -27,7 +27,7 @@ class SwingPendulum: public Env<float>
     std::ofstream outfile;
   public:
     SwingPendulum() :
-        Env(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(
+        Env(2, 3, 1), uMax(3.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(
             0), maxVelocity(M_PI_4 / stepTime), actionRange(
             new Range<float>(-uMax, uMax)), thetaRange(
             new Range<float>(-M_PI, M_PI)), velocityRange(
@@ -71,8 +71,9 @@ class SwingPendulum: public Env<float>
 
       DenseVector<float>& vars = *__vars;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
-      vars[0] = (theta / thetaRange->length()) * 10.0;
-      vars[1] = (velocity / velocityRange->length()) * 10.0;
+      vars[0] = (theta - thetaRange->min()) * 10.0 / thetaRange->length();
+      vars[1] = (velocity - velocityRange->min()) * 10.0
+          / velocityRange->length();
     }
     void initialize()
     {
@@ -89,6 +90,7 @@ class SwingPendulum: public Env<float>
 
     void step(const Action& a)
     {
+      //std::cout << a.at() << std::endl;
       float torque = actionRange->bound(a.at());
       float thetaAcc = -stepTime * velocity + mass * g * length * sin(theta)
           + torque;

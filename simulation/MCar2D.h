@@ -26,20 +26,15 @@ class MCar2D: public Env<float>
     float targetPosition;
     float throttleFactor;
 
-    float POS_WIDTH; // the tile width for position
-    float VEL_WIDTH; // the tile width for velocity
-
     std::ofstream outfile;
 
   public:
     MCar2D() :
-        Env<float>(2, 3, 1), position(0), velocity(0),
-            positionRange(new Range<float>(-1.2, 0.6)),
-            velocityRange(new Range<float>(-0.07, 0.07)),
-            actionRange(new Range<float>(-1.0, 1.0)),
-            targetPosition(positionRange->max()), throttleFactor(1.0),
-            POS_WIDTH(positionRange->length() / 10.0),
-            VEL_WIDTH(velocityRange->length() / 10.0)
+        Env<float>(2, 3, 1), position(0), velocity(0), positionRange(
+            new Range<float>(-1.2, 0.6)), velocityRange(
+            new Range<float>(-0.07, 0.07)), actionRange(
+            new Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(
+            1.0)
     {
       discreteActions->push_back(0, actionRange->min());
       discreteActions->push_back(1, 0.0);
@@ -65,11 +60,15 @@ class MCar2D: public Env<float>
     void update()
     {
       DenseVector<float>& vars = *__vars;
-      vars[0] = position / POS_WIDTH;
-      vars[1] = velocity / VEL_WIDTH;
+      vars[0] = (position - positionRange->min()) * 10.0
+          / positionRange->length();
+      vars[1] = (velocity - velocityRange->min()) * 10.0
+          / velocityRange->length();
 
+      //if (outfile.is_open() && getOn())
+      //  outfile << position << std::endl;
       if (outfile.is_open() && getOn())
-        outfile << position << std::endl;
+        outfile << vars[0] << " " << vars[1] << endl;
     }
 
     // Profiles
@@ -99,8 +98,7 @@ class MCar2D: public Env<float>
 
     float r() const
     {
-      return endOfEpisode() ?
-          0 : -1.0;
+      return endOfEpisode() ? 0 : -1.0;
     }
 
     float z() const

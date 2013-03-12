@@ -22,6 +22,7 @@ class Predictor
     }
     virtual int dimension() const=0;
     virtual double predict(const SparseVector<T>& x) const =0;
+    virtual double initialize() =0;
     virtual void reset() =0;
 
     virtual void persist(const std::string& f) const =0;
@@ -35,8 +36,8 @@ class OnPolicyTD: public Predictor<T>
     virtual ~OnPolicyTD()
     {
     }
-    virtual double update(const SparseVector<T>& phi_t,
-        const SparseVector<T>& phi_tp1, double r_tp1) =0;
+    virtual double update(const SparseVector<T>& x_t,
+        const SparseVector<T>& x_tp1, double r_tp1) =0;
 };
 
 template<class T>
@@ -46,8 +47,8 @@ class GVF: public Predictor<T>
     virtual ~GVF()
     {
     }
-    virtual double update(const SparseVector<T>& phi_t,
-        const SparseVector<T>& phi_tp1, const double& gamma_tp1,
+    virtual double update(const SparseVector<T>& x_t,
+        const SparseVector<T>& x_tp1, const double& gamma_tp1,
         const double& lambda_tp1, const double& rho_t, const double& r_tp1,
         const double& z_tp1) =0;
 };

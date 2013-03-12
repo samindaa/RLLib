@@ -29,6 +29,11 @@ class Adaline: public LearningAlgorithm<T>
       delete w;
     }
 
+    double initialize()
+    {
+      return 0.0;
+    }
+
     int dimension() const
     {
       return w->dimension();
@@ -79,6 +84,11 @@ class IDBD: public LearningAlgorithm<T>
       delete w;
       delete alpha;
       delete h;
+    }
+
+    double initialize()
+    {
+      return 0.0;
     }
 
     int dimension() const
@@ -176,6 +186,11 @@ class Autostep: public LearningAlgorithm<T>
     }
 
   public:
+    double initialize()
+    {
+      return 0.0;
+    }
+
     int dimension() const
     {
       return w->dimension();

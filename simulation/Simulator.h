@@ -34,15 +34,17 @@ class Simulator
     DenseVector<O>* x_tp1;
 
     std::vector<double> xTest;
-    double episodeR;
-    double episodeZ;
 
   public:
+    double episodeR;
+    double episodeZ;
+    double time;
+
     Simulator(Control<T, O>* agent, Env<O>* env, int maxTestRuns = 20) :
         maxTestRuns(maxTestRuns), agent(agent), env(env), action(0), x_t(
             new DenseVector<O>(env->getVars().dimension())), x_tp1(
             new DenseVector<O>(env->getVars().dimension())), episodeR(0), episodeZ(
-            0)
+            0), time(0)
     {
     }
 
@@ -52,15 +54,18 @@ class Simulator
       delete x_tp1;
     }
     void run(const int& maxRuns, const int& maxSteps, const int& maxEpisodes,
-        const bool& runTest = true)
+        const bool& runTest = true, const bool& verbose = true)
     {
-      std::cout << "## ControlLearner=" << typeid(*agent).name() << std::endl;
+      if (verbose)
+        std::cout << "## ControlLearner=" << typeid(*agent).name() << std::endl;
       xTest.clear();
 
       for (int run = 0; run < maxRuns; run++)
       {
-        std::cout << "## run=" << run << std::endl;
+        if (verbose)
+          std::cout << "## run=" << run << std::endl;
         agent->reset();
+        action = 0;
 
         for (int episode = 0; episode < maxEpisodes; episode++)
         {
@@ -71,6 +76,7 @@ class Simulator
           int steps = 0;
           episodeR = 0;
           episodeZ = 0;
+          time = 0;
           do
           {
             env->step(*action);
@@ -82,16 +88,23 @@ class Simulator
             x_t->set(*x_tp1);
           } while (!env->endOfEpisode() && steps < maxSteps);
 
-          std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
-          //std::cout << "x";
-          std::cout.flush();
+          time = steps;
+
+          if (verbose)
+          {
+            std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
+            //std::cout << "x";
+            std::cout.flush();
+          }
 
         }
-        std::cout << std::endl;
+        if (verbose)
+          std::cout << std::endl;
 
         if (runTest)
         {
-          std::cout << "## test" << std::endl;
+          if (verbose)
+            std::cout << "## test" << std::endl;
           test(maxTestRuns, maxSteps);
         }
       }
@@ -136,15 +149,16 @@ class Simulator
       std::cout << std::endl;
     }
 
-    void computeValueFunction() const
+    void computeValueFunction(const char* outFile =
+        "visualization/valueFunction.txt") const
     {
       if (env->getVars().dimension() == 2) // only for two state variables
       {
-        std::ofstream out("visualization/valueFunction.txt");
+        std::ofstream out(outFile);
         DenseVector<float> x_t(2);
-        for (float x = -10; x <= 10; x += 0.1)
+        for (float x = 0; x <= 10; x += 0.1)
         {
-          for (float y = -10; y <= 10; y += 0.1)
+          for (float y = 0; y <= 10; y += 0.1)
           {
             x_t[0] = x;
             x_t[1] = y;

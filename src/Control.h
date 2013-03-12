@@ -63,7 +63,7 @@ class ActorOffPolicy
     virtual void reset() =0;
     virtual void update(const Representations<T>& xas_t, const Action& a_t,
         double const& rho_t, double const& gamma_t, double delta_t) =0;
-    virtual void updatePolicy(const Representations<T>& xas) =0;
+    virtual PolicyDistribution<T>& policy() const =0;
     virtual const Action& proposeAction(const Representations<T>& xas) =0;
     virtual double pi(const Action& a) const =0;
 
@@ -83,10 +83,9 @@ class ActorOnPolicy
     virtual void initialize() =0;
     virtual void reset() =0;
     virtual void update(const Representations<T>& xas_t, const Action& a_t,
-        double delta_t) =0;
-    virtual void updatePolicy(const Representations<T>& xas) =0;
+        double delta) =0;
+    virtual PolicyDistribution<T>& policy() const =0;
     virtual const Action& proposeAction(const Representations<T>& xas) =0;
-    virtual const Action& decide(const Representations<T>& xas) =0;
 
     virtual void persist(const std::string& f) const =0;
     virtual void resurrect(const std::string& f) =0;

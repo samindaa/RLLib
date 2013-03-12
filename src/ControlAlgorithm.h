@@ -274,15 +274,16 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
   protected:
     bool initialized;
     double alpha_u, gamma_t, lambda;
-    PolicyDistribution<T>* policy;
+    PolicyDistribution<T>* policyDistribution;
     Traces<T>* e;
     SparseVectors<T>* u;
 
   public:
     ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t,
-        const double& lambda, PolicyDistribution<T>* policy, Traces<T>* e) :
-        initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda), policy(
-            policy), e(e), u(policy->parameters())
+        const double& lambda, PolicyDistribution<T>* policyDistribution,
+        Traces<T>* e) :
+        initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda), policyDistribution(
+            policyDistribution), e(e), u(policyDistribution->parameters())
     {
     }
 
@@ -301,7 +302,8 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
         double const& rho_t, double const& gamma_t, double delta_t)
     {
       assert(initialized);
-      const SparseVectors<T>& gradLog = policy->computeGradLog(xas_t, a_t);
+      const SparseVectors<T>& gradLog = policyDistribution->computeGradLog(
+          xas_t, a_t);
       for (unsigned int i = 0; i < e->dimension(); i++)
       {
         e->at(i)->update(gamma_t * lambda, gradLog[i]);
@@ -311,15 +313,15 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
 
     }
 
-    void updatePolicy(const Representations<T>& xas)
+    PolicyDistribution<T>& policy() const
     {
-      policy->update(xas);
+      return *policyDistribution;
     }
 
     const Action& proposeAction(const Representations<T>& xas)
     {
-      policy->update(xas);
-      return policy->sampleBestAction();
+      policyDistribution->update(xas);
+      return policyDistribution->sampleBestAction();
     }
 
     void reset()
@@ -331,7 +333,7 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
 
     double pi(const Action& a) const
     {
-      return policy->pi(a);
+      return policyDistribution->pi(a);
     }
 
     void persist(const std::string& f) const
@@ -390,7 +392,7 @@ class OffPAC: public OffPolicyControlLearner<T, O>
       phi_tp1->set(projector->project(x_tp1));
 
       const Representations<T>& xas_t = toStateAction->stateActions(x_t);
-      actor->updatePolicy(xas_t);
+      actor->policy().update(xas_t);
       behavior->update(xas_t);
       rho_t = actor->pi(a_t) / behavior->pi(a_t);
 
@@ -445,61 +447,47 @@ class Actor: public ActorOnPolicy<T, O>
 {
   protected:
     bool initialized;
-    double alpha_u, gamma, lambda;
-    PolicyDistribution<T>* policy;
-    Traces<T>* e;
+    double alpha_u;
+    PolicyDistribution<T>* policyDistribution;
     SparseVectors<T>* u;
 
   public:
-    Actor(const double& alpha_u, const double& gamma, const double& lambda,
-        PolicyDistribution<T>* policy, Traces<T>* e) :
-        initialized(false), alpha_u(alpha_u), gamma(gamma), lambda(lambda), policy(
-            policy), e(e), u(policy->parameters())
+    Actor(const double& alpha_u, PolicyDistribution<T>* policyDistribution) :
+        initialized(false), alpha_u(alpha_u), policyDistribution(
+            policyDistribution), u(policyDistribution->parameters())
     {
-      //assert(e->vect().dimension() == u->dimension());
-      assert(e->dimension() == u->dimension());
     }
 
     void initialize()
     {
-      e->clear();
       initialized = true;
     }
 
     void reset()
     {
       u->clear();
-      e->clear();
       initialized = false;
     }
 
     void update(const Representations<T>& xas_t, const Action& a_t,
-        double delta_t)
+        double delta)
     {
       assert(initialized);
-      const SparseVectors<T>& gradLog = policy->computeGradLog(xas_t, a_t);
-      for (unsigned int i = 0; i < e->dimension(); i++)
-      {
-        e->at(i)->update(gamma * lambda, gradLog[i]);
-        u->at(i)->addToSelf(alpha_u * delta_t, e->at(i)->vect());
-      }
+      const SparseVectors<T>& gradLog = policyDistribution->computeGradLog(
+          xas_t, a_t);
+      for (unsigned int i = 0; i < gradLog.dimension(); i++)
+        u->at(i)->addToSelf(alpha_u * delta, gradLog[i]);
     }
 
-    void updatePolicy(const Representations<T>& xas)
+    PolicyDistribution<T>& policy() const
     {
-      policy->update(xas);
+      return *policyDistribution;
     }
 
     const Action& proposeAction(const Representations<T>& xas)
     {
-      updatePolicy(xas);
-      return policy->sampleBestAction();
-    }
-
-    const Action& decide(const Representations<T>& xas)
-    {
-      updatePolicy(xas);
-      return policy->decide(xas);
+      policy().update(xas);
+      return policyDistribution->sampleBestAction();
     }
 
     void persist(const std::string& f) const
@@ -510,19 +498,65 @@ class Actor: public ActorOnPolicy<T, O>
     {
       u->resurrect(f);
     }
+
+};
+
+template<class T, class O>
+class ActorLambda: public Actor<T, O>
+{
+  protected:
+    typedef Actor<T, O> super;
+    double gamma, lambda;
+    Traces<T>* e;
+
+  public:
+    ActorLambda(const double& alpha_u, const double& gamma,
+        const double& lambda, PolicyDistribution<T>* policyDistribution,
+        Traces<T>* e) :
+        Actor<T, O>(alpha_u, policyDistribution), gamma(gamma), lambda(lambda), e(
+            e)
+    {
+      assert(e->dimension() == super::u->dimension());
+    }
+
+    void initialize()
+    {
+      super::initialize();
+      e->clear();
+    }
+
+    void reset()
+    {
+      super::reset();
+      e->clear();
+    }
+
+    void update(const Representations<T>& xas_t, const Action& a_t,
+        double delta)
+    {
+      assert(super::initialized);
+      const SparseVectors<T>& gradLog = super::policy().computeGradLog(xas_t,
+          a_t);
+      for (unsigned int i = 0; i < super::u->dimension(); i++)
+      {
+        e->at(i)->update(gamma * lambda, gradLog[i]);
+        super::u->at(i)->addToSelf(super::alpha_u * delta, e->at(i)->vect());
+      }
+    }
+
 };
 
 template<class T, class O>
 class AbstractActorCritic: public OnPolicyControlLearner<T, O>
 {
   protected:
-    TDLambda<T>* critic;
+    OnPolicyTD<T>* critic;
     ActorOnPolicy<T, O>* actor;
     Projector<T, O>* projector;
     StateToStateAction<T, O>* toStateAction;
 
   public:
-    AbstractActorCritic(TDLambda<T>* critic, ActorOnPolicy<T, O>* actor,
+    AbstractActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor,
         Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction) :
         critic(critic), actor(actor), projector(projector), toStateAction(
             toStateAction)
@@ -540,14 +574,19 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
         const double& z_tp1) =0;
 
     void updateActor(const DenseVector<O>& x_t, const Action& a_t,
-        const double& delta_t)
+        const double& actorDelta)
     {
       const Representations<T>& xas_t = toStateAction->stateActions(x_t);
-      actor->updatePolicy(xas_t);
-      actor->update(xas_t, a_t, delta_t);
+      policy().update(xas_t);
+      actor->update(xas_t, a_t, actorDelta);
     }
 
   public:
+    PolicyDistribution<T>& policy() const
+    {
+      return actor->policy();
+    }
+
     void reset()
     {
       critic->reset();
@@ -557,7 +596,8 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
     {
       critic->initialize();
       actor->initialize();
-      return actor->decide(toStateAction->stateActions(x_0));
+      policy().update(toStateAction->stateActions(x_0));
+      return policy().sampleAction();
     }
 
     const Action& proposeAction(const DenseVector<O>& x)
@@ -572,7 +612,8 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
       double delta_t = updateCritic(x_t, a_t, x_tp1, r_tp1, z_tp1);
       // Update actor
       updateActor(x_t, a_t, delta_t);
-      return actor->decide(toStateAction->stateActions(x_tp1));
+      policy().update(toStateAction->stateActions(x_tp1));
+      return policy().sampleAction();
     }
 
     const double computeValueFunction(const DenseVector<O>& x) const
@@ -610,7 +651,7 @@ class ActorCritic: public AbstractActorCritic<T, O>
     SparseVector<T>* phi_t;
     SparseVector<T>* phi_tp1;
   public:
-    ActorCritic(TDLambda<T>* critic, ActorOnPolicy<T, O>* actor,
+    ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor,
         Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction) :
         AbstractActorCritic<T, O>(critic, actor, projector, toStateAction), phi_t(
             new SparseVector<T>(projector->dimension())), phi_tp1(
@@ -645,7 +686,7 @@ class AverageRewardActorCritic: public AbstractActorCritic<T, O>
     SparseVector<T>* phi_tp1;
 
   public:
-    AverageRewardActorCritic(TDLambda<T>* critic, ActorOnPolicy<T, O>* actor,
+    AverageRewardActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor,
         Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction,
         double alpha_r) :
         AbstractActorCritic<T, O>(critic, actor, projector, toStateAction), alpha_r(

@@ -17,23 +17,20 @@ namespace RLLib
 
 // Simple predictor algorithms
 template<class T>
-class TDLambda: public OnPolicyTD<T>
+class TD: public OnPolicyTD<T>
 {
-  private:
-    double delta;
-    bool initialized;
   protected:
-    double alpha, gamma, lambda;
-    Trace<T>* e;
+    double delta_t;
+    bool initialized;
+    double alpha_v, gamma;
     SparseVector<T>* v;
   public:
-    TDLambda(const double& alpha, const double& gamma, const double& lambda,
-        Trace<T>* e) :
-        delta(0), initialized(false), alpha(alpha), gamma(gamma), lambda(
-            lambda), e(e), v(new SparseVector<T>(e->vect().dimension()))
+    TD(const double& alpha_v, const double& gamma, const int& nbFeatures) :
+        delta_t(0), initialized(false), alpha_v(alpha_v), gamma(gamma), v(
+            new SparseVector<T>(nbFeatures))
     {
     }
-    virtual ~TDLambda()
+    virtual ~TD()
     {
       delete v;
     }
@@ -42,25 +39,30 @@ class TDLambda: public OnPolicyTD<T>
 
     double initialize()
     {
-      e->clear();
       initialized = true;
-      return 0.0;
+      delta_t = 0;
+      return delta_t;
     }
 
-    double update(const SparseVector<T>& phi_t, const SparseVector<T>& phi_tp1,
+    virtual double update(const SparseVector<T>& x_t,
+        const SparseVector<T>& x_tp1, const double& r_tp1,
+        const double& gamma_tp1)
+    {
+      assert(initialized);
+      delta_t = r_tp1 + gamma_tp1 * v->dot(x_tp1) - v->dot(x_t);
+      v->addToSelf(alpha_v * delta_t, x_t);
+      return delta_t;
+    }
+
+    double update(const SparseVector<T>& x_t, const SparseVector<T>& x_tp1,
         double r_tp1)
     {
       assert(initialized);
-
-      delta = r_tp1 + gamma * v->dot(phi_tp1) - v->dot(phi_t);
-      e->update(gamma * lambda, phi_t);
-      v->addToSelf(alpha * delta, e->vect());
-      return delta;
+      return update(x_t, x_tp1, r_tp1, gamma);
     }
 
     void reset()
     {
-      e->clear();
       v->clear();
     }
 
@@ -82,6 +84,52 @@ class TDLambda: public OnPolicyTD<T>
     void resurrect(const std::string& f)
     {
       v->resurrect(f);
+    }
+
+};
+
+template<class T>
+class TDLambda: public TD<T>
+{
+  protected:
+    typedef TD<T> super;
+    double lambda;
+    Trace<T>* e;
+  public:
+    TDLambda(const double& alpha, const double& gamma, const double& lambda,
+        Trace<T>* e) :
+        TD<T>(alpha, gamma, e->vect().dimension()), lambda(lambda), e(e)
+    {
+    }
+    virtual ~TDLambda()
+    {
+    }
+
+  public:
+
+    double initialize()
+    {
+      super::initialize();
+      e->clear();
+      return super::delta_t;
+    }
+
+    double update(const SparseVector<T>& x_t, const SparseVector<T>& x_tp1,
+        const double& r_tp1, const double& gamma_tp1)
+    {
+      assert(super::initialized);
+
+      super::delta_t = r_tp1 + gamma_tp1 * super::v->dot(x_tp1)
+          - super::v->dot(x_t);
+      e->update(lambda * gamma_tp1, x_t);
+      super::v->addToSelf(super::alpha_v * super::delta_t, e->vect());
+      return super::delta_t;
+    }
+
+    void reset()
+    {
+      super::reset();
+      e->clear();
     }
 };
 

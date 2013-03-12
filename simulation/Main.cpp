@@ -43,6 +43,7 @@
 using namespace std;
 using namespace RLLib;
 
+
 void testProjector()
 {
   srand(time(0));
@@ -136,8 +137,8 @@ void testOnPolicyBoltzmannRTraceTabularActionCar()
   Trace<double>* actore = new RTrace<double>(toStateAction->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
-      lambda, acting, actoreTraces);
+  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u,
+      gamma, lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control =
       new ActorCritic<double, float>(critic, actor, projector, toStateAction);
@@ -1017,16 +1018,16 @@ void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
       critice);
 
-  PolicyDistribution<double>* acting = new NormalDistribution<double>(0, 1.0,
-      projector->dimension(), &problem->getContinuousActionList());
+  PolicyDistribution<double>* acting = new NormalDistributionScaled<double>(0,
+      1.0, projector->dimension(), &problem->getContinuousActionList());
 
   Trace<double>* actore1 = new ATrace<double>(projector->dimension());
   Trace<double>* actore2 = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore1);
   actoreTraces->push_back(actore2);
-  ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
-      lambda, acting, actoreTraces);
+  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u,
+      gamma, lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
       double, float>(critic, actor, projector, toStateAction, 0.0);
@@ -1075,8 +1076,8 @@ void testOnPolicyBoltzmannATraceCar()
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
-      lambda, acting, actoreTraces);
+  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u,
+      gamma, lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control =
       new ActorCritic<double, float>(critic, actor, projector, toStateAction);
@@ -1124,8 +1125,8 @@ void testOnPolicyBoltzmannRTraceCar()
   Trace<double>* actore = new RTrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
-      lambda, acting, actoreTraces);
+  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u,
+      gamma, lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control =
       new ActorCritic<double, float>(critic, actor, projector, toStateAction);
@@ -1186,8 +1187,8 @@ void testOnPolicySwingPendulum()
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore1);
   actoreTraces->push_back(actore2);
-  ActorOnPolicy<double, float>* actor = new Actor<double, float>(alpha_u, gamma,
-      lambda, acting, actoreTraces);
+  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u,
+      gamma, lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
       double, float>(critic, actor, projector, toStateAction, alpha_r);
@@ -1591,7 +1592,7 @@ int main(int argc, char** argv)
 //  testSarsaMountainCar();
 //  testSarsaTabularActionMountainCar();
 //  testOnPolicyBoltzmannRTraceTabularActionCar();
-  testExpectedSarsaMountainCar();
+//  testExpectedSarsaMountainCar();
 //  testGreedyGQOnPolicyMountainCar();
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
@@ -1604,7 +1605,7 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar3D();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D_2();
-//  testOffPACSwingPendulum();
+  testOffPACSwingPendulum();
 //  testOffPACSwingPendulum2();
 //  testOffPACAcrobot();
 //  testGreedyGQAcrobot();
