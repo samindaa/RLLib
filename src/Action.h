@@ -16,12 +16,12 @@ namespace RLLib
 
 class Action
 {
-  protected:
-    int id;
+  private:
+    int idNb;
     std::vector<double> values;
   public:
-    Action(const int& id) :
-        id(id)
+    Action(const int& idNb) :
+        idNb(idNb)
     {
     }
 
@@ -41,24 +41,20 @@ class Action
       values[i] = value;
     }
 
-    operator unsigned int() const
-    {
-      return id;
-    }
-
     const bool operator==(const Action& that) const
     {
-      return id == that.id;
+      return idNb == that.idNb;
     }
 
     const bool operator!=(const Action& that) const
     {
-      return id != that.id;
+      return idNb != that.idNb;
     }
 
-    const int getId() const
+    // Id within an associated id group
+    const int id() const
     {
-      return id;
+      return idNb;
     }
 
 };

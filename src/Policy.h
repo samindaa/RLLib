@@ -189,8 +189,6 @@ class NormalDistributionScaled: public NormalDistribution<T>
       double a = action.at(super::defaultAction);
       super::meanStep = (a - super::mean);
       super::stddevStep = (a - super::mean) * (a - super::mean) - super::sigma2;
-
-      //cout << super::meanStep << " " << super::stddevStep << endl;
     }
 
 };
@@ -235,14 +233,16 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
     const Action& problemToPolicy(const double& problemAction)
     {
       double normalizedAction = normalize(problemRange, problemAction);
-      a_t->update(0, scale(policyRange, normalizedAction));
+      double scaledAction = scale(policyRange, normalizedAction);
+      a_t->update(0, scaledAction);
       return *a_t;
     }
 
     const Action& policyToProblem(const double& policyAction)
     {
       double normalizedAction = normalize(policyRange, policyAction);
-      a_t->update(0, scale(problemRange, normalizedAction));
+      double scaledAction = scale(problemRange, normalizedAction);
+      a_t->update(0, scaledAction);
       return *a_t;
     }
 
@@ -259,7 +259,8 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
 
     const Action& sampleAction()
     {
-      actions->update(0, 0, policyToProblem(policy->sampleAction().at(0)));
+      actions->update(0, 0,
+          policyToProblem(policy->sampleAction().at(0)).at(0));
       return actions->at(0);
     }
 
@@ -335,17 +336,19 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
-        distribution->at(**a) = exp(u->dot(xas.at(**a)) - maxValue);
-        Boundedness::checkValue(distribution->at(**a));
-        sum += distribution->at(**a);
-        avg->addToSelf(distribution->at(**a), xas.at(**a));
+        const int id = (*a)->id();
+        distribution->at(id) = exp(u->dot(xas.at(id)) - maxValue);
+        Boundedness::checkValue(distribution->at(id));
+        sum += distribution->at(id);
+        avg->addToSelf(distribution->at(id), xas.at(id));
       }
 
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
-        distribution->at(**a) /= sum;
-        Boundedness::checkValue(distribution->at(**a));
+        const int id = (*a)->id();
+        distribution->at(id) /= sum;
+        Boundedness::checkValue(distribution->at(id));
       }
       avg->multiplyToSelf(1.0 / sum);
     }
@@ -360,7 +363,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
 
     double pi(const Action& action)
     {
-      return distribution->at(action);
+      return distribution->at(action.id());
 
     }
     const Action& sampleAction()
@@ -370,7 +373,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
-        sum += distribution->at(**a);
+        sum += distribution->at((*a)->id());
         if (sum >= random)
           return **a;
       }
@@ -451,10 +454,11 @@ class RandomBiasPolicy: public Policy<T>
         for (ActionList::const_iterator a = actions->begin();
             a != actions->end(); ++a)
         {
-          if (**a == *prev)
-            distribution->at(**a) = 0.5;
+          const int id = (*a)->id();
+          if (id == prev->id())
+            distribution->at(id) = 0.5;
           else
-            distribution->at(**a) = 0.5 / (actions->dimension() - 1);
+            distribution->at(id) = 0.5 / (actions->dimension() - 1);
         }
       }
       // chose an action
@@ -463,7 +467,7 @@ class RandomBiasPolicy: public Policy<T>
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
-        sum += distribution->at(**a);
+        sum += distribution->at((*a)->id());
         if (sum >= random)
         {
           prev = *a;
@@ -475,7 +479,7 @@ class RandomBiasPolicy: public Policy<T>
 
     double pi(const Action& action)
     {
-      return distribution->at(action);
+      return distribution->at(action.id());
     }
 
     const Action& sampleAction()
@@ -516,7 +520,10 @@ class Greedy: public DiscreteActionPolicy<T>
     {
       for (ActionList::const_iterator iter = actions->begin();
           iter != actions->end(); ++iter)
-        actionValues[**iter] = predictor->predict(xas_tp1.at(**iter));
+      {
+        const int id = (*iter)->id();
+        actionValues[id] = predictor->predict(xas_tp1.at(id));
+      }
     }
 
     void findBestAction()
@@ -524,7 +531,7 @@ class Greedy: public DiscreteActionPolicy<T>
       bestAction = &actions->at(0);
       for (unsigned int i = 1; i < actions->dimension(); i++)
       {
-        if (actionValues[i] > actionValues[*bestAction])
+        if (actionValues[i] > actionValues[bestAction->id()])
           bestAction = &actions->at(i);
       }
     }

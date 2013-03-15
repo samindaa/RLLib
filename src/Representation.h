@@ -44,12 +44,12 @@ class Representations
 
     void set(const SparseVector<T>& phi, const Action& action)
     {
-      phis->at(action)->set(phi);
+      phis->at(action.id())->set(phi);
     }
 
     const SparseVector<T>& at(const Action& action) const
     {
-      return *phis->at(action);
+      return *phis->at(action.id());
     }
 
     typedef typename std::vector<SparseVector<T>*>::iterator iterator;
@@ -119,7 +119,7 @@ class StateActionTilings: public StateToStateAction<T, O>
         if (actions->dimension() == 1)
           phis->set(projector->project(x), **a); // projection from whole space
         else
-          phis->set(projector->project(x, **a), **a);
+          phis->set(projector->project(x, (*a)->id()), **a);
       }
       return *phis;
     }
@@ -179,7 +179,7 @@ class TabularAction: public StateToStateAction<T, O>
       for (ActionList::const_iterator a = actions->begin(); a != actions->end();
           ++a)
       {
-        _phi->set(phi, projector->dimension() * (*a)->getId());
+        _phi->set(phi, projector->dimension() * (*a)->id());
         if (includeActiveFeature)
           _phi->insertLast(1.0);
         phis->set(*_phi, **a);

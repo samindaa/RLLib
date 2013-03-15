@@ -43,7 +43,7 @@ end
 % Pendulum
 S = load('swingPendulum.txt');
 
-if 0,
+if 1,
 numFrames = size(S, 1);
 figure(1);
 M = moviein(numFrames);

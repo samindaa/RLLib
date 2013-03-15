@@ -27,7 +27,7 @@ class SwingPendulum: public Env<float>
     std::ofstream outfile;
   public:
     SwingPendulum() :
-        Env(2, 3, 1), uMax(3.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(
+        Env(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(
             0), maxVelocity(M_PI_4 / stepTime), actionRange(
             new Range<float>(-uMax, uMax)), thetaRange(
             new Range<float>(-M_PI, M_PI)), velocityRange(
@@ -67,7 +67,7 @@ class SwingPendulum: public Env<float>
     void update()
     {
       if (outfile.is_open() && getOn())
-        outfile << (theta * 180 / M_PI) << " " << cos(theta) << std::endl;
+        outfile << ((theta * 180 / M_PI) + 180.0) << " " << cos(theta) << std::endl;
 
       DenseVector<float>& vars = *__vars;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;

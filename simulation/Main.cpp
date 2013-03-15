@@ -43,7 +43,6 @@
 using namespace std;
 using namespace RLLib;
 
-
 void testProjector()
 {
   srand(time(0));
@@ -1014,15 +1013,15 @@ void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
   alpha_v /= projector->vectorNorm();
   alpha_u /= projector->vectorNorm();
 
-  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  Trace<double>* critice = new RTrace<double>(projector->dimension());
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
       critice);
 
   PolicyDistribution<double>* acting = new NormalDistributionScaled<double>(0,
       1.0, projector->dimension(), &problem->getContinuousActionList());
 
-  Trace<double>* actore1 = new ATrace<double>(projector->dimension());
-  Trace<double>* actore2 = new ATrace<double>(projector->dimension());
+  Trace<double>* actore1 = new RTrace<double>(projector->dimension());
+  Trace<double>* actore2 = new RTrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore1);
   actoreTraces->push_back(actore2);
@@ -1030,7 +1029,7 @@ void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
       gamma, lambda, acting, actoreTraces);
 
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
-      double, float>(critic, actor, projector, toStateAction, 0.0);
+      double, float>(critic, actor, projector, toStateAction, 0);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
@@ -1195,7 +1194,9 @@ void testOnPolicySwingPendulum()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 1000, 2000);
+  sim->run(1, 1000 * 500, 1, false);
+  sim->test(1, 1000);
+  sim->computeValueFunction();
 
   delete problem;
   delete projector;
@@ -1605,12 +1606,12 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar3D();
 //  testSarsaMountainCar3D();
 //  testOffPACMountainCar3D_2();
-  testOffPACSwingPendulum();
+//  testOffPACSwingPendulum();
 //  testOffPACSwingPendulum2();
 //  testOffPACAcrobot();
 //  testGreedyGQAcrobot();
 
-//  testOnPolicySwingPendulum();
+  testOnPolicySwingPendulum();
 //  testOnPolicyContinousActionCar();
 //  testOnPolicyBoltzmannATraceCar();
 //  testOnPolicyBoltzmannRTraceCar();

@@ -81,7 +81,7 @@ class Acrobot: public Env<float>
 
     void step(const Action& action)
     {
-      float torque = actionRange->bound(action);
+      float torque = actionRange->bound(action.at());
       float d1, d2, phi2, phi1, theta2ddot, theta1ddot;
 
       //torque is in [-1,1]

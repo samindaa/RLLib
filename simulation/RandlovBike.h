@@ -376,7 +376,7 @@ class RandlovBike: public Env<float>
 
     void step(const Action& action)
     {
-      bike(execute_action, action);
+      bike(execute_action, action.id());
     }
 
     bool endOfEpisode() const

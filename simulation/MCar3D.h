@@ -105,7 +105,7 @@ class MCar3D: public Env<float>
     void update_velocity(const Action& act)
     {
 
-      switch (act)
+      switch (act.id())
       {
       case 0:
         xvelocity += cos(3 * xposition) * (-0.0025);

@@ -14,7 +14,7 @@ using namespace RLLib;
 ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearnerPendulumTest()
 {
   problem = new SwingPendulum;
-  projector = new TileCoderHashing<double, float>(1000, 10, true);
+  projector = new TileCoderHashing<double, float>(10000, 10, false);
   toStateAction = new StateActionTilings<double, float>(projector,
       &problem->getContinuousActionList());
 
@@ -85,7 +85,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
       toStateAction);
 
   sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 50, false, false);
+  sim->run(1, 5000 * 100, 1, false, false);
 
   evaluate();
   deleteObjects();
@@ -95,15 +95,15 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
 {
 
   gamma = 1.0;
-  alpha_v = 0.5 / projector->vectorNorm();
+  alpha_v = 0.1 / projector->vectorNorm();
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
-  alpha_u = 0.05 / projector->vectorNorm();
+  alpha_u = 0.001 / projector->vectorNorm();
   actor = new Actor<double, float>(alpha_u, policyDistribution);
   control = new ActorCritic<double, float>(critic, actor, projector,
       toStateAction);
 
   sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 1, false, false);
+  sim->run(1, 5000 * 100, 1, false, false);
   sim->computeValueFunction();
   evaluate();
   deleteObjects();
@@ -115,14 +115,14 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblit
   lambda = 0.5;
   alpha_v = 0.1 / projector->vectorNorm();
   critic = new TDLambda<double>(alpha_v, gamma, lambda, criticE);
-  alpha_u = 0.05 / projector->vectorNorm();
+  alpha_u = 0.001 / projector->vectorNorm();
   actor = new ActorLambda<double, float>(alpha_u, gamma, lambda,
       policyDistribution, actorTraces);
   control = new AverageRewardActorCritic<double, float>(critic, actor,
-      projector, toStateAction, 0.01);
+      projector, toStateAction, 0.0001);
 
   sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 1, false, false);
+  sim->run(1, 5000 * 100, 1, false, false);
   sim->computeValueFunction();
   evaluate();
   deleteObjects();
