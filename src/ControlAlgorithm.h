@@ -130,7 +130,7 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
         double pi = SarsaControl<T, O>::acting->pi(**a);
         if (pi == 0)
         {
-          assert(**a != a_tp1);
+          assert((*a)->id() != a_tp1.id());
           continue;
         }
         phi_bar_tp1->addToSelf(pi, xas_tp1.at(**a));
