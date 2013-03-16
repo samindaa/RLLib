@@ -1158,7 +1158,7 @@ void testOnPolicySwingPendulum()
   srand(time(0));
   Env<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(
-      10000, 10, false);
+      1000, 10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
       double, float>(projector, &problem->getContinuousActionList());
 
@@ -1194,7 +1194,7 @@ void testOnPolicySwingPendulum()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control,
       problem);
-  sim->run(1, 1000 * 500, 1, false);
+  sim->run(1, 5000, 100, false);
   sim->test(1, 1000);
   sim->computeValueFunction();
 
