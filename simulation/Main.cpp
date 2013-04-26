@@ -594,7 +594,7 @@ class AdvancedTilesProjector: public Projector<T, O>
 
   public:
     AdvancedTilesProjector() :
-        vector(new SparseVector<T>(10e5 + 1)), activeTiles(new int[48])
+        vector(new SparseVector<T>(100000 + 1)), activeTiles(new int[48])
     {
       // Consistent hashing
       int dummy_tiles[1];
@@ -852,6 +852,7 @@ void testGreedyGQMountainCar3D()
 // 3D
 void testSarsaMountainCar3D()
 {
+  srand(time(0));
   Env<float>* problem = new MCar3D;
   /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
    10, false);*/
@@ -862,9 +863,9 @@ void testSarsaMountainCar3D()
 
   Trace<double>* e = new RTrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
-  double alpha = 0.15 / projector->vectorNorm();
+  double alpha = 0.01 / projector->vectorNorm();
   double gamma = 0.99;
-  double lambda = 0.95;
+  double lambda = 0.6;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, eML);
   double epsilon = 0.1;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa,
@@ -956,18 +957,17 @@ void testOffPACSwingPendulum()
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.4;
-  Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
-  Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
+
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma,
-      lambda, criticeML);
+      lambda, critice);
   double alpha_u = 0.5 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(
       projector->dimension(), &problem->getDiscreteActionList());
 
-  Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
-  Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
+  Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
-  actoreTraces->push_back(actoreML);
+  actoreTraces->push_back(actore);
   ActorOffPolicy<double, float>* actor =
       new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target,
           actoreTraces);
@@ -988,10 +988,8 @@ void testOffPACSwingPendulum()
   delete projector;
   delete toStateAction;
   delete critice;
-  delete criticeML;
   delete critic;
   delete actore;
-  delete actoreML;
   delete actoreTraces;
   delete actor;
   delete behavior;
