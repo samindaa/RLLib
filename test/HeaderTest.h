@@ -86,7 +86,7 @@ inline bool checkVectorEquals(const SVecDoubleType& a, const SVecDoubleType& b,
 
 inline void checkVectorEquals(const SVecDoubleType& a, const SVecDoubleType& b)
 {
-  assert(checkVectorEquals(a, b, numeric_limits<float>::min()));
+  assert(checkVectorEquals(a, b, numeric_limits<float>::epsilon()));
 }
 
 class TestBase
