@@ -89,4 +89,13 @@ inline void checkVectorEquals(const SVecDoubleType& a, const SVecDoubleType& b)
   assert(checkVectorEquals(a, b, numeric_limits<float>::min()));
 }
 
+class TestBase
+{
+  public:
+    virtual ~TestBase()
+    {
+    }
+    virtual void run() =0;
+};
+
 #endif /* HEADERTEST_H_ */

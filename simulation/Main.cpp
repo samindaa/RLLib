@@ -591,16 +591,18 @@ class AdvancedTilesProjector: public Projector<T, O>
   protected:
     SparseVector<double>* vector;
     int* activeTiles;
+    Tiles* tiles;
 
   public:
     AdvancedTilesProjector() :
-        vector(new SparseVector<T>(100000 + 1)), activeTiles(new int[48])
+        vector(new SparseVector<T>(100000 + 1)), activeTiles(new int[48]), tiles(
+            new Tiles)
     {
       // Consistent hashing
       int dummy_tiles[1];
       float dummy_vars[1];
       srand(0);
-      tiles(dummy_tiles, 1, 1, dummy_vars, 0); // initializes tiling code
+      tiles->tiles(dummy_tiles, 1, 1, dummy_vars, 0); // initializes tiling code
       srand(time(0));
     }
 
@@ -608,6 +610,7 @@ class AdvancedTilesProjector: public Projector<T, O>
     {
       delete vector;
       delete[] activeTiles;
+      delete tiles;
     }
 
   public:
@@ -615,8 +618,8 @@ class AdvancedTilesProjector: public Projector<T, O>
     {
       vector->clear();
       // all 4
-      tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension(),
-          h1);
+      tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x(),
+          x.dimension(), h1);
       // 3 of 4
       static DenseVector<O> x3(3);
       static int x3o[4][3] =
@@ -629,7 +632,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       {
         for (int j = 0; j < 3; j++)
           x3[j] = x[x3o[i][j]];
-        tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(),
+        tiles->tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(),
             x3.dimension(), h1);
       }
       // 2 of 6
@@ -646,7 +649,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       {
         for (int j = 0; j < 2; j++)
           x2[j] = x[x2o[i][j]];
-        tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(),
+        tiles->tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(),
             x2.dimension(), h1);
       }
 
@@ -657,7 +660,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       for (int i = 0; i < 4; i++)
       {
         x1[0] = x[x1o[i]];
-        tiles(&activeTiles[36 + i * 3], 3, vector->dimension() - 1, x1(),
+        tiles->tiles(&activeTiles[36 + i * 3], 3, vector->dimension() - 1, x1(),
             x1.dimension(), h1);
       }
 
@@ -673,7 +676,8 @@ class AdvancedTilesProjector: public Projector<T, O>
 
       vector->clear();
       // all 4
-      tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension());
+      tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x(),
+          x.dimension());
       // 3 of 4
       static DenseVector<O> x3(3);
       static int x3o[4][3] =
@@ -686,7 +690,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       {
         for (int j = 0; j < 3; j++)
           x3[j] = x[x3o[i][j]];
-        tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(),
+        tiles->tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(),
             x3.dimension());
       }
       // 2 of 6
@@ -703,7 +707,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       {
         for (int j = 0; j < 2; j++)
           x2[j] = x[x2o[i][j]];
-        tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(),
+        tiles->tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(),
             x2.dimension());
       }
 
@@ -714,7 +718,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       for (int i = 0; i < 4; i++)
       {
         x1[0] = x[x1o[i]];
-        tiles(&activeTiles[36 + i], 3, vector->dimension() - 1, x1(),
+        tiles->tiles(&activeTiles[36 + i], 3, vector->dimension() - 1, x1(),
             x1.dimension());
       }
 
@@ -1596,7 +1600,7 @@ int main(int argc, char** argv)
 //  testGreedyGQMountainCar();
 //  testOffPACMountainCar();
 //  testGreedyGQContinuousGridworld();
-//  testOffPACContinuousGridworld();
+  testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
 //  testOffPACOnPolicyContinuousGridworld();
@@ -1609,7 +1613,7 @@ int main(int argc, char** argv)
 //  testOffPACAcrobot();
 //  testGreedyGQAcrobot();
 
-  testOnPolicySwingPendulum();
+//  testOnPolicySwingPendulum();
 //  testOnPolicyContinousActionCar();
 //  testOnPolicyBoltzmannATraceCar();
 //  testOnPolicyBoltzmannRTraceCar();
