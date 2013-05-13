@@ -11,6 +11,8 @@
 #include "VectorTest.h"
 #include "TraceTest.h"
 #include "LearningAlgorithmTest.h"
+#include "PendulumOnPolicyLearning.h"
+//#include "HelicopterTest.h"
 
 int main(int argc, char** argv)
 {
@@ -28,6 +30,18 @@ int main(int argc, char** argv)
   SupervisedAlgorithmTest supervisedAlgorithmTest;
   supervisedAlgorithmTest.run();
   cout << "*** LearningAlgorithmTest ends " << endl;
+
+  cout << "*** ActorCriticOnPolicyControlLearnerPendulumTest starts ***"
+      << endl;
+  // Evaluate
+  ActorCriticOnPolicyControlLearnerPendulumTest testOne;
+  testOne.run();
+  cout << "*** ActorCriticOnPolicyControlLearnerPendulumTest ends   ***"
+      << endl;
+
+  cout << "*** HelicopterTest starts ***" << endl;
+  cout << "TODO<<@ Sam add this test case" << endl;
+  cout << "*** HelicopterTest ends ***" << endl;
 
   return EXIT_SUCCESS;
 }

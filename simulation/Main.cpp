@@ -37,6 +37,7 @@
 #include "RandlovBike.h"
 #include "PoleBalancing.h"
 #include "TorquedPendulum.h"
+#include "Helicopter.h"
 
 #include "util/Spline.h"
 

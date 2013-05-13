@@ -11,10 +11,11 @@
 #include "ControlAlgorithm.h"
 #include "SwingPendulum.h"
 #include "Simulator.h"
+#include "HeaderTest.h"
 
-namespace RLLib
-{
-class ActorCriticOnPolicyControlLearnerPendulumTest
+using namespace RLLib;
+
+class ActorCriticOnPolicyControlLearnerPendulumTest: public TestBase
 {
   protected:
     Env<float>* problem;
@@ -43,16 +44,16 @@ class ActorCriticOnPolicyControlLearnerPendulumTest
   public:
     ActorCriticOnPolicyControlLearnerPendulumTest();
     ~ActorCriticOnPolicyControlLearnerPendulumTest();
+
+    void run();
+
+  private:
     void testRandom();
     void testActorCritic();
     void testActorCriticWithEligiblity();
 
-  private:
     void evaluate();
     void deleteObjects();
-
 };
-
-}  // namespace RLLib
 
 #endif /* PENDULUMONPOLICYLEARNING_H_ */

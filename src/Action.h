@@ -57,6 +57,11 @@ class Action
       return idNb;
     }
 
+    const unsigned int dimension() const
+    {
+      return values.size();
+    }
+
 };
 
 class ActionList

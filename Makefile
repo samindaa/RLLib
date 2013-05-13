@@ -16,7 +16,12 @@ Main:
 	$(CC) $(CFLAGS) simulation/Main.cpp -o Main
 
 Test:
-	$(CC) $(CFLAGS) test/VectorTest.cpp test/TraceTest.cpp test/LearningAlgorithmTest.cpp \
+	$(CC) $(CFLAGS) \
+	test/VectorTest.cpp \
+	test/TraceTest.cpp \
+	test/LearningAlgorithmTest.cpp \
+	test/HelicopterTest.cpp \
+	test/PendulumOnPolicyLearning.cpp \
 	test/Test.cpp -o Test
 	
 clean:
