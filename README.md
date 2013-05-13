@@ -10,8 +10,8 @@ RLLib features:
     On-policy algorithms: TD(lambda), SARSA(lambda), Expected-SARSA(lambda), and Actor-Critic (continuous and discrete actions), 
     Policies: Random, Random50%Bias, Greedy, Epsilon-greedy, Boltzmann, Normal, and Softmax,
     Efficient dot product implementation for tile coding base feature representations (with culling traces),
-    Benchmarks: Mountain Car, Mountain Car 3D, Swinging Pendulum, and Continuous grid world (Off-PAC paper) environments,
-    Optimized for very fast duty cycles (e.g., with culling traces, tested on the Robocup 3D simulator and on the Nao V4  (cognition thread)), 
+    Benchmarks: Mountain Car, Mountain Car 3D, Swinging Pendulum, Helicopter and Continuous grid world (Off-PAC paper) environments,
+    Optimized for very fast duty cycles (e.g., with culling traces, tested on the Robocup 3D simulator and on the NAO V4  (cognition thread)), 
     Main algorithm usage is very much similar to RLPark, therefore, swift learning curve, and
     A plethora of examples demonstrating on-policy control experiments and off-policy control experiments.
 
