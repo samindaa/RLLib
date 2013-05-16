@@ -16,14 +16,9 @@ RLLIB_TEST(ProjectorTest)
 class ProjectorTest: public ProjectorTestBase
 {
   public:
-    ProjectorTest()
-    {
-      RLLibTestRegistory::registerInstance(this);
-    }
+    ProjectorTest() {}
 
-    virtual ~ProjectorTest()
-    {
-    }
+    virtual ~ProjectorTest() {}
     void run();
 
   private:

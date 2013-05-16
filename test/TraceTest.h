@@ -33,8 +33,6 @@ class TraceTest: public TraceTestBase
       s02->setEntry(4, 1.0);
       s02->setEntry(5, 1.0);
       s02->setEntry(6, 1.0);
-
-      RLLibTestRegistory::registerInstance(this);
     }
 
     ~TraceTest()

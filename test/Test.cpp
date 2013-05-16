@@ -12,11 +12,7 @@
 
 RLLibTestRegistory::~RLLibTestRegistory()
 {
-  for (std::vector<RLLibTestCase*>::iterator iter = registory.begin(); iter != registory.end();
-      ++iter)
-    delete *iter;
   registory.clear();
-
 }
 
 RLLibTestRegistory* RLLibTestRegistory::inst = 0;

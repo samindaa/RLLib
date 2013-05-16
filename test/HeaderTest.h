@@ -157,7 +157,21 @@ class RLLibTestRegistory
     static RLLibTestRegistory* inst;
 };
 
+template<class T>
+class RLLibTestCaseLoader
+{
+  protected:
+    T theInstance;
+  public:
+    RLLibTestCaseLoader()
+    {
+      RLLibTestRegistory::registerInstance(&theInstance);
+    }
+    virtual ~RLLibTestCaseLoader() {}
+};
+
+/** Test make macro **/
 #define RLLIB_TEST_MAKE(NAME) \
-  NAME _testcase_##NAME;
+  RLLibTestCaseLoader<NAME> _testcase_loader_##NAME;
 
 #endif /* HEADERTEST_H_ */

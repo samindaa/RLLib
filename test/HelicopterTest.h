@@ -19,7 +19,6 @@ class HelicopterTest: public HelicopterTestBase
     HelicopterTest()
     {
       srand(time(0));
-      RLLibTestRegistory::registerInstance(this);
     }
 
     virtual ~HelicopterTest()

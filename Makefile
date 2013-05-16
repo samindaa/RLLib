@@ -10,10 +10,7 @@ INCLUDES = Action.h Control.h ControlAlgorithm.h Math.h Policy.h Predictor.h Pre
 		   Projector.h Representation.h Supervised.h SupervisedAlgorithm.h Tiles.h TilesImpl.h Trace.h \
 		   Vector.h
 
-all: Main Test
-
-Main: 
-	$(CC) $(CFLAGS) simulation/Main.cpp -o Main
+all: Test
 
 Test:
 	$(CC) $(CFLAGS) \
@@ -24,8 +21,10 @@ Test:
 	test/PendulumOnPolicyLearning.cpp \
 	test/ProjectorTest.cpp \
 	test/MountainCarTest.cpp \
+	test/ContinuousGridworldTest.cpp \
+	test/SwingPendulumTest.cpp \
+	test/ExtendedProblemsTest.cpp \
 	test/Test.cpp -o Test
 	
 clean:
-	rm -f Main
 	rm -f Test

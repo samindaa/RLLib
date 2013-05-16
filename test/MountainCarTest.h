@@ -9,7 +9,6 @@
 #define MOUNTAINCARTEST_H_
 
 #include "HeaderTest.h"
-#include "MountainCarTest.h"
 
 // From the RLLib
 #include "Vector.h"
@@ -27,14 +26,9 @@ RLLIB_TEST(MountainCarTest)
 class MountainCarTest: public MountainCarTestBase
 {
   public:
-    MountainCarTest()
-    {
-      RLLibTestRegistory::registerInstance(this);
-    }
+    MountainCarTest() {}
 
-    virtual ~MountainCarTest()
-    {
-    }
+    virtual ~MountainCarTest() {}
     void run();
 
   private:

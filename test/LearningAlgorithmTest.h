@@ -20,7 +20,6 @@ class SupervisedAlgorithmTest: public SupervisedAlgorithmTestBase
     SupervisedAlgorithmTest()
     {
       srand(time(0));
-      RLLibTestRegistory::registerInstance(this);
     }
 
     virtual ~SupervisedAlgorithmTest()

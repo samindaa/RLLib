@@ -36,8 +36,6 @@ ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearner
 
   control = 0;
   sim = 0;
-
-  RLLibTestRegistory::registerInstance(this);
 }
 
 ActorCriticOnPolicyControlLearnerPendulumTest::~ActorCriticOnPolicyControlLearnerPendulumTest()

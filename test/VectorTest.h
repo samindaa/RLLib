@@ -25,7 +25,6 @@ class SparseVectorTest: public SparseVectorTestBase
         _a(0), _b(0)
     {
       srand(time(0));
-      RLLibTestRegistory::registerInstance(this);
     }
     virtual ~SparseVectorTest()
     {
