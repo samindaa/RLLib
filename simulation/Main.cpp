@@ -433,7 +433,7 @@ class MountainCar3DTilesProjector: public AdvancedTilesProjector<T, O>
 void testOffPACMountainCar3D_1()
 {
   srand(time(0));
-  Env<float>* problem = new MCar2D;
+  Env<float>* problem = new MCar3D;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(
       1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<
