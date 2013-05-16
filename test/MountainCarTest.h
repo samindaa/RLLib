@@ -45,6 +45,12 @@ class MountainCarTest: public MountainCarTestBase
     void testGreedyGQOnPolicyMountainCar();
     void testGreedyGQMountainCar();
     void testOffPACMountainCar();
+
+    void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
+        const double& gamma, double alpha_v, double alpha_u);
+    void testOnPolicyBoltzmannATraceCar();
+    void testOnPolicyBoltzmannRTraceCar();
+    void testOnPolicyContinousActionCar();
 };
 
 #endif /* MOUNTAINCARTEST_H_ */

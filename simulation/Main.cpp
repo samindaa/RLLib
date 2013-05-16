@@ -29,7 +29,6 @@
 
 // Simulation
 #include "Simulator.h"
-#include "MCar2D.h"
 #include "MCar3D.h"
 #include "SwingPendulum.h"
 #include "ContinuousGridworld.h"
@@ -684,158 +683,6 @@ void testOffPACSwingPendulum()
   delete sim;
 }
 
-void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
-    const double& gamma, double alpha_v, double alpha_u)
-{
-  srand(time(0));
-  Env<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(
-      nbMemory, 10, false);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getContinuousActionList());
-
-  alpha_v /= projector->vectorNorm();
-  alpha_u /= projector->vectorNorm();
-
-  Trace<double>* critice = new RTrace<double>(projector->dimension());
-  TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
-      critice);
-
-  PolicyDistribution<double>* acting = new NormalDistributionScaled<double>(0,
-      1.0, projector->dimension(), &problem->getContinuousActionList());
-
-  Trace<double>* actore1 = new RTrace<double>(projector->dimension());
-  Trace<double>* actore2 = new RTrace<double>(projector->dimension());
-  Traces<double>* actoreTraces = new Traces<double>();
-  actoreTraces->push_back(actore1);
-  actoreTraces->push_back(actore2);
-  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u,
-      gamma, lambda, acting, actoreTraces);
-
-  OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<
-      double, float>(critic, actor, projector, toStateAction, 0);
-
-  Simulator<double, float>* sim = new Simulator<double, float>(control,
-      problem);
-  sim->run(1, 5000, 200);
-  sim->computeValueFunction();
-
-  delete problem;
-  delete projector;
-  delete toStateAction;
-  delete critice;
-  delete critic;
-  delete actore1;
-  delete actore2;
-  delete actoreTraces;
-  delete actor;
-  delete acting;
-  delete control;
-  delete sim;
-}
-
-void testOnPolicyBoltzmannATraceCar()
-{
-  srand(time(0));
-  Env<float>* problem = new MCar2D;
-
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(
-      10000, 10, false);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getDiscreteActionList());
-
-  double alpha_v = 0.1 / projector->vectorNorm();
-  double alpha_u = 0.01 / projector->vectorNorm();
-  double lambda = 0.3;
-  double gamma = 0.99;
-
-  Trace<double>* critice = new ATrace<double>(projector->dimension());
-  TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
-      critice);
-
-  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(
-      projector->dimension(), &problem->getDiscreteActionList());
-
-  Trace<double>* actore = new ATrace<double>(projector->dimension());
-  Traces<double>* actoreTraces = new Traces<double>();
-  actoreTraces->push_back(actore);
-  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u,
-      gamma, lambda, acting, actoreTraces);
-
-  OnPolicyControlLearner<double, float>* control =
-      new ActorCritic<double, float>(critic, actor, projector, toStateAction);
-
-  Simulator<double, float>* sim = new Simulator<double, float>(control,
-      problem);
-  sim->run(1, 5000, 300);
-  sim->computeValueFunction();
-
-  delete problem;
-  delete projector;
-  delete toStateAction;
-  delete critice;
-  delete critic;
-  delete actore;
-  delete actoreTraces;
-  delete actor;
-  delete acting;
-  delete control;
-  delete sim;
-}
-
-void testOnPolicyBoltzmannRTraceCar()
-{
-  srand(time(0));
-  Env<float>* problem = new MCar2D;
-
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(
-      10000, 10, false);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<
-      double, float>(projector, &problem->getDiscreteActionList());
-
-  double alpha_v = 0.1 / projector->vectorNorm();
-  double alpha_u = 0.01 / projector->vectorNorm();
-  double lambda = 0.3;
-  double gamma = 0.99;
-
-  Trace<double>* critice = new RTrace<double>(projector->dimension());
-  TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda,
-      critice);
-
-  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(
-      projector->dimension(), &problem->getDiscreteActionList());
-
-  Trace<double>* actore = new RTrace<double>(projector->dimension());
-  Traces<double>* actoreTraces = new Traces<double>();
-  actoreTraces->push_back(actore);
-  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u,
-      gamma, lambda, acting, actoreTraces);
-
-  OnPolicyControlLearner<double, float>* control =
-      new ActorCritic<double, float>(critic, actor, projector, toStateAction);
-
-  Simulator<double, float>* sim = new Simulator<double, float>(control,
-      problem);
-  sim->run(1, 5000, 300);
-  sim->computeValueFunction();
-
-  delete problem;
-  delete projector;
-  delete toStateAction;
-  delete critice;
-  delete critic;
-  delete actore;
-  delete actoreTraces;
-  delete actor;
-  delete acting;
-  delete control;
-  delete sim;
-}
-
-void testOnPolicyContinousActionCar()
-{
-  testOnPolicyContinousActionCar(10000, 0.4, 0.99, 0.1, 0.001);
-}
 
 void testOnPolicySwingPendulum()
 {
@@ -950,15 +797,6 @@ void testOffPACSwingPendulum2()
   delete target;
   delete control;
   delete sim;
-}
-
-void testSimple()
-{
-  double a = 2.0 / 10;
-  double b = 1.0 / 2.0 / 10;
-  double c = 1.0 / a;
-  cout << b << endl;
-  cout << c << endl;
 }
 
 // ====================== Acrobot projector ===================================
@@ -1271,17 +1109,6 @@ void testMotion()
 int main(int argc, char** argv)
 {
   cout << "## start" << endl; // prints @@ start
-//  testSparseVector();
-//  testProjector();
-//  testProjectorMachineLearning();
-//  testSarsaMountainCar();
-//  testSarsaTabularActionMountainCar();
-//  testOnPolicyBoltzmannRTraceTabularActionCar();
-//  testExpectedSarsaMountainCar();
-//  testGreedyGQOnPolicyMountainCar();
-//  testGreedyGQMountainCar();
-//  testOffPACMountainCar();
-//  testGreedyGQContinuousGridworld();
   testOffPACContinuousGridworld();
 //  testOffPACContinuousGridworldOPtimized();
 //  testOffPACMountainCar3D_1();
@@ -1296,10 +1123,6 @@ int main(int argc, char** argv)
 //  testGreedyGQAcrobot();
 
 //  testOnPolicySwingPendulum();
-//  testOnPolicyContinousActionCar();
-//  testOnPolicyBoltzmannATraceCar();
-//  testOnPolicyBoltzmannRTraceCar();
-
 //  testPoleBalancingPlant();
 //  testTorquedPendulum();
 
