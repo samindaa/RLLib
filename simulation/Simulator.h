@@ -91,8 +91,8 @@ class Simulator
 
           if (verbose)
           {
-            std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
-            //std::cout << "x";
+            //std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
+            std::cout << ".";
             std::cout.flush();
           }
 

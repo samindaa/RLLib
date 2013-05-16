@@ -15,7 +15,18 @@ RLLib features:
     Main algorithm usage is very much similar to RLPark, therefore, swift learning curve, and
     A plethora of examples demonstrating on-policy control experiments and off-policy control experiments.
 
-Documentation: http://web.cs.miami.edu/home/saminda/rllib.html
+RLLib configuration:
 
-Saminda Abeyruwan (saminda@cs.miami.edu)
+   The test cases are executed using:
+   ./configure
+   make
+   ./RLLibTest
+
+RLLib Documentation: 
+   
+   http://web.cs.miami.edu/home/saminda/rllib.html
+
+Contact:
+
+   Saminda Abeyruwan (saminda@cs.miami.edu)
 

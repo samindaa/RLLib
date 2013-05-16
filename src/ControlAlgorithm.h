@@ -45,7 +45,7 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
     {
       sarsa->initialize();
       const Representations<T>& xas_0 = toStateAction->stateActions(x_0);
-      const Action& a_0 = acting->decide(xas_0);
+      const Action& a_0 = Policies::sampleAction(acting, xas_0);
       xa_t->set(xas_0.at(a_0));
       return a_0;
     }
@@ -54,7 +54,7 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
         const double& r_tp1, const double& z_tp1)
     {
       const Representations<T>& xas_tp1 = toStateAction->stateActions(x_tp1);
-      const Action& a_tp1 = acting->decide(xas_tp1);
+      const Action& a_tp1 = Policies::sampleAction(acting, xas_tp1);
       const SparseVector<T>& xa_tp1 = xas_tp1.at(a_tp1);
       sarsa->update(*xa_t, xa_tp1, r_tp1);
       xa_t->set(xa_tp1);
@@ -68,8 +68,7 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
 
     const Action& proposeAction(const DenseVector<O>& x)
     {
-      acting->decide(toStateAction->stateActions(x));
-      return acting->sampleBestAction();
+      return Policies::sampleBestAction(acting, toStateAction->stateActions(x));
     }
 
     const double computeValueFunction(const DenseVector<O>& x) const
@@ -101,6 +100,7 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
   protected:
     SparseVector<T>* phi_bar_tp1;
     ActionList* actions;
+    typedef SarsaControl<T, O> super;
   public:
 
     ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction,
@@ -118,11 +118,11 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
         const double& r_tp1, const double& z_tp1)
     {
       phi_bar_tp1->clear();
-      const Representations<T>& xas_tp1 = SarsaControl<T, O>::toStateAction->stateActions(x_tp1);
-      const Action& a_tp1 = SarsaControl<T, O>::acting->decide(xas_tp1);
+      const Representations<T>& xas_tp1 = super::toStateAction->stateActions(x_tp1);
+      const Action& a_tp1 = Policies::sampleAction(super::acting, xas_tp1);
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
-        double pi = SarsaControl<T, O>::acting->pi(**a);
+        double pi = super::acting->pi(**a);
         if (pi == 0)
         {
           assert((*a)->id() != a_tp1.id());
@@ -132,8 +132,8 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
       }
 
       const SparseVector<T>& xa_tp1 = xas_tp1.at(a_tp1);
-      SarsaControl<T, O>::sarsa->update(*SarsaControl<T, O>::xa_t, *phi_bar_tp1, r_tp1);
-      SarsaControl<T, O>::xa_t->set(xa_tp1);
+      super::sarsa->update(*SarsaControl<T, O>::xa_t, *phi_bar_tp1, r_tp1);
+      super::xa_t->set(xa_tp1);
       return a_tp1;
     }
 
@@ -175,7 +175,7 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       gq->initialize();
       const Representations<T>& xas_0 = toStateAction->stateActions(x_0);
       target->update(xas_0);
-      const Action& a_0 = behavior->decide(xas_0);
+      const Action& a_0 = Policies::sampleAction(behavior, xas_0);
       phi_t->set(xas_0.at(a_0));
       return a_0;
     }
@@ -205,7 +205,7 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       gq->update(*phi_t, *phi_bar_tp1, rho_t, r_tp1, z_tp1);
       // Next cycle update the target policy
       target->update(xas_tp1);
-      const Action& a_tp1 = behavior->decide(xas_tp1);
+      const Action& a_tp1 = Policies::sampleAction(behavior, xas_tp1);
       phi_t->set(xas_tp1.at(a_tp1));
       return a_tp1;
     }
@@ -217,8 +217,7 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
 
     const Action& proposeAction(const DenseVector<O>& x)
     {
-      target->decide(toStateAction->stateActions(x));
-      return target->sampleBestAction();
+      return Policies::sampleBestAction(target, toStateAction->stateActions(x));
     }
 
     const double computeValueFunction(const DenseVector<O>& x) const
@@ -371,7 +370,7 @@ class OffPAC: public OffPolicyControlLearner<T, O>
     {
       critic->initialize();
       actor->initialize();
-      return behavior->decide(toStateAction->stateActions(x_0));
+      return Policies::sampleAction(behavior, toStateAction->stateActions(x_0));
     }
 
     const Action& step(const DenseVector<O>& x_t, const Action& a_t, const DenseVector<O>& x_tp1,
@@ -391,7 +390,7 @@ class OffPAC: public OffPolicyControlLearner<T, O>
       actor->update(xas_t, a_t, rho_t, gamma_t, delta_t);
 
       const Representations<T>& xas_tp1 = toStateAction->stateActions(x_tp1);
-      return behavior->decide(xas_tp1);
+      return Policies::sampleAction(behavior, xas_tp1);
     }
 
     void reset()

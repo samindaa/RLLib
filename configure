@@ -1,0 +1,212 @@
+#!/bin/bash
+#----------------------------------------
+# RLLib configure.sh
+# Author: Sam Abeyruwan
+#----------------------------------------
+
+#makefile target for this configuration
+targetname="RLLibTest"
+
+#list of needed libraries
+lib_list=""
+#list of needed external tools
+tool_list=""
+
+#regular expression to ignore files
+ignore="visualization"
+
+#compiler and linker flags
+cxx="g++"
+optional_cflags="-I. -I./src -I./test -I./simulation -Wall -Werror -O3 -Wno-deprecated -fPIC"
+optional_lflags=""
+
+builddir="./build"
+bin="./RLLibTest"
+
+#----------------------------------------
+#command line arguments
+#loop for all arguments
+for arg in "$@"
+do
+  argname=`echo $arg | sed 's/\([^=]*\)=.*/\1/g'`
+  argvalue=`echo $arg | sed 's/.*=\([^=]*\)/\1/g'`
+  if [ "$argname" == "target" ]; then targetname=$argvalue; fi
+  if [ "$argname" == "cxx" ]; then cxx=$argvalue; fi
+  if [ "$argname" == "cflags" ]; then optional_cflags=$argvalue; fi
+  if [ "$argname" == "lflags" ]; then optional_lflags=$argvalue; fi
+  if [ "$argname" == "builddir" ]; then builddir=$argvalue; fi
+  if [ "$argname" == "bin" ]; then bin=$argvalue; fi
+  if [ "$argname" == "lib_list" ]; then lib_list=$argvalue; fi
+  if [ "$argname" == "ignore" ]; then ignore="$ignore|$argvalue"; fi
+done
+
+#----------------------------------------
+#----------------------------------------
+# DO NOT MODIFY ANYTHING BELOW :)
+#----------------------------------------
+#----------------------------------------
+#check libraries
+
+libflags_compiler=""
+libflags_linker=""
+missing_libs=0
+for lib in $lib_list
+do
+  echo -n "Checking library $lib... "
+  tmp=`pkg-config --cflags $lib 2> /dev/null`
+  if [ "$?" == "0" ]
+  then
+    libflags_compiler="$libflags_compiler $tmp"
+    libflags_linker="$libflags_linker `pkg-config --libs $lib`"
+    echo ok
+  else
+    echo NOT FOUND
+    missing_libs=$((missing_libs+1))
+  fi
+done
+
+#check external tools
+missing_tools=0
+for tool in $tool_list
+do
+  echo -n "Checking $tool... "
+  tmp=`which $tool`
+  if [ "$?" == "0" ]
+  then
+    echo ok
+  else
+    echo NOT FOUND
+    missing_tools=$((missing_tools+1))
+  fi
+done
+
+#if something is missing, stop here
+if [ "$missing_libs" != "0" ]; then
+  echo $missing_libs libraries missing!; fi
+if [ "$missing_tools" != "0" ]; then
+  echo $missing_tools external tools missing!; fi
+if [ "$missing_libs$missing_tools" != "00" ]; then
+  exit; fi
+
+#----------------------------------------
+#write Makefile
+
+src_list=$builddir/src_list
+dep_list=$builddir/dep_list
+
+cflags="$libflags_compiler -I. -Wall -fpermissive $optional_cflags"
+lflags="$libflags_linker $optional_lflags"
+
+
+echo Creating Makefile...
+
+if [ -e Makefile ]
+then
+  cat Makefile | sed "1,/BEGIN TARGETS/d;/END TARGETS/,\$d"    \
+               | sed "/BEGIN $targetname\$/,/END $targetname\$/d"  \
+               | grep -E -v "^default:" > Makefile.tmp
+else
+  echo "ALLTARGETS=" > Makefile.tmp
+  echo "ALLOBJ=" >> Makefile.tmp
+fi
+tee > Makefile << EOC
+default: $targetname
+# --- BEGIN TARGETS
+# --- BEGIN $targetname
+$targetname: CXX=$cxx
+$targetname: CFLAGS=$cflags
+$targetname: LFLAGS=$lflags
+$targetname: BIN=$bin
+$targetname: BUILDDIR=$builddir
+-include $src_list
+-include $dep_list
+$targetname: \$(GENERATED_$targetname) \$(OBJ_$targetname) link_$targetname
+	@echo $targetname compiled.
+link_$targetname: \$(OBJ_$targetname)
+	@echo \$(YEL)Linking...\$(NOR)
+	@\$(CXX) \$(CFLAGS) -o $bin \$(OBJ_$targetname) \$(LFLAGS)
+# --- END $targetname
+EOC
+cat Makefile.tmp >> Makefile 
+echo "# --- END TARGETS" >> Makefile
+rm Makefile.tmp
+cat Makefile.template >> Makefile 
+
+if ! grep -q -E "^ALLTARGETS=.* $targetname .*\$" Makefile
+then
+  sed -i -e "s/^\(ALLTARGETS=.*\)\$/\1 $targetname /g" Makefile  
+fi
+if ! grep -q -E "^ALLOBJ=.* \\\$(OBJ_$targetname) .*\$" Makefile
+then
+  sed -i -e "s/^\(ALLOBJ=.*\)\$/\1 \$(OBJ_$targetname) /g" Makefile  
+fi
+
+#----------------------------------------
+#create build directory
+
+#create subdirectories
+echo Creating build directory...
+allcpp=`find . -name \*.cpp | cut -c3- | grep -E -v "$ignore" | xargs`
+if [ ! -d "$builddir" ]
+then
+  mkdir -p $builddir
+fi
+for cppfile in $allcpp
+do
+  d=$builddir/`dirname $cppfile`
+  if [ ! -d "$d" ]
+  then
+    mkdir -p $d
+  fi
+done
+
+
+#create object list
+allobj=""
+allsrc="$generatedfiles $allcpp"
+for srcfile in $allsrc
+do
+  object="$builddir/`dirname $srcfile`/`basename $srcfile | sed 's/\.[^\.]*$//'`.o"
+  allobj="$allobj $object"
+done
+echo "OBJ_$targetname = $allobj" >> $builddir/src_list
+
+
+#create dep files and dep_list
+echo Init dependency files...
+olddeps=`find $builddir -name \*.dep | xargs`
+if [ "$olddeps" != "" ]
+then
+  rm $olddeps
+fi
+echo > $dep_list
+filenametail="_tail"
+for srcfile in $allsrc
+do
+  #get path and filenames
+  objpath="$builddir/`dirname $srcfile`"
+  objfile="$objpath/`basename $srcfile | sed 's/\.[^\.]*$//'`.o"
+  depfile="$objpath/`basename $srcfile | sed 's/\.[^\.]*$//'`.dep"
+  #extra compiler flag for c files
+  extraflags=""
+  extension="`echo $srcfile | sed 's/.*\.'//''`"
+  if [ "$extension" == "c" ]; then extraflags="-Wno-write-strings"; fi 
+  #write dep file
+  echo -n "$objpath/" > $depfile
+  $cxx $cflags -M $srcfile >> $depfile
+  tee >> $depfile << EOC
+	@echo \$(BLU)[\$(CXX)]\$(NOR) $srcfile
+	@\$(CXX) \$(CFLAGS) $extraflags -c $srcfile -o $objfile
+	@tail -n7 $depfile > $depfile$filenametail
+	@echo -n "$objpath/" > $depfile
+	@\$(CXX) \$(CFLAGS) -M $srcfile >> $depfile
+	@cat $depfile$filenametail >> $depfile
+	@rm $depfile$filenametail
+EOC
+  #add dep file to dep_list
+  echo "-include $depfile" >> $dep_list
+done
+
+
+echo Done.
+

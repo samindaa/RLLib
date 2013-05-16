@@ -32,16 +32,30 @@ class Policy
     virtual ~Policy()
     {
     }
+    ;
     virtual void update(const Representations<T>& phis) =0;
     virtual double pi(const Action& a) =0;
     virtual const Action& sampleAction() =0;
     virtual const Action& sampleBestAction() =0;
+};
 
-    const Action& decide(const Representations<T>& phis)
+class Policies
+{
+  public:
+    template<class T>
+    static const Action& sampleAction(Policy<T>* policy, const Representations<T>& phis)
     {
-      update(phis);
-      return sampleAction();
+      policy->update(phis);
+      return policy->sampleAction();
     }
+
+    template<class T>
+    static const Action& sampleBestAction(Policy<T>* policy, const Representations<T>& phis)
+    {
+      policy->update(phis);
+      return policy->sampleBestAction();
+    }
+
 };
 
 // start with discrete action policy
@@ -56,12 +70,13 @@ class DiscreteActionPolicy: public Policy<T>
 };
 
 template<class T>
-class PolicyDistribution: public Policy<T>
+class PolicyDistribution: public virtual Policy<T>
 {
   public:
     virtual ~PolicyDistribution()
     {
     }
+    ;
     virtual const SparseVectors<T>& computeGradLog(const Representations<T>& phis,
         const Action& action) =0;
     virtual SparseVectors<T>* parameters() const =0;
@@ -275,78 +290,20 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
 };
 
 template<class T>
-class BoltzmannDistribution: public PolicyDistribution<T>
+class StochasticPolicy: public virtual Policy<T>
 {
   protected:
     ActionList* actions;
-    SparseVector<T>* avg;
-    SparseVector<T>* grad;
     DenseVector<double>* distribution;
-    SparseVector<T>* u;
-    SparseVectors<T>* multiu;
-    SparseVectors<T>* multigrad;
   public:
-    BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
-        actions(actions), avg(new SparseVector<T>(numFeatures)), grad(
-            new SparseVector<T>(numFeatures)), distribution(
-            new DenseVector<double>(actions->dimension())), u(new SparseVector<T>(numFeatures)), multiu(
-            new SparseVectors<T>()), multigrad(new SparseVectors<T>())
+    StochasticPolicy(const int& numFeatures, ActionList* actions) :
+        actions(actions), distribution(new DenseVector<double>(actions->dimension()))
     {
-      // Parameter setting
-      multiu->push_back(u);
-      multigrad->push_back(grad);
     }
 
-    virtual ~BoltzmannDistribution()
+    virtual ~StochasticPolicy()
     {
-      delete avg;
-      delete grad;
       delete distribution;
-      delete u;
-      delete multiu;
-      delete multigrad;
-    }
-
-    void update(const Representations<T>& xas)
-    {
-      assert(actions->dimension() == xas.dimension());
-      distribution->clear();
-      avg->clear();
-      double sum = 0;
-      // The exponential function may become very large and overflow.
-      // Therefore, we multiply top and bottom of the hypothesis by the same
-      // constant without changing the output.
-      double maxValue = 0;
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
-      {
-        double tmp = u->dot(xas.at(**a));
-        if (tmp > maxValue)
-          maxValue = tmp;
-      }
-
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
-      {
-        const int id = (*a)->id();
-        distribution->at(id) = exp(u->dot(xas.at(id)) - maxValue);
-        Boundedness::checkValue(distribution->at(id));
-        sum += distribution->at(id);
-        avg->addToSelf(distribution->at(id), xas.at(id));
-      }
-
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
-      {
-        const int id = (*a)->id();
-        distribution->at(id) /= sum;
-        Boundedness::checkValue(distribution->at(id));
-      }
-      avg->multiplyToSelf(1.0 / sum);
-    }
-
-    const SparseVectors<T>& computeGradLog(const Representations<T>& xas, const Action& action)
-    {
-      grad->set(xas.at(action));
-      grad->substractToSelf(*avg);
-      return *multigrad;
     }
 
     double pi(const Action& action)
@@ -354,6 +311,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       return distribution->at(action.id());
 
     }
+
     const Action& sampleAction()
     {
       double random = Random::nextDouble();
@@ -367,14 +325,155 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       return actions->at(actions->dimension() - 1);
 
     }
+
     const Action& sampleBestAction()
     {
       return sampleAction();
+    }
+};
+
+template<class T>
+class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistribution<T>
+{
+  protected:
+    SparseVector<T>* avg;
+    SparseVector<T>* grad;
+    SparseVector<T>* u;
+    SparseVectors<T>* multiu;
+    SparseVectors<T>* multigrad;
+    typedef StochasticPolicy<T> super;
+  public:
+    BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
+        StochasticPolicy<T>(numFeatures, actions), avg(new SparseVector<T>(numFeatures)), grad(
+            new SparseVector<T>(numFeatures)), u(new SparseVector<T>(numFeatures)), multiu(
+            new SparseVectors<T>()), multigrad(new SparseVectors<T>())
+    {
+      // Parameter setting
+      multiu->push_back(u);
+      multigrad->push_back(grad);
+    }
+
+    virtual ~BoltzmannDistribution()
+    {
+      delete avg;
+      delete grad;
+      delete u;
+      delete multiu;
+      delete multigrad;
+    }
+
+    void update(const Representations<T>& xas)
+    {
+      assert(super::actions->dimension() == xas.dimension());
+      super::distribution->clear();
+      avg->clear();
+      double sum = 0;
+      // The exponential function may become very large and overflow.
+      // Therefore, we multiply top and bottom of the hypothesis by the same
+      // constant without changing the output.
+      double maxValue = 0;
+      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      {
+        double tmp = u->dot(xas.at(**a));
+        if (tmp > maxValue)
+          maxValue = tmp;
+      }
+
+      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      {
+        const int id = (*a)->id();
+        super::distribution->at(id) = exp(u->dot(xas.at(id)) - maxValue);
+        Boundedness::checkValue(super::distribution->at(id));
+        sum += super::distribution->at(id);
+        avg->addToSelf(super::distribution->at(id), xas.at(id));
+      }
+
+      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      {
+        const int id = (*a)->id();
+        super::distribution->at(id) /= sum;
+        Boundedness::checkValue(super::distribution->at(id));
+      }
+      avg->multiplyToSelf(1.0 / sum);
+    }
+
+    const SparseVectors<T>& computeGradLog(const Representations<T>& xas, const Action& action)
+    {
+      grad->set(xas.at(action));
+      grad->substractToSelf(*avg);
+      return *multigrad;
     }
 
     SparseVectors<T>* parameters() const
     {
       return multiu;
+    }
+
+    double pi(const Action& action)
+    {
+      return super::pi(action);
+    }
+
+    const Action& sampleAction()
+    {
+      return super::sampleAction();
+    }
+
+    const Action& sampleBestAction()
+    {
+      return super::sampleBestAction();
+    }
+};
+
+template<class T>
+class SoftMax: public StochasticPolicy<T>
+{
+  protected:
+    Predictor<T>* predictor;
+    double temperature;
+    typedef StochasticPolicy<T> super;
+  public:
+    SoftMax(const int& numFeatures, ActionList* actions, Predictor<T>* predictor,
+        const double temperature = 1.0) :
+        StochasticPolicy<T>(numFeatures, actions), predictor(predictor), temperature(temperature)
+    {
+
+    }
+
+    virtual ~SoftMax()
+    {
+    }
+
+    void update(const Representations<T>& xas)
+    {
+      assert(super::actions->dimension() == xas.dimension());
+      super::distribution->clear();
+      double sum = 0;
+      // The exponential function may become very large and overflow.
+      // Therefore, we multiply top and bottom of the hypothesis by the same
+      // constant without changing the output.
+      double maxValue = 0;
+      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      {
+        double tmp = predictor->predict(xas.at(**a));
+        if (tmp > maxValue)
+          maxValue = tmp;
+      }
+
+      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      {
+        const int id = (*a)->id();
+        super::distribution->at(id) = exp((predictor->predict(xas.at(id)) - maxValue) / temperature);
+        Boundedness::checkValue(super::distribution->at(id));
+        sum += super::distribution->at(id);
+      }
+
+      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      {
+        const int id = (*a)->id();
+        super::distribution->at(id) /= sum;
+        Boundedness::checkValue(super::distribution->at(id));
+      }
     }
 };
 
