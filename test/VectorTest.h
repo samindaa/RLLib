@@ -56,7 +56,7 @@ class SparseVectorTest: public SparseVectorTestBase
       int nbActive = rand() % maxActive;
       for (int i = 0; i < nbActive; i++)
         type->setEntry(rand() % maxActive, Random::nextDouble() * 2 - 1);
-      assert(checkSparseVectorConsistency(*type));
+      assert(Assert::checkSparseVectorConsistency(*type));
       return type;
     }
 
@@ -64,14 +64,14 @@ class SparseVectorTest: public SparseVectorTestBase
     {
       SVecDoubleType pa(a);
       SVecDoubleType pb(b);
-      assert(checkSparseVectorConsistency(pa));
-      assert(checkSparseVectorConsistency(pb));
-      checkVectorEquals(pa, a);
-      checkVectorEquals(pb, b);
-      checkVectorEquals(pa.addToSelf(pb), a.addToSelf(b));
-      checkVectorEquals(pa.substractToSelf(pb), a.substractToSelf(b));
+      assert(Assert::checkSparseVectorConsistency(pa));
+      assert(Assert::checkSparseVectorConsistency(pb));
+      Assert::checkVectorEquals(pa, a);
+      Assert::checkVectorEquals(pb, b);
+      Assert::checkVectorEquals(pa.addToSelf(pb), a.addToSelf(b));
+      Assert::checkVectorEquals(pa.substractToSelf(pb), a.substractToSelf(b));
       float factor = Random::nextFloat();
-      checkVectorEquals(pa.addToSelf(factor, pb), a.addToSelf(factor, b));
+      Assert::checkVectorEquals(pa.addToSelf(factor, pb), a.addToSelf(factor, b));
     }
 
   protected:
@@ -114,7 +114,7 @@ class SparseVectorTest: public SparseVectorTestBase
           )
           { 0.0, 1.0, 0.0, 0.0 }, 4);
       a->set(*b);
-      assert(checkSparseVectorConsistency(*a));
+      assert(Assert::checkSparseVectorConsistency(*a));
     }
 
     void testRandomVectors()
@@ -138,13 +138,13 @@ class SparseVectorTest: public SparseVectorTestBase
       SVecDoubleType* b = newVector((double[]
           )
           { 0.0, 3.0, 2.0, 0.0, 1.0 }, 5);
-      checkVectorEquals(*b, v);
+      Assert::checkVectorEquals(*b, v);
       v.setEntry(0, 0);
       v.setEntry(1, 0);
       SVecDoubleType* c = newVector((double[]
           )
           { 0.0, 0.0, 2.0, 0.0, 1.0 }, 5);
-      checkVectorEquals(*c, v);
+      Assert::checkVectorEquals(*c, v);
     }
 
     void testSum()
@@ -170,7 +170,7 @@ class SparseVectorTest: public SparseVectorTestBase
       SVecDoubleType* c = newVector((double[]
           )
           { 3.0, 7.0, 2.0, 0.0, 5.0 }, 5);
-      checkVectorEquals(*c, a.addToSelf(b));
+      Assert::checkVectorEquals(*c, a.addToSelf(b));
     }
 
     void testMinus()
@@ -183,9 +183,9 @@ class SparseVectorTest: public SparseVectorTestBase
       SVecDoubleType* d = newVector((double[]
           )
           { -3.0, 2.0, 4.0, 0.0, -2.0 }, 5);
-      checkVectorEquals(*c, a.substractToSelf(b));
+      Assert::checkVectorEquals(*c, a.substractToSelf(b));
       SVecDoubleType e(*_a);
-      checkVectorEquals(*d, e.multiplyToSelf(2.0).substractToSelf(b));
+      Assert::checkVectorEquals(*d, e.multiplyToSelf(2.0).substractToSelf(b));
     }
 
     void testMapTimes()
@@ -198,8 +198,8 @@ class SparseVectorTest: public SparseVectorTestBase
       SVecDoubleType* d = newVector((double[]
           )
           { 0.0, 0.0, 0.0, 0.0, 0.0 }, 5);
-      checkVectorEquals(*c, a.multiplyToSelf(5.0));
-      checkVectorEquals(*d, b.multiplyToSelf(0.0));
+      Assert::checkVectorEquals(*c, a.multiplyToSelf(5.0));
+      Assert::checkVectorEquals(*d, b.multiplyToSelf(0.0));
     }
 
     void testMaxNorm()
@@ -274,7 +274,7 @@ class SparseVectorTest: public SparseVectorTestBase
       SVecDoubleType* c = newVector((double[]
           )
           { -3, 4, 10 }, 3);
-      checkVectorEquals(*c, a2->ebeMultiplyToSelf(*a1));
+      Assert::checkVectorEquals(*c, a2->ebeMultiplyToSelf(*a1));
     }
 
   public:

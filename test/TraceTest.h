@@ -89,17 +89,17 @@ class TraceTest: public TraceTestBase
     {
       trace.update(lambda, *s01);
       SVecDoubleType a(*s01);
-      checkVectorEquals(trace.vect(), a);
+      Assert::checkVectorEquals(trace.vect(), a);
       for (int i = 0; i < 1000; i++)
       {
         trace.update(lambda, *s02);
-        checkSparseVectorConsistency(trace.vect());
+        Assert::checkSparseVectorConsistency(trace.vect());
       }
       assert(s02->nbActiveEntries() == trace.vect().nbActiveEntries());
       // TODO: expected:
       SVecDoubleType expectedVec(trace.vect().dimension());
       expectedVec.set(*s02, expected);
-      checkVectorEquals(trace.vect(), expectedVec, 0.00001);
+      Assert::checkVectorEquals(trace.vect(), expectedVec, 0.00001);
     }
 
     void testTrace(const double& lambda, TraceDoubleType& trace, const double& expected)
