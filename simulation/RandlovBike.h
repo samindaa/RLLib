@@ -36,8 +36,8 @@ class RandlovBike: public Env<float>
     float x_goal, y_goal, radius_goal, reinforcement;
     bool isTerminal;
 
-    float omega, omega_dot, omega_d_dot, theta, theta_dot, theta_d_dot, xf, yf,
-        xb, yb /* tyre position */, psi_goal /* Angle to the goal */, aux_state;
+    float omega, omega_dot, omega_d_dot, theta, theta_dot, theta_d_dot, xf, yf, xb,
+        yb /* tyre position */, psi_goal /* Angle to the goal */, aux_state;
 
     float R1, R2, R3, R_FACTOR, NO_STATES2, dt, /* 10 km/t in m/s */
     v, g, dCM, c, h, Mc, Md, Mp, M, R, /* tyre radius */
@@ -47,20 +47,18 @@ class RandlovBike: public Env<float>
 
   public:
     RandlovBike() :
-        Env<float>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(
-            0), isTerminal(false), omega(0), omega_dot(0), omega_d_dot(0), theta(
-            0), theta_dot(0), theta_d_dot(0), xf(0), yf(0), xb(0), yb(0), psi_goal(
-            0), aux_state(0), R1(-1.0), R2(0.0), R3(+1.0),
+        Env<float>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
+            false), omega(0), omega_dot(0), omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(
+            0), yf(0), xb(0), yb(0), psi_goal(0), aux_state(0), R1(-1.0), R2(0.0), R3(+1.0),
         // +0.01
         R_FACTOR(0.0001), NO_STATES2(20),
 
-        dt(0.01), v(10.0 / 3.6), g(9.82), dCM(0.3), c(0.66), h(0.94), Mc(15.0), Md(
-            1.7), Mp(60.0), M(Mc + Mp), R(0.34),
+        dt(0.01), v(10.0 / 3.6), g(9.82), dCM(0.3), c(0.66), h(0.94), Mc(15.0), Md(1.7), Mp(60.0), M(
+            Mc + Mp), R(0.34),
         /* tyre radius */
-        sigma_dot(v / R), I_bike(
-            (13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)), I_dc(
-            Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl(
-            (1.0 / 2) * Md * R * R), l(1.11), pi(3.1415927)
+        sigma_dot(v / R), I_bike((13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)), I_dc(
+            Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl((1.0 / 2) * Md * R * R), l(1.11), pi(
+            3.1415927)
     {
 
       for (unsigned int i = 0; i < discreteActions->dimension(); i++)
@@ -105,8 +103,8 @@ class RandlovBike: public Env<float>
 
       return (temp);
     }
-    int get_box(float theta, float theta_dot, float omega, float omega_dot,
-        float omega_d_dot, float psi_goal)
+    int get_box(float theta, float theta_dot, float omega, float omega_dot, float omega_d_dot,
+        float psi_goal)
     {
       int box;
 
@@ -259,8 +257,7 @@ class RandlovBike: public Env<float>
             - cos(phi)
                 * (I_dc * sigma_dot * theta_dot
                     + Signum::valueOf(theta) * v * v
-                        * (Md * R * (1.0 / rf + 1.0 / rb) + M * h / rCM)))
-            / I_bike;
+                        * (Md * R * (1.0 / rf + 1.0 / rb) + M * h / rCM))) / I_bike;
         theta_d_dot = (T - I_dv * omega_dot * sigma_dot) / I_dl;
 
         /*--- Eulers method ---*/

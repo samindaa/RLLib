@@ -48,8 +48,7 @@ class Quaternion
         x(0), y(0), z(0), w(0)
     {
     }
-    Quaternion(const double& x, const double& y, const double& z,
-        const double& w) :
+    Quaternion(const double& x, const double& y, const double& z, const double& w) :
         x(x), y(y), z(z), w(w)
     {
     }
@@ -72,8 +71,7 @@ class Quaternion
     Quaternion mult(const Quaternion& rq) const
     {
       return Quaternion(w * rq.x + x * rq.w + y * rq.z - z * rq.y,
-          w * rq.y - x * rq.z + y * rq.w + z * rq.x,
-          w * rq.z + x * rq.y - y * rq.x + z * rq.w,
+          w * rq.y - x * rq.z + y * rq.w + z * rq.x, w * rq.z + x * rq.y - y * rq.x + z * rq.w,
           w * rq.w - x * rq.x - y * rq.y - z * rq.z);
     }
 
@@ -100,8 +98,7 @@ Quaternion HeliVector::to_quaternion() const
   {
     quat = Quaternion(sin(rotation_angle / 2.0f) * (x / rotation_angle),
         sin(rotation_angle / 2.0f) * (y / rotation_angle),
-        sin(rotation_angle / 2.0f) * (z / rotation_angle),
-        cos(rotation_angle / 2.0f));
+        sin(rotation_angle / 2.0f) * (z / rotation_angle), cos(rotation_angle / 2.0f));
   }
   return quat;
 }
@@ -337,8 +334,7 @@ class HelicopterDynamics
 
       for (int i = 0; i < 6; ++i)
         noise[i] = noise_memory * noise[i]
-            + (1.0 - noise_memory) * Random::nextNormalGaussian() * noise_std[i]
-                * noise_mult;
+            + (1.0 - noise_memory) * Random::nextNormalGaussian() * noise_std[i] * noise_mult;
 
       for (int t = 0; t < 10; ++t)
       {
@@ -354,14 +350,11 @@ class HelicopterDynamics
         HeliVector uvw = velocity.express_in_quat_frame(q);
         HeliVector wind_ned(wind[0], wind[1], 0.0);
         HeliVector wind_uvw = wind_ned.express_in_quat_frame(q);
-        HeliVector uvw_force_from_heli_over_m(
-            -heli_model_u_drag * (uvw.x + wind_uvw.x) + noise[0],
-            -heli_model_v_drag * (uvw.y + wind_uvw.y)
-                + heli_model_tail_rotor_side_thrust + noise[1],
-            -heli_model_w_drag * uvw.z + heli_model_u3_w * a[3] + noise[2]);
+        HeliVector uvw_force_from_heli_over_m(-heli_model_u_drag * (uvw.x + wind_uvw.x) + noise[0],
+            -heli_model_v_drag * (uvw.y + wind_uvw.y) + heli_model_tail_rotor_side_thrust
+                + noise[1], -heli_model_w_drag * uvw.z + heli_model_u3_w * a[3] + noise[2]);
 
-        HeliVector ned_force_from_heli_over_m =
-            uvw_force_from_heli_over_m.rotate(q);
+        HeliVector ned_force_from_heli_over_m = uvw_force_from_heli_over_m.rotate(q);
         velocity.x += DeltaT * ned_force_from_heli_over_m.x;
         velocity.y += DeltaT * ned_force_from_heli_over_m.y;
         velocity.z += DeltaT * (ned_force_from_heli_over_m.z + 9.81);
@@ -373,12 +366,9 @@ class HelicopterDynamics
         q = q.mult(rot_quat);
 
         // *** angular rate ***
-        double p_dot = -heli_model_p_drag * angularRate.x
-            + heli_model_u0_p * a[0] + noise[3];
-        double q_dot = -heli_model_q_drag * angularRate.y
-            + heli_model_u1_q * a[1] + noise[4];
-        double r_dot = -heli_model_r_drag * angularRate.z
-            + heli_model_u2_r * a[2] + noise[5];
+        double p_dot = -heli_model_p_drag * angularRate.x + heli_model_u0_p * a[0] + noise[3];
+        double q_dot = -heli_model_q_drag * angularRate.y + heli_model_u1_q * a[1] + noise[4];
+        double r_dot = -heli_model_r_drag * angularRate.z + heli_model_u2_r * a[2] + noise[5];
 
         angularRate.x += DeltaT * p_dot;
         angularRate.y += DeltaT * q_dot;

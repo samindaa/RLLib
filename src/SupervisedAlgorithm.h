@@ -72,10 +72,8 @@ class IDBD: public LearningAlgorithm<T>
     double theta, minimumStepSize;
   public:
     IDBD(const int& size, const double& theta) :
-        w(new SparseVector<T>(size)), alpha(
-            new SparseVector<T>(w->dimension())), h(
-            new SparseVector<T>(w->dimension())), theta(theta), minimumStepSize(
-            10e-7)
+        w(new SparseVector<T>(size)), alpha(new SparseVector<T>(w->dimension())), h(
+            new SparseVector<T>(w->dimension())), theta(theta), minimumStepSize(10e-7)
     {
       alpha->set(1.0 / w->dimension());
     }
@@ -113,13 +111,11 @@ class IDBD: public LearningAlgorithm<T>
       deltaX.multiplyToSelf(delta);
       SparseVector<T> deltaXh(deltaX);
       deltaXh.ebeMultiplyToSelf(*h);
-      SparseVector<T>::multiplySelfByExponential(*alpha, theta, deltaXh,
-          minimumStepSize);
+      SparseVector<T>::multiplySelfByExponential(*alpha, theta, deltaXh, minimumStepSize);
       SparseVector<T>& alphaDeltaX = deltaX.ebeMultiplyToSelf(*alpha);
       w->addToSelf(alphaDeltaX);
       SparseVector<T> alphaX2(x);
-      alphaX2.ebeMultiplyToSelf(x).ebeMultiplyToSelf(*alpha).ebeMultiplyToSelf(
-          *h);
+      alphaX2.ebeMultiplyToSelf(x).ebeMultiplyToSelf(*alpha).ebeMultiplyToSelf(*h);
       h->addToSelf(-1.0, alphaX2);
       h->addToSelf(alphaDeltaX);
     }
@@ -146,11 +142,9 @@ class Autostep: public LearningAlgorithm<T>
 
   public:
     Autostep(const int& nbFeatures) :
-        w(new SparseVector<T>(nbFeatures)), alpha(
-            new SparseVector<T>(w->dimension())), h(
-            new SparseVector<T>(w->dimension())), v(
-            new SparseVector<T>(w->dimension())), tau(1000.0), minimumStepSize(
-            10e-7)
+        w(new SparseVector<T>(nbFeatures)), alpha(new SparseVector<T>(w->dimension())), h(
+            new SparseVector<T>(w->dimension())), v(new SparseVector<T>(w->dimension())), tau(
+            1000.0), minimumStepSize(10e-7)
     {
       alpha->set(1.0 / nbFeatures);
       v->set(1.0);
@@ -172,12 +166,11 @@ class Autostep: public LearningAlgorithm<T>
       SparseVector<T> absDeltaXh(deltaXh);
       SparseVector<T>::absToSelf(absDeltaXh);
       SparseVector<T> vUpdate(absDeltaXh);
-      vUpdate.substractToSelf(*v).ebeMultiplyToSelf(x2).ebeMultiplyToSelf(
-          *alpha);
+      vUpdate.substractToSelf(*v).ebeMultiplyToSelf(x2).ebeMultiplyToSelf(*alpha);
       v->addToSelf(1.0 / tau, vUpdate);
       SparseVector<T>::positiveMaxToSelf(*v, absDeltaXh);
-      SparseVector<T>::multiplySelfByExponential(*alpha, 0.01,
-          deltaXh.ebeDivideToSelf(*v), minimumStepSize);
+      SparseVector<T>::multiplySelfByExponential(*alpha, 0.01, deltaXh.ebeDivideToSelf(*v),
+          minimumStepSize);
       SparseVector<T> x2ByAlpha(x2);
       x2ByAlpha.ebeMultiplyToSelf(*alpha);
       double sum = std::max(x2ByAlpha.sum(), 1.0);
@@ -215,8 +208,7 @@ class Autostep: public LearningAlgorithm<T>
       updateAlpha(x, x2, deltaX);
       SparseVector<T>& alphaDeltaX = deltaX.ebeMultiplyToSelf(*alpha);
       w->addToSelf(alphaDeltaX);
-      SparseVector<T>& minusX2AlphaH =
-          x2.ebeMultiplyToSelf(*alpha).ebeMultiplyToSelf(*h);
+      SparseVector<T>& minusX2AlphaH = x2.ebeMultiplyToSelf(*alpha).ebeMultiplyToSelf(*h);
       h->addToSelf(minusX2AlphaH.multiplyToSelf(-1.0)).addToSelf(alphaDeltaX);
     }
 

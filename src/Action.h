@@ -115,8 +115,7 @@ class GeneralActionList: public ActionList
     }
     virtual ~GeneralActionList()
     {
-      for (std::vector<Action*>::iterator iter = actions.begin();
-          iter != actions.end(); ++iter)
+      for (std::vector<Action*>::iterator iter = actions.begin(); iter != actions.end(); ++iter)
         delete *iter;
       actions.clear();
     }
@@ -136,8 +135,7 @@ class GeneralActionList: public ActionList
       actions.at(index)->push_back(value);
     }
 
-    void update(const int& actionIndex, const unsigned int& vectorIndex,
-        const double& value)
+    void update(const int& actionIndex, const unsigned int& vectorIndex, const double& value)
     {
       actions.at(actionIndex)->update(vectorIndex, value);
     }

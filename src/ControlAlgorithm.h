@@ -30,8 +30,7 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
     SparseVector<T>* xa_t;
 
   public:
-    SarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction,
-        Sarsa<T>* sarsa) :
+    SarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction, Sarsa<T>* sarsa) :
         acting(acting), toStateAction(toStateAction), sarsa(sarsa), xa_t(
             new SparseVector<T>(sarsa->dimension()))
     {
@@ -51,8 +50,8 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
       return a_0;
     }
 
-    const Action& step(const DenseVector<O>& x_t, const Action& a_t,
-        const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
+    const Action& step(const DenseVector<O>& x_t, const Action& a_t, const DenseVector<O>& x_tp1,
+        const double& r_tp1, const double& z_tp1)
     {
       const Representations<T>& xas_tp1 = toStateAction->stateActions(x_tp1);
       const Action& a_tp1 = acting->decide(xas_tp1);
@@ -79,8 +78,7 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
       acting->update(phis);
       double v_s = 0;
       // V(s) = \sum_{a \in A} \pi(s,a) * Q(s,a)
-      for (ActionList::const_iterator a =
-          toStateAction->getActionList().begin();
+      for (ActionList::const_iterator a = toStateAction->getActionList().begin();
           a != toStateAction->getActionList().end(); ++a)
         v_s += acting->pi(**a) * sarsa->predict(phis.at(**a));
       return v_s;
@@ -105,9 +103,8 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
     ActionList* actions;
   public:
 
-    ExpectedSarsaControl(Policy<T>* acting,
-        StateToStateAction<T, O>* toStateAction, Sarsa<T>* sarsa,
-        ActionList* actions) :
+    ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction,
+        Sarsa<T>* sarsa, ActionList* actions) :
         SarsaControl<T, O>(acting, toStateAction, sarsa), phi_bar_tp1(
             new SparseVector<T>(sarsa->dimension())), actions(actions)
     {
@@ -117,15 +114,13 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
       delete phi_bar_tp1;
     }
 
-    const Action& step(const DenseVector<O>& x_t, const Action& a_t,
-        const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
+    const Action& step(const DenseVector<O>& x_t, const Action& a_t, const DenseVector<O>& x_tp1,
+        const double& r_tp1, const double& z_tp1)
     {
       phi_bar_tp1->clear();
-      const Representations<T>& xas_tp1 =
-          SarsaControl<T, O>::toStateAction->stateActions(x_tp1);
+      const Representations<T>& xas_tp1 = SarsaControl<T, O>::toStateAction->stateActions(x_tp1);
       const Action& a_tp1 = SarsaControl<T, O>::acting->decide(xas_tp1);
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         double pi = SarsaControl<T, O>::acting->pi(**a);
         if (pi == 0)
@@ -137,8 +132,7 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
       }
 
       const SparseVector<T>& xa_tp1 = xas_tp1.at(a_tp1);
-      SarsaControl<T, O>::sarsa->update(*SarsaControl<T, O>::xa_t, *phi_bar_tp1,
-          r_tp1);
+      SarsaControl<T, O>::sarsa->update(*SarsaControl<T, O>::xa_t, *phi_bar_tp1, r_tp1);
       SarsaControl<T, O>::xa_t->set(xa_tp1);
       return a_tp1;
     }
@@ -191,8 +185,8 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       return target->pi(a_t) / behavior->pi(a_t);
     }
 
-    const Action& step(const DenseVector<O>& x_t, const Action& a_t,
-        const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
+    const Action& step(const DenseVector<O>& x_t, const Action& a_t, const DenseVector<O>& x_tp1,
+        const double& r_tp1, const double& z_tp1)
     {
 
       rho_t = computeRho(a_t);
@@ -200,8 +194,7 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       const Representations<T>& xas_tp1 = toStateAction->stateActions(x_tp1);
       target->update(xas_tp1);
       phi_bar_tp1->clear();
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         double pi = target->pi(**a);
         if (pi == 0)
@@ -234,8 +227,7 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       target->update(phis);
       double v_s = 0;
       // V(s) = \sum_{a \in A} \pi(s,a) * Q(s,a)
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
         v_s += target->pi(**a) * gq->predict(phis.at(**a));
       return v_s;
     }
@@ -279,9 +271,8 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     SparseVectors<T>* u;
 
   public:
-    ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t,
-        const double& lambda, PolicyDistribution<T>* policyDistribution,
-        Traces<T>* e) :
+    ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t, const double& lambda,
+        PolicyDistribution<T>* policyDistribution, Traces<T>* e) :
         initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda), policyDistribution(
             policyDistribution), e(e), u(policyDistribution->parameters())
     {
@@ -298,12 +289,11 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
       initialized = true;
     }
 
-    void update(const Representations<T>& xas_t, const Action& a_t,
-        double const& rho_t, double const& gamma_t, double delta_t)
+    void update(const Representations<T>& xas_t, const Action& a_t, double const& rho_t,
+        double const& gamma_t, double delta_t)
     {
       assert(initialized);
-      const SparseVectors<T>& gradLog = policyDistribution->computeGradLog(
-          xas_t, a_t);
+      const SparseVectors<T>& gradLog = policyDistribution->computeGradLog(xas_t, a_t);
       for (unsigned int i = 0; i < e->dimension(); i++)
       {
         e->at(i)->update(gamma_t * lambda, gradLog[i]);
@@ -362,9 +352,8 @@ class OffPAC: public OffPolicyControlLearner<T, O>
     SparseVector<T>* phi_tp1;
 
   public:
-    OffPAC(Policy<T>* behavior, GTDLambda<T>* critic,
-        ActorOffPolicy<T, O>* actor, StateToStateAction<T, O>* toStateAction,
-        Projector<T, O>* projector, const double& gamma_t) :
+    OffPAC(Policy<T>* behavior, GTDLambda<T>* critic, ActorOffPolicy<T, O>* actor,
+        StateToStateAction<T, O>* toStateAction, Projector<T, O>* projector, const double& gamma_t) :
         rho_t(0), delta_t(0), behavior(behavior), critic(critic), actor(actor), toStateAction(
             toStateAction), projector(projector), gamma_t(gamma_t), phi_t(
             new SparseVector<T>(projector->dimension())), phi_tp1(
@@ -385,8 +374,8 @@ class OffPAC: public OffPolicyControlLearner<T, O>
       return behavior->decide(toStateAction->stateActions(x_0));
     }
 
-    const Action& step(const DenseVector<O>& x_t, const Action& a_t,
-        const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
+    const Action& step(const DenseVector<O>& x_t, const Action& a_t, const DenseVector<O>& x_tp1,
+        const double& r_tp1, const double& z_tp1)
     {
       phi_t->set(projector->project(x_t));
       phi_tp1->set(projector->project(x_tp1));
@@ -453,8 +442,8 @@ class Actor: public ActorOnPolicy<T, O>
 
   public:
     Actor(const double& alpha_u, PolicyDistribution<T>* policyDistribution) :
-        initialized(false), alpha_u(alpha_u), policyDistribution(
-            policyDistribution), u(policyDistribution->parameters())
+        initialized(false), alpha_u(alpha_u), policyDistribution(policyDistribution), u(
+            policyDistribution->parameters())
     {
     }
 
@@ -469,12 +458,10 @@ class Actor: public ActorOnPolicy<T, O>
       initialized = false;
     }
 
-    void update(const Representations<T>& xas_t, const Action& a_t,
-        double delta)
+    void update(const Representations<T>& xas_t, const Action& a_t, double delta)
     {
       assert(initialized);
-      const SparseVectors<T>& gradLog = policyDistribution->computeGradLog(
-          xas_t, a_t);
+      const SparseVectors<T>& gradLog = policyDistribution->computeGradLog(xas_t, a_t);
       for (unsigned int i = 0; i < gradLog.dimension(); i++)
         u->at(i)->addToSelf(alpha_u * delta, gradLog[i]);
     }
@@ -510,11 +497,9 @@ class ActorLambda: public Actor<T, O>
     Traces<T>* e;
 
   public:
-    ActorLambda(const double& alpha_u, const double& gamma,
-        const double& lambda, PolicyDistribution<T>* policyDistribution,
-        Traces<T>* e) :
-        Actor<T, O>(alpha_u, policyDistribution), gamma(gamma), lambda(lambda), e(
-            e)
+    ActorLambda(const double& alpha_u, const double& gamma, const double& lambda,
+        PolicyDistribution<T>* policyDistribution, Traces<T>* e) :
+        Actor<T, O>(alpha_u, policyDistribution), gamma(gamma), lambda(lambda), e(e)
     {
       assert(e->dimension() == super::u->dimension());
     }
@@ -531,12 +516,10 @@ class ActorLambda: public Actor<T, O>
       e->clear();
     }
 
-    void update(const Representations<T>& xas_t, const Action& a_t,
-        double delta)
+    void update(const Representations<T>& xas_t, const Action& a_t, double delta)
     {
       assert(super::initialized);
-      const SparseVectors<T>& gradLog = super::policy().computeGradLog(xas_t,
-          a_t);
+      const SparseVectors<T>& gradLog = super::policy().computeGradLog(xas_t, a_t);
       for (unsigned int i = 0; i < super::u->dimension(); i++)
       {
         e->at(i)->update(gamma * lambda, gradLog[i]);
@@ -558,8 +541,7 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
   public:
     AbstractActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor,
         Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction) :
-        critic(critic), actor(actor), projector(projector), toStateAction(
-            toStateAction)
+        critic(critic), actor(actor), projector(projector), toStateAction(toStateAction)
     {
     }
 
@@ -570,11 +552,9 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
 
   protected:
     virtual double updateCritic(const DenseVector<O>& x_t, const Action& a_t,
-        const DenseVector<O>& x_tp1, const double& r_tp1,
-        const double& z_tp1) =0;
+        const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1) =0;
 
-    void updateActor(const DenseVector<O>& x_t, const Action& a_t,
-        const double& actorDelta)
+    void updateActor(const DenseVector<O>& x_t, const Action& a_t, const double& actorDelta)
     {
       const Representations<T>& xas_t = toStateAction->stateActions(x_t);
       policy().update(xas_t);
@@ -605,8 +585,8 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
       return actor->proposeAction(toStateAction->stateActions(x));
     }
 
-    const Action& step(const DenseVector<O>& x_t, const Action& a_t,
-        const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
+    const Action& step(const DenseVector<O>& x_t, const Action& a_t, const DenseVector<O>& x_tp1,
+        const double& r_tp1, const double& z_tp1)
     {
       // Update critic
       double delta_t = updateCritic(x_t, a_t, x_tp1, r_tp1, z_tp1);
@@ -651,8 +631,8 @@ class ActorCritic: public AbstractActorCritic<T, O>
     SparseVector<T>* phi_t;
     SparseVector<T>* phi_tp1;
   public:
-    ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor,
-        Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction) :
+    ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor, Projector<T, O>* projector,
+        StateToStateAction<T, O>* toStateAction) :
         AbstractActorCritic<T, O>(critic, actor, projector, toStateAction), phi_t(
             new SparseVector<T>(projector->dimension())), phi_tp1(
             new SparseVector<T>(projector->dimension()))
@@ -665,8 +645,8 @@ class ActorCritic: public AbstractActorCritic<T, O>
       delete phi_tp1;
     }
 
-    double updateCritic(const DenseVector<O>& x_t, const Action& a_t,
-        const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
+    double updateCritic(const DenseVector<O>& x_t, const Action& a_t, const DenseVector<O>& x_tp1,
+        const double& r_tp1, const double& z_tp1)
     {
       phi_t->set(super::projector->project(x_t));
       phi_tp1->set(super::projector->project(x_tp1));
@@ -687,11 +667,9 @@ class AverageRewardActorCritic: public AbstractActorCritic<T, O>
 
   public:
     AverageRewardActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor,
-        Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction,
-        double alpha_r) :
-        AbstractActorCritic<T, O>(critic, actor, projector, toStateAction), alpha_r(
-            alpha_r), averageReward(0), phi_t(
-            new SparseVector<T>(projector->dimension())), phi_tp1(
+        Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction, double alpha_r) :
+        AbstractActorCritic<T, O>(critic, actor, projector, toStateAction), alpha_r(alpha_r), averageReward(
+            0), phi_t(new SparseVector<T>(projector->dimension())), phi_tp1(
             new SparseVector<T>(projector->dimension()))
     {
     }
@@ -702,14 +680,13 @@ class AverageRewardActorCritic: public AbstractActorCritic<T, O>
       delete phi_tp1;
     }
 
-    double updateCritic(const DenseVector<O>& x_t, const Action& a_t,
-        const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1)
+    double updateCritic(const DenseVector<O>& x_t, const Action& a_t, const DenseVector<O>& x_tp1,
+        const double& r_tp1, const double& z_tp1)
     {
       phi_t->set(super::projector->project(x_t));
       phi_tp1->set(super::projector->project(x_tp1));
       // Update critic
-      double delta_t = super::critic->update(*phi_t, *phi_tp1,
-          r_tp1 - averageReward);
+      double delta_t = super::critic->update(*phi_t, *phi_tp1, r_tp1 - averageReward);
       averageReward += alpha_r * delta_t;
       return delta_t;
     }

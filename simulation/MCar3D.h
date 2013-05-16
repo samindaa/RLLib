@@ -53,9 +53,8 @@ class MCar3D: public Env<float>
 
   public:
     MCar3D() :
-        Env<float>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(
-            0), offset(0), targetPosition(0.5), positionRange(
-            new Range<float>(-1.2, 0.5)), velocityRange(
+        Env<float>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(0), targetPosition(
+            0.5), positionRange(new Range<float>(-1.2, 0.5)), velocityRange(
             new Range<float>(-0.07, 0.07))
     {
 
@@ -78,11 +77,9 @@ class MCar3D: public Env<float>
     void set_initial_position_random()
     {
       xposition = positionRange->min()
-          + Random::nextFloat()
-              * ((positionRange->max() - 0.2) - positionRange->min());
+          + Random::nextFloat() * ((positionRange->max() - 0.2) - positionRange->min());
       yposition = positionRange->min()
-          + Random::nextFloat()
-              * ((positionRange->max() - 0.2) - positionRange->min());
+          + Random::nextFloat() * ((positionRange->max() - 0.2) - positionRange->min());
       xvelocity = 0.0;
       yvelocity = 0.0;
     }
@@ -139,14 +136,10 @@ class MCar3D: public Env<float>
     void update()
     {
       DenseVector<float>& vars = *__vars;
-      vars[0] = (xposition - positionRange->min()) * 10.0
-          / positionRange->length();
-      vars[1] = (yposition - positionRange->min()) * 10.0
-          / positionRange->length();
-      vars[2] = (xvelocity - velocityRange->min()) * 10.0
-          / velocityRange->length();
-      vars[3] = (yvelocity - velocityRange->min()) * 10.0
-          / velocityRange->length();
+      vars[0] = (xposition - positionRange->min()) * 10.0 / positionRange->length();
+      vars[1] = (yposition - positionRange->min()) * 10.0 / positionRange->length();
+      vars[2] = (xvelocity - velocityRange->min()) * 10.0 / velocityRange->length();
+      vars[3] = (yvelocity - velocityRange->min()) * 10.0 / velocityRange->length();
       if (out.is_open() && getOn())
         out << xposition << " " << yposition << std::endl;
     }

@@ -30,8 +30,8 @@ class Representations
     }
     ~Representations()
     {
-      for (typename std::vector<SparseVector<T>*>::iterator iter =
-          phis->begin(); iter != phis->end(); ++iter)
+      for (typename std::vector<SparseVector<T>*>::iterator iter = phis->begin();
+          iter != phis->end(); ++iter)
         delete *iter;
       phis->clear();
       delete phis;
@@ -100,8 +100,7 @@ class StateActionTilings: public StateToStateAction<T, O>
   public:
     StateActionTilings(Projector<T, O>* projector, ActionList* actions) :
         projector(projector), actions(actions), phis(
-            new Representations<T>(projector->dimension(),
-                actions->dimension()))
+            new Representations<T>(projector->dimension(), actions->dimension()))
     {
     }
 
@@ -113,8 +112,7 @@ class StateActionTilings: public StateToStateAction<T, O>
     const Representations<T>& stateActions(const DenseVector<O>& x)
     {
       assert(actions->dimension() == phis->dimension());
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         if (actions->dimension() == 1)
           phis->set(projector->project(x), **a); // projection from whole space
@@ -150,14 +148,12 @@ class TabularAction: public StateToStateAction<T, O>
     SparseVector<T>* _phi;
     bool includeActiveFeature;
   public:
-    TabularAction(Projector<T, O>* projector, ActionList* actions,
-        bool includeActiveFeature = true) :
+    TabularAction(Projector<T, O>* projector, ActionList* actions, bool includeActiveFeature = true) :
         projector(projector), actions(actions), phis(
             new Representations<T>(
                 includeActiveFeature ?
                     actions->dimension() * projector->dimension() + 1 :
-                    actions->dimension() * projector->dimension(),
-                actions->dimension())), _phi(
+                    actions->dimension() * projector->dimension(), actions->dimension())), _phi(
             new SparseVector<T>(
                 includeActiveFeature ?
                     actions->dimension() * projector->dimension() + 1 :
@@ -176,8 +172,7 @@ class TabularAction: public StateToStateAction<T, O>
     {
       assert(actions->dimension() == phis->dimension());
       const SparseVector<T>& phi = projector->project(x);
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         _phi->set(phi, projector->dimension() * (*a)->id());
         if (includeActiveFeature)
@@ -194,9 +189,7 @@ class TabularAction: public StateToStateAction<T, O>
 
     double vectorNorm() const
     {
-      return
-          includeActiveFeature ?
-              projector->vectorNorm() + 1 : projector->vectorNorm();
+      return includeActiveFeature ? projector->vectorNorm() + 1 : projector->vectorNorm();
     }
 
     int dimension() const

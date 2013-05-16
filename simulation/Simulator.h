@@ -43,8 +43,7 @@ class Simulator
     Simulator(Control<T, O>* agent, Env<O>* env, int maxTestRuns = 20) :
         maxTestRuns(maxTestRuns), agent(agent), env(env), action(0), x_t(
             new DenseVector<O>(env->getVars().dimension())), x_tp1(
-            new DenseVector<O>(env->getVars().dimension())), episodeR(0), episodeZ(
-            0), time(0)
+            new DenseVector<O>(env->getVars().dimension())), episodeR(0), episodeZ(0), time(0)
     {
     }
 
@@ -53,8 +52,8 @@ class Simulator
       delete x_t;
       delete x_tp1;
     }
-    void run(const int& maxRuns, const int& maxSteps, const int& maxEpisodes,
-        const bool& runTest = true, const bool& verbose = true)
+    void run(const int& maxRuns, const int& maxSteps, const int& maxEpisodes, const bool& runTest =
+        true, const bool& verbose = true)
     {
       if (verbose)
         std::cout << "## ControlLearner=" << typeid(*agent).name() << std::endl;
@@ -111,12 +110,10 @@ class Simulator
 
       if (runTest)
       {
-        double xbar = std::accumulate(xTest.begin(), xTest.end(), 0.0)
-            / (double(xTest.size()));
+        double xbar = std::accumulate(xTest.begin(), xTest.end(), 0.0) / (double(xTest.size()));
         std::cout << "## avg length=" << xbar << std::endl;
         double sigmabar = 0;
-        for (std::vector<double>::const_iterator x = xTest.begin();
-            x != xTest.end(); ++x)
+        for (std::vector<double>::const_iterator x = xTest.begin(); x != xTest.end(); ++x)
           sigmabar += pow((*x - xbar), 2);
         sigmabar = sqrt(sigmabar) / double(xTest.size());
         double se/*standard error*/= sigmabar / sqrt(double(xTest.size()));
@@ -149,8 +146,7 @@ class Simulator
       std::cout << std::endl;
     }
 
-    void computeValueFunction(const char* outFile =
-        "visualization/valueFunction.txt") const
+    void computeValueFunction(const char* outFile = "visualization/valueFunction.txt") const
     {
       if (env->getVars().dimension() == 2) // only for two state variables
       {

@@ -39,8 +39,7 @@ class ATrace: public Trace<T>
     SparseVector<T>* vector;
   public:
     ATrace(const int& numFeatures, const double& threshold = 1e-8) :
-        defaultThreshold(threshold), threshold(threshold), vector(
-            new SparseVector<T>(numFeatures))
+        defaultThreshold(threshold), threshold(threshold), vector(new SparseVector<T>(numFeatures))
     {
     }
     virtual ~ATrace()
@@ -121,8 +120,7 @@ class RTrace: public ATrace<T>
     void replaceWith(const SparseVector<T>& phi)
     {
       const int* indexes = phi.getActiveIndexes();
-      for (const int* index = indexes; index < indexes + phi.nbActiveEntries();
-          ++index)
+      for (const int* index = indexes; index < indexes + phi.nbActiveEntries(); ++index)
         ATrace<T>::vector->setEntry(*index, phi.getEntry(*index));
     }
   public:
@@ -140,8 +138,7 @@ class AMaxTrace: public ATrace<T>
   protected:
     double maximumValue;
   public:
-    AMaxTrace(const int& capacity, const double& threshold = 1e-8,
-        const double& maximumValue = 1.0) :
+    AMaxTrace(const int& capacity, const double& threshold = 1e-8, const double& maximumValue = 1.0) :
         ATrace<T>(capacity, threshold), maximumValue(maximumValue)
     {
     }
@@ -157,8 +154,7 @@ class AMaxTrace: public ATrace<T>
       {
         T absValue = fabs(values[i]);
         if (absValue > maximumValue)
-          ATrace<T>::vector->setEntry(indexes[i],
-              Signum::valueOf(absValue) * maximumValue);
+          ATrace<T>::vector->setEntry(indexes[i], Signum::valueOf(absValue) * maximumValue);
       }
     }
 
@@ -240,8 +236,7 @@ class Traces
     Traces(const Traces<T>& that) :
         traces(new std::vector<Trace<T>*>())
     {
-      for (typename Traces<T>::iterator iter = that.begin();
-          iter != that.end(); ++iter)
+      for (typename Traces<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
         traces->push_back(*iter);
     }
 
@@ -250,8 +245,7 @@ class Traces
       if (this != that)
       {
         traces->clear();
-        for (typename Traces<T>::iterator iter = that.begin();
-            iter != that.end(); ++iter)
+        for (typename Traces<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
           traces->push_back(*iter);
       }
       return *this;
@@ -295,8 +289,7 @@ class Traces
 
     void clear()
     {
-      for (typename Traces<T>::iterator iter = begin(); iter != end();
-          ++iter)
+      for (typename Traces<T>::iterator iter = begin(); iter != end(); ++iter)
         (*iter)->clear();
     }
 };

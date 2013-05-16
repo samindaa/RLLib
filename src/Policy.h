@@ -62,8 +62,8 @@ class PolicyDistribution: public Policy<T>
     virtual ~PolicyDistribution()
     {
     }
-    virtual const SparseVectors<T>& computeGradLog(
-        const Representations<T>& phis, const Action& action) =0;
+    virtual const SparseVectors<T>& computeGradLog(const Representations<T>& phis,
+        const Action& action) =0;
     virtual SparseVectors<T>* parameters() const =0;
 };
 
@@ -86,14 +86,11 @@ class NormalDistribution: public PolicyDistribution<T>
 
     NormalDistribution(const double& initialMean, const double& initialStddev,
         const int& nbFeatures, ActionList* actions) :
-        initialMean(initialMean), initialStddev(initialStddev), sigma2(0), mean(
-            0), stddev(0), meanStep(0), stddevStep(0), u_mean(
-            new SparseVector<T>(nbFeatures)), u_stddev(
-            new SparseVector<T>(nbFeatures)), gradMean(
-            new SparseVector<T>(u_mean->dimension())), gradStddev(
-            new SparseVector<T>(u_stddev->dimension())), x(
-            new SparseVector<T>(nbFeatures)), actions(actions), multiu(
-            new SparseVectors<T>()), multigrad(new SparseVectors<T>()), defaultAction(
+        initialMean(initialMean), initialStddev(initialStddev), sigma2(0), mean(0), stddev(0), meanStep(
+            0), stddevStep(0), u_mean(new SparseVector<T>(nbFeatures)), u_stddev(
+            new SparseVector<T>(nbFeatures)), gradMean(new SparseVector<T>(u_mean->dimension())), gradStddev(
+            new SparseVector<T>(u_stddev->dimension())), x(new SparseVector<T>(nbFeatures)), actions(
+            actions), multiu(new SparseVectors<T>()), multigrad(new SparseVectors<T>()), defaultAction(
             0)
     {
       multiu->push_back(u_mean);
@@ -133,8 +130,7 @@ class NormalDistribution: public PolicyDistribution<T>
 
     const Action& sampleAction()
     {
-      actions->update(defaultAction, defaultAction,
-          Random::nextNormalGaussian() * stddev + mean);
+      actions->update(defaultAction, defaultAction, Random::nextNormalGaussian() * stddev + mean);
       return actions->at(defaultAction);
     }
 
@@ -150,8 +146,7 @@ class NormalDistribution: public PolicyDistribution<T>
       stddevStep = (a - mean) * (a - mean) / sigma2 - 1.0;
     }
 
-    const SparseVectors<T>& computeGradLog(const Representations<T>& xs,
-        const Action& action)
+    const SparseVectors<T>& computeGradLog(const Representations<T>& xs, const Action& action)
     {
       assert((xs.dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
@@ -175,8 +170,8 @@ class NormalDistributionScaled: public NormalDistribution<T>
 
     typedef NormalDistribution<T> super;
 
-    NormalDistributionScaled(const double& initialMean,
-        const double& initialStddev, const int& nbFeatures, ActionList* actions) :
+    NormalDistributionScaled(const double& initialMean, const double& initialStddev,
+        const int& nbFeatures, ActionList* actions) :
         NormalDistribution<T>(initialMean, initialStddev, nbFeatures, actions)
     {
     }
@@ -206,8 +201,8 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
   public:
     ScaledPolicyDistribution(ActionList* actions, PolicyDistribution<T>* policy,
         Range<T>* policyRange, Range<T>* problemRange) :
-        actions(actions), policy(policy), policyRange(policyRange), problemRange(
-            problemRange), a_t(new Action(0))
+        actions(actions), policy(policy), policyRange(policyRange), problemRange(problemRange), a_t(
+            new Action(0))
     {
       a_t->push_back(0.0);
     }
@@ -259,8 +254,7 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
 
     const Action& sampleAction()
     {
-      actions->update(0, 0,
-          policyToProblem(policy->sampleAction().at(0)).at(0));
+      actions->update(0, 0, policyToProblem(policy->sampleAction().at(0)).at(0));
       return actions->at(0);
     }
 
@@ -269,8 +263,7 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
       return sampleAction();
     }
 
-    const SparseVectors<T>& computeGradLog(const Representations<T>& phis,
-        const Action& action)
+    const SparseVectors<T>& computeGradLog(const Representations<T>& phis, const Action& action)
     {
       return policy->computeGradLog(phis, problemToPolicy(action.at(0)));
     }
@@ -296,9 +289,8 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
         actions(actions), avg(new SparseVector<T>(numFeatures)), grad(
             new SparseVector<T>(numFeatures)), distribution(
-            new DenseVector<double>(actions->dimension())), u(
-            new SparseVector<T>(numFeatures)), multiu(new SparseVectors<T>()), multigrad(
-            new SparseVectors<T>())
+            new DenseVector<double>(actions->dimension())), u(new SparseVector<T>(numFeatures)), multiu(
+            new SparseVectors<T>()), multigrad(new SparseVectors<T>())
     {
       // Parameter setting
       multiu->push_back(u);
@@ -325,16 +317,14 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       // Therefore, we multiply top and bottom of the hypothesis by the same
       // constant without changing the output.
       double maxValue = 0;
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         double tmp = u->dot(xas.at(**a));
         if (tmp > maxValue)
           maxValue = tmp;
       }
 
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         const int id = (*a)->id();
         distribution->at(id) = exp(u->dot(xas.at(id)) - maxValue);
@@ -343,8 +333,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
         avg->addToSelf(distribution->at(id), xas.at(id));
       }
 
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         const int id = (*a)->id();
         distribution->at(id) /= sum;
@@ -353,8 +342,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
       avg->multiplyToSelf(1.0 / sum);
     }
 
-    const SparseVectors<T>& computeGradLog(const Representations<T>& xas,
-        const Action& action)
+    const SparseVectors<T>& computeGradLog(const Representations<T>& xas, const Action& action)
     {
       grad->set(xas.at(action));
       grad->substractToSelf(*avg);
@@ -370,8 +358,7 @@ class BoltzmannDistribution: public PolicyDistribution<T>
     {
       double random = Random::nextDouble();
       double sum = 0;
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         sum += distribution->at((*a)->id());
         if (sum >= random)
@@ -451,8 +438,7 @@ class RandomBiasPolicy: public Policy<T>
         distribution->at(0) = 1.0;
       else
       {
-        for (ActionList::const_iterator a = actions->begin();
-            a != actions->end(); ++a)
+        for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
         {
           const int id = (*a)->id();
           if (id == prev->id())
@@ -464,8 +450,7 @@ class RandomBiasPolicy: public Policy<T>
       // chose an action
       double random = Random::nextDouble();
       double sum = 0;
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end();
-          ++a)
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         sum += distribution->at((*a)->id());
         if (sum >= random)
@@ -504,8 +489,8 @@ class Greedy: public DiscreteActionPolicy<T>
 
   public:
     Greedy(Predictor<T>* predictor, ActionList* actions) :
-        predictor(predictor), actions(actions), actionValues(
-            new double[actions->dimension()]), bestAction(0)
+        predictor(predictor), actions(actions), actionValues(new double[actions->dimension()]), bestAction(
+            0)
     {
     }
 
@@ -518,8 +503,7 @@ class Greedy: public DiscreteActionPolicy<T>
 
     void updateActionValues(const Representations<T>& xas_tp1)
     {
-      for (ActionList::const_iterator iter = actions->begin();
-          iter != actions->end(); ++iter)
+      for (ActionList::const_iterator iter = actions->begin(); iter != actions->end(); ++iter)
       {
         const int id = (*iter)->id();
         actionValues[id] = predictor->predict(xas_tp1.at(id));
@@ -567,8 +551,7 @@ class EpsilonGreedy: public Greedy<T>
   protected:
     double epsilon;
   public:
-    EpsilonGreedy(Predictor<T>* predictor, ActionList* actions,
-        const double& epsilon) :
+    EpsilonGreedy(Predictor<T>* predictor, ActionList* actions, const double& epsilon) :
         Greedy<T>(predictor, actions), epsilon(epsilon)
     {
     }

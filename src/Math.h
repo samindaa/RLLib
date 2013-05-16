@@ -112,8 +112,7 @@ class Random
       return v1 * fac;
     }
 
-    inline static double gaussianProbability(const float& x, const float& m,
-        const float& s)
+    inline static double gaussianProbability(const float& x, const float& m, const float& s)
     {
       return exp(-0.5 * pow((x - m) / s, 2)) / (s * sqrt(2.0 * M_PI));
     }
@@ -159,8 +158,7 @@ class Random
 
     inline float sampleTriangularDistribution(float b)
     {
-      float randResult = 2.0f * ((nextFloat() - 0.5f) * b)
-          + 2.0f * ((nextFloat() - 0.5f) * b);
+      float randResult = 2.0f * ((nextFloat() - 0.5f) * b) + 2.0f * ((nextFloat() - 0.5f) * b);
       return (sqrt(6.0f) / 2.0f) * randResult;
     }
 };

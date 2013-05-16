@@ -25,13 +25,10 @@ class Dynamics
 
   public:
     Dynamics(const int& dimensions, const double& dt) :
-        dimensions(dimensions), dt(dt), t(0),
-            dxdt(new DenseVector<double>(dimensions)),
-            x(new DenseVector<double>(dimensions)),
-            xout(new DenseVector<double>(dimensions)),
-            dxm(new DenseVector<double>(dimensions)),
-            dxt(new DenseVector<double>(dimensions)),
-            xt(new DenseVector<double>(dimensions))
+        dimensions(dimensions), dt(dt), t(0), dxdt(new DenseVector<double>(dimensions)), x(
+            new DenseVector<double>(dimensions)), xout(new DenseVector<double>(dimensions)), dxm(
+            new DenseVector<double>(dimensions)), dxt(new DenseVector<double>(dimensions)), xt(
+            new DenseVector<double>(dimensions))
     {
     }
     virtual ~Dynamics()
@@ -61,8 +58,7 @@ class Dynamics
       x->at(index) = value;
     }
 
-    virtual void derivs(const double& a, DenseVector<double>* b,
-        DenseVector<double>* c) =0;
+    virtual void derivs(const double& a, DenseVector<double>* b, DenseVector<double>* c) =0;
 
     void rk4a()
     {
@@ -88,8 +84,7 @@ class Dynamics
       derivs(t + dt, xt, dxt);
 
       for (int i = 0; i < dimensions; i++)
-        xout->at(i) = (x->at(i)
-            + d3 * (dxdt->at(i) + dxt->at(i) + 2.0 * dxm->at(i)));
+        xout->at(i) = (x->at(i) + d3 * (dxdt->at(i) + dxt->at(i) + 2.0 * dxm->at(i)));
     }
 
     void nextstep()

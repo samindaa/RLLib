@@ -29,11 +29,9 @@ class Acrobot: public Env<float>
     Acrobot() :
         Env(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
             new Range<float>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
-            new Range<float>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(
-            new Range<float>(-1.0, 1.0)), m1(1.0), m2(1.0), l1(1.0), l2(1.0), lc1(
-            0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), targetPosition(
-            1.0), theta1(0), theta2(0), theta1Dot(0), theta2Dot(0), transitionNoise(
-            0)
+            new Range<float>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(new Range<float>(-1.0, 1.0)), m1(
+            1.0), m2(1.0), l1(1.0), l2(1.0), lc1(0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), targetPosition(
+            1.0), theta1(0), theta2(0), theta1Dot(0), theta2Dot(0), transitionNoise(0)
     {
       discreteActions->push_back(0, actionRange->min());
       discreteActions->push_back(1, 0.0);
@@ -75,10 +73,8 @@ class Acrobot: public Env<float>
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * 8.0;
       vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * 8.0;
-      vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length())
-          * 8.0;
-      vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length())
-          * 8.0;
+      vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length()) * 8.0;
+      vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length()) * 8.0;
     }
 
     void step(const Action& action)
@@ -97,8 +93,7 @@ class Acrobot: public Env<float>
       {
         count++;
 
-        d1 = m1 * pow(lc1, 2)
-            + m2 * (pow(l1, 2) + pow(lc2, 2) + 2 * l1 * lc2 * cos(theta2)) + I1
+        d1 = m1 * pow(lc1, 2) + m2 * (pow(l1, 2) + pow(lc2, 2) + 2 * l1 * lc2 * cos(theta2)) + I1
             + I2;
         d2 = m2 * (pow(lc2, 2) + l1 * lc2 * cos(theta2)) + I2;
 
@@ -107,9 +102,8 @@ class Acrobot: public Env<float>
             - 2 * m2 * l1 * lc2 * theta1Dot * theta2Dot * sin(theta2))
             + (m1 * lc1 + m2 * l1) * g * cos(theta1 - M_PI / 2.0) + phi2;
 
-        theta2ddot = (torque + (d2 / d1) * phi1
-            - m2 * l1 * lc2 * pow(theta1Dot, 2) * sin(theta2) - phi2)
-            / (m2 * pow(lc2, 2) + I2 - pow(d2, 2) / d1);
+        theta2ddot = (torque + (d2 / d1) * phi1 - m2 * l1 * lc2 * pow(theta1Dot, 2) * sin(theta2)
+            - phi2) / (m2 * pow(lc2, 2) + I2 - pow(d2, 2) / d1);
         theta1ddot = -(d2 * theta2ddot + phi1) / d1;
 
         theta1Dot += theta1ddot * dt;

@@ -23,9 +23,9 @@ class ContinuousGridworld: public Env<float>
 
   public:
     ContinuousGridworld() :
-        Env<float>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)),
-            actionRange(new Range<float>(-0.05, 0.05)), absoluteNoise(0.025),
-            observations(new DenseVector<float>(2))
+        Env<float>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)), actionRange(
+            new Range<float>(-0.05, 0.05)), absoluteNoise(0.025), observations(
+            new DenseVector<float>(2))
     {
       // discrete actions
       for (unsigned int i = 0; i < discreteActions->dimension(); i++)
@@ -105,8 +105,7 @@ class ContinuousGridworld: public Env<float>
       float py = observations->at(1);
       return -1.0
           - 2.0
-              * (N(px, 0.3, 0.1) * N(py, 0.6, 0.03)
-                  + N(px, 0.4, 0.03) * N(py, 0.5, 0.1)
+              * (N(px, 0.3, 0.1) * N(py, 0.6, 0.03) + N(px, 0.4, 0.03) * N(py, 0.5, 0.1)
                   + N(px, 0.8, 0.03) * N(py, 0.9, 0.1));
     }
 
@@ -118,14 +117,11 @@ class ContinuousGridworld: public Env<float>
     void draw() const
     {
       std::ofstream oute("visualization/continuousGridworld.txt");
-      for (float px = observationRange->min(); px <= observationRange->max();
-          px += 0.01)
+      for (float px = observationRange->min(); px <= observationRange->max(); px += 0.01)
       {
-        for (float py = observationRange->min(); py <= observationRange->max();
-            py += 0.01)
+        for (float py = observationRange->min(); py <= observationRange->max(); py += 0.01)
           oute
-              << (N(px, 0.3, 0.1) * N(py, 0.6, 0.03)
-                  + N(px, 0.4, 0.03) * N(py, 0.5, 0.1)
+              << (N(px, 0.3, 0.1) * N(py, 0.6, 0.03) + N(px, 0.4, 0.03) * N(py, 0.5, 0.1)
                   + N(px, 0.8, 0.03) * N(py, 0.9, 0.1)) << " ";
 
         oute << std::endl;

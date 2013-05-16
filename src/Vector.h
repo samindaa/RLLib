@@ -25,10 +25,8 @@ namespace RLLib
 // Forward declarations
 template<class T> class DenseVector;
 template<class T> class SparseVector;
-template<class T> std::ostream& operator<<(std::ostream& out,
-    const DenseVector<T>& that);
-template<class T> std::ostream& operator<<(std::ostream& out,
-    const SparseVector<T>& that);
+template<class T> std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that);
+template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that);
 
 /**
  * This is used in parameter representation in a given vector space for
@@ -255,8 +253,8 @@ class SparseVector: public Vector<T>
 
     SparseVector(const int& capacity = 1) :
         indexesPositionLength(capacity), activeIndexesLength(10), nbActive(0), indexesPosition(
-            new int[indexesPositionLength]), activeIndexes(
-            new int[activeIndexesLength]), values(new T[activeIndexesLength])
+            new int[indexesPositionLength]), activeIndexes(new int[activeIndexesLength]), values(
+            new T[activeIndexesLength])
     {
       std::fill(indexesPosition, indexesPosition + capacity, -1);
     }
@@ -271,14 +269,12 @@ class SparseVector: public Vector<T>
     SparseVector(const SparseVector<T>& that) :
         indexesPositionLength(that.indexesPositionLength), activeIndexesLength(
             that.activeIndexesLength), nbActive(that.nbActive), indexesPosition(
-            new int[that.indexesPositionLength]), activeIndexes(
-            new int[that.activeIndexesLength]), values(
+            new int[that.indexesPositionLength]), activeIndexes(new int[that.activeIndexesLength]), values(
             new T[that.activeIndexesLength])
     {
-      std::copy(that.indexesPosition,
-          that.indexesPosition + that.indexesPositionLength, indexesPosition);
-      std::copy(that.activeIndexes, that.activeIndexes + that.nbActive,
-          activeIndexes);
+      std::copy(that.indexesPosition, that.indexesPosition + that.indexesPositionLength,
+          indexesPosition);
+      std::copy(that.activeIndexes, that.activeIndexes + that.nbActive, activeIndexes);
       std::copy(that.values, that.values + that.nbActive, values);
     }
     SparseVector<T>& operator=(const SparseVector& that)
@@ -295,10 +291,9 @@ class SparseVector: public Vector<T>
         activeIndexes = new int[activeIndexesLength];
         values = new T[activeIndexesLength];
 
-        std::copy(that.indexesPosition,
-            that.indexesPosition + that.indexesPositionLength, indexesPosition);
-        std::copy(that.activeIndexes, that.activeIndexes + that.nbActive,
-            activeIndexes);
+        std::copy(that.indexesPosition, that.indexesPosition + that.indexesPositionLength,
+            indexesPosition);
+        std::copy(that.activeIndexes, that.activeIndexes + that.nbActive, activeIndexes);
         std::copy(that.values, that.values + that.nbActive, values);
 
       }
@@ -358,10 +353,8 @@ class SparseVector: public Vector<T>
       int* newActiveIndexes = new int[newCapacity];
       T* newValues = new T[newCapacity];
 
-      std::copy(activeIndexes, activeIndexes + activeIndexesLength,
-          newActiveIndexes);
-      std::fill(newActiveIndexes + activeIndexesLength,
-          newActiveIndexes + newCapacity, 0);
+      std::copy(activeIndexes, activeIndexes + activeIndexesLength, newActiveIndexes);
+      std::fill(newActiveIndexes + activeIndexesLength, newActiveIndexes + newCapacity, 0);
 
       std::copy(values, values + activeIndexesLength, newValues);
       std::fill(newValues + activeIndexesLength, newValues + newCapacity, 0);
@@ -419,15 +412,13 @@ class SparseVector: public Vector<T>
       nbActive = 0;
     }
 
-    SparseVector<T>& addToSelf(const double& factor,
-        const SparseVector<T>& that)
+    SparseVector<T>& addToSelf(const double& factor, const SparseVector<T>& that)
     {
       assert(dimension() == that.dimension());
       for (int position = 0; position < that.nbActive; position++)
       {
         int index = that.activeIndexes[position];
-        setNonZeroEntry(index,
-            getEntry(index) + factor * that.values[position]);
+        setNonZeroEntry(index, getEntry(index) + factor * that.values[position]);
       }
       return *this;
     }
@@ -496,8 +487,7 @@ class SparseVector: public Vector<T>
     {
       double tmp = 0;
       for (int position = 0; position < _this.nbActive; position++)
-        tmp += _that.getEntry(_this.activeIndexes[position])
-            * _this.values[position];
+        tmp += _that.getEntry(_this.activeIndexes[position]) * _this.values[position];
       return tmp;
     }
 
@@ -615,8 +605,8 @@ class SparseVector: public Vector<T>
         // Write numActive (int)
         Vector<T>::write(of, nbActive);
         // Verbose
-        printf("vectorType=%i capacity=%i nbActive=%i\n", vectorType,
-            indexesPositionLength, nbActive);
+        printf("vectorType=%i capacity=%i nbActive=%i\n", vectorType, indexesPositionLength,
+            nbActive);
         // Write active indexes
         for (int position = 0; position < nbActive; position++)
           Vector<T>::write(of, activeIndexes[position]);
@@ -648,8 +638,7 @@ class SparseVector: public Vector<T>
         Vector<T>::read(ifs, rnbActive);
         assert(indexesPositionLength == rcapacity);
         // Verbose
-        printf("vectorType=%i rcapacity=%i rnbActive=%i\n", vectorType,
-            rcapacity, rnbActive);
+        printf("vectorType=%i rcapacity=%i rnbActive=%i\n", vectorType, rcapacity, rnbActive);
         // Read active indexes
         int* ractiveIndexes = new int[rnbActive];
         for (int position = 0; position < rnbActive; position++)
@@ -679,34 +668,29 @@ class SparseVector: public Vector<T>
     // Static
     inline static void absToSelf(SparseVector<T>& that)
     {
-      for (T* position = that.values; position < that.values + that.nbActive;
-          ++position)
+      for (T* position = that.values; position < that.values + that.nbActive; ++position)
         *position = fabs(*position);
     }
 
-    inline static void multiplySelfByExponential(SparseVector<T>& result,
-        const double& factor, const SparseVector<T>& other, const double& min)
+    inline static void multiplySelfByExponential(SparseVector<T>& result, const double& factor,
+        const SparseVector<T>& other, const double& min)
     {
       const int* activeIndexes = other.getActiveIndexes();
       for (int i = 0; i < other.nbActiveEntries(); i++)
       {
         int index = activeIndexes[i];
         result.setEntry(index,
-            std::max(min,
-                result.getEntry(index)
-                    * std::exp(factor * other.getEntry(index))));
+            std::max(min, result.getEntry(index) * std::exp(factor * other.getEntry(index))));
       }
     }
 
-    inline static void positiveMaxToSelf(SparseVector<T>& result,
-        const SparseVector<T>& other)
+    inline static void positiveMaxToSelf(SparseVector<T>& result, const SparseVector<T>& other)
     {
       const int* activeIndexes = other.getActiveIndexes();
       for (int i = 0; i < other.nbActiveEntries(); i++)
       {
         int index = activeIndexes[i];
-        result.setEntry(index,
-            std::max(result.getEntry(index), other.getEntry(index)));
+        result.setEntry(index, std::max(result.getEntry(index), other.getEntry(index)));
       }
     }
 };
@@ -734,8 +718,7 @@ class SparseVectors
     SparseVectors(const SparseVectors<T>& that) :
         vectors(new std::vector<SparseVector<T>*>())
     {
-      for (typename SparseVectors<T>::iterator iter = that.begin();
-          iter != that.end(); ++iter)
+      for (typename SparseVectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
         vectors->push_back(*iter);
     }
 
@@ -744,8 +727,7 @@ class SparseVectors
       if (this != that)
       {
         vectors->clear();
-        for (typename SparseVectors<T>::iterator iter = that.begin();
-            iter != that.end(); ++iter)
+        for (typename SparseVectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
           vectors->push_back(*iter);
       }
       return *this;
@@ -778,8 +760,7 @@ class SparseVectors
 
     void clear()
     {
-      for (typename SparseVectors<T>::iterator iter = begin(); iter != end();
-          ++iter)
+      for (typename SparseVectors<T>::iterator iter = begin(); iter != end(); ++iter)
         (*iter)->clear();
     }
 
@@ -803,8 +784,7 @@ class SparseVectors
     void persist(std::string f) const
     {
       int i = 0;
-      for (typename SparseVectors<T>::const_iterator iter = begin();
-          iter != end(); ++iter)
+      for (typename SparseVectors<T>::const_iterator iter = begin(); iter != end(); ++iter)
       {
         std::string fi(f);
         std::stringstream ss;
@@ -818,8 +798,7 @@ class SparseVectors
     void resurrect(std::string f) const
     {
       int i = 0;
-      for (typename SparseVectors<T>::const_iterator iter = begin();
-          iter != end(); ++iter)
+      for (typename SparseVectors<T>::const_iterator iter = begin(); iter != end(); ++iter)
       {
         std::string fi(f);
         std::stringstream ss;

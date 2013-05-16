@@ -28,10 +28,9 @@ class Env
 
   public:
     Env(int numVars, int numDiscreteActions, int numContinuousActions) :
-        __vars(new DenseVector<O>(numVars)),
-            discreteActions(new GeneralActionList(numDiscreteActions)),
-            continuousActions(new GeneralActionList(numContinuousActions)),
-            itsOn(false)
+        __vars(new DenseVector<O>(numVars)), discreteActions(
+            new GeneralActionList(numDiscreteActions)), continuousActions(
+            new GeneralActionList(numContinuousActions)), itsOn(false)
     {
     }
 

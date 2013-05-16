@@ -30,11 +30,9 @@ class MCar2D: public Env<float>
 
   public:
     MCar2D() :
-        Env<float>(2, 3, 1), position(0), velocity(0), positionRange(
-            new Range<float>(-1.2, 0.6)), velocityRange(
-            new Range<float>(-0.07, 0.07)), actionRange(
-            new Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(
-            1.0)
+        Env<float>(2, 3, 1), position(0), velocity(0), positionRange(new Range<float>(-1.2, 0.6)), velocityRange(
+            new Range<float>(-0.07, 0.07)), actionRange(new Range<float>(-1.0, 1.0)), targetPosition(
+            positionRange->max()), throttleFactor(1.0)
     {
       discreteActions->push_back(0, actionRange->min());
       discreteActions->push_back(1, 0.0);
@@ -60,10 +58,8 @@ class MCar2D: public Env<float>
     void update()
     {
       DenseVector<float>& vars = *__vars;
-      vars[0] = (position - positionRange->min()) * 10.0
-          / positionRange->length();
-      vars[1] = (velocity - velocityRange->min()) * 10.0
-          / velocityRange->length();
+      vars[0] = (position - positionRange->min()) * 10.0 / positionRange->length();
+      vars[1] = (velocity - velocityRange->min()) * 10.0 / velocityRange->length();
 
       //if (outfile.is_open() && getOn())
       //  outfile << position << std::endl;
@@ -82,8 +78,7 @@ class MCar2D: public Env<float>
     void step(const Action& a)
     {
       float throttle = actionRange->bound(a.at()) * throttleFactor;
-      velocity = velocityRange->bound(
-          velocity + throttle * 0.001 + cos(3 * position) * (-0.0025));
+      velocity = velocityRange->bound(velocity + throttle * 0.001 + cos(3 * position) * (-0.0025));
       position += velocity;
       if (position < positionRange->min())
         velocity = 0.0;

@@ -18,8 +18,7 @@ class TorquedPendulum: public Dynamics
 
   public:
 
-    TorquedPendulum(const double& m, const double& l, const double& mu,
-        const double& dt) :
+    TorquedPendulum(const double& m, const double& l, const double& mu, const double& dt) :
         Dynamics(2, dt), m(m), l(l), mu(mu), g(9.8), u(0)
     {
     }

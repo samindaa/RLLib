@@ -46,11 +46,9 @@ class TileCoder: public Projector<T, O>
     DenseVector<int>* tileIndices;
     Tiles* tiles;
   public:
-    TileCoder(const int& memorySize, const int& numTiling,
-        bool includeActiveFeature = true) :
+    TileCoder(const int& memorySize, const int& numTiling, bool includeActiveFeature = true) :
         includeActiveFeature(includeActiveFeature), vector(
-            new SparseVector<T>(
-                includeActiveFeature ? memorySize + 1 : memorySize)), tileIndices(
+            new SparseVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)), tileIndices(
             new DenseVector<int>(numTiling)), tiles(new Tiles)
     {
       // Consistent hashing
@@ -69,10 +67,9 @@ class TileCoder: public Projector<T, O>
       delete tiles;
     }
 
-    virtual void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
-        const int& memory) =0;
-    virtual void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
-        const int& memory, const int& h1) =0;
+    virtual void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory) =0;
+    virtual void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory,
+        const int& h1) =0;
 
     const SparseVector<T>& project(const DenseVector<O>& x, int h1)
     {
@@ -109,9 +106,7 @@ class TileCoder: public Projector<T, O>
 
     double vectorNorm() const
     {
-      return
-          includeActiveFeature ?
-              tileIndices->dimension() + 1 : tileIndices->dimension();
+      return includeActiveFeature ? tileIndices->dimension() + 1 : tileIndices->dimension();
     }
 
     int dimension() const
@@ -126,8 +121,7 @@ class TileCoderHashing: public TileCoder<T, O>
 {
     typedef TileCoder<T, O> Base;
   public:
-    TileCoderHashing(const int& memorySize, const int& numTiling,
-        bool includeActiveFeature = true) :
+    TileCoderHashing(const int& memorySize, const int& numTiling, bool includeActiveFeature = true) :
         TileCoder<T, O>(memorySize, numTiling, includeActiveFeature)
     {
     }
@@ -136,18 +130,15 @@ class TileCoderHashing: public TileCoder<T, O>
     {
     }
 
-    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
-        const int& memory)
+    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory)
     {
-      Base::tiles->tiles(theTiles(), theTiles.dimension(), memory, x(),
-          x.dimension());
+      Base::tiles->tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension());
     }
 
-    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
-        const int& memory, const int& h1)
+    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory,
+        const int& h1)
     {
-      Base::tiles->tiles(theTiles(), theTiles.dimension(), memory, x(),
-          x.dimension(), h1);
+      Base::tiles->tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension(), h1);
     }
 
 };
@@ -185,18 +176,15 @@ class TileCoderNoHashing: public TileCoder<T, O>
       delete ct;
     }
 
-    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
-        const int& memory)
+    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory)
     {
-      Base::tiles->tiles(theTiles(), theTiles.dimension(), ct, x(),
-          x.dimension());
+      Base::tiles->tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension());
     }
 
-    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x,
-        const int& memory, const int& h1)
+    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory,
+        const int& h1)
     {
-      Base::tiles->tiles(theTiles(), theTiles.dimension(), ct, x(),
-          x.dimension(), h1);
+      Base::tiles->tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension(), h1);
     }
 };
 
