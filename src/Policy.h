@@ -296,7 +296,7 @@ class StochasticPolicy: public virtual Policy<T>
     ActionList* actions;
     DenseVector<double>* distribution;
   public:
-    StochasticPolicy(const int& numFeatures, ActionList* actions) :
+    StochasticPolicy(ActionList* actions) :
         actions(actions), distribution(new DenseVector<double>(actions->dimension()))
     {
     }
@@ -344,7 +344,7 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
     typedef StochasticPolicy<T> super;
   public:
     BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
-        StochasticPolicy<T>(numFeatures, actions), avg(new SparseVector<T>(numFeatures)), grad(
+        StochasticPolicy<T>(actions), avg(new SparseVector<T>(numFeatures)), grad(
             new SparseVector<T>(numFeatures)), u(new SparseVector<T>(numFeatures)), multiu(
             new SparseVectors<T>()), multigrad(new SparseVectors<T>())
     {
@@ -433,9 +433,8 @@ class SoftMax: public StochasticPolicy<T>
     double temperature;
     typedef StochasticPolicy<T> super;
   public:
-    SoftMax(const int& numFeatures, ActionList* actions, Predictor<T>* predictor,
-        const double temperature = 1.0) :
-        StochasticPolicy<T>(numFeatures, actions), predictor(predictor), temperature(temperature)
+    SoftMax(Predictor<T>* predictor, ActionList* actions, const double temperature = 1.0) :
+        StochasticPolicy<T>(actions), predictor(predictor), temperature(temperature)
     {
 
     }
@@ -463,7 +462,8 @@ class SoftMax: public StochasticPolicy<T>
       for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
       {
         const int id = (*a)->id();
-        super::distribution->at(id) = exp((predictor->predict(xas.at(id)) - maxValue) / temperature);
+        super::distribution->at(id) = exp(
+            (predictor->predict(xas.at(id)) - maxValue) / temperature);
         Boundedness::checkValue(super::distribution->at(id));
         sum += super::distribution->at(id);
       }

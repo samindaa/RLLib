@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <string>
+#include <cstring>
 #include <map>
 #include <fstream>
 #include <istream>

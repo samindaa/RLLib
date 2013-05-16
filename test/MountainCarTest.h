@@ -38,6 +38,7 @@ class MountainCarTest: public MountainCarTestBase
     void testExpectedSarsaMountainCar();
     void testGreedyGQOnPolicyMountainCar();
     void testGreedyGQMountainCar();
+    void testSoftmaxGQOnMountainCar();
     void testOffPACMountainCar();
 
     void testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,

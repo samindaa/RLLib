@@ -231,6 +231,41 @@ void MountainCarTest::testGreedyGQMountainCar()
   delete sim;
 }
 
+void MountainCarTest::testSoftmaxGQOnMountainCar()
+{
+  srand(time(0));
+  cout << "MountainCarTest::testSoftmaxGQOnMountainCar" << endl;
+  Env<float>* problem = new MCar2D;
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+      projector, &problem->getDiscreteActionList());
+  Trace<double>* e = new ATrace<double>(projector->dimension());
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_w = .0005 / projector->vectorNorm();
+  double gamma_tp1 = 0.99;
+  double beta_tp1 = 1.0 - gamma_tp1;
+  double lambda_t = 0.4;
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
+  Policy<double>* behavior = new RandomPolicy<double>(&problem->getDiscreteActionList());
+  Policy<double>* target = new SoftMax<double>(gq, &problem->getDiscreteActionList(), 0.1);
+  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
+      &problem->getDiscreteActionList(), toStateAction, gq);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
+  sim->run(10, 5000, 100);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete gq;
+  delete behavior;
+  delete target;
+  delete control;
+  delete sim;
+}
+
 void MountainCarTest::testOffPACMountainCar()
 {
   srand(time(0));
@@ -435,6 +470,7 @@ void MountainCarTest::run()
   testExpectedSarsaMountainCar();
   testGreedyGQOnPolicyMountainCar();
   testGreedyGQMountainCar();
+  testSoftmaxGQOnMountainCar();
   testOffPACMountainCar();
 
   testOnPolicyBoltzmannATraceCar();
