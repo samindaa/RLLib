@@ -84,6 +84,11 @@ class RLLibTestRegistry
       return registry.end();
     }
 
+    const unsigned int dimension() const
+    {
+      return registry.size();
+    }
+
     static RLLibTestRegistry* instance();
     static void registerInstance(RLLibTestCase* testCase);
 

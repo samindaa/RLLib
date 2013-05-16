@@ -32,6 +32,7 @@ void RLLibTestRegistry::registerInstance(RLLibTestCase* testCase)
 int main(int argc, char** argv)
 {
   RLLibTestRegistry* registry = RLLibTestRegistry::instance();
+  cout << "*** nbRLLibTests=" << registry->dimension() << endl;
   for (RLLibTestRegistry::iterator iter = registry->begin(); iter != registry->end(); ++iter)
   {
     RLLibTestCase* testCase = *iter;

@@ -4,27 +4,23 @@
 # saminda@cs.miami.edu
 # To access RLLib documentation, please visit http://saminda.org
 
+# Declaration of variables
 CC = g++
-CFLAGS = -I. -I./src -I./test -I./simulation -Wall -Werror -O3
-INCLUDES = Action.h Control.h ControlAlgorithm.h Math.h Policy.h Predictor.h PredictorAlgorithm.h \
-		   Projector.h Representation.h Supervised.h SupervisedAlgorithm.h Tiles.h TilesImpl.h Trace.h \
-		   Vector.h
+CC_FLAGS = -I. -I./src -I./test -I./simulation -Wall -Werror -O3
 
-all: Test
+# File names
+EXEC = RLLibTest
+SOURCES = $(wildcard test/*.cpp)
+OBJECTS = $(SOURCES:.cpp=.o)
 
-Test:
-	$(CC) $(CFLAGS) \
-	test/VectorTest.cpp \
-	test/TraceTest.cpp \
-	test/LearningAlgorithmTest.cpp \
-	test/HelicopterTest.cpp \
-	test/PendulumOnPolicyLearning.cpp \
-	test/ProjectorTest.cpp \
-	test/MountainCarTest.cpp \
-	test/ContinuousGridworldTest.cpp \
-	test/SwingPendulumTest.cpp \
-	test/ExtendedProblemsTest.cpp \
-	test/Test.cpp -o Test
-	
+# Main target
+$(EXEC): $(OBJECTS)
+	$(CC) $(OBJECTS) -o $(EXEC)
+
+# To obtain object files
+%.o: %.cpp
+	$(CC) -c $(CC_FLAGS) $< -o $@
+
+# To remove generated files
 clean:
-	rm -f Test
+	rm -f $(EXEC) $(OBJECTS)
