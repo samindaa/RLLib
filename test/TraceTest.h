@@ -10,7 +10,9 @@
 
 #include "HeaderTest.h"
 
-class TraceTest: public TestBase
+RLLIB_TEST(TraceTest)
+
+class TraceTest: public TraceTestBase
 {
   protected:
     vector<TraceDoubleType*> traces;
@@ -32,6 +34,7 @@ class TraceTest: public TestBase
       s02->setEntry(5, 1.0);
       s02->setEntry(6, 1.0);
 
+      RLLibTestRegistory::registerInstance(this);
     }
 
     ~TraceTest()
@@ -39,8 +42,7 @@ class TraceTest: public TestBase
       delete s01;
       delete s02;
 
-      for (vector<TraceDoubleType*>::iterator iter = traces.begin();
-          iter != traces.end(); ++iter)
+      for (vector<TraceDoubleType*>::iterator iter = traces.begin(); iter != traces.end(); ++iter)
         delete *iter;
       traces.clear();
     }
@@ -102,8 +104,7 @@ class TraceTest: public TestBase
       checkVectorEquals(trace.vect(), expectedVec, 0.00001);
     }
 
-    void testTrace(const double& lambda, TraceDoubleType& trace,
-        const double& expected)
+    void testTrace(const double& lambda, TraceDoubleType& trace, const double& expected)
     {
       testTraceWithDiscounting(lambda, trace, expected);
     }

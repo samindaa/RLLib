@@ -7,6 +7,8 @@
 
 #include "TraceTest.h"
 
+RLLIB_TEST_MAKE(TraceTest)
+
 void TraceTest::run()
 {
   testATrace();

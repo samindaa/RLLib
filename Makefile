@@ -22,6 +22,8 @@ Test:
 	test/LearningAlgorithmTest.cpp \
 	test/HelicopterTest.cpp \
 	test/PendulumOnPolicyLearning.cpp \
+	test/ProjectorTest.cpp \
+	test/MountainCarTest.cpp \
 	test/Test.cpp -o Test
 	
 clean:

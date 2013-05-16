@@ -9,6 +9,8 @@
 
 #include "VectorTest.h"
 
+RLLIB_TEST_MAKE(SparseVectorTest)
+
 void SparseVectorTest::run()
 {
   testActiveIndices();

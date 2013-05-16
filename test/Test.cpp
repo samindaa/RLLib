@@ -8,41 +8,43 @@
  *
  */
 
-#include "VectorTest.h"
-#include "TraceTest.h"
-#include "LearningAlgorithmTest.h"
-#include "PendulumOnPolicyLearning.h"
-//#include "HelicopterTest.h"
+#include "HeaderTest.h"
+
+RLLibTestRegistory::~RLLibTestRegistory()
+{
+  for (std::vector<RLLibTestCase*>::iterator iter = registory.begin(); iter != registory.end();
+      ++iter)
+    delete *iter;
+  registory.clear();
+
+}
+
+RLLibTestRegistory* RLLibTestRegistory::inst = 0;
+
+RLLibTestRegistory* RLLibTestRegistory::instance()
+{
+  if (!inst)
+    inst = new RLLibTestRegistory;
+  return inst;
+}
+
+void RLLibTestRegistory::registerInstance(RLLibTestCase* testCase)
+{
+  RLLibTestRegistory::instance()->registory.push_back(testCase);
+}
 
 int main(int argc, char** argv)
 {
-  cout << "*** VectorTest starts ... " << endl;
-  SparseVectorTest sparseVectorTest;
-  sparseVectorTest.run();
-  cout << "*** VectorTest ends ... " << endl;
+  RLLibTestRegistory* registory = RLLibTestRegistory::instance();
+  for (RLLibTestRegistory::iterator iter = registory->begin(); iter != registory->end(); ++iter)
+  {
+    RLLibTestCase* testCase = *iter;
+    cout << "*** starts " << testCase->getName() << endl;
+    testCase->run();
+    cout << "***   ends " << testCase->getName() << endl;
+  }
 
-  cout << "*** TraceTest starts ... " << endl;
-  TraceTest traceTest;
-  traceTest.run();
-  cout << "*** TraceTest ends ... " << endl;
-
-  cout << "*** LearningAlgorithmTest starts " << endl;
-  SupervisedAlgorithmTest supervisedAlgorithmTest;
-  supervisedAlgorithmTest.run();
-  cout << "*** LearningAlgorithmTest ends " << endl;
-
-  cout << "*** ActorCriticOnPolicyControlLearnerPendulumTest starts ***"
-      << endl;
-  // Evaluate
-  ActorCriticOnPolicyControlLearnerPendulumTest testOne;
-  testOne.run();
-  cout << "*** ActorCriticOnPolicyControlLearnerPendulumTest ends   ***"
-      << endl;
-
-  cout << "*** HelicopterTest starts ***" << endl;
-  cout << "TODO<<@ Sam add this test case" << endl;
-  cout << "*** HelicopterTest ends ***" << endl;
-
+  cout << "*** Tests completed! " << endl;
   return EXIT_SUCCESS;
 }
 

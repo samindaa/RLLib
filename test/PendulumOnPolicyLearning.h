@@ -13,9 +13,9 @@
 #include "Simulator.h"
 #include "HeaderTest.h"
 
-using namespace RLLib;
+RLLIB_TEST(ActorCriticOnPolicyControlLearnerPendulumTest)
 
-class ActorCriticOnPolicyControlLearnerPendulumTest: public TestBase
+class ActorCriticOnPolicyControlLearnerPendulumTest: public ActorCriticOnPolicyControlLearnerPendulumTestBase
 {
   protected:
     Env<float>* problem;

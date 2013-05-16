@@ -11,12 +11,15 @@
 #include "HeaderTest.h"
 #include "Helicopter.h"
 
-class HelicopterTest: public TestBase
+RLLIB_TEST(HelicopterTest)
+
+class HelicopterTest: public HelicopterTestBase
 {
   public:
     HelicopterTest()
     {
       srand(time(0));
+      RLLibTestRegistory::registerInstance(this);
     }
 
     virtual ~HelicopterTest()
@@ -41,8 +44,7 @@ class HelicopterTest: public TestBase
           helicopter.step(helicopter.getContinuousActionList().at(0));
           assert(helicopter.r() <= 0);
           for (int i = 0; i < helicopter.getVars().dimension(); i++)
-            assert(
-                helicopter.heliDynamics.ObservationRanges[i].in(helicopter.getVars()[i]));
+            assert( helicopter.heliDynamics.ObservationRanges[i].in(helicopter.getVars()[i]));
         }
       }
     }

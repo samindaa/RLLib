@@ -10,7 +10,9 @@
 
 #include "HeaderTest.h"
 
-class SparseVectorTest: public TestBase
+RLLIB_TEST(SparseVectorTest)
+
+class SparseVectorTest: public SparseVectorTestBase
 {
   protected:
     vector<SVecDoubleType*> vectors;
@@ -23,12 +25,11 @@ class SparseVectorTest: public TestBase
         _a(0), _b(0)
     {
       srand(time(0));
+      RLLibTestRegistory::registerInstance(this);
     }
-
     virtual ~SparseVectorTest()
     {
-      for (vector<SVecDoubleType*>::iterator iter = vectors.begin();
-          iter != vectors.end(); ++iter)
+      for (vector<SVecDoubleType*>::iterator iter = vectors.begin(); iter != vectors.end(); ++iter)
         delete *iter;
       vectors.clear();
     }
@@ -50,8 +51,7 @@ class SparseVectorTest: public TestBase
       return type;
     }
 
-    SVecDoubleType* createRandomSparseVector(const int& maxActive,
-        const int& size)
+    SVecDoubleType* createRandomSparseVector(const int& maxActive, const int& size)
     {
       SVecDoubleType* type = newVector(size);
       int nbActive = rand() % maxActive;

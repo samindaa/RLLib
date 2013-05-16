@@ -9,7 +9,8 @@
 #include "PendulumOnPolicyLearning.h"
 
 using namespace std;
-using namespace RLLib;
+
+RLLIB_TEST_MAKE(ActorCriticOnPolicyControlLearnerPendulumTest)
 
 ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearnerPendulumTest()
 {
@@ -35,6 +36,8 @@ ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearner
 
   control = 0;
   sim = 0;
+
+  RLLibTestRegistory::registerInstance(this);
 }
 
 ActorCriticOnPolicyControlLearnerPendulumTest::~ActorCriticOnPolicyControlLearnerPendulumTest()

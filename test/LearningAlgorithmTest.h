@@ -12,12 +12,15 @@
 #include "Projector.h"
 #include "SupervisedAlgorithm.h"
 
-class SupervisedAlgorithmTest: public TestBase
+RLLIB_TEST(SupervisedAlgorithmTest)
+
+class SupervisedAlgorithmTest: public SupervisedAlgorithmTestBase
 {
   public:
     SupervisedAlgorithmTest()
     {
       srand(time(0));
+      RLLibTestRegistory::registerInstance(this);
     }
 
     virtual ~SupervisedAlgorithmTest()

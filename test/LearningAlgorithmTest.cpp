@@ -7,6 +7,8 @@
 
 #include "LearningAlgorithmTest.h"
 
+RLLIB_TEST_MAKE(SupervisedAlgorithmTest)
+
 void SupervisedAlgorithmTest::run()
 {
   // simple sine curve estimation
