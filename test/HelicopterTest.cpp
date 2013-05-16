@@ -7,6 +7,8 @@
 
 #include "HelicopterTest.h"
 
+//RLLIB_TEST_MAKE(HelicopterTest)
+
 void HelicopterTest::run()
 {
   testEndEpisode();

@@ -10,29 +10,29 @@
 
 #include "HeaderTest.h"
 
-RLLibTestRegistory::~RLLibTestRegistory()
+RLLibTestRegistry::~RLLibTestRegistry()
 {
-  registory.clear();
+  registry.clear();
 }
 
-RLLibTestRegistory* RLLibTestRegistory::inst = 0;
+RLLibTestRegistry* RLLibTestRegistry::inst = 0;
 
-RLLibTestRegistory* RLLibTestRegistory::instance()
+RLLibTestRegistry* RLLibTestRegistry::instance()
 {
   if (!inst)
-    inst = new RLLibTestRegistory;
+    inst = new RLLibTestRegistry;
   return inst;
 }
 
-void RLLibTestRegistory::registerInstance(RLLibTestCase* testCase)
+void RLLibTestRegistry::registerInstance(RLLibTestCase* testCase)
 {
-  RLLibTestRegistory::instance()->registory.push_back(testCase);
+  RLLibTestRegistry::instance()->registry.push_back(testCase);
 }
 
 int main(int argc, char** argv)
 {
-  RLLibTestRegistory* registory = RLLibTestRegistory::instance();
-  for (RLLibTestRegistory::iterator iter = registory->begin(); iter != registory->end(); ++iter)
+  RLLibTestRegistry* registry = RLLibTestRegistry::instance();
+  for (RLLibTestRegistry::iterator iter = registry->begin(); iter != registry->end(); ++iter)
   {
     RLLibTestCase* testCase = *iter;
     cout << "*** starts " << testCase->getName() << endl;

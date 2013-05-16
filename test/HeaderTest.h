@@ -110,13 +110,13 @@ class NAME##Base : public RLLibTestCase             \
     const char* getName() const { return #NAME ; }  \
 };                                                  \
 
-class RLLibTestRegistory
+class RLLibTestRegistry
 {
   protected:
-    std::vector<RLLibTestCase*> registory;
+    std::vector<RLLibTestCase*> registry;
 
   public:
-    ~RLLibTestRegistory();
+    ~RLLibTestRegistry();
 
 
     typedef std::vector<RLLibTestCase*>::iterator iterator;
@@ -124,37 +124,37 @@ class RLLibTestRegistory
 
     iterator begin()
     {
-      return registory.begin();
+      return registry.begin();
     }
 
     const_iterator begin() const
     {
-      return registory.begin();
+      return registry.begin();
     }
 
     iterator end()
     {
-      return registory.end();
+      return registry.end();
     }
 
     const_iterator end() const
     {
-      return registory.end();
+      return registry.end();
     }
 
-    static RLLibTestRegistory* instance();
+    static RLLibTestRegistry* instance();
     static void registerInstance(RLLibTestCase* testCase);
 
   protected:
-    RLLibTestRegistory()
+    RLLibTestRegistry()
     {
     }
 
-    RLLibTestRegistory(RLLibTestRegistory const&);
-    RLLibTestRegistory& operator=(RLLibTestRegistory const&);
+    RLLibTestRegistry(RLLibTestRegistry const&);
+    RLLibTestRegistry& operator=(RLLibTestRegistry const&);
 
   private:
-    static RLLibTestRegistory* inst;
+    static RLLibTestRegistry* inst;
 };
 
 template<class T>
@@ -165,7 +165,7 @@ class RLLibTestCaseLoader
   public:
     RLLibTestCaseLoader()
     {
-      RLLibTestRegistory::registerInstance(&theInstance);
+      RLLibTestRegistry::registerInstance(&theInstance);
     }
     virtual ~RLLibTestCaseLoader() {}
 };
