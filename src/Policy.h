@@ -52,7 +52,6 @@ class Policies
       policy->update(phis);
       return policy->sampleBestAction();
     }
-
 };
 
 // start with discrete action policy
@@ -61,7 +60,6 @@ class DiscreteActionPolicy: public virtual Policy<T>
 {
   public:
     virtual ~DiscreteActionPolicy() {}
-
 };
 
 template<class T>
@@ -165,7 +163,6 @@ class NormalDistribution: public PolicyDistribution<T>
 
     SparseVectors<T>* parameters() const
     {
-      //return u;
       return multiu;
     }
 };
@@ -182,6 +179,7 @@ class NormalDistributionScaled: public NormalDistribution<T>
         NormalDistribution<T>(initialMean, initialStddev, nbFeatures, actions)
     {
     }
+
     virtual ~NormalDistributionScaled()
     {
     }
@@ -301,7 +299,6 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
     double pi(const Action& action)
     {
       return distribution->at(action.id());
-
     }
 
     const Action& sampleAction()
@@ -315,7 +312,6 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
           return **a;
       }
       return actions->at(actions->dimension() - 1);
-
     }
 
     const Action& sampleBestAction()
@@ -428,7 +424,6 @@ class SoftMax: public StochasticPolicy<T>
     SoftMax(Predictor<T>* predictor, ActionList* actions, const double temperature = 1.0) :
         StochasticPolicy<T>(actions), predictor(predictor), temperature(temperature)
     {
-
     }
 
     virtual ~SoftMax()
