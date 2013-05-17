@@ -57,12 +57,10 @@ class Policies
 
 // start with discrete action policy
 template<class T>
-class DiscreteActionPolicy: public Policy<T>
+class DiscreteActionPolicy: public virtual Policy<T>
 {
   public:
-    virtual ~DiscreteActionPolicy()
-    {
-    }
+    virtual ~DiscreteActionPolicy() {}
 
 };
 
@@ -70,10 +68,7 @@ template<class T>
 class PolicyDistribution: public virtual Policy<T>
 {
   public:
-    virtual ~PolicyDistribution()
-    {
-    }
-    ;
+    virtual ~PolicyDistribution() {}
     virtual const SparseVectors<T>& computeGradLog(const Representations<T>& phis,
         const Action& action) =0;
     virtual SparseVectors<T>* parameters() const =0;
@@ -287,7 +282,7 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
 };
 
 template<class T>
-class StochasticPolicy: public virtual Policy<T>
+class StochasticPolicy: public virtual DiscreteActionPolicy<T>
 {
   protected:
     ActionList* actions;
