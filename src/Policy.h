@@ -29,10 +29,7 @@ template<class T>
 class Policy
 {
   public:
-    virtual ~Policy()
-    {
-    }
-    ;
+    virtual ~Policy() {}
     virtual void update(const Representations<T>& phis) =0;
     virtual double pi(const Action& a) =0;
     virtual const Action& sampleAction() =0;
