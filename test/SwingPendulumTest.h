@@ -35,6 +35,7 @@ class SwingPendulumTest: public SwingPendulumTestBase
     void testOffPACSwingPendulum();
     void testOnPolicySwingPendulum();
     void testOffPACSwingPendulum2();
+    void testOffPACOnPolicySwingPendulum();
 
 };
 

@@ -318,6 +318,55 @@ void MountainCarTest::testOffPACMountainCar()
   delete sim;
 }
 
+void MountainCarTest::testOffPACOnPolicyMountainCar()
+{
+  srand(time(0));
+  Env<float>* problem = new MCar2D;
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+      projector, &problem->getDiscreteActionList());
+
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_w = .0001 / projector->vectorNorm();
+  double lambda = 0.4;
+  double gamma = 0.99;
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
+  double alpha_u = 0.5 / projector->vectorNorm();
+  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(projector->dimension(),
+      &problem->getDiscreteActionList());
+
+  Trace<double>* actore = new ATrace<double>(projector->dimension());
+  Traces<double>* actoreTraces = new Traces<double>();
+  actoreTraces->push_back(actore);
+  ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
+      lambda, acting, actoreTraces);
+
+  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(acting, critic, actor,
+      toStateAction, projector, gamma);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
+  sim->run(10, 5000, 100);
+  sim->computeValueFunction();
+  control->persist("visualization/mcar_offpac.data");
+
+  control->reset();
+  control->resurrect("visualization/mcar_offpac.data");
+  sim->test(20, 5000);
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actore;
+  delete actoreTraces;
+  delete actor;
+  delete acting;
+  delete control;
+  delete sim;
+}
+
 void MountainCarTest::testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
     const double& gamma, double alpha_v, double alpha_u)
 {
@@ -472,6 +521,7 @@ void MountainCarTest::run()
   testGreedyGQMountainCar();
   testSoftmaxGQOnMountainCar();
   testOffPACMountainCar();
+  testOffPACOnPolicyMountainCar();
 
   testOnPolicyBoltzmannATraceCar();
   testOnPolicyBoltzmannRTraceCar();

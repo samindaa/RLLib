@@ -164,10 +164,56 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
   delete sim;
 }
 
+void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
+{
+  srand(time(0));
+  Env<float>* problem = new SwingPendulum;
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+      projector, &problem->getDiscreteActionList());
+
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_w = .0001 / projector->vectorNorm();
+  double gamma = 0.99;
+  double lambda = 0.4;
+
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
+  double alpha_u = 0.5 / projector->vectorNorm();
+  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(projector->dimension(),
+      &problem->getDiscreteActionList());
+
+  Trace<double>* actore = new ATrace<double>(projector->dimension());
+  Traces<double>* actoreTraces = new Traces<double>();
+  actoreTraces->push_back(actore);
+  ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
+      lambda, acting, actoreTraces);
+
+  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(acting, critic, actor,
+      toStateAction, projector, gamma);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
+  sim->run(5, 5000, 10);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actore;
+  delete actoreTraces;
+  delete actor;
+  delete acting;
+  delete control;
+  delete sim;
+}
+
 void SwingPendulumTest::run()
 {
   testOffPACSwingPendulum();
   testOnPolicySwingPendulum();
-  //testOffPACSwingPendulum2();
+  testOffPACSwingPendulum2();
+  testOffPACOnPolicySwingPendulum();
 }
 
