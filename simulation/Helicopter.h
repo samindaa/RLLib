@@ -12,8 +12,6 @@
 
 // ============================================================================
 
-class Quaternion;
-
 class HeliVector
 {
   public:
@@ -27,10 +25,6 @@ class HeliVector
         x(x), y(y), z(z)
     {
     }
-
-    Quaternion to_quaternion() const;
-    HeliVector rotate(const Quaternion& q) const;
-    HeliVector express_in_quat_frame(const Quaternion& q) const;
 
     void reset()
     {
@@ -82,36 +76,41 @@ class Quaternion
     }
 };
 
-Quaternion HeliVector::to_quaternion() const
+// Some transformations needed for this problem
+class T
 {
-  Quaternion quat;
-  double rotation_angle = sqrt(x * x + y * y + z * z);
-  if (rotation_angle < 1e-4)
-  { // avoid division by zero -- also: can use
-    // simpler computation in this case, since for
-    // small angles sin(x) = x is a good
-    // approximation
-    quat = Quaternion(x / 2.0f, y / 2.0f, z / 2.0f, 0.0f);
-    quat.w = sqrt(1.0f - (quat.x * quat.x + quat.y * quat.y + quat.z * quat.z));
-  }
-  else
-  {
-    quat = Quaternion(sin(rotation_angle / 2.0f) * (x / rotation_angle),
-        sin(rotation_angle / 2.0f) * (y / rotation_angle),
-        sin(rotation_angle / 2.0f) * (z / rotation_angle), cos(rotation_angle / 2.0f));
-  }
-  return quat;
-}
+  public:
+    static Quaternion to_quaternion(const HeliVector& v)
+    {
+      Quaternion quat;
+      double rotation_angle = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+      if (rotation_angle < 1e-4)
+      { // avoid division by zero -- also: can use
+        // simpler computation in this case, since for
+        // small angles sin(x) = x is a good
+        // approximation
+        quat = Quaternion(v.x / 2.0f, v.y / 2.0f, v.z / 2.0f, 0.0f);
+        quat.w = sqrt(1.0f - (quat.x * quat.x + quat.y * quat.y + quat.z * quat.z));
+      }
+      else
+      {
+        quat = Quaternion(sin(rotation_angle / 2.0f) * (v.x / rotation_angle),
+            sin(rotation_angle / 2.0f) * (v.y / rotation_angle),
+            sin(rotation_angle / 2.0f) * (v.z / rotation_angle), cos(rotation_angle / 2.0f));
+      }
+      return quat;
+    }
 
-HeliVector HeliVector::rotate(const Quaternion& q) const
-{
-  return q.mult(Quaternion(*this)).mult(q.conj()).complex_part();
-}
+    static HeliVector rotate(const HeliVector& v, const Quaternion& q)
+    {
+      return q.mult(Quaternion(v)).mult(q.conj()).complex_part();
+    }
 
-HeliVector HeliVector::express_in_quat_frame(const Quaternion& q) const
-{
-  return rotate(q.conj());
-}
+    static HeliVector express_in_quat_frame(const HeliVector& v, const Quaternion& q)
+    {
+      return rotate(v, q.conj());
+    }
+};
 
 // ============================================================================
 class HelicopterDynamics
@@ -287,8 +286,8 @@ class HelicopterDynamics
     {
       // observation is the error state in the helicopter's coordinate system
       // (that way errors/observations can be mapped more directly to actions)
-      HeliVector ned_error_in_heli_frame = position.express_in_quat_frame(q);
-      HeliVector uvw = velocity.express_in_quat_frame(q);
+      HeliVector ned_error_in_heli_frame = T::express_in_quat_frame(position, q);
+      HeliVector uvw = T::express_in_quat_frame(velocity, q);
 
       observation[0] = uvw.x;
       observation[1] = uvw.y;
@@ -347,14 +346,14 @@ class HelicopterDynamics
         position.z += DeltaT * velocity.z;
 
         // *** velocity ***
-        HeliVector uvw = velocity.express_in_quat_frame(q);
+        HeliVector uvw = T::express_in_quat_frame(velocity, q);
         HeliVector wind_ned(wind[0], wind[1], 0.0);
-        HeliVector wind_uvw = wind_ned.express_in_quat_frame(q);
+        HeliVector wind_uvw = T::express_in_quat_frame(wind_ned, q);
         HeliVector uvw_force_from_heli_over_m(-heli_model_u_drag * (uvw.x + wind_uvw.x) + noise[0],
             -heli_model_v_drag * (uvw.y + wind_uvw.y) + heli_model_tail_rotor_side_thrust
                 + noise[1], -heli_model_w_drag * uvw.z + heli_model_u3_w * a[3] + noise[2]);
 
-        HeliVector ned_force_from_heli_over_m = uvw_force_from_heli_over_m.rotate(q);
+        HeliVector ned_force_from_heli_over_m = T::rotate(uvw_force_from_heli_over_m, q);
         velocity.x += DeltaT * ned_force_from_heli_over_m.x;
         velocity.y += DeltaT * ned_force_from_heli_over_m.y;
         velocity.z += DeltaT * (ned_force_from_heli_over_m.z + 9.81);
@@ -362,7 +361,7 @@ class HelicopterDynamics
         // *** orientation ***
         HeliVector axis_rotation(angularRate.x * DeltaT, angularRate.y * DeltaT,
             angularRate.z * DeltaT);
-        Quaternion rot_quat = axis_rotation.to_quaternion();
+        Quaternion rot_quat = T::to_quaternion(axis_rotation);
         q = q.mult(rot_quat);
 
         // *** angular rate ***

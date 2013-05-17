@@ -7,7 +7,7 @@
 
 #include "HelicopterTest.h"
 
-//RLLIB_TEST_MAKE(HelicopterTest)
+RLLIB_TEST_MAKE(HelicopterTest)
 
 void HelicopterTest::run()
 {

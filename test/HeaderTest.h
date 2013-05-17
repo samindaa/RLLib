@@ -14,6 +14,7 @@
 #include <string>
 #include <cstring>
 #include <map>
+#include <set>
 #include <fstream>
 #include <istream>
 #include <ostream>
@@ -57,13 +58,13 @@ class NAME##Base : public RLLibTestCase             \
 class RLLibTestRegistry
 {
   protected:
-    std::vector<RLLibTestCase*> registry;
+    std::map<string, RLLibTestCase*> registry;
 
   public:
     ~RLLibTestRegistry();
 
-    typedef std::vector<RLLibTestCase*>::iterator iterator;
-    typedef std::vector<RLLibTestCase*>::const_iterator const_iterator;
+    typedef std::map<string, RLLibTestCase*>::iterator iterator;
+    typedef std::map<string, RLLibTestCase*>::const_iterator const_iterator;
 
     iterator begin()
     {
@@ -83,6 +84,16 @@ class RLLibTestRegistry
     const_iterator end() const
     {
       return registry.end();
+    }
+
+    iterator find(const string& key)
+    {
+      return registry.find(key);
+    }
+
+    const_iterator find(const string& key) const
+    {
+      return registry.find(key);
     }
 
     const unsigned int dimension() const

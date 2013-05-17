@@ -7,7 +7,7 @@
 
 #include "ExtendedProblemsTest.h"
 
-//RLLIB_TEST_MAKE(ExtendedProblemsTest)
+RLLIB_TEST_MAKE(ExtendedProblemsTest)
 
 void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 {
