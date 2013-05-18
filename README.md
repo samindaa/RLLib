@@ -6,7 +6,7 @@ The RLLib is an implementation of incremental standard and gradient temporal-dif
 RLLib features:
 
     Off-policy prediction algorithms: GTD(lambda), and GQ(lambda),
-    Off-policy control algorithms:  Greedy-GQ(lambda), Softmax-GQ(lambda), and Off-PAC,
+    Off-policy control algorithms:  Greedy-GQ(lambda), Softmax-GQ(lambda), and Off-PAC (can be used in on-policy setting),
     On-policy algorithms: TD(lambda), SARSA(lambda), Expected-SARSA(lambda), and Actor-Critic (continuous and discrete actions), 
     Policies: Random, Random50%Bias, Greedy, Epsilon-greedy, Boltzmann, Normal, and Softmax,
     Efficient dot product implementation for tile coding base feature representations (with culling traces),
