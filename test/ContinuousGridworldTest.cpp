@@ -225,9 +225,9 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
 
 void ContinuousGridworldTest::run()
 {
-  testGreedyGQContinuousGridworld();
+  //testGreedyGQContinuousGridworld();
   testOffPACContinuousGridworld();
   //testOffPACOnPolicyContinuousGridworld();
-  testOffPACContinuousGridworldOPtimized();
+  //testOffPACContinuousGridworldOPtimized();
 }
 

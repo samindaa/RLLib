@@ -274,46 +274,26 @@ class GQOnPolicyControl: public GreedyGQ<T, O>
 };
 
 template<class T, class O>
-class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
+class AbstractActorOffPolicy: public ActorOffPolicy<T, O>
 {
   protected:
     bool initialized;
-    double alpha_u, gamma_t, lambda;
     PolicyDistribution<T>* targetPolicy;
-    Traces<T>* e;
     SparseVectors<T>* u;
-
   public:
-    ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t, const double& lambda,
-        PolicyDistribution<T>* targetPolicy, Traces<T>* e) :
-        initialized(false), alpha_u(alpha_u), gamma_t(gamma_t), lambda(lambda), targetPolicy(
-            targetPolicy), e(e), u(targetPolicy->parameters())
+    AbstractActorOffPolicy(PolicyDistribution<T>* targetPolicy) :
+        initialized(false), targetPolicy(targetPolicy), u(targetPolicy->parameters())
     {
     }
 
-    virtual ~ActorLambdaOffPolicy()
+    virtual ~AbstractActorOffPolicy()
     {
     }
 
   public:
     void initialize()
     {
-      e->clear();
       initialized = true;
-    }
-
-    void update(const Representations<T>& xas_t, const Action& a_t, double const& rho_t,
-        double const& gamma_t, double delta_t)
-    {
-      assert(initialized);
-      const SparseVectors<T>& gradLog = targetPolicy->computeGradLog(xas_t, a_t);
-      for (unsigned int i = 0; i < e->dimension(); i++)
-      {
-        e->at(i)->update(gamma_t * lambda, gradLog[i]);
-        e->at(i)->multiplyToSelf(rho_t);
-        u->at(i)->addToSelf(alpha_u * delta_t, e->at(i)->vect());
-      }
-
     }
 
     PolicyDistribution<T>& policy() const
@@ -329,7 +309,6 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     void reset()
     {
       u->clear();
-      e->clear();
       initialized = false;
     }
 
@@ -345,6 +324,53 @@ class ActorLambdaOffPolicy: public ActorOffPolicy<T, O>
     void resurrect(const std::string& f)
     {
       u->resurrect(f);
+    }
+
+};
+
+template<class T, class O>
+class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T, O>
+{
+  protected:
+    double alpha_u, gamma_t, lambda;
+    Traces<T>* e;
+    typedef AbstractActorOffPolicy<T, O> super;
+  public:
+    ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t, const double& lambda,
+        PolicyDistribution<T>* targetPolicy, Traces<T>* e) :
+        AbstractActorOffPolicy<T, O>(targetPolicy), alpha_u(alpha_u), gamma_t(gamma_t), lambda(
+            lambda), e(e)
+    {
+    }
+
+    virtual ~ActorLambdaOffPolicy()
+    {
+    }
+
+  public:
+    void initialize()
+    {
+      super::initialize();
+      e->clear();
+    }
+
+    void update(const Representations<T>& xas_t, const Action& a_t, double const& rho_t,
+        double const& gamma_t, double delta_t)
+    {
+      assert(super::initialized);
+      const SparseVectors<T>& gradLog = super::targetPolicy->computeGradLog(xas_t, a_t);
+      for (unsigned int i = 0; i < e->dimension(); i++)
+      {
+        e->at(i)->update(gamma_t * lambda, gradLog[i]);
+        e->at(i)->multiplyToSelf(rho_t);
+        super::u->at(i)->addToSelf(alpha_u * delta_t, e->at(i)->vect());
+      }
+    }
+
+    void reset()
+    {
+      super::reset();
+      e->clear();
     }
 };
 
@@ -538,6 +564,53 @@ class ActorLambda: public Actor<T, O>
         super::u->at(i)->addToSelf(super::alpha_u * delta, e->at(i)->vect());
       }
     }
+};
+
+template<class T, class O>
+class ActorNatural: public Actor<T, O>
+{
+  protected:
+    typedef Actor<T, O> super;
+    SparseVectors<T>* w;
+    double alpha_w;
+  public:
+    ActorNatural(const double& alpha_u, const double& alpha_w,
+        PolicyDistribution<T>* policyDistribution) :
+        Actor<T, O>(alpha_u, policyDistribution), w(new SparseVectors<T>()), alpha_w(alpha_w)
+    {
+      for (unsigned int i = 0; i < super::u->dimension(); i++)
+        w->push_back(new SparseVector<T>(super::u->at(i)->dimension()));
+    }
+
+    virtual ~ActorNatural()
+    {
+      for (typename SparseVectors<T>::iterator iter = w->begin(); iter != w->end(); ++iter)
+        delete *iter;
+      delete w;
+    }
+
+    void update(const Representations<T>& xas_t, const Action& a_t, double delta)
+    {
+      assert(super::initialized);
+      const SparseVectors<T>& gradLog = super::policy().computeGradLog(xas_t, a_t);
+      double advantageValue = 0;
+      // Calculate the advantage function
+      for (unsigned int i = 0; i < w->dimension(); i++)
+        advantageValue += gradLog[i].dot(*w->at(i));
+      for (unsigned int i = 0; i < w->dimension(); i++)
+      {
+        // Update the weights of the advantage function
+        w->at(i)->addToSelf(alpha_w * (delta - advantageValue), gradLog[i]);
+        // Update the policy parameters
+        super::u->at(i)->addToSelf(super::alpha_u, *w->at(i));
+      }
+    }
+
+    void reset()
+    {
+      super::reset();
+      w->clear();
+    }
 
 };
 
@@ -665,7 +738,6 @@ class ActorCritic: public AbstractActorCritic<T, O>
       // Update critic
       return super::critic->update(*phi_t, *phi_tp1, r_tp1);
     }
-
 };
 
 template<class T, class O>

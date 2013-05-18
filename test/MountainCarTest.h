@@ -61,6 +61,8 @@ class MountainCarTest: public MountainCarTestBase
     void testOnPolicyBoltzmannATraceCar();
     void testOnPolicyBoltzmannRTraceCar();
     void testOnPolicyContinousActionCar();
+
+    void testOnPolicyBoltzmannATraceNaturalActorCriticCar();
 };
 
 #endif /* MOUNTAINCARTEST_H_ */

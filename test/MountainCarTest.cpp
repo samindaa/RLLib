@@ -525,6 +525,45 @@ void MountainCarTest::testOnPolicyContinousActionCar()
   testOnPolicyContinousActionCar(10000, 0.4, 0.99, 0.1, 0.001);
 }
 
+void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
+{
+  srand(time(0));
+  Env<float>* problem = new MCar2D;
+
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, false);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+      projector, &problem->getDiscreteActionList());
+
+  double alpha_v = 0.01 / projector->vectorNorm();
+  double alpha_u = 0.01 / projector->vectorNorm();
+  double alpha_w = 0.01 / projector->vectorNorm();
+  double lambda = 0.0;
+  double gamma = 0.99;
+
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda, critice);
+
+  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(projector->dimension(),
+      &problem->getDiscreteActionList());
+
+  ActorOnPolicy<double, float>* actor = new ActorNatural<double, float>(alpha_u, alpha_w, acting);
+  OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
+      projector, toStateAction);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
+  sim->run(10, 5000, 100);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actor;
+  delete acting;
+  delete control;
+  delete sim;
+}
+
 void MountainCarTest::run()
 {
   testSarsaTabularActionMountainCar();
@@ -540,5 +579,6 @@ void MountainCarTest::run()
   testOnPolicyBoltzmannATraceCar();
   testOnPolicyBoltzmannRTraceCar();
   testOnPolicyContinousActionCar();
+  testOnPolicyBoltzmannATraceNaturalActorCriticCar();
 }
 
