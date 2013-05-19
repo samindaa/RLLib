@@ -223,11 +223,50 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
   delete sim;
 }
 
+void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum()
+{
+  srand(time(0));
+  Env<float>* problem = new SwingPendulum;
+
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+      projector, &problem->getDiscreteActionList());
+
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_u = 0.001 / projector->vectorNorm();
+  double lambda = 0.4;
+  double gamma = 0.99;
+
+  Trace<double>* critice = new ATrace<double>(projector->dimension());
+  TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda, critice);
+
+  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(projector->dimension(),
+      &problem->getDiscreteActionList());
+
+  ActorOnPolicy<double, float>* actor = new ActorNatural<double, float>(alpha_u, alpha_v, acting);
+  OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
+      projector, toStateAction);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
+  sim->run(10, 5000, 50);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete critice;
+  delete critic;
+  delete actor;
+  delete acting;
+  delete control;
+  delete sim;
+}
+
 void SwingPendulumTest::run()
 {
   testOffPACSwingPendulum();
   testOnPolicySwingPendulum();
   testOffPACSwingPendulum2();
   testOffPACOnPolicySwingPendulum();
+  testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum();
 }
 

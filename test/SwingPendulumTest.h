@@ -50,7 +50,7 @@ class SwingPendulumTest: public SwingPendulumTestBase
     void testOnPolicySwingPendulum();
     void testOffPACSwingPendulum2();
     void testOffPACOnPolicySwingPendulum();
-
+    void testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum();
 };
 
 #endif /* SWINGPENDULUMTEST_H_ */

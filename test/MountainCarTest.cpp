@@ -534,10 +534,9 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
 
-  double alpha_v = 0.01 / projector->vectorNorm();
-  double alpha_u = 0.01 / projector->vectorNorm();
-  double alpha_w = 0.01 / projector->vectorNorm();
-  double lambda = 0.0;
+  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_u = 0.001 / projector->vectorNorm();
+  double lambda = 0.4;
   double gamma = 0.99;
 
   Trace<double>* critice = new ATrace<double>(projector->dimension());
@@ -546,7 +545,7 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
   PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(projector->dimension(),
       &problem->getDiscreteActionList());
 
-  ActorOnPolicy<double, float>* actor = new ActorNatural<double, float>(alpha_u, alpha_w, acting);
+  ActorOnPolicy<double, float>* actor = new ActorNatural<double, float>(alpha_u, alpha_v, acting);
   OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
       projector, toStateAction);
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem);

@@ -572,11 +572,11 @@ class ActorNatural: public Actor<T, O>
   protected:
     typedef Actor<T, O> super;
     SparseVectors<T>* w;
-    double alpha_w;
+    double alpha_v;
   public:
-    ActorNatural(const double& alpha_u, const double& alpha_w,
+    ActorNatural(const double& alpha_u, const double& alpha_v,
         PolicyDistribution<T>* policyDistribution) :
-        Actor<T, O>(alpha_u, policyDistribution), w(new SparseVectors<T>()), alpha_w(alpha_w)
+        Actor<T, O>(alpha_u, policyDistribution), w(new SparseVectors<T>()), alpha_v(alpha_v)
     {
       for (unsigned int i = 0; i < super::u->dimension(); i++)
         w->push_back(new SparseVector<T>(super::u->at(i)->dimension()));
@@ -600,7 +600,7 @@ class ActorNatural: public Actor<T, O>
       for (unsigned int i = 0; i < w->dimension(); i++)
       {
         // Update the weights of the advantage function
-        w->at(i)->addToSelf(alpha_w * (delta - advantageValue), gradLog[i]);
+        w->at(i)->addToSelf(alpha_v * (delta - advantageValue), gradLog[i]);
         // Update the policy parameters
         super::u->at(i)->addToSelf(super::alpha_u, *w->at(i));
       }
