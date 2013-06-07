@@ -41,7 +41,7 @@ class Acrobot: public Env<float>
 
   public:
     Acrobot() :
-        Env(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
+        Env<float>(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
             new Range<float>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
             new Range<float>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(new Range<float>(-1.0, 1.0)), m1(
             1.0), m2(1.0), l1(1.0), l2(1.0), lc1(0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), targetPosition(
