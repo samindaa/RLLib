@@ -40,6 +40,9 @@ class SupervisedAlgorithmTest: public SupervisedAlgorithmTestBase
     {
     }
     void run();
+
+    void linearRegression();
+    void logisticRegression();
 };
 
 #endif /* LEARNINGALGORITHMTEST_H_ */

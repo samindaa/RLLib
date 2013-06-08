@@ -20,10 +20,11 @@
  */
 
 #include "LearningAlgorithmTest.h"
+#include "Math.h"
 
 RLLIB_TEST_MAKE(SupervisedAlgorithmTest)
 
-void SupervisedAlgorithmTest::run()
+void SupervisedAlgorithmTest::linearRegression()
 {
   // simple sine curve estimation
   // training samples
@@ -48,8 +49,7 @@ void SupervisedAlgorithmTest::run()
   ofstream outFileError("visualization/learningAlgorithmTestError.dat");
   while (++traininCounter < 100)
   {
-    for (multimap<double, double>::const_iterator iter = X.begin();
-        iter != X.end(); ++iter)
+    for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
     {
       x[0] = 2.0 * iter->first / M_PI; // normalized and unit generalized
       const SVecDoubleType& phi = coder.project(x);
@@ -61,8 +61,8 @@ void SupervisedAlgorithmTest::run()
     // Calculate the error
     double mse[3] =
     { 0 };
-    for (multimap<double, double>::const_iterator iterMse = X.begin();
-        iterMse != X.end(); ++iterMse)
+    for (multimap<double, double>::const_iterator iterMse = X.begin(); iterMse != X.end();
+        ++iterMse)
     {
       x[0] = 2.0 * iterMse->first / M_PI;
       const SVecDoubleType& phi = coder.project(x);
@@ -76,18 +76,87 @@ void SupervisedAlgorithmTest::run()
   outFileError.close();
 
   // output
-  ofstream outFilePrediction(
-      "visualization/learningAlgorithmTestPrediction.dat");
-  for (multimap<double, double>::const_iterator iter = X.begin();
-      iter != X.end(); ++iter)
+  ofstream outFilePrediction("visualization/learningAlgorithmTestPrediction.dat");
+  for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
   {
     x[0] = 2.0 * iter->first / M_PI;
     const SVecDoubleType& phi = coder.project(x);
     if (outFilePrediction.is_open())
-      outFilePrediction << iter->first << " " << iter->second << " "
-          << adaline.predict(phi) << " " << idbd.predict(phi) << " "
-          << autostep.predict(phi) << endl;
+      outFilePrediction << iter->first << " " << iter->second << " " << adaline.predict(phi) << " "
+          << idbd.predict(phi) << " " << autostep.predict(phi) << endl;
   }
   outFilePrediction.close();
+}
+
+void SupervisedAlgorithmTest::logisticRegression()
+{
+  // simple sine curve estimation
+  // training samples
+  multimap<double, double> X;
+  for (int i = 0; i < 50; i++)
+  {
+    double x = Random::nextGaussian(0.25, 0.2); // @@>> input noise?
+    double y = 0; // @@>> output noise?
+    X.insert(make_pair(x, y));
+  }
+
+  for (int i = 50; i < 100; i++)
+  {
+    double x = Random::nextGaussian(0.75, 0.2); // @@>> input noise?
+    double y = 1; // @@>> output noise?
+    X.insert(make_pair(x, y));
+  }
+
+  // train
+  int numObservations = 1;
+  int memorySize = 512;
+  int numTiling = 16;
+  DVecFloatType x(numObservations);
+  TileCoderHashing<double, float> coder(memorySize, numTiling, true);
+  SemiLinerIDBD<double> semiLinearIdbd(coder.dimension(), 0.001 / x.dimension()); // This value looks good
+  int traininCounter = 0;
+  ofstream outFileError("visualization/learningAlgorithmSemiLinearTestError.dat");
+  while (++traininCounter < 100)
+  {
+    for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
+    {
+      x[0] = 10.0 * iter->first; // normalized and unit generalized
+      const SVecDoubleType& phi = coder.project(x);
+      semiLinearIdbd.learn(phi, iter->second);
+    }
+
+    // Calculate the error
+    double crossEntropy = 0;
+    for (multimap<double, double>::const_iterator iterCrossEntropy = X.begin();
+        iterCrossEntropy != X.end(); ++iterCrossEntropy)
+    {
+      x[0] = 10.0 * iterCrossEntropy->first;
+      const SVecDoubleType& phi = coder.project(x);
+      crossEntropy += -iterCrossEntropy->second * log(semiLinearIdbd.predict(phi))
+          - (1.0 - iterCrossEntropy->second) * log(1.0 - semiLinearIdbd.predict(phi));
+    }
+    if (outFileError.is_open())
+      outFileError << crossEntropy << endl;
+  }
+  outFileError.close();
+
+  // output
+  ofstream outFilePrediction("visualization/learningAlgorithmSemiLinearTestPrediction.dat");
+  for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
+  {
+    x[0] = 10.0 * iter->first;
+    const SVecDoubleType& phi = coder.project(x);
+    if (outFilePrediction.is_open())
+      outFilePrediction << iter->first << " " << iter->second << " " << semiLinearIdbd.predict(phi)
+          << endl;
+  }
+  outFilePrediction.close();
+
+}
+
+void SupervisedAlgorithmTest::run()
+{
+  linearRegression();
+  logisticRegression();
 }
 

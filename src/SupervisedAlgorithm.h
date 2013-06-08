@@ -84,10 +84,18 @@ class IDBD: public LearningAlgorithm<T>
     SparseVector<T>* alpha;
     SparseVector<T>* h;
     double theta, minimumStepSize;
+
+    // Auxiliary variables
+    SparseVector<T>* deltaX;
+    SparseVector<T>* deltaXh;
+    SparseVector<T>* alphaX2;
+
   public:
     IDBD(const int& size, const double& theta) :
         w(new SparseVector<T>(size)), alpha(new SparseVector<T>(w->dimension())), h(
-            new SparseVector<T>(w->dimension())), theta(theta), minimumStepSize(10e-7)
+            new SparseVector<T>(w->dimension())), theta(theta), minimumStepSize(10e-7), deltaX(
+            new SparseVector<T>(w->dimension())), deltaXh(new SparseVector<T>(w->dimension())), alphaX2(
+            new SparseVector<T>(w->dimension()))
     {
       alpha->set(1.0 / w->dimension());
     }
@@ -96,6 +104,10 @@ class IDBD: public LearningAlgorithm<T>
       delete w;
       delete alpha;
       delete h;
+
+      delete deltaX;
+      delete deltaXh;
+      delete alphaX2;
     }
 
     double initialize()
@@ -121,16 +133,98 @@ class IDBD: public LearningAlgorithm<T>
     void learn(const SparseVector<T>& x, const T& y)
     {
       double delta = y - predict(x);
-      SparseVector<T> deltaX(x);
-      deltaX.multiplyToSelf(delta);
-      SparseVector<T> deltaXh(deltaX);
-      deltaXh.ebeMultiplyToSelf(*h);
-      SparseVector<T>::multiplySelfByExponential(*alpha, theta, deltaXh, minimumStepSize);
-      SparseVector<T>& alphaDeltaX = deltaX.ebeMultiplyToSelf(*alpha);
+      deltaX->set(x);
+      deltaX->multiplyToSelf(delta);
+      deltaXh->set(*deltaX);
+      deltaXh->ebeMultiplyToSelf(*h);
+      SparseVector<T>::multiplySelfByExponential(*alpha, theta, *deltaXh, minimumStepSize);
+      SparseVector<T>& alphaDeltaX = deltaX->ebeMultiplyToSelf(*alpha);
       w->addToSelf(alphaDeltaX);
-      SparseVector<T> alphaX2(x);
-      alphaX2.ebeMultiplyToSelf(x).ebeMultiplyToSelf(*alpha).ebeMultiplyToSelf(*h);
-      h->addToSelf(-1.0, alphaX2);
+      alphaX2->set(x);
+      alphaX2->ebeMultiplyToSelf(x).ebeMultiplyToSelf(*alpha).ebeMultiplyToSelf(*h);
+      h->addToSelf(-1.0, *alphaX2);
+      h->addToSelf(alphaDeltaX);
+    }
+
+    void persist(const std::string& f) const
+    {
+      w->persist(f);
+    }
+    void resurrect(const std::string& f)
+    {
+      w->resurrect(f);
+    }
+};
+
+template<class T>
+class SemiLinerIDBD: public LearningAlgorithm<T>
+{
+  protected:
+    SparseVector<T>* w;
+    SparseVector<T>* alpha;
+    SparseVector<T>* h;
+    double theta, minimumStepSize;
+
+    // Auxiliary variables
+    SparseVector<T>* deltaX;
+    SparseVector<T>* deltaXh;
+    SparseVector<T>* alphaX2YMinusOneMinusY;
+
+  public:
+    SemiLinerIDBD(const int& size, const double& theta) :
+        w(new SparseVector<T>(size)), alpha(new SparseVector<T>(w->dimension())), h(
+            new SparseVector<T>(w->dimension())), theta(theta), minimumStepSize(10e-7), deltaX(
+            new SparseVector<T>(w->dimension())), deltaXh(new SparseVector<T>(w->dimension())), alphaX2YMinusOneMinusY(
+            new SparseVector<T>(w->dimension()))
+    {
+      alpha->set(1.0 / w->dimension());
+    }
+    virtual ~SemiLinerIDBD()
+    {
+      delete w;
+      delete alpha;
+      delete h;
+
+      delete deltaX;
+      delete deltaXh;
+      delete alphaX2YMinusOneMinusY;
+    }
+
+    double initialize()
+    {
+      return 0.0;
+    }
+
+    int dimension() const
+    {
+      return w->dimension();
+    }
+    double predict(const SparseVector<T>& x) const
+    {
+      return 1.0 / (1.0 + exp(-w->dot(x)));
+    }
+    void reset()
+    {
+      w->clear();
+      alpha->set(1.0 / w->dimension());
+      h->clear();
+    }
+
+    void learn(const SparseVector<T>& x, const T& z)
+    {
+      double y = predict(x);
+      double delta = z - y;
+      deltaX->set(x);
+      deltaX->multiplyToSelf(delta);
+      deltaXh->set(*deltaX);
+      deltaXh->ebeMultiplyToSelf(*h);
+      SparseVector<T>::multiplySelfByExponential(*alpha, theta, *deltaXh, minimumStepSize);
+      SparseVector<T>& alphaDeltaX = deltaX->ebeMultiplyToSelf(*alpha);
+      w->addToSelf(alphaDeltaX);
+      alphaX2YMinusOneMinusY->set(x);
+      alphaX2YMinusOneMinusY->ebeMultiplyToSelf(x).ebeMultiplyToSelf(*alpha).ebeMultiplyToSelf(*h).multiplyToSelf(
+          y).multiplyToSelf(1.0 - y);
+      h->addToSelf(-1.0, *alphaX2YMinusOneMinusY);
       h->addToSelf(alphaDeltaX);
     }
 
