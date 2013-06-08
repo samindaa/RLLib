@@ -113,7 +113,7 @@ void SupervisedAlgorithmTest::logisticRegression()
   int numTiling = 16;
   DVecFloatType x(numObservations);
   TileCoderHashing<double, float> coder(memorySize, numTiling, true);
-  SemiLinerIDBD<double> semiLinearIdbd(coder.dimension(), 0.001 / x.dimension()); // This value looks good
+  SemiLinearIDBD<double> semiLinearIdbd(coder.dimension(), 0.001 / x.dimension()); // This value looks good
   int traininCounter = 0;
   ofstream outFileError("visualization/learningAlgorithmSemiLinearTestError.dat");
   while (++traininCounter < 100)

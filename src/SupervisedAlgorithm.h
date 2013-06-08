@@ -157,7 +157,7 @@ class IDBD: public LearningAlgorithm<T>
 };
 
 template<class T>
-class SemiLinerIDBD: public LearningAlgorithm<T>
+class SemiLinearIDBD: public LearningAlgorithm<T>
 {
   protected:
     SparseVector<T>* w;
@@ -171,7 +171,7 @@ class SemiLinerIDBD: public LearningAlgorithm<T>
     SparseVector<T>* alphaX2YMinusOneMinusY;
 
   public:
-    SemiLinerIDBD(const int& size, const double& theta) :
+    SemiLinearIDBD(const int& size, const double& theta) :
         w(new SparseVector<T>(size)), alpha(new SparseVector<T>(w->dimension())), h(
             new SparseVector<T>(w->dimension())), theta(theta), minimumStepSize(10e-7), deltaX(
             new SparseVector<T>(w->dimension())), deltaXh(new SparseVector<T>(w->dimension())), alphaX2YMinusOneMinusY(
@@ -179,7 +179,7 @@ class SemiLinerIDBD: public LearningAlgorithm<T>
     {
       alpha->set(1.0 / w->dimension());
     }
-    virtual ~SemiLinerIDBD()
+    virtual ~SemiLinearIDBD()
     {
       delete w;
       delete alpha;
