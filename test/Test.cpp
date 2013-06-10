@@ -24,28 +24,38 @@
 
 #include "HeaderTest.h"
 
+RLLibTestRegistry::RLLibTestRegistry()
+{
+}
+
 RLLibTestRegistry::~RLLibTestRegistry()
 {
   registry.clear();
 }
 
-RLLibTestRegistry* RLLibTestRegistry::inst = 0;
+RLLibTestRegistry* RLLibTestRegistry::instance = 0;
 
-RLLibTestRegistry* RLLibTestRegistry::instance()
+RLLibTestRegistry* RLLibTestRegistry::getInstance()
 {
-  if (!inst)
-    inst = new RLLibTestRegistry;
-  return inst;
+  if (!instance)
+    instance = new RLLibTestRegistry;
+  return instance;
+}
+
+void RLLibTestRegistry::deleteInstance()
+{
+  assert(instance);
+  delete instance;
 }
 
 void RLLibTestRegistry::registerInstance(RLLibTestCase* testCase)
 {
-  RLLibTestRegistry::instance()->registry.insert(make_pair(testCase->getName(), testCase));
+  RLLibTestRegistry::getInstance()->registry.insert(make_pair(testCase->getName(), testCase));
 }
 
 int main(int argc, char** argv)
 {
-  RLLibTestRegistry* registry = RLLibTestRegistry::instance();
+  RLLibTestRegistry* registry = RLLibTestRegistry::getInstance();
   cout << "*** number of registered test cases = " << registry->dimension() << endl;
   set<string> activeTestSet;
   ifstream inf("test/test.cfg");
@@ -85,9 +95,10 @@ int main(int argc, char** argv)
     RLLibTestCase* testCase = iter2->second;
     cout << "*** starts " << testCase->getName() << endl;
     testCase->run();
-    cout << "***   ends " << testCase->getName() << endl;
+    cout << "*** ends   " << testCase->getName() << endl;
   }
 
+  RLLibTestRegistry::deleteInstance();
   cout << "*** Tests completed! " << endl;
   return EXIT_SUCCESS;
 }

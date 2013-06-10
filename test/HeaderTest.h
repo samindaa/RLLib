@@ -75,7 +75,6 @@ class RLLibTestRegistry
     std::map<string, RLLibTestCase*> registry;
 
   public:
-    ~RLLibTestRegistry();
 
     typedef std::map<string, RLLibTestCase*>::iterator iterator;
     typedef std::map<string, RLLibTestCase*>::const_iterator const_iterator;
@@ -115,33 +114,34 @@ class RLLibTestRegistry
       return registry.size();
     }
 
-    static RLLibTestRegistry* instance();
+    static RLLibTestRegistry* getInstance();
+    static void deleteInstance();
     static void registerInstance(RLLibTestCase* testCase);
 
   protected:
-    RLLibTestRegistry()
-    {
-    }
-
+    RLLibTestRegistry();
+    ~RLLibTestRegistry();
     RLLibTestRegistry(RLLibTestRegistry const&);
     RLLibTestRegistry& operator=(RLLibTestRegistry const&);
 
   private:
-    static RLLibTestRegistry* inst;
+    static RLLibTestRegistry* instance;
 };
 
 template<class T>
 class RLLibTestCaseLoader
 {
   protected:
-    T theInstance;
+    T* theInstance;
   public:
-    RLLibTestCaseLoader()
+    RLLibTestCaseLoader() : theInstance(new T())
     {
-      RLLibTestRegistry::registerInstance(&theInstance);
+      RLLibTestRegistry::registerInstance(theInstance);
     }
-    virtual ~RLLibTestCaseLoader()
+
+    ~RLLibTestCaseLoader()
     {
+      delete theInstance;
     }
 };
 
