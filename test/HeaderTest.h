@@ -211,4 +211,6 @@ class Assert
     }
 };
 
+#define ARRAYSIZE(a) sizeof(a)/ sizeof (a[0])
+
 #endif /* HEADERTEST_H_ */

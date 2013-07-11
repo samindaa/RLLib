@@ -41,8 +41,10 @@ class SupervisedAlgorithmTest: public SupervisedAlgorithmTestBase
     }
     void run();
 
-    void linearRegression();
-    void logisticRegression();
+    void linearRegressionWithTileFeatures();
+    void logisticRegressionWithTileFeatures();
+    void linearRegressionWithRegularFeatures();
+    void logisticRegressionWithRegularFeatures();
 };
 
 #endif /* LEARNINGALGORITHMTEST_H_ */

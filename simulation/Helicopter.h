@@ -62,7 +62,7 @@ class Quaternion
     }
 
     Quaternion(const HeliVector& v) :
-        x(x), y(y), z(z), w(0)
+        x(v.x), y(v.y), z(v.z), w(0)
     {
     }
 
