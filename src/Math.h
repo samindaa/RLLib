@@ -141,8 +141,8 @@ class Random
         double x, y, r;
         do
         {
-          x = nextDouble() - 1;
-          y = nextDouble() - 1;
+          x = 2.0 * nextDouble() - 1;
+          y = 2.0 * nextDouble() - 1;
 
           r = x * x + y * y;
         } while (r == 0.0 || r > 1.0);
