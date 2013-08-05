@@ -30,6 +30,7 @@
 
 #include "Control.h"
 #include "Env.h"
+#include "Timer.h"
 
 #include <iostream>
 #include <vector>
@@ -137,6 +138,9 @@ class Simulator
 
     void test(int maxRuns, int maxSteps)
     {
+      Timer timer;
+      double totalTime = 0;
+      double totalSteps = 0;
       for (int run = 0; run < maxRuns; run++)
       {
         env->setOn(true);
@@ -150,13 +154,19 @@ class Simulator
           ++steps;
           episodeR += env->r();
           episodeZ += env->z();
+          timer.start();
           action = &agent->proposeAction(env->getVars());
+          timer.stop();
+          totalTime += timer.getElapsedTimeInMilliSec();
         } while (!env->endOfEpisode() && steps < maxSteps);
 
         xTest.push_back(steps);
+        totalSteps += steps;
         std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
         std::cout.flush();
       }
+      double averageTimePerStep = totalTime / totalSteps;
+      std::cout << "(" << averageTimePerStep << ") ";
       std::cout << std::endl;
     }
 
