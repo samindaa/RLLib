@@ -23,7 +23,9 @@
 #define MATH_H_
 
 #include <cmath>
+#include <cassert>
 #include <limits>
+#include <vector>
 
 namespace RLLib
 {
@@ -84,6 +86,90 @@ class Range
       return min() + (length() / 2.0);
     }
 };
+
+
+template<class T>
+class Ranges
+{
+  protected:
+    typename std::vector<Range<T>*>* ranges;
+  public:
+    typedef typename std::vector<Range<T>*>::iterator iterator;
+    typedef typename std::vector<Range<T>*>::const_iterator const_iterator;
+
+    Ranges() :
+        ranges(new std::vector<Range<T>*>())
+    {
+    }
+
+    ~Ranges()
+    {
+      ranges->clear();
+      delete ranges;
+    }
+
+    Ranges(const Range<T>& that) :
+        ranges(new std::vector<Range<T>*>())
+    {
+      for (typename SparseVectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+        ranges->push_back(*iter);
+    }
+
+    Ranges<T>& operator=(const Ranges<T>& that)
+    {
+      if (this != that)
+      {
+        ranges->clear();
+        for (typename SparseVectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+          ranges->push_back(*iter);
+      }
+      return *this;
+    }
+
+    void push_back(Range<T>* range)
+    {
+      ranges->push_back(range);
+    }
+
+    iterator begin()
+    {
+      return ranges->begin();
+    }
+
+    const_iterator begin() const
+    {
+      return ranges->begin();
+    }
+
+    iterator end()
+    {
+      return ranges->end();
+    }
+
+    const_iterator end() const
+    {
+      return ranges->end();
+    }
+
+
+    unsigned int dimension() const
+    {
+      return ranges->size();
+    }
+
+    const Range<T>& operator[](const unsigned index) const
+    {
+      assert(index >= 0 && index < dimension());
+      return *ranges->at(index);
+    }
+
+    Range<T>* at(const unsigned index) const
+    {
+      assert(index >= 0 && index < dimension());
+      return ranges->at(index);
+    }
+};
+
 
 class Signum
 {
