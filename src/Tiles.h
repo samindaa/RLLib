@@ -46,11 +46,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <assert.h>
+#include <limits.h>
 
 namespace RLLib
 {
 
-class collision_table
+// ============================================================================
+class CollisionTable
 {
   public:
     long m;
@@ -60,7 +62,7 @@ class collision_table
     long clearhits;
     long collisions;
 
-    collision_table(int size, int safety)
+    CollisionTable(int size, int safety)
     {
       int tmp = size;
       while (tmp > 2)
@@ -84,7 +86,7 @@ class collision_table
       collisions = 0;
     }
 
-    ~collision_table()
+    ~CollisionTable()
     {
       delete[] data;
     }
@@ -139,6 +141,149 @@ class collision_table
 };
 
 // ============================================================================
+class Hashing
+{
+  public:
+    virtual ~Hashing()
+    {
+    }
+    virtual int hash(int* ints/*coordinates*/, int num_ints, long m/*memory_size*/,
+        int increment) =0;
+};
+
+class UNH: public Hashing
+{
+  protected:
+    enum
+    {
+      URNDSEQ = 2047, RNDSEQ = 2048
+    };
+
+    unsigned int rndseq[RNDSEQ];
+
+  public:
+    UNH()
+    {
+      /*First call to hashing, initialize table of random numbers */
+      //printf("inside tiles \n");
+      for (int k = 0; k < RNDSEQ; k++)
+      {
+        rndseq[k] = 0;
+        for (int i = 0; i < int(sizeof(int)); ++i)
+          rndseq[k] = (rndseq[k] << 8) | (rand() & 0xff);
+      }
+    }
+
+    /** hash_UNH
+     *  Takes an array of integers and returns the corresponding tile after hashing
+     */
+    int hash(int* ints/*coordinates*/, int num_ints, long m/*memory_size*/, int increment)
+    {
+      long index;
+      long sum = 0;
+
+      for (int i = 0; i < num_ints; i++)
+      {
+        /* add random table offset for this dimension and wrap around */
+        index = ints[i];
+        index += (increment * i);
+        /* index %= 2048; */
+        //index = index & 2047;
+        index = index & URNDSEQ;
+        while (index < 0)
+          index += RNDSEQ;
+
+        /* add selected random number to sum */
+        sum += (long) rndseq[(int) index];
+      }
+      index = (int) (sum % m);
+      while (index < 0)
+        index += m;
+
+      /* printf("index is %d \n", index); */
+      return (index);
+    }
+};
+
+class MurmurHashing: public Hashing
+{
+
+  protected:
+    unsigned int seed;
+  public:
+    MurmurHashing() :
+        seed((unsigned int) rand())
+    {
+    }
+
+  protected:
+
+    /**
+     * MurmurHashNeutral2, by Austin Appleby
+     * https://sites.google.com/site/murmurhash/
+     * https://sites.google.com/site/murmurhash/MurmurHashNeutral2.cpp?attredirects=0
+     * Same as MurmurHash2, but endian- and alignment-neutral.
+     * Half the speed though, alas.
+     */
+    unsigned int murmurHash(const void * key, int len, unsigned int seed)
+    {
+      // 'm' and 'r' are mixing constants generated offline.
+      // They're not really 'magic', they just happen to work well.
+
+      const unsigned int m = 0x5bd1e995;
+      const int r = 24;
+
+      unsigned int h = seed ^ len;
+
+      const unsigned char * data = (const unsigned char *) key;
+
+      while (len >= 4)
+      {
+        unsigned int k;
+
+        k = data[0];
+        k |= data[1] << 8;
+        k |= data[2] << 16;
+        k |= data[3] << 24;
+
+        k *= m;
+        k ^= k >> r;
+        k *= m;
+
+        h *= m;
+        h ^= k;
+
+        data += 4;
+        len -= 4;
+      }
+
+      switch (len)
+      {
+      case 3:
+        h ^= data[2] << 16;
+      case 2:
+        h ^= data[1] << 8;
+      case 1:
+        h ^= data[0];
+        h *= m;
+      };
+
+      h ^= h >> 13;
+      h *= m;
+      h ^= h >> 15;
+
+      return h;
+    }
+
+  public:
+    int hash(int* ints/*coordinates*/, int num_ints, long m/*memory_size*/, int increment)
+    {
+      return (int) (((long) murmurHash(ints, num_ints, seed) + INT_MAX) % m);
+    }
+
+};
+
+// ============================================================================
 class Tiles
 {
   protected:
@@ -157,63 +302,34 @@ class Tiles
     int i_tmp_arr[MAX_NUM_VARS];
     float f_tmp_arr[MAX_NUM_VARS];
 
-    /* hash_UNH
-     Takes an array of integers and returns the corresponding tile after hashing
-     */
-    int hash_UNH(int *ints, int num_ints, long m, int increment)
+    Hashing* hashing; /*The has function*/
+    Hashing* hashUNH;
+
+  public:
+    Tiles(Hashing* hashing = 0) :
+        hashing(0), hashUNH(new UNH)
     {
-      static unsigned int rndseq[2048];
-      static int first_call = 1;
-      int i, k;
-      long index;
-      long sum = 0;
-
-      /* if first call to hashing, initialize table of random numbers */
-      if (first_call)
-      {
-        //printf("inside tiles \n");
-        for (k = 0; k < 2048; k++)
-        {
-          rndseq[k] = 0;
-          for (i = 0; i < int(sizeof(int)); ++i)
-            rndseq[k] = (rndseq[k] << 8) | (rand() & 0xff);
-        }
-        first_call = 0;
-      }
-
-      for (i = 0; i < num_ints; i++)
-      {
-        /* add random table offset for this dimension and wrap around */
-        index = ints[i];
-        index += (increment * i);
-        /* index %= 2048; */
-        index = index & 2047;
-        while (index < 0)
-          index += 2048;
-
-        /* add selected random number to sum */
-        sum += (long) rndseq[(int) index];
-      }
-      index = (int) (sum % m);
-      while (index < 0)
-        index += m;
-
-      /* printf("index is %d \n", index); */
-
-      return (index);
+      if (!hashing)
+        this->hashing = hashUNH;
     }
 
+    ~Tiles()
+    {
+      delete hashUNH;
+    }
+
+  private:
     /* hash
      Takes an array of integers and returns the corresponding tile after hashing
      */
-    int hash(int *ints, int num_ints, collision_table *ct)
+    int hash(int *ints, int num_ints, CollisionTable *ct)
     {
       int j;
       long ccheck;
 
       ct->calls++;
-      j = hash_UNH(ints, num_ints, ct->m, 449);
-      ccheck = hash_UNH(ints, num_ints, MaxLONGINT, 457);
+      j = hashUNH->hash(ints, num_ints, ct->m, 449);
+      ccheck = hashUNH->hash(ints, num_ints, MaxLONGINT, 457);
       if (ccheck == ct->data[j])
         ct->clearhits++;
       else if (ct->data[j] == -1)
@@ -225,7 +341,7 @@ class Tiles
         ct->collisions++;
       else
       {
-        long h2 = 1 + 2 * hash_UNH(ints, num_ints, (MaxLONGINT) / 4, 449);
+        long h2 = 1 + 2 * hashUNH->hash(ints, num_ints, (MaxLONGINT) / 4, 449);
         int i = 0;
         while (++i)
         {
@@ -295,14 +411,14 @@ class Tiles
         /* add additional indices for tiling and hashing_set so they hash differently */
         coordinates[i] = j;
 
-        the_tiles[j] = hash_UNH(coordinates, num_coordinates, memory_size, 449);
+        the_tiles[j] = hashing->hash(coordinates, num_coordinates, memory_size, 449);
       }
       return;
     }
 
     void tiles(int the_tiles[],             // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
-        collision_table *ctable,    // total number of possible tiles
+        CollisionTable *ctable,    // total number of possible tiles
         float floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int ints[],                   // array of integer variables
@@ -356,7 +472,7 @@ class Tiles
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 0);
     }
 
-    void tiles(int the_tiles[], int nt, collision_table *ct, float floats[], int nf)
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, float floats[], int nf)
     {
       tiles(the_tiles, nt, ct, floats, nf, i_tmp_arr, 0);
     }
@@ -368,7 +484,7 @@ class Tiles
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 1);
     }
 
-    void tiles(int the_tiles[], int nt, collision_table *ct, float floats[], int nf, int h1)
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, float floats[], int nf, int h1)
     {
       i_tmp_arr[0] = h1;
       tiles(the_tiles, nt, ct, floats, nf, i_tmp_arr, 1);
@@ -382,7 +498,7 @@ class Tiles
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 2);
     }
 
-    void tiles(int the_tiles[], int nt, collision_table *ct, float floats[], int nf, int h1, int h2)
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, float floats[], int nf, int h1, int h2)
     {
       i_tmp_arr[0] = h1;
       i_tmp_arr[1] = h2;
@@ -398,7 +514,7 @@ class Tiles
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 3);
     }
 
-    void tiles(int the_tiles[], int nt, collision_table *ct, float floats[], int nf, int h1, int h2,
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, float floats[], int nf, int h1, int h2,
         int h3)
     {
       i_tmp_arr[0] = h1;
@@ -414,7 +530,7 @@ class Tiles
       tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 0);
     }
 
-    void tiles1(int the_tiles[], int nt, collision_table *ct, float f1)
+    void tiles1(int the_tiles[], int nt, CollisionTable *ct, float f1)
     {
       f_tmp_arr[0] = f1;
       tiles(the_tiles, nt, ct, f_tmp_arr, 1, i_tmp_arr, 0);
@@ -428,7 +544,7 @@ class Tiles
       tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 1);
     }
 
-    void tiles1(int the_tiles[], int nt, collision_table *ct, float f1, int h1)
+    void tiles1(int the_tiles[], int nt, CollisionTable *ct, float f1, int h1)
     {
       f_tmp_arr[0] = f1;
       i_tmp_arr[0] = h1;
@@ -444,7 +560,7 @@ class Tiles
       tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 2);
     }
 
-    void tiles1(int the_tiles[], int nt, collision_table *ct, float f1, int h1, int h2)
+    void tiles1(int the_tiles[], int nt, CollisionTable *ct, float f1, int h1, int h2)
     {
       f_tmp_arr[0] = f1;
       i_tmp_arr[0] = h1;
@@ -462,7 +578,7 @@ class Tiles
       tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 3);
     }
 
-    void tiles1(int the_tiles[], int nt, collision_table *ct, float f1, int h1, int h2, int h3)
+    void tiles1(int the_tiles[], int nt, CollisionTable *ct, float f1, int h1, int h2, int h3)
     {
       f_tmp_arr[0] = f1;
       i_tmp_arr[0] = h1;
@@ -479,7 +595,7 @@ class Tiles
       tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 0);
     }
 
-    void tiles2(int the_tiles[], int nt, collision_table *ct, float f1, float f2)
+    void tiles2(int the_tiles[], int nt, CollisionTable *ct, float f1, float f2)
     {
       f_tmp_arr[0] = f1;
       f_tmp_arr[1] = f2;
@@ -495,7 +611,7 @@ class Tiles
       tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 1);
     }
 
-    void tiles2(int the_tiles[], int nt, collision_table *ct, float f1, float f2, int h1)
+    void tiles2(int the_tiles[], int nt, CollisionTable *ct, float f1, float f2, int h1)
     {
       f_tmp_arr[0] = f1;
       f_tmp_arr[1] = f2;
@@ -513,7 +629,7 @@ class Tiles
       tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 2);
     }
 
-    void tiles2(int the_tiles[], int nt, collision_table *ct, float f1, float f2, int h1, int h2)
+    void tiles2(int the_tiles[], int nt, CollisionTable *ct, float f1, float f2, int h1, int h2)
     {
       f_tmp_arr[0] = f1;
       f_tmp_arr[1] = f2;
@@ -533,7 +649,7 @@ class Tiles
       tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 3);
     }
 
-    void tiles2(int the_tiles[], int nt, collision_table *ct, float f1, float f2, int h1, int h2,
+    void tiles2(int the_tiles[], int nt, CollisionTable *ct, float f1, float f2, int h1, int h2,
         int h3)
     {
       f_tmp_arr[0] = f1;
@@ -598,14 +714,14 @@ class Tiles
         /* add additional indices for tiling and hashing_set so they hash differently */
         coordinates[i] = j;
 
-        the_tiles[j] = hash_UNH(coordinates, num_coordinates, memory_size, 449);
+        the_tiles[j] = hashing->hash(coordinates, num_coordinates, memory_size, 449);
       }
       return;
     }
 
     void tileswrap(int the_tiles[],         // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
-        collision_table *ctable,   // total number of possible tiles
+        CollisionTable *ctable,   // total number of possible tiles
         float floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int wrap_widths[],         // array of widths (length and units as in floats)

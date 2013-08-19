@@ -162,7 +162,7 @@ class TileCoderNoHashing: public TileCoder<T, O>
 {
   protected:
     typedef TileCoder<T, O> Base;
-    collision_table* ct;
+    CollisionTable* ct;
   public:
     TileCoderNoHashing(const int& memorySize, const int& numTiling,
         bool includeActiveFeature = true) :
@@ -182,7 +182,7 @@ class TileCoderNoHashing: public TileCoder<T, O>
       // The vector needs to reflect the correct memory size
       delete Base::vector;
       Base::vector = new SparseVector<T>(includeActiveFeature ? v + 1 : v);
-      ct = new collision_table(v, 1);
+      ct = new CollisionTable(v, 1);
     }
 
     virtual ~TileCoderNoHashing()
