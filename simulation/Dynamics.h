@@ -24,6 +24,8 @@
 
 #include "Vector.h"
 
+using namespace RLLib;
+
 class Dynamics
 {
   protected:

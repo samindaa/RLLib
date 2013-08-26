@@ -43,7 +43,9 @@ template<class T>
 class Policy
 {
   public:
-    virtual ~Policy() {}
+    virtual ~Policy()
+    {
+    }
     virtual void update(const Representations<T>& phis) =0;
     virtual double pi(const Action& a) =0;
     virtual const Action& sampleAction() =0;
@@ -73,14 +75,18 @@ template<class T>
 class DiscreteActionPolicy: public virtual Policy<T>
 {
   public:
-    virtual ~DiscreteActionPolicy() {}
+    virtual ~DiscreteActionPolicy()
+    {
+    }
 };
 
 template<class T>
 class PolicyDistribution: public virtual Policy<T>
 {
   public:
-    virtual ~PolicyDistribution() {}
+    virtual ~PolicyDistribution()
+    {
+    }
     virtual const SparseVectors<T>& computeGradLog(const Representations<T>& phis,
         const Action& action) =0;
     virtual SparseVectors<T>* parameters() const =0;
@@ -384,10 +390,10 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
       {
         const int id = (*a)->id();
-        super::distribution->at(id) = exp(u->dot(xas.at(id)) - maxValue);
+        super::distribution->at(id) = exp(u->dot(xas.at(**a)) - maxValue);
         Boundedness::checkValue(super::distribution->at(id));
         sum += super::distribution->at(id);
-        avg->addToSelf(super::distribution->at(id), xas.at(id));
+        avg->addToSelf(super::distribution->at(id), xas.at(**a));
       }
 
       for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
@@ -464,7 +470,7 @@ class SoftMax: public StochasticPolicy<T>
       {
         const int id = (*a)->id();
         super::distribution->at(id) = exp(
-            (predictor->predict(xas.at(id)) - maxValue) / temperature);
+            (predictor->predict(xas.at(**a)) - maxValue) / temperature);
         Boundedness::checkValue(super::distribution->at(id));
         sum += super::distribution->at(id);
       }
@@ -606,7 +612,7 @@ class Greedy: public DiscreteActionPolicy<T>
       for (ActionList::const_iterator iter = actions->begin(); iter != actions->end(); ++iter)
       {
         const int id = (*iter)->id();
-        actionValues[id] = predictor->predict(xas_tp1.at(id));
+        actionValues[id] = predictor->predict(xas_tp1.at(**iter));
       }
     }
 

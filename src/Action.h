@@ -34,7 +34,7 @@ class Action
     int idNb;
     std::vector<double> values;
   public:
-    Action(const int& idNb) :
+    explicit Action(const int& idNb) :
         idNb(idNb)
     {
     }

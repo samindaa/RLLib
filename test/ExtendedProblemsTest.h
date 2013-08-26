@@ -40,7 +40,7 @@
 #include "Simulator.h"
 
 #include "util/Spline.h"
-
+using namespace std;
 RLLIB_TEST(ExtendedProblemsTest)
 
 class ExtendedProblemsTest: public ExtendedProblemsTestBase

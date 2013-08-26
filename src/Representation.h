@@ -22,8 +22,8 @@
 #ifndef REPRESENTATION_H_
 #define REPRESENTATION_H_
 
-#include <vector>
-
+#include <map>
+#include "Action.h"
 #include "Vector.h"
 #include "Projector.h"
 
@@ -34,19 +34,19 @@ template<class T>
 class Representations
 {
   protected:
-    std::vector<SparseVector<T>*>* phis;
+    std::map<int, SparseVector<T>*>* phis;
   public:
-    Representations(const int& numFeatures, const int& numActions) :
-        phis(new std::vector<SparseVector<T>*>())
+    Representations(const int& numFeatures, const ActionList* actions) :
+        phis(new std::map<int, SparseVector<T>*>())
     {
-      for (int i = 0; i < numActions; i++)
-        phis->push_back(new SparseVector<T>(numFeatures));
+      for (ActionList::const_iterator iter = actions->begin(); iter != actions->end(); ++iter)
+        phis->insert(std::make_pair((*iter)->id(), new SparseVector<T>(numFeatures)));
     }
     ~Representations()
     {
-      for (typename std::vector<SparseVector<T>*>::iterator iter = phis->begin();
-          iter != phis->end(); ++iter)
-        delete *iter;
+      for (typename std::map<int, SparseVector<T>*>::iterator iter = phis->begin(); iter != phis->end();
+          ++iter)
+        delete iter->second;
       phis->clear();
       delete phis;
     }
@@ -114,7 +114,7 @@ class StateActionTilings: public StateToStateAction<T, O>
   public:
     StateActionTilings(Projector<T, O>* projector, ActionList* actions) :
         projector(projector), actions(actions), phis(
-            new Representations<T>(projector->dimension(), actions->dimension()))
+            new Representations<T>(projector->dimension(), actions))
     {
     }
 
@@ -167,7 +167,7 @@ class TabularAction: public StateToStateAction<T, O>
             new Representations<T>(
                 includeActiveFeature ?
                     actions->dimension() * projector->dimension() + 1 :
-                    actions->dimension() * projector->dimension(), actions->dimension())), _phi(
+                    actions->dimension() * projector->dimension(), actions)), _phi(
             new SparseVector<T>(
                 includeActiveFeature ?
                     actions->dimension() * projector->dimension() + 1 :
