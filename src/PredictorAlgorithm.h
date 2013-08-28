@@ -249,11 +249,15 @@ class SarsaAdaptive: public Sarsa<T>
     void updateAlpha(const SparseVector<T>& phi_t, const SparseVector<T>& phi_tp1, double r_tp1)
     {
       // Update the adaptive step-size
-      gammaPhi_tp1MinusPhi_t->set(phi_tp1).multiplyToSelf(super::gamma).substractToSelf(phi_t);
-
-      double secondValue = std::abs(super::e->vect().dot(*gammaPhi_tp1MinusPhi_t));
+      double secondValue = std::abs(
+          super::e->vect().dot(
+              gammaPhi_tp1MinusPhi_t->set(phi_tp1).multiplyToSelf(super::gamma).substractToSelf(
+                  phi_t)));
       secondValue = std::max(minUpdate, secondValue); // To get numerically stable value
       super::alpha = std::min(super::alpha, 1.0f / secondValue);
+
+      std::cout << "." ;
+      std::cout.flush();
     }
 
 };
