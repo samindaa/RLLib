@@ -255,9 +255,6 @@ class SarsaAdaptive: public Sarsa<T>
                   phi_t)));
       secondValue = std::max(minUpdate, secondValue); // To get numerically stable value
       super::alpha = std::min(super::alpha, 1.0f / secondValue);
-
-      std::cout << "." ;
-      std::cout.flush();
     }
 
 };
