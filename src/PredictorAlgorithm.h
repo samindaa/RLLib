@@ -146,10 +146,9 @@ class TDLambda: public TD<T>
 template<class T>
 class Sarsa: public Predictor<T>
 {
-  private:
+  protected:
     double v_t, v_tp1, delta; // temporary variables
     bool initialized;
-  protected:
     double alpha, gamma, lambda;
     Trace<T>* e;
     SparseVector<T>* v;
@@ -173,9 +172,21 @@ class Sarsa: public Predictor<T>
       return 0.0;
     }
 
+    virtual void updateV()
+    {
+
+    }
+
+    virtual void updateAlpha(const SparseVector<T>& phi_t, const SparseVector<T>& phi_tp1,
+        double r_tp1)
+    {/*Default is for fixed step-size*/
+    }
+
     double update(const SparseVector<T>& phi_t, const SparseVector<T>& phi_tp1, double r_tp1)
     {
       assert(initialized);
+
+      updateAlpha(phi_t, phi_tp1, r_tp1);
 
       v_t = v->dot(phi_t);
       v_tp1 = v->dot(phi_tp1);
@@ -213,6 +224,38 @@ class Sarsa: public Predictor<T>
     {
       v->resurrect(f);
     }
+};
+
+template<class T>
+class SarsaAdaptive: public Sarsa<T>
+{
+  private:
+    typedef Sarsa<T> super;
+    double minUpdate;
+    SparseVector<T>* gammaPhi_tp1MinusPhi_t;
+  public:
+    SarsaAdaptive(const double& gamma, const double& lambda, Trace<T>* e) :
+        Sarsa<T>(1.0f/*According to the paper*/, gamma, lambda, e), minUpdate(1e-10), gammaPhi_tp1MinusPhi_t(
+            new SparseVector<T>(e->vect().dimension()))
+    {
+    }
+    virtual ~SarsaAdaptive()
+    {
+      delete gammaPhi_tp1MinusPhi_t;
+    }
+
+  public:
+
+    void updateAlpha(const SparseVector<T>& phi_t, const SparseVector<T>& phi_tp1, double r_tp1)
+    {
+      // Update the adaptive step-size
+      gammaPhi_tp1MinusPhi_t->set(phi_tp1).multiplyToSelf(super::gamma).substractToSelf(phi_t);
+
+      double secondValue = std::abs(super::e->vect().dot(*gammaPhi_tp1MinusPhi_t));
+      secondValue = std::max(minUpdate, secondValue); // To get numerically stable value
+      super::alpha = std::min(super::alpha, 1.0f / secondValue);
+    }
+
 };
 
 // Gradient decent

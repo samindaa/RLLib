@@ -678,6 +678,88 @@ class EpsilonGreedy: public Greedy<T>
 
 };
 
+// Special behavior policies
+template<class T>
+class BoltzmannDistributionPerturbed: public Policy<T>
+{
+  protected:
+    SparseVector<T>* u;
+    ActionList* actions;
+    DenseVector<double>* distribution;
+    double epsilon;
+    double perturbation;
+  public:
+    BoltzmannDistributionPerturbed(SparseVector<T>* u, ActionList* actions, const double& epsilon,
+        const double& perturbation) :
+        u(u), actions(actions), distribution(new DenseVector<double>(actions->dimension())), epsilon(
+            epsilon), perturbation(perturbation)
+    {
+    }
+
+    virtual ~BoltzmannDistributionPerturbed()
+    {
+      delete distribution;
+    }
+
+    void update(const Representations<T>& phis)
+    {
+      assert(actions->dimension() == phis.dimension());
+      distribution->clear();
+      double sum = 0;
+      // The exponential function may become very large and overflow.
+      // Therefore, we multiply top and bottom of the hypothesis by the same
+      // constant without changing the output.
+      double maxValue = 0;
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      {
+        double tmp = u->dot(phis.at(**a));
+        if (tmp > maxValue)
+          maxValue = tmp;
+      }
+
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      {
+        const int id = (*a)->id();
+        double perturb = Random::nextDouble() < epsilon ? perturbation : 0.0f;
+        distribution->at(id) = exp(u->dot(phis.at(**a)) + perturb - maxValue);
+        Boundedness::checkValue(distribution->at(id));
+        sum += distribution->at(id);
+      }
+
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      {
+        const int id = (*a)->id();
+        distribution->at(id) /= sum;
+        Boundedness::checkValue(distribution->at(id));
+      }
+
+    }
+
+    double pi(const Action& action)
+    {
+      return distribution->at(action.id());
+    }
+
+    const Action& sampleAction()
+    {
+      double random = Random::nextDouble();
+      double sum = 0;
+      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      {
+        sum += distribution->at((*a)->id());
+        if (sum >= random)
+          return **a;
+      }
+      return actions->at(actions->dimension() - 1);
+    }
+
+    const Action& sampleBestAction()
+    {
+      return sampleAction();
+    }
+
+};
+
 } // namespace RLLib
 
 #endif /* POLICY_H_ */

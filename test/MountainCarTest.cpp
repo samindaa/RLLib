@@ -143,6 +143,37 @@ void MountainCarTest::testSarsaMountainCar()
   delete sim;
 }
 
+void MountainCarTest::testSarsaAdaptiveMountainCar()
+{
+  srand(time(0));
+  Env<float>* problem = new MCar2D;
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, true);
+  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+      projector, &problem->getDiscreteActionList());
+  Trace<double>* e = new RTrace<double>(projector->dimension());
+  double gamma = 0.99;
+  double lambda = 0.3;
+  Sarsa<double>* sarsaAdaptive = new SarsaAdaptive<double>(gamma, lambda, e);
+  double epsilon = 0.01;
+  Policy<double>* acting = new EpsilonGreedy<double>(sarsaAdaptive, &problem->getDiscreteActionList(),
+      epsilon);
+  OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
+      toStateAction, sarsaAdaptive);
+
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
+  sim->run(1, 5000, 300);
+  sim->computeValueFunction();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete sarsaAdaptive;
+  delete acting;
+  delete control;
+  delete sim;
+}
+
 void MountainCarTest::testExpectedSarsaMountainCar()
 {
   Env<float>* problem = new MCar2D;
@@ -568,6 +599,7 @@ void MountainCarTest::run()
   testSarsaTabularActionMountainCar();
   testOnPolicyBoltzmannRTraceTabularActionCar();
   testSarsaMountainCar();
+  testSarsaAdaptiveMountainCar();
   testExpectedSarsaMountainCar();
   testGreedyGQOnPolicyMountainCar();
   testGreedyGQMountainCar();

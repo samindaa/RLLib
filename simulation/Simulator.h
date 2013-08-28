@@ -67,6 +67,73 @@ class Simulator
       delete x_t;
       delete x_tp1;
     }
+
+    void test(int maxRuns, int maxSteps)
+    {
+      Timer timer;
+      double totalTime = 0;
+      double totalSteps = 0;
+      for (int run = 0; run < maxRuns; run++)
+      {
+        env->setOn(true);
+        env->initialize();
+        action = &agent->proposeAction(env->getVars());
+        episodeR = episodeZ = 0;
+        int steps = 0;
+        do
+        {
+          env->step(*action);
+          ++steps;
+          episodeR += env->r();
+          episodeZ += env->z();
+          timer.start();
+          action = &agent->proposeAction(env->getVars());
+          timer.stop();
+          totalTime += timer.getElapsedTimeInMilliSec();
+        } while (!env->endOfEpisode() && steps < maxSteps);
+
+        xTest.push_back(steps);
+        totalSteps += steps;
+        std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
+        std::cout.flush();
+      }
+      double averageTimePerStep = totalTime / totalSteps;
+      std::cout << "(" << averageTimePerStep << ") ";
+      std::cout << std::endl;
+    }
+
+    void test(int episode, int maxSteps, std::ofstream& fout)
+    {
+      Timer timer;
+      double totalTime = 0;
+      double totalSteps = 0;
+
+      env->setOn(true);
+      env->initialize();
+      action = &agent->proposeAction(env->getVars());
+      episodeR = episodeZ = 0;
+      int steps = 0;
+      do
+      {
+        env->step(*action);
+        ++steps;
+        episodeR += env->r();
+        episodeZ += env->z();
+        timer.start();
+        action = &agent->proposeAction(env->getVars());
+        timer.stop();
+        totalTime += timer.getElapsedTimeInMilliSec();
+      } while (!env->endOfEpisode() && steps < maxSteps);
+
+      xTest.push_back(steps);
+      totalSteps += steps;
+      fout << episode << " " << steps << " " << episodeR << " " << episodeZ << " ";
+
+      double averageTimePerStep = totalTime / totalSteps;
+      fout << averageTimePerStep << " ";
+      fout << std::endl;
+    }
+
     void run(const int& maxRuns, const int& maxSteps, const int& maxEpisodes, const bool& runTest =
         true, const bool& verbose = true)
     {
@@ -111,6 +178,17 @@ class Simulator
             std::cout.flush();
           }
 
+          if (false)
+          {
+            // Evaluate after each episode
+            std::cout << "episode: " << episode << " ";
+            std::cout << std::endl;
+            {
+              static std::ofstream fout("visualization/fout.dat");
+              test(episode, maxSteps, fout);
+              fout.flush();
+            }
+          }
         }
         if (verbose)
           std::cout << std::endl;
@@ -134,40 +212,6 @@ class Simulator
         double se/*standard error*/= sigmabar / sqrt(double(xTest.size()));
         std::cout << "## (+- 95%) =" << (se * 2) << std::endl;
       }
-    }
-
-    void test(int maxRuns, int maxSteps)
-    {
-      Timer timer;
-      double totalTime = 0;
-      double totalSteps = 0;
-      for (int run = 0; run < maxRuns; run++)
-      {
-        env->setOn(true);
-        env->initialize();
-        action = &agent->proposeAction(env->getVars());
-        episodeR = episodeZ = 0;
-        int steps = 0;
-        do
-        {
-          env->step(*action);
-          ++steps;
-          episodeR += env->r();
-          episodeZ += env->z();
-          timer.start();
-          action = &agent->proposeAction(env->getVars());
-          timer.stop();
-          totalTime += timer.getElapsedTimeInMilliSec();
-        } while (!env->endOfEpisode() && steps < maxSteps);
-
-        xTest.push_back(steps);
-        totalSteps += steps;
-        std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
-        std::cout.flush();
-      }
-      double averageTimePerStep = totalTime / totalSteps;
-      std::cout << "(" << averageTimePerStep << ") ";
-      std::cout << std::endl;
     }
 
     void computeValueFunction(const char* outFile = "visualization/valueFunction.txt") const

@@ -48,9 +48,8 @@ class ContinuousGridworldTest: public ContinuousGridworldTestBase
   private:
     void testGreedyGQContinuousGridworld();
     void testOffPACContinuousGridworld();
-
+    void testOffPACContinuousGridworld2();
     void testOffPACOnPolicyContinuousGridworld();
-
     void testOffPACContinuousGridworldOPtimized();
 };
 

@@ -49,6 +49,7 @@ class MountainCarTest: public MountainCarTestBase
     void testSarsaTabularActionMountainCar();
     void testOnPolicyBoltzmannRTraceTabularActionCar();
     void testSarsaMountainCar();
+    void testSarsaAdaptiveMountainCar();
     void testExpectedSarsaMountainCar();
     void testGreedyGQOnPolicyMountainCar();
     void testGreedyGQMountainCar();
