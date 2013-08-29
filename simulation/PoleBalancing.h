@@ -22,7 +22,7 @@
 #ifndef POLEBALANCING_H_
 #define POLEBALANCING_H_
 
-#include "Env.h"
+#include "Environment.h"
 #include "Eigen/Dense"
 #include "Eigen/Eigenvalues"
 #include "Math.h"
@@ -43,11 +43,11 @@ void mvnrnd(const MatrixBase<Derived1>& mu, const MatrixBase<Derived2>& Sigma,
   MatrixXd R = Sigma.llt().matrixL()/*cholcov*/;
   int size = mu.rows();
   for (int i = 0; i < size; i++)
-    r(i) = RLLib::Random::nextNormalGaussian();
+    r(i) = RLLib::Probabilistic::nextNormalGaussian();
   r = mu + R * r;
 }
 
-class PoleBalancing: public Env<float>
+class PoleBalancing: public Environment<float>
 {
   protected:
     double tau, veta, g;
@@ -65,7 +65,7 @@ class PoleBalancing: public Env<float>
 
   public:
     PoleBalancing() :
-        Env<float>(4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
+        Environment<float>(4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
     {
       // No discrete actions
 
@@ -109,20 +109,21 @@ class PoleBalancing: public Env<float>
     void initialize()
     {
       mvnrnd(mu0, Sigma0, x);
-      update();
+      updateRTStep();
     }
-    void update()
+    void updateRTStep()
     {
-      DenseVector<float>& vars = *__vars;
+      DenseVector<float>& vars = *output->o_tp1;
       for (int i = 0; i < vars.dimension(); i++)
         vars[i] = x[i];
+      output->updateRTStep(r(), z(), endOfEpisode());
     }
     void step(const Action& action)
     {
       u(0) = action.at(0);
       mu = A * x + b * u;
       mvnrnd(mu, SigmaT, x);
-      update();
+      updateRTStep();
     }
     bool endOfEpisode() const
     {

@@ -24,9 +24,9 @@
 
 #include <fstream>
 #include <iostream>
-#include "Env.h"
+#include "Environment.h"
 
-class ContinuousGridworld: public Env<float>
+class ContinuousGridworld: public Environment<float>
 {
   protected:
     Range<float>* observationRange;
@@ -37,7 +37,7 @@ class ContinuousGridworld: public Env<float>
 
   public:
     ContinuousGridworld() :
-        Env<float>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)), actionRange(
+        Environment<float>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)), actionRange(
             new Range<float>(-0.05, 0.05)), absoluteNoise(0.025), observations(
             new DenseVector<float>(2))
     {
@@ -73,30 +73,31 @@ class ContinuousGridworld: public Env<float>
     {
       observations->at(0) = 0.2;
       observations->at(1) = 0.4;
-      update();
+      updateRTStep();
     }
 
-    void update()
+    void updateRTStep()
     { // nothing
       // unit generalization
-      for (int i = 0; i < __vars->dimension(); i++)
-        __vars->at(i) = observations->at(i) * 10.0;
+      for (int i = 0; i < output->o_tp1->dimension(); i++)
+        output->o_tp1->at(i) = observations->at(i) * 10.0;
       //std::cout << __vars->at(0) << " " << __vars->at(1) << " || ";
       if (getOn())
       {
-        for (int i = 0; i < __vars->dimension(); i++)
-          outpath << __vars->at(i) << " ";
+        for (int i = 0; i < output->o_tp1->dimension(); i++)
+          outpath << output->o_tp1->at(i) << " ";
         outpath << std::endl;
       }
+      output->updateRTStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action& action)
     {
-      float noise = Random::nextFloat() * absoluteNoise - (absoluteNoise / 2.0);
+      float noise = Probabilistic::nextFloat() * absoluteNoise - (absoluteNoise / 2.0);
       for (int i = 0; i < observations->dimension(); i++)
         observations->at(i) = observationRange->bound(
             observations->at(i) + actionRange->bound(action.at(i) + noise));
-      update();
+      updateRTStep();
     }
 
     bool endOfEpisode() const
@@ -110,7 +111,7 @@ class ContinuousGridworld: public Env<float>
 
     float N(const float& p, const float& mu, const float& sigma) const
     {
-      return Random::gaussianProbability(p, mu, sigma);
+      return Probabilistic::gaussianProbability(p, mu, sigma);
     }
 
     float r() const

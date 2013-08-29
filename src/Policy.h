@@ -148,14 +148,14 @@ class NormalDistribution: public PolicyDistribution<T>
 
     double pi(const Action& a)
     {
-      return Random::gaussianProbability(a.at(defaultAction), mean, stddev);
+      return Probabilistic::gaussianProbability(a.at(defaultAction), mean, stddev);
     }
 
   public:
 
     const Action& sampleAction()
     {
-      actions->update(defaultAction, defaultAction, Random::nextNormalGaussian() * stddev + mean);
+      actions->update(defaultAction, defaultAction, Probabilistic::nextNormalGaussian() * stddev + mean);
       return actions->at(defaultAction);
     }
 
@@ -323,7 +323,7 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
 
     const Action& sampleAction()
     {
-      double random = Random::nextDouble();
+      double random = Probabilistic::nextDouble();
       double sum = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
@@ -554,7 +554,7 @@ class RandomBiasPolicy: public Policy<T>
         }
       }
       // chose an action
-      double random = Random::nextDouble();
+      double random = Probabilistic::nextDouble();
       double sum = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
@@ -664,7 +664,7 @@ class EpsilonGreedy: public Greedy<T>
 
     const Action& sampleAction()
     {
-      if (Random::nextDouble() < epsilon)
+      if (Probabilistic::nextDouble() < epsilon)
         return (*Greedy<T>::actions)[rand() % Greedy<T>::actions->dimension()];
       else
         return *Greedy<T>::bestAction;
@@ -720,7 +720,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         const int id = (*a)->id();
-        double perturb = Random::nextDouble() < epsilon ? perturbation : 0.0f;
+        double perturb = Probabilistic::nextDouble() < epsilon ? perturbation : 0.0f;
         distribution->at(id) = exp(u->dot(phis.at(**a)) + perturb - maxValue);
         Boundedness::checkValue(distribution->at(id));
         sum += distribution->at(id);
@@ -742,7 +742,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
 
     const Action& sampleAction()
     {
-      double random = Random::nextDouble();
+      double random = Probabilistic::nextDouble();
       double sum = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {

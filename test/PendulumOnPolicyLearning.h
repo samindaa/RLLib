@@ -32,7 +32,7 @@ RLLIB_TEST(ActorCriticOnPolicyControlLearnerPendulumTest)
 class ActorCriticOnPolicyControlLearnerPendulumTest: public ActorCriticOnPolicyControlLearnerPendulumTestBase
 {
   protected:
-    Env<float>* problem;
+    Environment<float>* problem;
     Projector<double, float>* projector;
     StateToStateAction<double, float>* toStateAction;
 

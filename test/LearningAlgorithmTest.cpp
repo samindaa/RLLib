@@ -31,7 +31,7 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
   multimap<double, double> X;
   for (int i = 0; i < 100; i++)
   {
-    double x = -M_PI_2 + 2 * M_PI * Random::nextDouble(); // @@>> input noise?
+    double x = -M_PI_2 + 2 * M_PI * Probabilistic::nextDouble(); // @@>> input noise?
     double y = sin(2 * x); // @@>> output noise?
     X.insert(make_pair(x, y));
   }
@@ -95,14 +95,14 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
   multimap<double, double> X;
   for (int i = 0; i < 50; i++)
   {
-    double x = Random::nextGaussian(0.25, 0.2); // @@>> input noise?
+    double x = Probabilistic::nextGaussian(0.25, 0.2); // @@>> input noise?
     double y = 0; // @@>> output noise?
     X.insert(make_pair(x, y));
   }
 
   for (int i = 50; i < 100; i++)
   {
-    double x = Random::nextGaussian(0.75, 0.2); // @@>> input noise?
+    double x = Probabilistic::nextGaussian(0.75, 0.2); // @@>> input noise?
     double y = 1; // @@>> output noise?
     X.insert(make_pair(x, y));
   }
@@ -161,7 +161,7 @@ void SupervisedAlgorithmTest::linearRegressionWithRegularFeatures()
   multimap<double, double> X;
   for (int i = 0; i < 100; i++)
   {
-    double x = -M_PI_2 + 2 * M_PI * Random::nextDouble(); // @@>> input noise?
+    double x = -M_PI_2 + 2 * M_PI * Probabilistic::nextDouble(); // @@>> input noise?
     double y = sin(2 * x); // @@>> output noise?
     X.insert(make_pair(x, y));
   }
@@ -220,14 +220,14 @@ void SupervisedAlgorithmTest::logisticRegressionWithRegularFeatures()
   multimap<double, double> X;
   for (int i = 0; i < 50; i++)
   {
-    double x = Random::nextGaussian(0.25, 0.2); // @@>> input noise?
+    double x = Probabilistic::nextGaussian(0.25, 0.2); // @@>> input noise?
     double y = 0; // @@>> output noise?
     X.insert(make_pair(x, y));
   }
 
   for (int i = 50; i < 100; i++)
   {
-    double x = Random::nextGaussian(0.75, 0.2); // @@>> input noise?
+    double x = Probabilistic::nextGaussian(0.75, 0.2); // @@>> input noise?
     double y = 1; // @@>> output noise?
     X.insert(make_pair(x, y));
   }

@@ -24,9 +24,9 @@
 
 #include <iostream>
 #include <fstream>
-#include "Env.h"
+#include "Environment.h"
 
-class SwingPendulum: public Env<float>
+class SwingPendulum: public Environment<float>
 {
   protected:
     float uMax, stepTime, theta, velocity, maxVelocity;
@@ -41,7 +41,7 @@ class SwingPendulum: public Env<float>
     std::ofstream outfile;
   public:
     SwingPendulum() :
-        Env<float>(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(0), maxVelocity(
+        Environment<float>(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(0), maxVelocity(
             M_PI_4 / stepTime), actionRange(new Range<float>(-uMax, uMax)), thetaRange(
             new Range<float>(-M_PI, M_PI)), velocityRange(
             new Range<float>(-maxVelocity, maxVelocity)), mass(1.0), length(1.0), g(9.8), requiredUpTime(
@@ -76,15 +76,16 @@ class SwingPendulum: public Env<float>
     }
 
   public:
-    void update()
+    void updateRTStep()
     {
       if (outfile.is_open() && getOn())
         outfile << ((theta * 180 / M_PI) + 180.0) << " " << cos(theta) << std::endl;
 
-      DenseVector<float>& vars = *__vars;
+      DenseVector<float>& vars = *output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = (theta - thetaRange->min()) * 10.0 / thetaRange->length();
       vars[1] = (velocity - velocityRange->min()) * 10.0 / velocityRange->length();
+      output->updateRTStep(r(), z(), endOfEpisode());
     }
     void initialize()
     {
@@ -96,7 +97,7 @@ class SwingPendulum: public Env<float>
       theta = M_PI_2;
       velocity = 0.0;
       adjustTheta();
-      update();
+      updateRTStep();
     }
 
     void step(const Action& a)
@@ -109,7 +110,7 @@ class SwingPendulum: public Env<float>
       adjustTheta();
       upTime = fabs(theta) > upRange ? 0 : upTime + 1;
 
-      update();
+      updateRTStep();
     }
     bool endOfEpisode() const
     {

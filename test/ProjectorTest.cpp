@@ -31,13 +31,13 @@ void ProjectorTest::testProjector()
   bool bias = true;
   SparseVector<double> w(memorySize + bias);
   for (int t = 0; t < 50; t++)
-    w.insertEntry(rand() % memorySize, Random::nextDouble());
+    w.insertEntry(rand() % memorySize, Probabilistic::nextDouble());
   TileCoderHashing<double, float> coder(memorySize, numTiling, bias);
   DenseVector<float> x(numObservations);
   for (int p = 0; p < 5; p++)
   {
     for (int o = 0; o < numObservations; o++)
-      x[o] = Random::nextDouble() / 0.25;
+      x[o] = Probabilistic::nextDouble() / 0.25;
     const SparseVector<double>& vect = coder.project(x);
     cout << w << endl;
     cout << vect << endl;

@@ -22,7 +22,7 @@
 #ifndef RANDLOVBIKE_H_
 #define RANDLOVBIKE_H_
 
-#include "Env.h"
+#include "Environment.h"
 #include "Math.h"
 #include <iostream>
 #include <cmath>
@@ -43,7 +43,7 @@
  * bib2html_rescat = "Applications, General RL",
  }
  */
-class RandlovBike: public Env<float>
+class RandlovBike: public Environment<float>
 {
   protected:
     /* position of goal */
@@ -61,7 +61,7 @@ class RandlovBike: public Env<float>
 
   public:
     RandlovBike() :
-        Env<float>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
+        Environment<float>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
             false), omega(0), omega_dot(0), omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(
             0), yf(0), xb(0), yb(0), psi_goal(0), aux_state(0), R1(-1.0), R2(0.0), R3(+1.0),
         // +0.01
@@ -189,9 +189,9 @@ class RandlovBike: public Env<float>
 
   public:
 
-    void update()
+    void updateRTStep()
     {
-      DenseVector<float>& vars = *__vars;
+      DenseVector<float>& vars = *output->o_tp1;
       vars[0] = omega;
       vars[1] = omega_dot;
       vars[2] = omega_d_dot;
@@ -222,6 +222,7 @@ class RandlovBike: public Env<float>
       //for (int i = 0; i < env->getNumStateVars(); i++)
       //  cout << percepts[i] << " ";
       //cout << endl;
+      output->updateRTStep(r(), z(), endOfEpisode());
     }
 
     void bike(int to_do, int action = 0)
@@ -232,7 +233,7 @@ class RandlovBike: public Env<float>
 
       T = 2 * ((action / 3) - 1);
       d = 0.02 * ((action % 3) - 1);
-      d = d + 0.04 * (0.5 - Random::nextDouble()); /* Max noise is 2 cm */
+      d = d + 0.04 * (0.5 - Probabilistic::nextDouble()); /* Max noise is 2 cm */
 
       switch (to_do)
       {
@@ -373,7 +374,7 @@ class RandlovBike: public Env<float>
         i++;
       }
 
-      update();
+      updateRTStep();
     }
 
     void initialize()
@@ -383,11 +384,13 @@ class RandlovBike: public Env<float>
       y_goal = 0;
       radius_goal = 10;
       bike(start);
+      updateRTStep();
     }
 
     void step(const Action& action)
     {
       bike(execute_action, action.id());
+      updateRTStep();
     }
 
     bool endOfEpisode() const

@@ -69,7 +69,7 @@ class SparseVectorTest: public SparseVectorTestBase
       SVecDoubleType* type = newVector(size);
       int nbActive = rand() % maxActive;
       for (int i = 0; i < nbActive; i++)
-        type->setEntry(rand() % maxActive, Random::nextDouble() * 2 - 1);
+        type->setEntry(rand() % maxActive, Probabilistic::nextDouble() * 2 - 1);
       assert(Assert::checkSparseVectorConsistency(*type));
       return type;
     }
@@ -84,7 +84,7 @@ class SparseVectorTest: public SparseVectorTestBase
       Assert::checkVectorEquals(pb, b);
       Assert::checkVectorEquals(pa.addToSelf(pb), a.addToSelf(b));
       Assert::checkVectorEquals(pa.substractToSelf(pb), a.substractToSelf(b));
-      float factor = Random::nextFloat();
+      float factor = Probabilistic::nextFloat();
       Assert::checkVectorEquals(pa.addToSelf(factor, pb), a.addToSelf(factor, b));
     }
 
@@ -230,7 +230,7 @@ class SparseVectorTest: public SparseVectorTestBase
       cout << v << endl;
       for (int i = 0; i < v.dimension(); i++)
       {
-        double k = Random::nextDouble();
+        double k = Probabilistic::nextDouble();
         v[i] = k;
         cout << k << " ";
       }

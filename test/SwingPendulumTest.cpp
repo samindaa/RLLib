@@ -26,7 +26,7 @@ RLLIB_TEST_MAKE(SwingPendulumTest)
 void SwingPendulumTest::testOffPACSwingPendulum()
 {
   srand(time(0));
-  Env<float>* problem = new SwingPendulum;
+  Environment<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
@@ -54,8 +54,8 @@ void SwingPendulumTest::testOffPACSwingPendulum()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 200);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 200);
+  sim->run();
   sim->computeValueFunction();
 
   delete problem;
@@ -75,7 +75,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
 void SwingPendulumTest::testOnPolicySwingPendulum()
 {
   srand(time(0));
-  Env<float>* problem = new SwingPendulum;
+  Environment<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getContinuousActionList());
@@ -107,9 +107,14 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
   OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<double, float>(
       critic, actor, projector, toStateAction, alpha_r);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 100, false);
-  sim->test(1, 1000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 100);
+  sim->setVerbose(false);
+  sim->run();
+
+  sim->setEvaluate(true);
+  sim->setEpisodes(1000);
+  sim->run();
+
   sim->computeValueFunction();
 
   delete problem;
@@ -130,7 +135,7 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
 void SwingPendulumTest::testOffPACSwingPendulum2()
 {
   srand(time(0));
-  Env<float>* problem = new SwingPendulum;
+  Environment<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
@@ -159,8 +164,8 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 200);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 200);
+  sim->run();
 
   delete problem;
   delete projector;
@@ -181,7 +186,7 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
 void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
 {
   srand(time(0));
-  Env<float>* problem = new SwingPendulum;
+  Environment<float>* problem = new SwingPendulum;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
@@ -206,8 +211,8 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(acting, critic, actor,
       toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(5, 5000, 10);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5, 5000, 10);
+  sim->run();
   sim->computeValueFunction();
 
   delete problem;
@@ -226,7 +231,7 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
 void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum()
 {
   srand(time(0));
-  Env<float>* problem = new SwingPendulum;
+  Environment<float>* problem = new SwingPendulum;
 
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
@@ -246,8 +251,8 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
   ActorOnPolicy<double, float>* actor = new ActorNatural<double, float>(alpha_u, alpha_v, acting);
   OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
       projector, toStateAction);
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(10, 5000, 50);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 10, 5000, 50);
+  sim->run();
   sim->computeValueFunction();
 
   delete problem;

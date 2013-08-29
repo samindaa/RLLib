@@ -24,9 +24,9 @@
 
 #include <iostream>
 #include <fstream>
-#include "Env.h"
+#include "Environment.h"
 
-class Acrobot: public Env<float>
+class Acrobot: public Environment<float>
 {
   protected:
     Range<float>* thetaRange;
@@ -41,7 +41,7 @@ class Acrobot: public Env<float>
 
   public:
     Acrobot() :
-        Env<float>(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
+        Environment<float>(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
             new Range<float>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
             new Range<float>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(new Range<float>(-1.0, 1.0)), m1(
             1.0), m2(1.0), l1(1.0), l2(1.0), lc1(0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), targetPosition(
@@ -70,25 +70,27 @@ class Acrobot: public Env<float>
       bool isRandomStart = false;
       if (isRandomStart) // random
       {
-        theta1 = Random::nextFloat() - 0.5;
-        theta2 = Random::nextFloat() - 0.5;
-        theta1Dot = Random::nextFloat() - 0.5;
-        theta2Dot = Random::nextFloat() - 0.5;
+        theta1 = Probabilistic::nextFloat() - 0.5;
+        theta2 = Probabilistic::nextFloat() - 0.5;
+        theta1Dot = Probabilistic::nextFloat() - 0.5;
+        theta2Dot = Probabilistic::nextFloat() - 0.5;
       }
       else
         theta1 = theta2 = theta1Dot = theta2Dot = 0.0; // not random
 
-      update();
+      updateRTStep();
 
     }
-    void update()
+
+    void updateRTStep()
     {
-      DenseVector<float>& vars = *__vars;
+      DenseVector<float>& vars = *output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * 8.0;
       vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * 8.0;
       vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length()) * 8.0;
       vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length()) * 8.0;
+      output->updateRTStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action& action)
@@ -98,7 +100,7 @@ class Acrobot: public Env<float>
 
       //torque is in [-1,1]
       //We'll make noise equal to at most +/- 1
-      float theNoise = transitionNoise * 2.0 * (Random::nextFloat() - 0.5);
+      float theNoise = transitionNoise * 2.0 * (Probabilistic::nextFloat() - 0.5);
 
       torque += theNoise;
 
@@ -143,7 +145,7 @@ class Acrobot: public Env<float>
         theta1Dot = 0;
       }
 
-      update();
+      updateRTStep();
     }
 
     bool endOfEpisode() const

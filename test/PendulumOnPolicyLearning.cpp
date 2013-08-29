@@ -38,8 +38,8 @@ ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearner
   criticE = new ATrace<double>(projector->dimension());
   critic = 0;
 
-  policyDistribution = new NormalDistributionScaled<double>(0, 1.0,
-      projector->dimension(), &problem->getContinuousActionList());
+  policyDistribution = new NormalDistributionScaled<double>(0, 1.0, projector->dimension(),
+      &problem->getContinuousActionList());
 
   actorMuE = new ATrace<double>(projector->dimension());
   actorSigmaE = new ATrace<double>(projector->dimension());
@@ -69,8 +69,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::evaluate()
 {
   if (sim)
   {
-    cout << sim->episodeR << " " << sim->time << " "
-        << (sim->episodeR / sim->time) << endl;
+    cout << sim->episodeR << " " << sim->timeStep << " " << (sim->episodeR / sim->timeStep) << endl;
   }
 }
 
@@ -95,11 +94,10 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
   alpha_v = alpha_u = alpha_r = gamma = lambda = 0;
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
   actor = new Actor<double, float>(alpha_u, policyDistribution);
-  control = new ActorCritic<double, float>(critic, actor, projector,
-      toStateAction);
+  control = new ActorCritic<double, float>(critic, actor, projector, toStateAction);
 
-  sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 50, false, false);
+  sim = new Simulator<double, float>(control, problem, 1, 5000, 50);
+  sim->run();
 
   evaluate();
   deleteObjects();
@@ -113,11 +111,11 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
   alpha_u = 0.05 / projector->vectorNorm();
   actor = new Actor<double, float>(alpha_u, policyDistribution);
-  control = new AverageRewardActorCritic<double, float>(critic, actor,
-      projector, toStateAction, 0.01);
+  control = new AverageRewardActorCritic<double, float>(critic, actor, projector, toStateAction,
+      0.01);
 
-  sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 50, false, false);
+  sim = new Simulator<double, float>(control, problem, 1, 5000, 50);
+  sim->run();
   sim->computeValueFunction();
   evaluate();
   deleteObjects();
@@ -130,13 +128,12 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblit
   alpha_v = 0.1 / projector->vectorNorm();
   critic = new TDLambda<double>(alpha_v, gamma, lambda, criticE);
   alpha_u = 0.05 / projector->vectorNorm();
-  actor = new ActorLambda<double, float>(alpha_u, gamma, lambda,
-      policyDistribution, actorTraces);
-  control = new AverageRewardActorCritic<double, float>(critic, actor,
-      projector, toStateAction, 0.01);
+  actor = new ActorLambda<double, float>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
+  control = new AverageRewardActorCritic<double, float>(critic, actor, projector, toStateAction,
+      0.01);
 
-  sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 50, false, false);
+  sim = new Simulator<double, float>(control, problem, 1, 5000, 50);
+  sim->run();
   sim->computeValueFunction();
   evaluate();
   deleteObjects();

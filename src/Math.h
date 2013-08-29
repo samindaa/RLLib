@@ -182,7 +182,7 @@ class Signum
 };
 
 // Important distributions
-class Random
+class Probabilistic
 {
   public:
 

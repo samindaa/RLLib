@@ -29,7 +29,7 @@
 #include <typeinfo>
 
 #include "Control.h"
-#include "Env.h"
+#include "Environment.h"
 #include "Timer.h"
 
 #include <iostream>
@@ -39,26 +39,39 @@ template<class T, class O>
 class Simulator
 {
   protected:
-    int maxTestRuns;
-
     Control<T, O>* agent;
-    Env<O>* env;
+    Environment<O>* environment;
 
-    const Action* action;
+    const Action* a_t;
     DenseVector<O>* x_t;
     DenseVector<O>* x_tp1;
 
-    std::vector<double> xTest;
+    int nbRuns;
+    int maxEpisodeTimeSteps;
+    int nbEpisodes;
+    int nbEpisodeDone;
+    bool beginingOfEpisode;
+    bool evaluate;
+    bool verbose;
 
+    Timer timer;
+    double totalTimeInMilliseconds;
+
+    std::vector<double> statistics;
+    bool enableStatistics;
   public:
+    int timeStep;
     double episodeR;
     double episodeZ;
-    double time;
 
-    Simulator(Control<T, O>* agent, Env<O>* env, int maxTestRuns = 20) :
-        maxTestRuns(maxTestRuns), agent(agent), env(env), action(0), x_t(
-            new DenseVector<O>(env->getVars().dimension())), x_tp1(
-            new DenseVector<O>(env->getVars().dimension())), episodeR(0), episodeZ(0), time(0)
+    Simulator(Control<T, O>* agent, Environment<O>* environment, int nbRuns,
+        int maxEpisodeTimeSteps, int nbEpisodes) :
+        agent(agent), environment(environment), a_t(0), x_t(
+            new DenseVector<O>(environment->getVars().dimension())), x_tp1(
+            new DenseVector<O>(environment->getVars().dimension())), nbRuns(nbRuns), maxEpisodeTimeSteps(
+            maxEpisodeTimeSteps), nbEpisodes(nbEpisodes), nbEpisodeDone(0), beginingOfEpisode(true), evaluate(
+            false), verbose(true), totalTimeInMilliseconds(0), enableStatistics(false), timeStep(0), episodeR(
+            0), episodeZ(0)
     {
     }
 
@@ -68,155 +81,119 @@ class Simulator
       delete x_tp1;
     }
 
-    void test(int maxRuns, int maxSteps)
+    void setVerbose(const bool& verbose)
     {
-      Timer timer;
-      double totalTime = 0;
-      double totalSteps = 0;
-      for (int run = 0; run < maxRuns; run++)
-      {
-        env->setOn(true);
-        env->initialize();
-        action = &agent->proposeAction(env->getVars());
-        episodeR = episodeZ = 0;
-        int steps = 0;
-        do
-        {
-          env->step(*action);
-          ++steps;
-          episodeR += env->r();
-          episodeZ += env->z();
-          timer.start();
-          action = &agent->proposeAction(env->getVars());
-          timer.stop();
-          totalTime += timer.getElapsedTimeInMilliSec();
-        } while (!env->endOfEpisode() && steps < maxSteps);
-
-        xTest.push_back(steps);
-        totalSteps += steps;
-        std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
-        std::cout.flush();
-      }
-      double averageTimePerStep = totalTime / totalSteps;
-      std::cout << "(" << averageTimePerStep << ") ";
-      std::cout << std::endl;
+      this->verbose = verbose;
     }
 
-    void test(int episode, int maxSteps, std::ofstream& fout)
+    void setEvaluate(const bool& evaluate)
     {
-      Timer timer;
-      double totalTime = 0;
-      double totalSteps = 0;
+      this->evaluate = evaluate;
+    }
 
-      env->setOn(true);
-      env->initialize();
-      action = &agent->proposeAction(env->getVars());
-      episodeR = episodeZ = 0;
-      int steps = 0;
+    void setRuns(const int& nbRuns)
+    {
+      this->nbRuns = nbRuns;
+    }
+
+    void setEpisodes(const int& nbEpisodes)
+    {
+      this->nbEpisodes = nbEpisodes;
+    }
+
+    void benchmark()
+    {
+      double xbar = std::accumulate(statistics.begin(), statistics.end(), 0.0)
+          / (double(statistics.size()));
+      std::cout << "## Avg: length=" << xbar << std::endl;
+      double sigmabar = 0;
+      for (std::vector<double>::const_iterator x = statistics.begin(); x != statistics.end(); ++x)
+        sigmabar += pow((*x - xbar), 2);
+      sigmabar = sqrt(sigmabar) / double(statistics.size());
+      double se/*standard error*/= sigmabar / sqrt(double(statistics.size()));
+      std::cout << "## (+- 95%) =" << (se * 2) << std::endl;
+      statistics.clear();
+    }
+
+    void step()
+    {
+      if (beginingOfEpisode)
+      {
+        environment->setOn(false);
+        environment->initialize();
+        x_t->set(environment->getVars());
+        a_t = &agent->initialize(*x_t);
+        timeStep = 0;
+        episodeR = 0;
+        episodeZ = 0;
+        totalTimeInMilliseconds = 0;
+        beginingOfEpisode = false;
+      }
+      else
+      {
+        environment->step(*a_t);
+        const TRStep<O>& step = environment->getTRStep();
+        x_tp1->set(environment->getVars());
+        ++timeStep;
+        episodeR += step.r_tp1;
+        episodeZ += step.z_tp1;
+        timer.start();
+        a_t =
+            evaluate ?
+                &agent->proposeAction(environment->getVars()) :
+                &agent->step(*x_t, *a_t, *x_tp1, step.r_tp1, step.z_tp1);
+        x_t->set(*x_tp1);
+        timer.stop();
+        totalTimeInMilliseconds += timer.getElapsedTimeInMilliSec();
+      }
+
+      if (environment->getTRStep().endOfEpisode || (timeStep == maxEpisodeTimeSteps))
+      {
+        // Episode ended
+        if (verbose)
+        {
+          double averageTimePerStep = totalTimeInMilliseconds / timeStep;
+          std::cout << timeStep << " (" << episodeR << "," << episodeZ << "," << averageTimePerStep
+              << ") ";
+          //std::cout << ".";
+          std::cout.flush();
+        }
+        if (enableStatistics)
+          statistics.push_back(timeStep);
+        timeStep = 0;
+        ++nbEpisodeDone;
+        beginingOfEpisode = true;
+      }
+    }
+
+    void runEpisodes()
+    {
       do
       {
-        env->step(*action);
-        ++steps;
-        episodeR += env->r();
-        episodeZ += env->z();
-        timer.start();
-        action = &agent->proposeAction(env->getVars());
-        timer.stop();
-        totalTime += timer.getElapsedTimeInMilliSec();
-      } while (!env->endOfEpisode() && steps < maxSteps);
-
-      xTest.push_back(steps);
-      totalSteps += steps;
-      fout << episode << " " << steps << " " << episodeR << " " << episodeZ << " ";
-
-      double averageTimePerStep = totalTime / totalSteps;
-      fout << averageTimePerStep << " ";
-      fout << std::endl;
+        step();
+      } while (nbEpisodeDone < nbEpisodes);
     }
 
-    void run(const int& maxRuns, const int& maxSteps, const int& maxEpisodes, const bool& runTest =
-        true, const bool& verbose = true)
+    void run()
     {
       if (verbose)
         std::cout << "## ControlLearner=" << typeid(*agent).name() << std::endl;
-      xTest.clear();
+      statistics.clear();
+      enableStatistics = true;
 
-      for (int run = 0; run < maxRuns; run++)
+      for (int run = 0; run < nbRuns; run++)
       {
-        if (verbose)
-          std::cout << "## run=" << run << std::endl;
-        agent->reset();
-        action = 0;
-
-        for (int episode = 0; episode < maxEpisodes; episode++)
-        {
-          env->setOn(false);
-          env->initialize();
-          x_t->set(env->getVars());
-          action = &agent->initialize(*x_t);
-          int steps = 0;
-          episodeR = 0;
-          episodeZ = 0;
-          time = 0;
-          do
-          {
-            env->step(*action);
-            x_tp1->set(env->getVars());
-            ++steps;
-            episodeR += env->r();
-            episodeZ += env->z();
-            action = &agent->step(*x_t, *action, *x_tp1, env->r(), env->z());
-            x_t->set(*x_tp1);
-          } while (!env->endOfEpisode() && steps < maxSteps);
-
-          time = steps;
-
-          if (verbose)
-          {
-            std::cout << steps << " (" << episodeR << "," << episodeZ << ") ";
-            //std::cout << ".";
-            std::cout.flush();
-          }
-
-          if (false)
-          {
-            // Evaluate after each episode
-            std::cout << "episode: " << episode << " ";
-            std::cout << std::endl;
-            {
-              static std::ofstream fout("visualization/fout.dat");
-              test(episode, maxSteps, fout);
-              fout.flush();
-            }
-          }
-        }
-        if (verbose)
-          std::cout << std::endl;
-
-        if (runTest)
-        {
-          if (verbose)
-            std::cout << "## test" << std::endl;
-          test(maxTestRuns, maxSteps);
-        }
+        nbEpisodeDone = 0;
+        // For each run
+        runEpisodes();
+        benchmark();
       }
 
-      if (runTest)
-      {
-        double xbar = std::accumulate(xTest.begin(), xTest.end(), 0.0) / (double(xTest.size()));
-        std::cout << "## avg length=" << xbar << std::endl;
-        double sigmabar = 0;
-        for (std::vector<double>::const_iterator x = xTest.begin(); x != xTest.end(); ++x)
-          sigmabar += pow((*x - xbar), 2);
-        sigmabar = sqrt(sigmabar) / double(xTest.size());
-        double se/*standard error*/= sigmabar / sqrt(double(xTest.size()));
-        std::cout << "## (+- 95%) =" << (se * 2) << std::endl;
-      }
     }
 
     void computeValueFunction(const char* outFile = "visualization/valueFunction.txt") const
     {
-      if (env->getVars().dimension() == 2) // only for two state variables
+      if (environment->getVars().dimension() == 2) // only for two state variables
       {
         std::ofstream out(outFile);
         DenseVector<float> x_t(2);
@@ -234,7 +211,7 @@ class Simulator
       }
 
       // draw
-      env->draw();
+      environment->draw();
     }
 };
 

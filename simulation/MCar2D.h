@@ -24,9 +24,9 @@
 
 #include <iostream>
 #include <fstream>
-#include "Env.h"
+#include "Environment.h"
 
-class MCar2D: public Env<float>
+class MCar2D: public Environment<float>
 {
   protected:
     // Global variables:
@@ -44,16 +44,13 @@ class MCar2D: public Env<float>
 
   public:
     MCar2D() :
-        Env<float>(2, 3, 1), position(0), velocity(0), positionRange(new Range<float>(-1.2, 0.6)), velocityRange(
-            new Range<float>(-0.07, 0.07)), actionRange(new Range<float>(-1.0, 1.0)), targetPosition(
-            positionRange->max()), throttleFactor(1.0)
+        Environment<float>(2, 3, 1), position(0), velocity(0), positionRange(
+            new Range<float>(-1.2, 0.6)), velocityRange(new Range<float>(-0.07, 0.07)), actionRange(
+            new Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(1.0)
     {
       discreteActions->push_back(0, actionRange->min());
       discreteActions->push_back(1, 0.0);
       discreteActions->push_back(2, actionRange->max());
-      /*int i = 0;
-       for (float p = actionRange->min(); p <= actionRange->max(); p += 0.02)
-       discreteActions->push_back(i++, p);*/
 
       // subject to change
       continuousActions->push_back(0, 0.0);
@@ -69,11 +66,12 @@ class MCar2D: public Env<float>
       outfile.close();
     }
 
-    void update()
+    void updateRTStep()
     {
-      DenseVector<float>& vars = *__vars;
+      DenseVector<float>& vars = *output->o_tp1;
       vars[0] = (position - positionRange->min()) * 10.0 / positionRange->length();
       vars[1] = (velocity - velocityRange->min()) * 10.0 / velocityRange->length();
+      output->updateRTStep(r(), z(), endOfEpisode());
 
       //if (outfile.is_open() && getOn())
       //  outfile << position << std::endl;
@@ -86,7 +84,7 @@ class MCar2D: public Env<float>
     {
       position = -0.5;
       velocity = 0.0;
-      update();
+      updateRTStep();
     }
 
     void step(const Action& a)
@@ -97,7 +95,7 @@ class MCar2D: public Env<float>
       if (position < positionRange->min())
         velocity = 0.0;
       position = positionRange->bound(position);
-      update();
+      updateRTStep();
     }
 
     bool endOfEpisode() const

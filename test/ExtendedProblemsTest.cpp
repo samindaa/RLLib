@@ -26,7 +26,7 @@ RLLIB_TEST_MAKE(ExtendedProblemsTest)
 void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 {
   srand(time(0));
-  Env<float>* problem = new MCar3D;
+  Environment<float>* problem = new MCar3D;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
@@ -55,8 +55,8 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(20, 5000, 100);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 20, 5000, 100);
+  sim->run();
 
   delete problem;
   delete projector;
@@ -77,7 +77,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 {
   srand(time(0));
-  Env<float>* problem = new MCar3D;
+  Environment<float>* problem = new MCar3D;
   /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
    10, true);*/
   Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
@@ -99,13 +99,15 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
       &problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 3000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 3000);
+  sim->run();
   //sim->computeValueFunction();
   control->persist("visualization/mcar3d_greedy_gq.data");
   control->reset();
   control->resurrect("visualization/mcar3d_greedy_gq.data");
-  sim->test(20, 5000);
+  sim->setEvaluate(true);
+  sim->setEpisodes(20);
+  sim->run();
 
   delete problem;
   delete projector;
@@ -123,7 +125,7 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 void ExtendedProblemsTest::testSarsaMountainCar3D()
 {
   srand(time(0));
-  Env<float>* problem = new MCar3D;
+  Environment<float>* problem = new MCar3D;
   /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
    10, false);*/
   Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
@@ -142,8 +144,8 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
   OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
       toStateAction, sarsa);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 1000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 1000);
+  sim->run();
 
   delete problem;
   delete projector;
@@ -159,7 +161,7 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
 void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 {
   srand(time(0));
-  Env<float>* problem = new MCar3D;
+  Environment<float>* problem = new MCar3D;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
@@ -185,8 +187,8 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 1000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 1000);
+  sim->run();
   sim->computeValueFunction();
 
   delete problem;
@@ -208,7 +210,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 void ExtendedProblemsTest::testOffPACAcrobot()
 {
   srand(time(0));
-  Env<float>* problem = new Acrobot;
+  Environment<float>* problem = new Acrobot;
   Projector<double, float>* projector = new AcrobotTilesProjector<double, float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
@@ -237,8 +239,8 @@ void ExtendedProblemsTest::testOffPACAcrobot()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 500);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 500);
+  sim->run();
   sim->computeValueFunction();
 
   delete problem;
@@ -260,7 +262,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
 void ExtendedProblemsTest::testGreedyGQAcrobot()
 {
   srand(time(0));
-  Env<float>* problem = new Acrobot;
+  Environment<float>* problem = new Acrobot;
   /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
    10, true);*/
   Projector<double, float>* projector = new AcrobotTilesProjector<double, float>();
@@ -282,8 +284,8 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
       &problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem);
-  sim->run(1, 5000, 500);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 500);
+  sim->run();
   sim->computeValueFunction();
 
   delete problem;
@@ -322,7 +324,7 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
 
       // **** action ***
       VectorXd noise(1);
-      noise(0) = Random::nextNormalGaussian() * 0.1;
+      noise(0) = Probabilistic::nextNormalGaussian() * 0.1;
       VectorXd u = k.transpose() * x + noise;
       actions.update(0, 0, (float) u(0));
 
@@ -339,7 +341,7 @@ void ExtendedProblemsTest::testPersistResurrect()
   srand(time(0));
   SparseVector<float> a(20);
   for (int i = 0; i < 10; i++)
-    a.insertEntry(i, Random::nextDouble());
+    a.insertEntry(i, Probabilistic::nextDouble());
   cout << a << endl;
   a.persist(string("testsv.dat"));
 
@@ -349,7 +351,7 @@ void ExtendedProblemsTest::testPersistResurrect()
 
   DenseVector<float> d(20);
   for (int i = 0; i < 10; i++)
-    d[i] = Random::nextDouble();
+    d[i] = Probabilistic::nextDouble();
   cout << d << endl;
   d.persist(string("testdv.dat"));
 

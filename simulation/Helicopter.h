@@ -22,7 +22,7 @@
 #ifndef HELICOPTER_H_
 #define HELICOPTER_H_
 
-#include "Env.h"
+#include "Environment.h"
 
 // ============================================================================
 
@@ -347,7 +347,7 @@ class HelicopterDynamics
 
       for (int i = 0; i < 6; ++i)
         noise[i] = noise_memory * noise[i]
-            + (1.0 - noise_memory) * Random::nextNormalGaussian() * noise_std[i] * noise_mult;
+            + (1.0 - noise_memory) * Probabilistic::nextNormalGaussian() * noise_std[i] * noise_mult;
 
       for (int t = 0; t < 10; ++t)
       {
@@ -397,7 +397,7 @@ class HelicopterDynamics
     }
 };
 
-class Helicopter: public Env<float>
+class Helicopter: public Environment<float>
 {
   protected:
     double episodeLength;
@@ -407,7 +407,7 @@ class Helicopter: public Env<float>
 
   public:
     Helicopter(const int episodeLength = 6000) :
-        Env<float>(12, 1, 4), episodeLength(episodeLength), step_time(0)
+        Environment<float>(12, 1, 4), episodeLength(episodeLength), step_time(0)
     {
       // Discrete actions are not setup for this problem.
       for (unsigned int i = 0; i < continuousActions->dimension(); i++)
@@ -435,25 +435,27 @@ class Helicopter: public Env<float>
     void initialize()
     {
       heliDynamics.reset();
-      update();
+      updateRTStep();
       step_time = 0;
     }
 
-    void update()
+    void updateRTStep()
     {
-      DenseVector<float>& vars = *__vars;
+      DenseVector<float>& vars = *output->o_tp1;
       const vector<double>& observation = heliDynamics.getObservation();
       for (unsigned int i = 0; i < observation.size(); i++)
       {
         vars[i] = observation[i];
         // TODO: scaling?
       }
+      output->updateRTStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action& action)
     {
       heliDynamics.step(action);
       ++step_time;
+      updateRTStep();
     }
 
     bool endOfEpisode() const
