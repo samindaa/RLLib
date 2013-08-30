@@ -153,7 +153,7 @@ void MountainCarTest::testSarsaAdaptiveMountainCar()
   Trace<double>* e = new RTrace<double>(projector->dimension());
   double gamma = 0.99;
   double lambda = 0.3;
-  Sarsa<double>* sarsaAdaptive = new SarsaAdaptive<double>(gamma, lambda, e);
+  Sarsa<double>* sarsaAdaptive = new SarsaAlphaBound<double>(gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsaAdaptive,
       &problem->getDiscreteActionList(), epsilon);
