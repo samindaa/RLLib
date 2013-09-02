@@ -46,6 +46,7 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
       &problem->getDiscreteActionList(), toStateAction, gq);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 5000);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -89,6 +90,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
       actor, toStateAction, projector, gamma);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5, 5000, 3000);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -97,6 +99,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
   control->reset();
   control->resurrect("visualization/cgw_offpac.data");
   sim->setEpisodes(100);
+  sim->setEvaluate(true);
   sim->run();
 
   delete problem;
@@ -143,6 +146,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 30000);
   //sim->run(5, 5000, 3000);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   //sim->computeValueFunction();
 
@@ -206,6 +210,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
   control->reset();
   control->resurrect("visualization/cgw_offpac.data");
   sim->setEpisodes(100);
+  sim->setEvaluate(true);
   sim->run();
 
   delete problem;
@@ -261,6 +266,8 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
   control->reset();
   control->resurrect("visualization/cgw_offpac.data");
   sim->setEpisodes(100);
+  sim->setEvaluate(true);
+  sim->run();
 
   delete problem;
   delete projector;

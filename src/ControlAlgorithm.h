@@ -46,7 +46,7 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
   public:
     SarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction, Sarsa<T>* sarsa) :
         acting(acting), toStateAction(toStateAction), sarsa(sarsa), xa_t(
-            new SparseVector<T>(sarsa->dimension()))
+            new SparseVector<T>(toStateAction->dimension()))
     {
     }
 
@@ -120,7 +120,7 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
     ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction,
         Sarsa<T>* sarsa, ActionList* actions) :
         SarsaControl<T, O>(acting, toStateAction, sarsa), phi_bar_tp1(
-            new SparseVector<T>(sarsa->dimension())), actions(actions)
+            new SparseVector<T>(toStateAction->dimension())), actions(actions)
     {
     }
     virtual ~ExpectedSarsaControl()
@@ -173,8 +173,8 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
     GreedyGQ(Policy<T>* target, Policy<T>* behavior, ActionList* actions,
         StateToStateAction<T, O>* toStateAction, GQ<T>* gq) :
         rho_t(0), target(target), behavior(behavior), actions(actions), toStateAction(
-            toStateAction), gq(gq), phi_t(new SparseVector<T>(gq->dimension())), phi_bar_tp1(
-            new SparseVector<T>(gq->dimension()))
+            toStateAction), gq(gq), phi_t(new SparseVector<T>(toStateAction->dimension())), phi_bar_tp1(
+            new SparseVector<T>(toStateAction->dimension()))
     {
     }
 

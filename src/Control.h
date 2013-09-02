@@ -24,27 +24,25 @@
 
 #include "Action.h"
 #include "Vector.h"
+#include "Function.h"
 #include "Policy.h"
 
 namespace RLLib
 {
 
 template<class T, class O>
-class Control
+class Control : public ParameterizedFunction<T>
 {
   public:
     virtual ~Control()
     {
     }
-    virtual void reset() =0;
     virtual const Action& initialize(const DenseVector<O>& x_0) =0;
+    virtual void reset() =0;
     virtual const Action& proposeAction(const DenseVector<O>& x) =0;
     virtual const Action& step(const DenseVector<O>& x_t, const Action& a_t,
         const DenseVector<O>& x_tp1, const double& r_tp1, const double& z_tp1) =0;
     virtual const double computeValueFunction(const DenseVector<O>& x) const =0;
-
-    virtual void persist(const std::string& f) const =0;
-    virtual void resurrect(const std::string& f) =0;
 };
 
 template<class T, class O>
@@ -66,7 +64,7 @@ class OffPolicyControlLearner: public Control<T, O>
 };
 
 template<class T, class O>
-class ActorOffPolicy
+class ActorOffPolicy: public ParameterizedFunction<T>
 {
   public:
     virtual ~ActorOffPolicy()
@@ -79,28 +77,20 @@ class ActorOffPolicy
     virtual PolicyDistribution<T>& policy() const =0;
     virtual const Action& proposeAction(const Representations<T>& xas) =0;
     virtual double pi(const Action& a) const =0;
-
-    virtual void persist(const std::string& f) const =0;
-    virtual void resurrect(const std::string& f) =0;
-
 };
 
 template<class T, class O>
-class ActorOnPolicy
+class ActorOnPolicy: public ParameterizedFunction<T>
 {
   public:
     virtual ~ActorOnPolicy()
     {
     }
-
     virtual void initialize() =0;
     virtual void reset() =0;
     virtual void update(const Representations<T>& xas_t, const Action& a_t, double delta) =0;
     virtual PolicyDistribution<T>& policy() const =0;
     virtual const Action& proposeAction(const Representations<T>& xas) =0;
-
-    virtual void persist(const std::string& f) const =0;
-    virtual void resurrect(const std::string& f) =0;
 };
 
 } // namespace RLLib

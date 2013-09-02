@@ -55,6 +55,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
       actor, toStateAction, projector, gamma);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 200);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -108,7 +109,7 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
       critic, actor, projector, toStateAction, alpha_r);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 100);
-  sim->setVerbose(false);
+  sim->setVerbose(true);
   sim->run();
 
   sim->setEvaluate(true);
@@ -165,6 +166,7 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
       actor, toStateAction, projector, gamma);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 200);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
 
   delete problem;
@@ -212,6 +214,7 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
       toStateAction, projector, gamma);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5, 5000, 10);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -252,6 +255,7 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
   OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
       projector, toStateAction);
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 10, 5000, 50);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -270,8 +274,8 @@ void SwingPendulumTest::run()
 {
   testOffPACSwingPendulum();
   testOnPolicySwingPendulum();
-  testOffPACSwingPendulum2();
-  testOffPACOnPolicySwingPendulum();
-  testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum();
+  //testOffPACSwingPendulum2();
+  //testOffPACOnPolicySwingPendulum();
+  //testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum();
 }
 

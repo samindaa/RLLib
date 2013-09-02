@@ -59,6 +59,9 @@ class Simulator
 
     std::vector<double> statistics;
     bool enableStatistics;
+
+    bool enableTestEpisodesAfterEachRun;
+    int maxTestEpisodesAfterEachRun;
   public:
     int timeStep;
     double episodeR;
@@ -70,8 +73,8 @@ class Simulator
             new DenseVector<O>(environment->getVars().dimension())), x_tp1(
             new DenseVector<O>(environment->getVars().dimension())), nbRuns(nbRuns), maxEpisodeTimeSteps(
             maxEpisodeTimeSteps), nbEpisodes(nbEpisodes), nbEpisodeDone(0), beginingOfEpisode(true), evaluate(
-            false), verbose(true), totalTimeInMilliseconds(0), enableStatistics(false), timeStep(0), episodeR(
-            0), episodeZ(0)
+            false), verbose(true), totalTimeInMilliseconds(0), enableStatistics(false), enableTestEpisodesAfterEachRun(
+            false), maxTestEpisodesAfterEachRun(20), timeStep(0), episodeR(0), episodeZ(0)
     {
     }
 
@@ -101,11 +104,17 @@ class Simulator
       this->nbEpisodes = nbEpisodes;
     }
 
+    void setTestEpisodesAfterEachRun(const bool& enableTestEpisodesAfterEachRun)
+    {
+      this->enableTestEpisodesAfterEachRun = enableTestEpisodesAfterEachRun;
+    }
+
     void benchmark()
     {
       double xbar = std::accumulate(statistics.begin(), statistics.end(), 0.0)
           / (double(statistics.size()));
-      std::cout << "## Avg: length=" << xbar << std::endl;
+      std::cout << std::endl;
+      std::cout << "## Average: length=" << xbar << std::endl;
       double sigmabar = 0;
       for (std::vector<double>::const_iterator x = statistics.begin(); x != statistics.end(); ++x)
         sigmabar += pow((*x - xbar), 2);
@@ -178,15 +187,29 @@ class Simulator
     {
       if (verbose)
         std::cout << "## ControlLearner=" << typeid(*agent).name() << std::endl;
-      statistics.clear();
-      enableStatistics = true;
-
       for (int run = 0; run < nbRuns; run++)
       {
+        std::cout << "## nbRun=" << run << std::endl;
+        enableStatistics = true;
+        statistics.clear();
         nbEpisodeDone = 0;
         // For each run
+        if (!evaluate)
+          agent->reset();
         runEpisodes();
         benchmark();
+
+        if (enableTestEpisodesAfterEachRun)
+        {
+          // test run
+          std::cout << "## enableTestEpisodesAfterEachRun=" << enableTestEpisodesAfterEachRun
+              << std::endl;
+          Simulator<T, O>* testSimulator = new Simulator<T, O>(agent, environment, 1,
+              maxEpisodeTimeSteps, maxTestEpisodesAfterEachRun);
+          testSimulator->setEvaluate(true);
+          testSimulator->run();
+          delete testSimulator;
+        }
       }
 
     }

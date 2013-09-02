@@ -28,7 +28,7 @@ namespace RLLib
 {
 
 template<class T>
-class Adaline: public LearningAlgorithm<T>
+class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
 {
   protected:
     SparseVector<T>* w;
@@ -48,14 +48,11 @@ class Adaline: public LearningAlgorithm<T>
       return 0.0;
     }
 
-    int dimension() const
-    {
-      return w->dimension();
-    }
     double predict(const SparseVector<T>& x) const
     {
       return w->dot(x);
     }
+
     void reset()
     {
       w->clear();
@@ -77,7 +74,7 @@ class Adaline: public LearningAlgorithm<T>
 };
 
 template<class T>
-class IDBD: public LearningAlgorithm<T>
+class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
 {
   protected:
     SparseVector<T>* w;
@@ -115,14 +112,11 @@ class IDBD: public LearningAlgorithm<T>
       return 0.0;
     }
 
-    int dimension() const
-    {
-      return w->dimension();
-    }
     double predict(const SparseVector<T>& x) const
     {
       return w->dot(x);
     }
+
     void reset()
     {
       w->clear();
@@ -150,6 +144,7 @@ class IDBD: public LearningAlgorithm<T>
     {
       w->persist(f);
     }
+
     void resurrect(const std::string& f)
     {
       w->resurrect(f);
@@ -157,7 +152,7 @@ class IDBD: public LearningAlgorithm<T>
 };
 
 template<class T>
-class SemiLinearIDBD: public LearningAlgorithm<T>
+class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
 {
   protected:
     SparseVector<T>* w;
@@ -195,14 +190,11 @@ class SemiLinearIDBD: public LearningAlgorithm<T>
       return 0.0;
     }
 
-    int dimension() const
-    {
-      return w->dimension();
-    }
     double predict(const SparseVector<T>& x) const
     {
       return 1.0 / (1.0 + exp(-w->dot(x)));
     }
+
     void reset()
     {
       w->clear();
@@ -232,6 +224,7 @@ class SemiLinearIDBD: public LearningAlgorithm<T>
     {
       w->persist(f);
     }
+
     void resurrect(const std::string& f)
     {
       w->resurrect(f);
@@ -239,7 +232,7 @@ class SemiLinearIDBD: public LearningAlgorithm<T>
 };
 
 template<class T>
-class Autostep: public LearningAlgorithm<T>
+class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
 {
   protected:
     SparseVector<T>* w;
@@ -310,11 +303,6 @@ class Autostep: public LearningAlgorithm<T>
     double initialize()
     {
       return 0.0;
-    }
-
-    int dimension() const
-    {
-      return w->dimension();
     }
 
     double predict(const SparseVector<T>& x) const

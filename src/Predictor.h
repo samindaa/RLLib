@@ -23,6 +23,7 @@
 #define PREDICTOR_H_
 
 #include "Vector.h"
+#include "Function.h"
 
 namespace RLLib
 {
@@ -34,17 +35,11 @@ class Predictor
     virtual ~Predictor()
     {
     }
-    virtual int dimension() const=0;
     virtual double predict(const SparseVector<T>& x) const =0;
-    virtual double initialize() =0;
-    virtual void reset() =0;
-
-    virtual void persist(const std::string& f) const =0;
-    virtual void resurrect(const std::string& f) =0;
 };
 
 template<class T>
-class OnPolicyTD: public Predictor<T>
+class OnPolicyTD: public Predictor<T>, public LinearLearner<T>
 {
   public:
     virtual ~OnPolicyTD()
@@ -55,7 +50,19 @@ class OnPolicyTD: public Predictor<T>
 };
 
 template<class T>
-class GVF: public Predictor<T>
+class OffPolicyTD: public Predictor<T>, public LinearLearner<T>
+{
+  public:
+    virtual ~OffPolicyTD()
+    {
+    }
+    virtual double update(const SparseVector<T>& phi_t, const SparseVector<T>& phi_tp1,
+        const double& rho_t, const double& gamma_t, double r_tp1, double z_tp1) =0;
+
+};
+
+template<class T>
+class GVF: public OffPolicyTD<T>
 {
   public:
     virtual ~GVF()

@@ -78,11 +78,6 @@ class TD: public OnPolicyTD<T>
       v->clear();
     }
 
-    int dimension() const
-    {
-      return v->dimension();
-    }
-
     double predict(const SparseVector<T>& phi) const
     {
       return v->dot(phi);
@@ -125,8 +120,8 @@ class TDLambda: public TD<T>
       return super::delta_t;
     }
 
-    virtual void updateAlpha(double& alpha_v, const SparseVector<T>& x_t,
-        const SparseVector<T>& x_tp1, const double& r_tp1, const double& gamma_tp1)
+    virtual void updateAlpha(const SparseVector<T>& x_t, const SparseVector<T>& x_tp1,
+        const double& r_tp1, const double& gamma_tp1)
     {/*Default is for fixed step-size*/
     }
 
@@ -137,7 +132,7 @@ class TDLambda: public TD<T>
 
       super::delta_t = r_tp1 + gamma_tp1 * super::v->dot(x_tp1) - super::v->dot(x_t);
       e->update(lambda * gamma_tp1, x_t);
-      updateAlpha(super::alpha_v, x_t, x_tp1, r_tp1, gamma_tp1);
+      updateAlpha(x_t, x_tp1, r_tp1, gamma_tp1);
       super::v->addToSelf(super::alpha_v * super::delta_t, e->vect());
       return super::delta_t;
     }
@@ -167,23 +162,27 @@ class TDLambdaAlphaBound: public TDLambda<T>
       delete gammaX_tp1MinusX_t;
     }
 
-  public:
+    void reset()
+    {
+      super::reset();
+      TD<T>::alpha_v = 1.0f;
+    }
 
-    virtual void updateAlpha(double& alpha_v, const SparseVector<T>& x_t,
-        const SparseVector<T>& x_tp1, const double& r_tp1, const double& gamma_tp1)
+    virtual void updateAlpha(const SparseVector<T>& x_t, const SparseVector<T>& x_tp1,
+        const double& r_tp1, const double& gamma_tp1)
     {
       // Update the adaptive step-size
       double b = std::abs(
           super::e->vect().dot(
               gammaX_tp1MinusX_t->set(x_tp1).multiplyToSelf(gamma_tp1).substractToSelf(x_t)));
       if (b > 0.0f)
-        alpha_v = std::min(alpha_v, 1.0f / b);
+        TD<T>::alpha_v = std::min(TD<T>::alpha_v, 1.0f / b);
     }
 
 };
 
 template<class T>
-class Sarsa: public Predictor<T>
+class Sarsa: public Predictor<T>, public LinearLearner<T>
 {
   protected:
     double v_t, v_tp1, delta; // temporary variables
@@ -236,11 +235,6 @@ class Sarsa: public Predictor<T>
       initialized = false;
     }
 
-    int dimension() const
-    {
-      return v->dimension();
-    }
-
     double predict(const SparseVector<T>& phi_sa) const
     {
       return v->dot(phi_sa);
@@ -274,7 +268,11 @@ class SarsaAlphaBound: public Sarsa<T>
       delete gammaPhi_tp1MinusPhi_t;
     }
 
-  public:
+    void reset()
+    {
+      super::reset();
+      super::alpha = 1.0f;
+    }
 
     void updateAlpha(const SparseVector<T>& phi_t, const SparseVector<T>& phi_tp1, double r_tp1)
     {
@@ -291,7 +289,7 @@ class SarsaAlphaBound: public Sarsa<T>
 
 // Gradient decent
 template<class T>
-class GQ: public Predictor<T>
+class GQ: public Predictor<T>, public LinearLearner<T>
 {
   private:
     double delta_t;
@@ -350,11 +348,6 @@ class GQ: public Predictor<T>
       v->clear();
       w->clear();
       initialized = false;
-    }
-
-    int dimension() const
-    {
-      return v->dimension();
     }
 
     double predict(const SparseVector<T>& phi_sa) const
@@ -445,11 +438,6 @@ class GTDLambda: public GVF<T>
       v->clear();
       w->clear();
       initialized = false;
-    }
-
-    int dimension() const
-    {
-      return v->dimension();
     }
 
     double predict(const SparseVector<T>& phi) const

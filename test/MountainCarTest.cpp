@@ -160,7 +160,8 @@ void MountainCarTest::testSarsaAdaptiveMountainCar()
   OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
       toStateAction, sarsaAdaptive);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 300);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 2, 5000, 300);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -262,6 +263,7 @@ void MountainCarTest::testGreedyGQMountainCar()
       &problem->getDiscreteActionList(), toStateAction, gq);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 10, 5000, 100);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -297,6 +299,7 @@ void MountainCarTest::testSoftmaxGQOnMountainCar()
       &problem->getDiscreteActionList(), toStateAction, gq);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 10, 5000, 100);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -341,6 +344,7 @@ void MountainCarTest::testOffPACMountainCar()
       actor, toStateAction, projector, gamma);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 10, 5000, 100);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
   control->persist("visualization/mcar_offpac.data");
@@ -348,6 +352,7 @@ void MountainCarTest::testOffPACMountainCar()
   control->reset();
   control->resurrect("visualization/mcar_offpac.data");
   sim->setEpisodes(20);
+  sim->setEvaluate(true);
   sim->run();
 
   delete problem;
@@ -378,20 +383,21 @@ void MountainCarTest::testOffPACOnPolicyMountainCar()
   double gamma = 0.99;
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
-  double alpha_u = 0.5 / projector->vectorNorm();
-  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(projector->dimension(),
+  double alpha_u = 1.0 / projector->vectorNorm();
+  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
       &problem->getDiscreteActionList());
+  Policy<double>* behavior = (Policy<double>*) target;
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
-      lambda, acting, actoreTraces);
+      lambda, target, actoreTraces);
 
-  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(acting, critic, actor,
+  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic, actor,
       toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 10, 5000, 100);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 100);
   sim->run();
   sim->computeValueFunction();
   control->persist("visualization/mcar_offpac.data");
@@ -399,6 +405,7 @@ void MountainCarTest::testOffPACOnPolicyMountainCar()
   control->reset();
   control->resurrect("visualization/mcar_offpac.data");
   sim->setEpisodes(20);
+  sim->setEvaluate(true);
   sim->run();
 
   delete problem;
@@ -409,7 +416,7 @@ void MountainCarTest::testOffPACOnPolicyMountainCar()
   delete actore;
   delete actoreTraces;
   delete actor;
-  delete acting;
+  delete target;
   delete control;
   delete sim;
 }
@@ -444,6 +451,7 @@ void MountainCarTest::testOnPolicyContinousActionCar(const int& nbMemory, const 
       critic, actor, projector, toStateAction, 0);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 200);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -491,6 +499,7 @@ void MountainCarTest::testOnPolicyBoltzmannATraceCar()
       projector, toStateAction);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 300);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -537,6 +546,7 @@ void MountainCarTest::testOnPolicyBoltzmannRTraceCar()
       projector, toStateAction);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 300);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -582,6 +592,7 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
   OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
       projector, toStateAction);
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 10, 5000, 100);
+  sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
 
