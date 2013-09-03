@@ -156,7 +156,8 @@ class UNH: public Hashing
   protected:
     enum
     {
-      URNDSEQ = 2047, RNDSEQ = 2048
+      URNDSEQ = 2047,
+      RNDSEQ = 2048
     };
 
     unsigned int rndseq[RNDSEQ];
@@ -166,12 +167,14 @@ class UNH: public Hashing
     {
       /*First call to hashing, initialize table of random numbers */
       //printf("inside tiles \n");
+      srand(0);
       for (int k = 0; k < RNDSEQ; k++)
       {
         rndseq[k] = 0;
         for (int i = 0; i < int(sizeof(int)); ++i)
           rndseq[k] = (rndseq[k] << 8) | (rand() & 0xff);
       }
+      srand(time(0));
     }
 
     /** hash_UNH
@@ -207,17 +210,18 @@ class UNH: public Hashing
 
 class MurmurHashing: public Hashing
 {
-
   protected:
     unsigned int seed;
   public:
-    MurmurHashing() :
-        seed((unsigned int) rand())
+    MurmurHashing()
     {
+      // Constant seed
+      srand(0);
+      seed = (unsigned int) rand();
+      srand(time(0));
     }
 
-  protected:
-
+  public:
     /**
      * MurmurHashNeutral2, by Austin Appleby
      * https://sites.google.com/site/murmurhash/
@@ -225,13 +229,13 @@ class MurmurHashing: public Hashing
      * Same as MurmurHash2, but endian- and alignment-neutral.
      * Half the speed though, alas.
      */
-    unsigned int murmurHash(const void * key, int len, unsigned int seed)
+    unsigned int MurmurHashNeutral2(const void * key, int len, unsigned int seed)
     {
-      // 'm' and 'r' are mixing constants generated offline.
+      // 'm' and 'r' are mixing constants generated off-line.
       // They're not really 'magic', they just happen to work well.
 
-      const unsigned int m = 0x5bd1e995;
-      const int r = 24;
+      const static unsigned int m = 0x5bd1e995;
+      const static int r = 24;
 
       unsigned int h = seed ^ len;
 
@@ -275,10 +279,10 @@ class MurmurHashing: public Hashing
       return h;
     }
 
-  public:
     int hash(int* ints/*coordinates*/, int num_ints, long m/*memory_size*/, int increment)
     {
-      return (int) (((long) murmurHash(ints, num_ints, seed) + INT_MAX) % m);
+      // FixMe:
+      return (int) (((long) MurmurHashNeutral2(ints, num_ints, seed) + INT_MAX) % m);
     }
 
 };
@@ -307,10 +311,10 @@ class Tiles
 
   public:
     Tiles(Hashing* hashing = 0) :
-        hashing(0), hashUNH(new UNH)
+        hashing(hashing), hashUNH(new UNH)
     {
       if (!hashing)
-        this->hashing = hashUNH;
+        this->hashing = hashUNH; //<< default hashing method
     }
 
     ~Tiles()

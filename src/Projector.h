@@ -58,19 +58,12 @@ class TileCoder: public Projector<T, O>
     bool includeActiveFeature;
     SparseVector<T>* vector;
     DenseVector<int>* tileIndices;
-    Tiles* tiles;
   public:
     TileCoder(const int& memorySize, const int& numTiling, bool includeActiveFeature = true) :
-        includeActiveFeature(includeActiveFeature), vector(
-            new SparseVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)), tileIndices(
-            new DenseVector<int>(numTiling)), tiles(new Tiles)
+        includeActiveFeature(includeActiveFeature),
+            vector(new SparseVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)),
+            tileIndices(new DenseVector<int>(numTiling))
     {
-      // Consistent hashing
-      int dummyTiles[1];
-      float dummyVars[1];
-      srand(0);
-      tiles->tiles(dummyTiles, 1, 1, dummyVars, 0); // initializes tiling code
-      srand(time(0));
     }
 
     virtual ~TileCoder()
@@ -78,7 +71,6 @@ class TileCoder: public Projector<T, O>
 
       delete vector;
       delete tileIndices;
-      delete tiles;
     }
 
     virtual void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory) =0;
@@ -133,26 +125,29 @@ class TileCoder: public Projector<T, O>
 template<class T, class O>
 class TileCoderHashing: public TileCoder<T, O>
 {
-    typedef TileCoder<T, O> Base;
+  private:
+    Tiles* tiles;
   public:
-    TileCoderHashing(const int& memorySize, const int& numTiling, bool includeActiveFeature = true) :
-        TileCoder<T, O>(memorySize, numTiling, includeActiveFeature)
+    TileCoderHashing(const int& memorySize, const int& numTiling, bool includeActiveFeature = true,
+        Hashing* hashing = 0) :
+        TileCoder<T, O>(memorySize, numTiling, includeActiveFeature), tiles(new Tiles(hashing))
     {
     }
 
     virtual ~TileCoderHashing()
     {
+      delete tiles;
     }
 
     void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory)
     {
-      Base::tiles->tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension());
+      tiles->tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension());
     }
 
     void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory,
         const int& h1)
     {
-      Base::tiles->tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension(), h1);
+      tiles->tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension(), h1);
     }
 
 };
@@ -161,16 +156,16 @@ template<class T, class O>
 class TileCoderNoHashing: public TileCoder<T, O>
 {
   protected:
-    typedef TileCoder<T, O> Base;
+    Tiles* tiles;
     CollisionTable* ct;
   public:
     TileCoderNoHashing(const int& memorySize, const int& numTiling,
         bool includeActiveFeature = true) :
-        TileCoder<T, O>(memorySize, numTiling, includeActiveFeature)
+        TileCoder<T, O>(memorySize, numTiling, includeActiveFeature), tiles(new Tiles)
     {
       // http://graphics.stanford.edu/~seander/bithacks.html
       // Compute the next highest power of 2 of 32-bit v
-      unsigned int v = Base::vector->dimension();
+      unsigned int v = TileCoder<T, O>::vector->dimension();
       v--;
       v |= v >> 1;
       v |= v >> 2;
@@ -180,25 +175,26 @@ class TileCoderNoHashing: public TileCoder<T, O>
       v++;
 
       // The vector needs to reflect the correct memory size
-      delete Base::vector;
-      Base::vector = new SparseVector<T>(includeActiveFeature ? v + 1 : v);
+      delete TileCoder<T, O>::vector;
+      TileCoder<T, O>::vector = new SparseVector<T>(includeActiveFeature ? v + 1 : v);
       ct = new CollisionTable(v, 1);
     }
 
     virtual ~TileCoderNoHashing()
     {
+      delete tiles;
       delete ct;
     }
 
     void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory)
     {
-      Base::tiles->tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension());
+      tiles->tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension());
     }
 
     void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory,
         const int& h1)
     {
-      Base::tiles->tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension(), h1);
+      tiles->tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension(), h1);
     }
 };
 

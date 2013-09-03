@@ -394,8 +394,8 @@ void MountainCarTest::testOffPACOnPolicyMountainCar()
   ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
       lambda, target, actoreTraces);
 
-  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic, actor,
-      toStateAction, projector, gamma);
+  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
+      actor, toStateAction, projector, gamma);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 100);
   sim->run();
@@ -612,6 +612,7 @@ void MountainCarTest::run()
   testSarsaTabularActionMountainCar();
   testOnPolicyBoltzmannRTraceTabularActionCar();
   testSarsaMountainCar();
+
   testSarsaAdaptiveMountainCar();
   testExpectedSarsaMountainCar();
   testGreedyGQOnPolicyMountainCar();

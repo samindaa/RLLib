@@ -46,8 +46,12 @@ RLLIB_TEST(ExtendedProblemsTest)
 class ExtendedProblemsTest: public ExtendedProblemsTestBase
 {
   public:
-    ExtendedProblemsTest() {}
-    virtual ~ExtendedProblemsTest() {}
+    ExtendedProblemsTest()
+    {
+    }
+    virtual ~ExtendedProblemsTest()
+    {
+    }
     void run();
 
   private:
@@ -60,15 +64,63 @@ class ExtendedProblemsTest: public ExtendedProblemsTestBase
 
     void testPoleBalancingPlant();
     void testPersistResurrect();
-    void testExp();
     void testEigen3();
     void testTorquedPendulum();
 
-    void testCubicSpline();
-    void testMotion();
+    //void testCubicSpline();
+    //void testMotion();
 };
 
 // Helpers
+class CombinationGenerator
+{
+  public:
+    typedef std::map<int, vector<int> > Combinations;
+
+  private:
+    int n;
+    int k;
+    Combinations combinations;
+    vector<int> input;
+    vector<int> combination;
+
+  public:
+    CombinationGenerator(const int& n, const int& k, const int& nbVars) :
+        n(n), k(k)
+    {
+      for (int i = 0; i < nbVars; i++)
+        input.push_back(i);
+    }
+
+  private:
+    void addCombination(const vector<int>& v)
+    {
+      combinations.insert(make_pair(combinations.size(), v));
+    }
+
+    void nextCombination(int offset, int k)
+    {
+      if (k == 0)
+      {
+        addCombination(combination);
+        return;
+      }
+      for (int i = offset; i <= n - k; ++i)
+      {
+        combination.push_back(input[i]);
+        nextCombination(i + 1, k - 1);
+        combination.pop_back();
+      }
+    }
+
+  public:
+    Combinations& getCombinations()
+    {
+      nextCombination(0, k);
+      return combinations;
+    }
+};
+
 // ====================== Advanced projector ===================================
 template<class T, class O>
 class AdvancedTilesProjector: public Projector<T, O>
@@ -80,14 +132,8 @@ class AdvancedTilesProjector: public Projector<T, O>
 
   public:
     AdvancedTilesProjector() :
-        vector(new SparseVector<T>(100000 + 1)), activeTiles(new int[48]), tiles(new Tiles)
+        vector(new SparseVector<T>(1000000 + 1)), activeTiles(new int[48]), tiles(new Tiles)
     {
-      // Consistent hashing
-      int dummy_tiles[1];
-      float dummy_vars[1];
-      srand(0);
-      tiles->tiles(dummy_tiles, 1, 1, dummy_vars, 0); // initializes tiling code
-      srand(time(0));
     }
 
     virtual ~AdvancedTilesProjector()
@@ -98,53 +144,41 @@ class AdvancedTilesProjector: public Projector<T, O>
     }
 
   public:
-    const SparseVector<T>& project(const DenseVector<O>& x, int h1)
+    const SparseVector<T>& project(const DenseVector<O>& x, int h2)
     {
       vector->clear();
+      int h1 = 0;
       // all 4
-      tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension(), h1);
+      tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension(), h1++, h2);
       // 3 of 4
+      static CombinationGenerator cg43(4, 3, 4); // We know x.dimension() == 4
+      static CombinationGenerator::Combinations& c43 = cg43.getCombinations();
       static DenseVector<O> x3(3);
-      static int x3o[4][3] =
+      for (int i = 0; i < (int) c43.size(); i++)
       {
-      { 0, 1, 2 },
-      { 1, 2, 3 },
-      { 2, 3, 0 },
-      { 1, 3, 0 } };
-      for (int i = 0; i < 4; i++)
-      {
-        for (int j = 0; j < 3; j++)
-          x3[j] = x[x3o[i][j]];
-        tiles->tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(), x3.dimension(),
-            h1);
+        for (int j = 0; j < (int) c43[i].size(); j++)
+          x3[j] = x[c43[i][j]];
+        tiles->tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(), 3, h1++, h2);
       }
       // 2 of 6
+      static CombinationGenerator cg42(4, 2, 4);
+      static CombinationGenerator::Combinations& c42 = cg42.getCombinations();
       static DenseVector<O> x2(2);
-      static int x2o[6][2] =
+      for (int i = 0; i < (int) c42.size(); i++)
       {
-      { 0, 1 },
-      { 1, 2 },
-      { 2, 3 },
-      { 0, 3 },
-      { 0, 2 },
-      { 1, 3 } };
-      for (int i = 0; i < 6; i++)
-      {
-        for (int j = 0; j < 2; j++)
-          x2[j] = x[x2o[i][j]];
-        tiles->tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(), x2.dimension(),
-            h1);
+        for (int j = 0; j < (int) c42[i].size(); j++)
+          x2[j] = x[c42[i][j]];
+        tiles->tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(), 2, h1++, h2);
       }
 
-      // 3 of 4 of 1
+      // 1 of 4
+      static CombinationGenerator cg41(4, 1, 4);
+      static CombinationGenerator::Combinations& c41 = cg41.getCombinations();
       static DenseVector<O> x1(1);
-      static int x1o[4] =
-      { 0, 1, 2, 3 };
-      for (int i = 0; i < 4; i++)
+      for (int i = 0; i < (int) c41.size(); i++)
       {
-        x1[0] = x[x1o[i]];
-        tiles->tiles(&activeTiles[36 + i * 3], 3, vector->dimension() - 1, x1(), x1.dimension(),
-            h1);
+        x1[0] = x[c41[i][0]]; // there is only a single element
+        tiles->tiles(&activeTiles[36 + i * 3], 3, vector->dimension() - 1, x1(), 1, h1++, h2);
       }
 
       // bias
@@ -154,6 +188,7 @@ class AdvancedTilesProjector: public Projector<T, O>
 
       return *vector;
     }
+
     const SparseVector<T>& project(const DenseVector<O>& x)
     {
 
@@ -161,51 +196,40 @@ class AdvancedTilesProjector: public Projector<T, O>
       // all 4
       tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension());
       // 3 of 4
+      static CombinationGenerator cg43(4, 3, 4); // We know x.dimension() == 4
+      static CombinationGenerator::Combinations& c43 = cg43.getCombinations();
       static DenseVector<O> x3(3);
-      static int x3o[4][3] =
+      for (int i = 0; i < (int) c43.size(); i++)
       {
-      { 0, 1, 2 },
-      { 1, 2, 3 },
-      { 2, 3, 0 },
-      { 1, 3, 0 } };
-      for (int i = 0; i < 4; i++)
-      {
-        for (int j = 0; j < 3; j++)
-          x3[j] = x[x3o[i][j]];
-        tiles->tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(), x3.dimension());
+        for (int j = 0; j < (int) c43[i].size(); j++)
+          x3[j] = x[c43[i][j]];
+        tiles->tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3(), 3);
       }
       // 2 of 6
+      static CombinationGenerator cg42(4, 2, 4);
+      static CombinationGenerator::Combinations& c42 = cg42.getCombinations();
       static DenseVector<O> x2(2);
-      static int x2o[6][2] =
+      for (int i = 0; i < (int) c42.size(); i++)
       {
-      { 0, 1 },
-      { 1, 2 },
-      { 2, 3 },
-      { 0, 3 },
-      { 0, 2 },
-      { 1, 3 } };
-      for (int i = 0; i < 6; i++)
-      {
-        for (int j = 0; j < 2; j++)
-          x2[j] = x[x2o[i][j]];
-        tiles->tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(), x2.dimension());
+        for (int j = 0; j < (int) c42[i].size(); j++)
+          x2[j] = x[c42[i][j]];
+        tiles->tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2(), 2);
       }
 
-      // 4 of 1
+      // 1 of 4
+      static CombinationGenerator cg41(4, 1, 4);
+      static CombinationGenerator::Combinations& c41 = cg41.getCombinations();
       static DenseVector<O> x1(1);
-      static int x1o[4] =
-      { 0, 1, 2, 3 };
-      for (int i = 0; i < 4; i++)
+      for (int i = 0; i < (int) c41.size(); i++)
       {
-        x1[0] = x[x1o[i]];
-        tiles->tiles(&activeTiles[36 + i], 3, vector->dimension() - 1, x1(), x1.dimension());
+        x1[0] = x[c41[i][0]]; // there is only a single element
+        tiles->tiles(&activeTiles[36 + i * 3], 3, vector->dimension() - 1, x1(), 1);
       }
-
-      for (int* i = activeTiles; i < activeTiles + 48; ++i)
-        vector->insertEntry(*i, 1.0);
 
       // bias
       vector->insertLast(1.0);
+      for (int* i = activeTiles; i < activeTiles + 48; ++i)
+        vector->insertEntry(*i, 1.0);
 
       return *vector;
     }

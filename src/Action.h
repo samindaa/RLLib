@@ -31,11 +31,11 @@ namespace RLLib
 class Action
 {
   private:
-    int idNb;
+    int actionID;
     std::vector<double> values;
   public:
-    explicit Action(const int& idNb) :
-        idNb(idNb)
+    explicit Action(const int& actionID) :
+        actionID(actionID)
     {
     }
 
@@ -57,18 +57,18 @@ class Action
 
     const bool operator==(const Action& that) const
     {
-      return idNb == that.idNb;
+      return actionID == that.actionID;
     }
 
     const bool operator!=(const Action& that) const
     {
-      return idNb != that.idNb;
+      return actionID != that.actionID;
     }
 
     // Id within an associated id group
     const int id() const
     {
-      return idNb;
+      return actionID;
     }
 
     const unsigned int dimension() const

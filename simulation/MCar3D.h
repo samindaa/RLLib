@@ -150,10 +150,10 @@ class MCar3D: public Environment<float>
     void updateRTStep()
     {
       DenseVector<float>& vars = *output->o_tp1;
-      vars[0] = (xposition - positionRange->min()) * 10.0 / positionRange->length();
-      vars[1] = (yposition - positionRange->min()) * 10.0 / positionRange->length();
-      vars[2] = (xvelocity - velocityRange->min()) * 10.0 / velocityRange->length();
-      vars[3] = (yvelocity - velocityRange->min()) * 10.0 / velocityRange->length();
+      vars[0] = (xposition - positionRange->min()) * 6.0 / positionRange->length();
+      vars[1] = (yposition - positionRange->min()) * 6.0 / positionRange->length();
+      vars[2] = (xvelocity - velocityRange->min()) * 6.0 / velocityRange->length();
+      vars[3] = (yvelocity - velocityRange->min()) * 6.0 / velocityRange->length();
       if (out.is_open() && getOn())
         out << xposition << " " << yposition << std::endl;
       output->updateRTStep(r(), z(), endOfEpisode());

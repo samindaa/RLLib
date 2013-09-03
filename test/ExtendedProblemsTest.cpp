@@ -27,17 +27,18 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 {
   srand(time(0));
   Environment<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
+  //Projector<double, float>* projector = new TileCoderHashing<double, float>(100000, 10, true);
+  Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
 
-  double alpha_v = 0.05 / projector->vectorNorm();
+  double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma = 0.99;
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, 0.4, criticeML);
-  double alpha_u = 1.0 / projector->vectorNorm();
+  double alpha_u = 0.5 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
       &problem->getDiscreteActionList());
 
@@ -48,14 +49,14 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
   ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
       0.4, target, actoreTraces);
 
-  //Policy<double>* behavior = new RandomPolicy<double>(
-  //    &problem->getActionList());
-  Policy<double>* behavior = new BoltzmannDistribution<double>(projector->dimension(),
-      &problem->getDiscreteActionList());
+  Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
+      &problem->getDiscreteActionList(), 0.0f, 0.0f);
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 20, 5000, 100);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 100);
+  sim->run();
+  sim->setEvaluate(true);
   sim->run();
 
   delete problem;
@@ -78,14 +79,12 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 {
   srand(time(0));
   Environment<float>* problem = new MCar3D;
-  /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-   10, true);*/
   Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 2000);
-  double alpha_v = 0.2 / projector->vectorNorm();
+  double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
   double beta_tp1 = 1.0 - gamma_tp1;
@@ -99,7 +98,7 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
       &problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 3000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 300);
   sim->run();
   //sim->computeValueFunction();
   control->persist("visualization/mcar3d_greedy_gq.data");
@@ -126,25 +125,26 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
 {
   srand(time(0));
   Environment<float>* problem = new MCar3D;
-  /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-   10, false);*/
   Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
+  //Projector<double, float>* projector = new TileCoderHashing<double, float>(100000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
 
-  Trace<double>* e = new RTrace<double>(projector->dimension(), 0.001);
-  Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
-  double alpha = 0.01 / projector->vectorNorm();
+  Trace<double>* e = new ATrace<double>(projector->dimension());
+  //Trace<double>* e = new RTrace<double>(projector->dimension(), 0.01);
+  Trace<double>* eML = new MaxLengthTrace<double>(e, 2000);
   double gamma = 0.99;
-  double lambda = 0.6;
-  Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, eML);
+  double lambda = 0.9;
+  Sarsa<double>* sarsa = new SarsaAlphaBound<double>(gamma, lambda, eML);
   double epsilon = 0.1;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, &problem->getDiscreteActionList(),
       epsilon);
   OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
       toStateAction, sarsa);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 1000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 300);
+  sim->run();
+  sim->setEvaluate(true);
   sim->run();
 
   delete problem;
@@ -162,7 +162,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 {
   srand(time(0));
   Environment<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(100000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
 
@@ -215,14 +215,14 @@ void ExtendedProblemsTest::testOffPACAcrobot()
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
 
-  double alpha_v = 0.1 / projector->vectorNorm();
+  double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.4;
   Trace<double>* critice = new AMaxTrace<double>(projector->dimension());
   Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, criticeML);
-  double alpha_u = 0.0001 / projector->vectorNorm();
+  double alpha_u = 0.001 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
       &problem->getDiscreteActionList());
 
@@ -233,13 +233,16 @@ void ExtendedProblemsTest::testOffPACAcrobot()
   ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
       lambda, target, actoreTraces);
 
-  /*Policy<double>* behavior = new RandomPolicy<double>(
-   &problem->getDiscreteActionList());*/
-  Policy<double>* behavior = new RandomBiasPolicy<double>(&problem->getDiscreteActionList());
+  //Policy<double>* behavior = new RandomPolicy<double>(&problem->getDiscreteActionList());
+  //Policy<double>* behavior = new RandomBiasPolicy<double>(&problem->getDiscreteActionList());
+  Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
+      &problem->getDiscreteActionList(), 0.0f, 0.0f);
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 500);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 300);
+  sim->run();
+  sim->setEvaluate(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -263,8 +266,6 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
 {
   srand(time(0));
   Environment<float>* problem = new Acrobot;
-  /*Projector<double, float>* projector = new FullTilings<double, float>(1000000,
-   10, true);*/
   Projector<double, float>* projector = new AcrobotTilesProjector<double, float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
@@ -285,6 +286,8 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
       &problem->getDiscreteActionList(), toStateAction, gq);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 500);
+  sim->run();
+  sim->setEvaluate(true);
   sim->run();
   sim->computeValueFunction();
 
@@ -360,13 +363,6 @@ void ExtendedProblemsTest::testPersistResurrect()
   cout << e << endl;
 }
 
-void ExtendedProblemsTest::testExp()
-{
-  //cout << exp(200) << endl;
-  cout << std::numeric_limits<float>::epsilon() << endl;
-  cout << 1e3 << endl;
-}
-
 void ExtendedProblemsTest::testEigen3()
 {
   using Eigen::MatrixXf;
@@ -418,83 +414,6 @@ void ExtendedProblemsTest::testTorquedPendulum()
   }
 }
 
-void ExtendedProblemsTest::testCubicSpline()
-{
-  Spline spline;
-
-  for (double x = -5; x <= 5; x++)
-    spline.addPoint(x, sin(x));
-  spline.setLowBC(Spline::FIXED_1ST_DERIV_BC, 0);
-  spline.setHighBC(Spline::FIXED_1ST_DERIV_BC, 0);
-
-  std::ofstream of("/home/sam/Tmp/CSplines/spline.natural.dat");
-  for (double x = -5; x <= 5; x += 0.1)
-    of << x << " " << spline(x) << "\n";
-  of.close();
-}
-
-void ExtendedProblemsTest::testMotion()
-{
-  Spline spline;
-  std::ifstream inf("/home/sam/projects/workspace_robocanes/RLLib/visualization/j_balance_1");
-
-  spline.setLowBC(Spline::FIXED_1ST_DERIV_BC, 0);
-  spline.setHighBC(Spline::FIXED_1ST_DERIV_BC, 0);
-
-  map<int, vector<double> > motions;
-
-  std::string str;
-  while (std::getline(inf, str))
-  {
-    //std::cout << str << '\n';
-    std::stringstream strstr(str);
-
-    // use stream iterators to copy the stream to the vector as whitespace separated strings
-    std::istream_iterator<std::string> it(strstr);
-    std::istream_iterator<std::string> end;
-    std::vector<std::string> results(it, end);
-
-    std::vector<double> resultsToDouble;
-    for (std::vector<std::string>::iterator iter = results.begin(); iter != results.end(); ++iter)
-    {
-      stringstream ss(*iter);
-      double tmp;
-      ss >> tmp;
-      resultsToDouble.push_back(tmp);
-    }
-    motions.insert(make_pair(motions.size(), resultsToDouble));
-  }
-
-  cout << "*** write some down *** " << endl;
-  std::ofstream of("/home/sam/Tmp/CSplines/motions.natural.dat");
-  std::ofstream of2("/home/sam/Tmp/CSplines/motions.dat");
-  int cTime = 0;
-  for (map<int, vector<double> >::const_iterator iter = motions.begin(); iter != motions.end();
-      ++iter)
-  {
-    cTime += iter->second[0];
-    spline.addPoint(cTime, iter->second[3]);
-  }
-
-  // every 20ms
-  int startTime = motions[0][0];
-  for (int tt = startTime; tt <= cTime; tt += 20)
-  {
-    of << tt << " " << spline(tt) << endl;
-  }
-
-  cTime = 0;
-  for (map<int, vector<double> >::const_iterator iter = motions.begin(); iter != motions.end();
-      ++iter)
-  {
-    cTime += iter->second[0];
-    of2 << cTime << " " << iter->second[3] << " " << spline(cTime) << endl;
-  }
-  of.close();
-  of2.close();
-
-}
-
 void ExtendedProblemsTest::run()
 {
   testOffPACMountainCar3D_1();
@@ -504,13 +423,10 @@ void ExtendedProblemsTest::run()
   testOffPACAcrobot();
   testGreedyGQAcrobot();
 
-  testPoleBalancingPlant();
-  testPersistResurrect();
-  testExp();
-  testEigen3();
-  testTorquedPendulum();
+  //testPoleBalancingPlant();
+  //testPersistResurrect();
+  //testEigen3();
+  //testTorquedPendulum();
 
-  testCubicSpline();
-  testMotion();
 }
 

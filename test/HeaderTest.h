@@ -134,7 +134,8 @@ class RLLibTestCaseLoader
   protected:
     T* theInstance;
   public:
-    RLLibTestCaseLoader() : theInstance(new T())
+    RLLibTestCaseLoader() :
+        theInstance(new T())
     {
       RLLibTestRegistry::registerInstance(theInstance);
     }
@@ -161,7 +162,11 @@ typedef MaxLengthTrace<double> MaxLengthTraceDoubleType;
 
 enum TraceEnum
 {
-  ATraceDouble = 0, RTraceDouble, AMaxTraceDouble, MaxLengthTraceDouble, TraceEnumDimension
+  ATraceDouble = 0,
+  RTraceDouble,
+  AMaxTraceDouble,
+  MaxLengthTraceDouble,
+  TraceEnumDimension
 };
 
 // Common assertion tests
@@ -211,6 +216,14 @@ class Assert
     }
 };
 
-#define ARRAYSIZE(a) sizeof(a)/ sizeof (a[0])
+class Arrays
+{
+  public:
+    template<class T, unsigned int N>
+    static inline unsigned int length(T (&pX)[N])
+    {
+      return N;
+    }
+};
 
 #endif /* HEADERTEST_H_ */

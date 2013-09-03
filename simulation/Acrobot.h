@@ -86,10 +86,10 @@ class Acrobot: public Environment<float>
     {
       DenseVector<float>& vars = *output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
-      vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * 8.0;
-      vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * 8.0;
-      vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length()) * 8.0;
-      vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length()) * 8.0;
+      vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * 6.0;
+      vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * 6.0;
+      vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length()) * 6.0;
+      vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length()) * 6.0;
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 
