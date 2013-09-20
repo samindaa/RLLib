@@ -8,7 +8,7 @@ RLLib is a lightweight C++ template library that implements `incremental`, `stan
 Features
 --------
 
-* Off-policy prediction algorithms: 
+* ##### Off-policy prediction algorithms: 
  `GTD(lambda)`
  `GQ(lambda)`
 * Off-policy control algorithms:  
