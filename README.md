@@ -19,7 +19,7 @@ Features
  `TD(lambda)`
  `SARSA(lambda)`
  `Expected-SARSA(lambda)`
- `Actor-Critic` (continuous and discrete actions) 
+ `Actor-Critic (continuous and discrete actions, discounted, averaged reward settings, etc.)` 
 * Supervised learning algorithms: 
  `Adaline`
  `IDBD`
@@ -42,7 +42,7 @@ Features
  `Helicopter`
 `Continuous Grid World`
 * Optimization: 
- Optimized for very fast duty cycles (e.g., with culling traces, RLLib has been tested on the Robocup 3D simulator, and on the NAO V4  (cognition thread)). 
+ Optimized for very fast duty cycles (e.g., with culling traces, RLLib has been tested on `the Robocup 3D simulator agent`, and on `the NAO V4  (cognition thread)`). 
 * Usage: 
  The algorithm usage is very much similar to RLPark, therefore, swift learning curve.
 * Examples: 
