@@ -8,24 +8,24 @@ RLLib is a lightweight C++ template library that implements `incremental`, `stan
 Features
 --------
 
-* ##### Off-policy prediction algorithms: 
+* **Off-policy prediction algorithms**: 
  `GTD(lambda)`
  `GQ(lambda)`
-* Off-policy control algorithms:  
+* **Off-policy control algorithms**:  
  `Greedy-GQ(lambda)`
  `Softmax-GQ(lambda)`
  `Off-PAC` (can be used in on-policy setting)
-* On-policy algorithms: 
+* **On-policy algorithms**: 
  `TD(lambda)`
  `SARSA(lambda)`
  `Expected-SARSA(lambda)`
  `Actor-Critic (continuous and discrete actions, discounted, averaged reward settings, etc.)` 
-* Supervised learning algorithms: 
+* **Supervised learning algorithms**: 
  `Adaline`
  `IDBD`
  `SemiLinearIDBD`
  `Autostep`
-* Policies: 
+* **Policies**: 
  `Random`
  `Random50%Bias`
  `Greedy`
@@ -33,19 +33,19 @@ Features
  `Boltzmann`
  `Normal`
  `Softmax`
-* Dot product: 
+* **Dot product**: 
  An efficient implementation of the dot product for tile coding based feature representations (with culling traces).
-* Benchmarks environments: 
+* **Benchmarking environments**: 
  `Mountain Car`
  `Mountain Car 3D`
  `Swinging Pendulum`
  `Helicopter`
 `Continuous Grid World`
-* Optimization: 
+* **Optimization**: 
  Optimized for very fast duty cycles (e.g., with culling traces, RLLib has been tested on `the Robocup 3D simulator agent`, and on `the NAO V4  (cognition thread)`). 
-* Usage: 
+* **Usage**: 
  The algorithm usage is very much similar to RLPark, therefore, swift learning curve.
-* Examples: 
+* **Examples**: 
  There are a plethora of examples demonstrating on-policy and off-policy control experiments.
 
 
