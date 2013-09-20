@@ -21,16 +21,19 @@ Features
 Usage
 -----
 
-RLLib is a C++ template library. The header files are located in the `src` directly. You can simply include this directory from your project, e.g., `-I./src` to access the algorithms.
+RLLib is a C++ template library. The header files are located in the `src` directly. You can simply include this directory from your projects, e.g., `-I./src`, to access the algorithms.
 
-To access control algorithms:
-   #include "ControlAlgorithm.h"
+To access the control algorithms:
+    
+    #include "ControlAlgorithm.h"
 
-To access predication algorithms:
-   #include "PredictorAlgorithm"
+To access the predication algorithms:
+   
+    #include "PredictorAlgorithm"
  
-To access supervised learning algorithms:
-   #include "SupervisedAlgorithm.h"
+To access the supervised learning algorithms:
+   
+    #include "SupervisedAlgorithm.h"
 
 RLLib uses the `namespace RLLib`.
 
