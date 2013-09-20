@@ -9,8 +9,8 @@ Features
 --------
 
 * Off-policy prediction algorithms: 
-..* `GTD(lambda)`
-..* `GQ(lambda)`,
+... `GTD(lambda)`
+... `GQ(lambda)`
 * Off-policy control algorithms:  
 ..* `Greedy-GQ(lambda)`
 ..* `Softmax-GQ(lambda)`
