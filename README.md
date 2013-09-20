@@ -9,44 +9,44 @@ Features
 --------
 
 * Off-policy prediction algorithms: 
-`GTD(lambda)`
-`GQ(lambda)`
+ `GTD(lambda)`
+ `GQ(lambda)`
 * Off-policy control algorithms:  
-..* `Greedy-GQ(lambda)`
-..* `Softmax-GQ(lambda)`
-..* `Off-PAC` (can be used in on-policy setting)
+ `Greedy-GQ(lambda)`
+ `Softmax-GQ(lambda)`
+ `Off-PAC` (can be used in on-policy setting)
 * On-policy algorithms: 
-..* `TD(lambda)`
-..* `SARSA(lambda)`
-..* `Expected-SARSA(lambda)`
-..* `Actor-Critic` (continuous and discrete actions) 
+ `TD(lambda)`
+ `SARSA(lambda)`
+ `Expected-SARSA(lambda)`
+ `Actor-Critic` (continuous and discrete actions) 
 * Supervised learning algorithms: 
-..* `Adaline`
-..* `IDBD`
-..* `SemiLinearIDBD`
-..* `Autostep`
+ `Adaline`
+ `IDBD`
+ `SemiLinearIDBD`
+ `Autostep`
 * Policies: 
-..* `Random`
-..* `Random50%Bias`
-..* `Greedy`
-..* `Epsilon-greedy`
-..* `Boltzmann`
-..* `Normal`
-..* `Softmax`
+ `Random`
+ `Random50%Bias`
+ `Greedy`
+ `Epsilon-greedy`
+ `Boltzmann`
+ `Normal`
+ `Softmax`
 * Dot product: 
-..* An efficient implementation of the dot product for tile coding based feature representations (with culling traces).
+ An efficient implementation of the dot product for tile coding based feature representations (with culling traces).
 * Benchmarks environments: 
-..* `Mountain Car`
-..* `Mountain Car 3D`
-..* `Swinging Pendulum`
-..* `Helicopter`
-..*`Continuous Grid World`
+ `Mountain Car`
+ `Mountain Car 3D`
+ `Swinging Pendulum`
+ `Helicopter`
+`Continuous Grid World`
 * Optimization: 
-..* Optimized for very fast duty cycles (e.g., with culling traces, RLLib has been tested on the Robocup 3D simulator, and on the NAO V4  (cognition thread)). 
+ Optimized for very fast duty cycles (e.g., with culling traces, RLLib has been tested on the Robocup 3D simulator, and on the NAO V4  (cognition thread)). 
 * Usage: 
-..* The algorithm usage is very much similar to RLPark, therefore, swift learning curve.
+ The algorithm usage is very much similar to RLPark, therefore, swift learning curve.
 * Examples: 
-..* There are a plethora of examples demonstrating on-policy and off-policy control experiments.
+ There are a plethora of examples demonstrating on-policy and off-policy control experiments.
 
 
 Usage
