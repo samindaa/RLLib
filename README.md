@@ -1,5 +1,7 @@
-RLLib (A Lightweight, Standard, and On/Off Policy Reinforcement Learning C++ Template Library)
-==============================================================================================
+RLLib 
+=====
+(A Lightweight, Standard, and On/Off Policy Reinforcement Learning C++ Template Library)
+----------------------------------------------------------------------------------------
 
 RLLib is a lightweight C++ template library that implements `incremental`, `standard`, and `gradient temporal-difference` learning algorithms in Reinforcement Learning. It is a highly optimized library that is designed and written specifically for robotic applications. The implementation of the RLLib library is inspired by the RLPark API, which is a library of temporal-difference learning algorithms written in Java. 
 
@@ -47,7 +49,8 @@ RLLib provides a flexible testing framework. Follow these steps to quickly write
 
 * To access the testing framework: `#include "HeaderTest.h"`
 
-    RLLIB_TEST(YourTest)
+```javascript
+RLLIB_TEST(YourTest)
     class YourTest Test: public YourTestBase
     {
       public:
@@ -61,7 +64,8 @@ RLLib provides a flexible testing framework. Follow these steps to quickly write
     };
     void YourTestBase::testYourMethod() {/** Your test code */}
     void YourTestBase::run() { testYourMethod(); }
-
+```
+    
 
 * Add `YourTest` to the `test/test.cfg` file.
 
