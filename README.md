@@ -47,19 +47,25 @@ RLLib provides a flexible testing framework. Follow these steps to quickly write
 
 * To access the testing framework: `#include "HeaderTest.h"`
 
-    #include "HeaderTest.h"
+    `#include "HeaderTest.h"`
     RLLIB_TEST(YourTest)
+
     class YourTest Test: public YourTestBase
     {
       public:
         YourTestTest() {}
+
         virtual ~Test() {}
         void run();
+
       private:
         void testYourMethod();
-    };
+    };  
+
     void YourTestBase::testYourMethod() {/** Your test code */}
+
     void YourTestBase::run() { testYourMethod(); }
+
 
 * Add `YourTest` to the `test/test.cfg` file.
 
