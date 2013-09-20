@@ -1,5 +1,5 @@
-RLLib (A Lightweight, Standard, and On/Off Policy Reinforcement Learning Library (C++))
-=======================================================================================
+RLLib (A Lightweight, Standard, and On/Off Policy Reinforcement Learning C++ Template Library)
+==============================================================================================
 
 RLLib is a lightweight C++ template library that implements `incremental`, `standard`, and `gradient temporal-difference` learning algorithms in Reinforcement Learning. It is a highly optimized library that is designed and written specifically for robotic applications. The implementation of the RLLib library is inspired by the RLPark API, which is a library of temporal-difference learning algorithms written in Java. 
 
