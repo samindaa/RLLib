@@ -35,7 +35,10 @@ To access the supervised learning algorithms:
    
     #include "SupervisedAlgorithm.h"
 
-RLLib uses the `namespace RLLib`.
+RLLib uses the namespace: 
+
+    using namespace RLLib
+
 
 Testing
 -------
@@ -44,25 +47,25 @@ RLLib provides a flexible testing framework. Follow these steps to quickly write
 
 * To access the testing framework: `#include "HeaderTest.h"`
 
-   #include "HeaderTest.h"
+    #include "HeaderTest.h"
 
-   RLLIB_TEST(YourTest)
+    RLLIB_TEST(YourTest)
 
-   class YourTest Test: public YourTestBase
-   {
-     public:
-      YourTestTest() {}
+    class YourTest Test: public YourTestBase
+    {
+      public:
+        YourTestTest() {}
 
-      virtual ~Test() {}
-      void run();
+        virtual ~Test() {}
+        void run();
 
-     private:
+      private:
         void testYourMethod();
-   };  
+    };  
 
-   void YourTestBase::testYourMethod() {/** Your test code */}
+    void YourTestBase::testYourMethod() {/** Your test code */}
 
-   void YourTestBase::run() { testYourMethod(); }
+    void YourTestBase::run() { testYourMethod(); }
 
 
 * Add `YourTest` to the `test/test.cfg` file.
@@ -72,9 +75,9 @@ Test Configuration
 
 The test cases are executed using:
    
-   ./configure
-   make
-   ./RLLibTest
+    ./configure
+    make
+    ./RLLibTest
 
 Documentation
 ------------- 
