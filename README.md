@@ -47,9 +47,8 @@ RLLib provides a flexible testing framework. Follow these steps to quickly write
 
 * To access the testing framework: `#include "HeaderTest.h"`
 
-    `#include "HeaderTest.h"`
+    \#include "HeaderTest.h"
     RLLIB_TEST(YourTest)
-
     class YourTest Test: public YourTestBase
     {
       public:
@@ -60,10 +59,8 @@ RLLib provides a flexible testing framework. Follow these steps to quickly write
 
       private:
         void testYourMethod();
-    };  
-
+    };
     void YourTestBase::testYourMethod() {/** Your test code */}
-
     void YourTestBase::run() { testYourMethod(); }
 
 
