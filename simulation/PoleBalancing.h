@@ -23,45 +23,38 @@
 #define POLEBALANCING_H_
 
 #include "Environment.h"
-#include "Eigen/Dense"
-#include "Eigen/Eigenvalues"
 #include "Math.h"
-
-using Eigen::VectorXd;
-using Eigen::MatrixXd;
-using Eigen::MatrixBase;
+#include "Matrix.h"
 
 // MultivariateNormal random number generator
 
 /*
  * Multivariate normal random number. Based on Matlab mvnrnd function.
  */
-template<class Derived1, class Derived2, class Derived3>
-void mvnrnd(const MatrixBase<Derived1>& mu, const MatrixBase<Derived2>& Sigma,
-    MatrixBase<Derived3>& r)
+void mvnrnd(const Matrix& mu, const Matrix& Sigma, Matrix& r)
 {
-  MatrixXd R = Sigma.llt().matrixL()/*cholcov*/;
-  int size = mu.rows();
-  for (int i = 0; i < size; i++)
-    r(i) = RLLib::Probabilistic::nextNormalGaussian();
-  r = mu + R * r;
+  Matrix U, D;
+  Sigma.eig(U, D);
+  for (unsigned int i = 0; i < mu.rows(); i++)
+    r(i) = RLLib::Probabilistic::nextNormalGaussian() * ::sqrt(D(i));
+  r = mu + U * r;
 }
 
 class PoleBalancing: public Environment<float>
 {
   protected:
     double tau, veta, g;
-    MatrixXd Sigma0;
-    VectorXd mu0;
-    VectorXd mu;
-    VectorXd x;
-    MatrixXd A;
-    VectorXd b;
-    MatrixXd Q;
-    MatrixXd SigmaT;
+    Matrix Sigma0;
+    Matrix mu0;
+    Matrix mu;
+    Matrix x;
+    Matrix A;
+    Matrix b;
+    Matrix Q;
+    Matrix SigmaT;
 
-    VectorXd u;/*only single input is considered*/
-    VectorXd R;
+    Matrix u;/*only single input is considered*/
+    Matrix R;
 
   public:
     PoleBalancing() :
@@ -73,26 +66,27 @@ class PoleBalancing: public Environment<float>
       continuousActions->push_back(0, 0.0);
 
       // Set up the matrixes
-      VectorXd sigma0(4);
+      Matrix sigma0(4);
       mu0.resize(4);
       mu.resize(4);
       x.resize(4);
-      for (int i = 0; i < sigma0.rows(); i++)
+      for (unsigned int i = 0; i < sigma0.rows(); i++)
       {
         sigma0(i) = 0.1;
         x(i) = mu0(i) = mu(i) = 0;
       }
-      Sigma0 = sigma0.asDiagonal();
+      Sigma0 = sigma0.diag();
 
       A.resize(4, 4);
-      A << 1, tau, 0, 0, 0, 1, 0, 0, 0, 0, 1, tau, 0, 0, veta * tau, 1;
+      A.insert(1.f, tau, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, tau, 0.f, 0.f, veta * tau,
+          1.f);
 
       b.resize(4);
-      b << 0, tau, 0, veta * tau / g;
+      b.insert(0.f, tau, 0.f, veta * tau / g);
 
-      VectorXd q(4);
-      q << 1.25, 1, 12, 0.25;
-      Q = q.asDiagonal();
+      Matrix q(4);
+      q.insert(1.25f, 1.f, 12.f, 0.25f);
+      Q = q.diag();
 
       SigmaT = 0.01 * Sigma0;
 
@@ -132,7 +126,7 @@ class PoleBalancing: public Environment<float>
 
     float r() const
     {
-      VectorXd r_xt_ut = x.transpose() * Q * x + u.transpose() * R * u;
+      Matrix r_xt_ut = x.T() * Q * x + u.T() * R * u;
       return (float) r_xt_ut(0);
     }
 

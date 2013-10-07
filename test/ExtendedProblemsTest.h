@@ -26,6 +26,7 @@
 
 // From the RLLib
 #include "Vector.h"
+#include "Matrix.h"
 #include "Trace.h"
 #include "Projector.h"
 #include "ControlAlgorithm.h"
@@ -64,11 +65,9 @@ class ExtendedProblemsTest: public ExtendedProblemsTestBase
 
     void testPoleBalancingPlant();
     void testPersistResurrect();
-    void testEigen3();
+    void testMatrix();
     void testTorquedPendulum();
 
-    //void testCubicSpline();
-    //void testMotion();
 };
 
 // Helpers
