@@ -306,12 +306,13 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
 void ExtendedProblemsTest::testPoleBalancingPlant()
 {
   srand(time(0));
-  RLLib::Matrix x(4);
-  RLLib::Matrix k(4);
-  k.insert(10.f, 15.f, -90.f, -25.f);
   PoleBalancing poleBalancing;
+  VectorXd x(4);
+  VectorXd k(4);
+  k << 10, 15, -90, -25;
 
   ActionList& actions = poleBalancing.getContinuousActionList();
+
   for (int r = 0; r < 1; r++)
   {
     cout << "*** start *** " << endl;
@@ -322,12 +323,12 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
       const DenseVector<float>& vars = poleBalancing.getVars();
       for (int i = 0; i < vars.dimension(); i++)
         x[i] = vars[i];
-      std::cout << "x=" << x.T() << std::endl;
+      cout << "x=" << x.transpose() << endl;
 
       // **** action ***
-      RLLib::Matrix noise(1);
+      VectorXd noise(1);
       noise(0) = Probabilistic::nextNormalGaussian() * 0.1;
-      RLLib::Matrix u = k.T() * x + noise;
+      VectorXd u = k.transpose() * x + noise;
       actions.update(0, 0, (float) u(0));
 
       poleBalancing.step(actions.at(0));
@@ -365,7 +366,7 @@ void ExtendedProblemsTest::testPersistResurrect()
 void ExtendedProblemsTest::testMatrix()
 {
 
-  Matrix m(2, 2);
+  RLLib::Matrix m(2, 2);
   m(0, 0) = 3;
   m(1, 0) = 2.5;
   m(0, 1) = -1;
