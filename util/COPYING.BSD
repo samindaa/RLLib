@@ -23,47 +23,4 @@
  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- ********************************************************************************
- *   Content : Eigen bindings to Intel(R) MKL
- *    Householder QR decomposition of a matrix w/o pivoting based on
- *    LAPACKE_?geqrf function.
- ********************************************************************************
 */
-
-#ifndef EIGEN_QR_MKL_H
-#define EIGEN_QR_MKL_H
-
-#include "Eigen/src/Core/util/MKL_support.h"
-
-namespace Eigen { 
-
-namespace internal {
-
-/** \internal Specialization for the data types supported by MKL */
-
-#define EIGEN_MKL_QR_NOPIV(EIGTYPE, MKLTYPE, MKLPREFIX) \
-template<typename MatrixQR, typename HCoeffs> \
-void householder_qr_inplace_blocked(MatrixQR& mat, HCoeffs& hCoeffs, \
-                                       typename MatrixQR::Index maxBlockSize=32, \
-                                       EIGTYPE* tempData = 0) \
-{ \
-  lapack_int m = mat.rows(); \
-  lapack_int n = mat.cols(); \
-  lapack_int lda = mat.outerStride(); \
-  lapack_int matrix_order = (MatrixQR::IsRowMajor) ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR; \
-  LAPACKE_##MKLPREFIX##geqrf( matrix_order, m, n, (MKLTYPE*)mat.data(), lda, (MKLTYPE*)hCoeffs.data()); \
-  hCoeffs.adjointInPlace(); \
-\
-}
-
-EIGEN_MKL_QR_NOPIV(double, double, d)
-EIGEN_MKL_QR_NOPIV(float, float, s)
-EIGEN_MKL_QR_NOPIV(dcomplex, MKL_Complex16, z)
-EIGEN_MKL_QR_NOPIV(scomplex, MKL_Complex8, c)
-
-} // end namespace internal
-
-} // end namespace Eigen
-
-#endif // EIGEN_QR_MKL_H
