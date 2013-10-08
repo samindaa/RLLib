@@ -48,7 +48,7 @@ Features
 * **Examples**: 
  There are a plethora of examples demonstrating on-policy and off-policy control experiments.
 * **RLLibViz**:
- A Qt4 based visualization tool to visualize the benchmark problems.  
+ There is a Qt4 based visualization tool to visualize benchmark problems.  
 
 
 Usage
