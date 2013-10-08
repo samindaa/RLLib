@@ -214,6 +214,16 @@ class Simulator
 
     }
 
+    bool isBeginingOfEpisode() const
+    {
+      return beginingOfEpisode;
+    }
+
+    const Environment<O>* getEnvironment() const
+    {
+      return environment;
+    }
+
     void computeValueFunction(const char* outFile = "visualization/valueFunction.txt") const
     {
       if (environment->getVars().dimension() == 2) // only for two state variables

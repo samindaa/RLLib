@@ -47,6 +47,8 @@ Features
  The algorithm usage is very much similar to RLPark, therefore, swift learning curve.
 * **Examples**: 
  There are a plethora of examples demonstrating on-policy and off-policy control experiments.
+* **RLLibViz**:
+ A Qt4 based visualization tool to visualize the benchmark problems.  
 
 
 Usage
