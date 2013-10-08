@@ -1,7 +1,7 @@
 RLLib 
 =====
-(A Lightweight, Standard, and On/Off Policy Reinforcement Learning C++ Template Library)
-----------------------------------------------------------------------------------------
+(C++ Template Library to Learn Behaviors and Represent Learnable Knowledge using On/Off Policy Reinforcement Learning)
+----------------------------------------------------------------------------------------------------------------------
 
 RLLib is a lightweight C++ template library that implements `incremental`, `standard`, and `gradient temporal-difference` learning algorithms in Reinforcement Learning. It is a highly optimized library that is designed and written specifically for robotic applications. The implementation of the RLLib library is inspired by the RLPark API, which is a library of temporal-difference learning algorithms written in Java. 
 
@@ -47,8 +47,8 @@ Features
  The algorithm usage is very much similar to RLPark, therefore, swift learning curve.
 * **Examples**: 
  There are a plethora of examples demonstrating on-policy and off-policy control experiments.
-* **RLLibViz**:
- There is a Qt4 based visualization tool to visualize benchmark problems.  
+* **Visualization**:
+ We provide a Qt4 based application to visualize benchmark problems.  
 
 
 Usage
