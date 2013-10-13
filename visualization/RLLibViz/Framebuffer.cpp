@@ -30,7 +30,6 @@ void Framebuffer::draw(QPainter& painter)
     path.lineTo(points.at(i));
   }
   painter.drawPath(path);
-  std::cout << "Framebuffer=" << this << " points=" << points.size() << std::endl;
 }
 
 void Framebuffer::clear()

@@ -20,7 +20,7 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
       &behaviourEnvironment->getDiscreteActionList());
 
   alpha_v = 0.1 / projector->vectorNorm();
-  alpha_w = 0.0f; //0.0001 / projector->vectorNorm();
+  alpha_w = 0.0001 / projector->vectorNorm();
   gamma = 0.99;
   lambda = 0.4;
   critice = new ATrace<double>(projector->dimension());
@@ -84,10 +84,9 @@ void ContinuousGridworldModel::doWork()
     if (i->second->isBeginingOfEpisode())
       window->views[i->first]->draw();
     else
-    {
       window->views[i->first]->add(
           Vec(i->second->getEnvironment()->getTRStep().o_tp1->at(0),
               i->second->getEnvironment()->getTRStep().o_tp1->at(1)));
-    }
   }
+
 }

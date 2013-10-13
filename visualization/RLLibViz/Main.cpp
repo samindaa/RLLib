@@ -1,6 +1,7 @@
 #include <QApplication>
 #include "ContinuousGridworldModel.h"
 #include "ContinuousGridworldView.h"
+#include "PlotView.h"
 #include "ModelThread.h"
 #include "Window.h"
 

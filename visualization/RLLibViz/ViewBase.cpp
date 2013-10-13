@@ -35,7 +35,7 @@ QSize ViewBase::minimumSizeHint() const
 
 QSize ViewBase::sizeHint() const
 {
-  return QSize(400, 400);
+  return QSize(250, 250);
 }
 
 void ViewBase::paintEvent(QPaintEvent* event)

@@ -16,7 +16,6 @@
 #include <QKeyEvent>
 
 // RLLibViz
-#include "Vec.h"
 #include "Mat.h"
 #include "Framebuffer.h"
 
@@ -41,9 +40,7 @@ class ViewBase: public QWidget
 
     virtual void initialize() =0;
     virtual void add(const Vec& p) =0;
-
-  public:
-    void draw();
+    virtual void draw();
 
   protected:
     void paintEvent(QPaintEvent *);

@@ -15,6 +15,7 @@ Q_OBJECT
 
 public:
   typedef std::vector<ViewBase*> Views;
+  typedef std::vector<ViewBase*> Plots;
   Views views;
   QHBoxLayout* mainLayout;
 public:

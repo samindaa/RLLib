@@ -19,7 +19,8 @@ SOURCES += Main.cpp\
 	ViewBase.cpp \
 	Framebuffer.cpp \
 	ContinuousGridworldView.cpp \
-    	Window.cpp
+    	Window.cpp \
+	PlotView.cpp
 
 HEADERS  += Mat.h \
     	Vec.h \
@@ -29,6 +30,7 @@ HEADERS  += Mat.h \
 	ModelThread.h \
 	Framebuffer.h \
 	ContinuousGridworldView.h \
-	ContinuousGridworldModel.h
+	ContinuousGridworldModel.h \
+	PlotView.h
 
 	
