@@ -38,7 +38,9 @@ class Boundedness
     template<class T>
     inline static bool checkValue(const T& value)
     {
-      return !isnan(value) && !isinf(value);
+      bool bvalue = !isnan(value) && !isinf(value);
+      assert(bvalue);
+      return bvalue;
     }
 };
 

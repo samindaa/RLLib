@@ -12,11 +12,23 @@ TEMPLATE = app
 INCLUDEPATH += ../../src \
                ../../simulation
 
-SOURCES += main.cpp\
-        RenderArea.cpp \
-    Window.cpp \
-    Model.cpp
+SOURCES += Main.cpp\
+        ModelBase.cpp \
+	ModelThread.cpp \
+	ContinuousGridworldModel.cpp \
+	ViewBase.cpp \
+	Framebuffer.cpp \
+	ContinuousGridworldView.cpp \
+    	Window.cpp
 
-HEADERS  += RenderArea.h \
-    Window.h \
-    Model.h
+HEADERS  += Mat.h \
+    	Vec.h \
+    	ViewBase.h \
+	Window.h \
+	ModelBase.h \
+	ModelThread.h \
+	Framebuffer.h \
+	ContinuousGridworldView.h \
+	ContinuousGridworldModel.h
+
+	

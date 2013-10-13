@@ -3,22 +3,30 @@
 #include <QTime>
 #include <iostream>
 
+using namespace RLLibViz;
+
 Window::Window(QWidget *parent) :
-  QWidget(parent)
+    QWidget(parent), mainLayout(0)
 {
-  QHBoxLayout* mainLayout = new QHBoxLayout;
-  for (int i = 0; i < NB_AREA; i++)
-    renders.push_back(new RenderArea);
-  for (Renders::iterator iter = renders.begin(); iter != renders.end(); ++iter)
-    mainLayout->addWidget(*iter);
+  mainLayout = new QHBoxLayout;
   setLayout(mainLayout);
 }
 
- void Window::keyPressEvent(QKeyEvent* event)
- {
-   if (event->key() == Qt::Key_Escape)
-   {
-     std::cout << "Window::Quit()" << std::endl;
-     qApp->quit();
-   }
- }
+Window::~Window()
+{
+}
+
+void Window::addView(ViewBase* view)
+{
+  views.push_back(view);
+  mainLayout->addWidget(view);
+}
+
+void Window::keyPressEvent(QKeyEvent* event)
+{
+  if (event->key() == Qt::Key_Escape)
+  {
+    std::cout << "Window::Quit()" << std::endl;
+    qApp->quit();
+  }
+}

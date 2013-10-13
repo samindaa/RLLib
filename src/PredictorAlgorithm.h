@@ -100,11 +100,11 @@ class TDLambda: public TD<T>
 {
   protected:
     typedef TD<T> super;
-    double lambda;
+    double lambda, gamma_t;
     Trace<T>* e;
   public:
     TDLambda(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
-        TD<T>(alpha, gamma, e->vect().dimension()), lambda(lambda), e(e)
+        TD<T>(alpha, gamma, e->vect().dimension()), lambda(lambda), gamma_t(gamma), e(e)
     {
     }
     virtual ~TDLambda()
@@ -117,6 +117,7 @@ class TDLambda: public TD<T>
     {
       super::initialize();
       e->clear();
+      gamma_t = super::gamma;
       return super::delta_t;
     }
 
@@ -131,15 +132,17 @@ class TDLambda: public TD<T>
       assert(super::initialized);
 
       super::delta_t = r_tp1 + gamma_tp1 * super::v->dot(x_tp1) - super::v->dot(x_t);
-      e->update(lambda * gamma_tp1, x_t);
+      e->update(lambda * gamma_t, x_t);
       updateAlpha(x_t, x_tp1, r_tp1, gamma_tp1);
       super::v->addToSelf(super::alpha_v * super::delta_t, e->vect());
+      gamma_t = gamma_tp1;
       return super::delta_t;
     }
 
     void reset()
     {
       super::reset();
+      gamma_t = super::gamma;
       e->clear();
     }
 };

@@ -3,24 +3,29 @@
 
 #include <QWidget>
 #include <QHBoxLayout>
-#include "RenderArea.h"
+#include "ViewBase.h"
 #include <vector>
 
-class Window : public QWidget
+namespace RLLibViz
 {
-  Q_OBJECT
+
+class Window: public QWidget
+{
+Q_OBJECT
 
 public:
-
-  enum { NB_AREA = 2};
-  typedef std::vector<RenderArea*> Renders;
-  Renders renders;
-
+  typedef std::vector<ViewBase*> Views;
+  Views views;
+  QHBoxLayout* mainLayout;
 public:
   explicit Window(QWidget *parent = 0);
-  
+  virtual ~Window();
+  void addView(ViewBase* view);
+
 protected:
-   void keyPressEvent(QKeyEvent *);
+  void keyPressEvent(QKeyEvent *);
 };
+
+}  // namespace RLLibViz
 
 #endif // WINDOW_H
