@@ -45,13 +45,15 @@ class Environment
 {
   public:
     Environment(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
-        output(new TRStep<O>(nbVars)), discreteActions(new GeneralActionList(nbDiscreteActions)), continuousActions(
+        observations(new DenseVector<float>(nbVars)), output(new TRStep<O>(nbVars)), discreteActions(
+            new GeneralActionList(nbDiscreteActions)), continuousActions(
             new GeneralActionList(nbContinuousActions)), itsOn(false)
     {
     }
 
     virtual ~Environment()
     {
+      delete observations;
       delete output;
       delete discreteActions;
       delete continuousActions;
@@ -95,6 +97,11 @@ class Environment
       return *output->o_tp1;
     }
 
+    virtual const DenseVector<O>& getObservations() const
+    {
+      return *observations;
+    }
+
   protected:
     virtual void updateRTStep() =0;
     virtual bool endOfEpisode() const =0;
@@ -102,6 +109,7 @@ class Environment
     virtual float z() const =0;
 
   protected:
+    DenseVector<float>* observations;
     TRStep<O>* output;
     ActionList* discreteActions;
     ActionList* continuousActions;

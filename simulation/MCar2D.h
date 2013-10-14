@@ -73,6 +73,9 @@ class MCar2D: public Environment<float>
       vars[1] = (velocity - velocityRange->min()) * 10.0 / velocityRange->length();
       output->updateRTStep(r(), z(), endOfEpisode());
 
+      observations->at(0) = position;
+      observations->at(1) = velocity;
+
       //if (outfile.is_open() && getOn())
       //  outfile << position << std::endl;
       if (outfile.is_open() && getOn())

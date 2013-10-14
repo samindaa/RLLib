@@ -24,7 +24,7 @@ ContinuousGridworldView::~ContinuousGridworldView()
 void ContinuousGridworldView::initialize()
 {
   std::cout << "ContinuousGridworldView" << std::endl;
-  vecE = Vec(10.0, 10.0);
+  vecE = Vec(1.0, 1.0);
   vecX = Vec(0.0f, 0.0f);
   vecY = Vec(width(), height());
 

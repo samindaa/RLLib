@@ -32,14 +32,12 @@ class ContinuousGridworld: public Environment<float>
     Range<float>* observationRange;
     Range<float>* actionRange;
     float absoluteNoise;
-    DenseVector<float>* observations;
     std::ofstream outpath;
 
   public:
     ContinuousGridworld() :
         Environment<float>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)), actionRange(
-            new Range<float>(-0.05, 0.05)), absoluteNoise(0.025), observations(
-            new DenseVector<float>(2))
+            new Range<float>(-0.05, 0.05)), absoluteNoise(0.025)
     {
       // discrete actions
       for (unsigned int i = 0; i < discreteActions->dimension(); i++)
@@ -65,7 +63,6 @@ class ContinuousGridworld: public Environment<float>
     {
       delete observationRange;
       delete actionRange;
-      delete observations;
       outpath.close();
     }
 

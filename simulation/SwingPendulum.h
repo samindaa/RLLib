@@ -85,6 +85,10 @@ class SwingPendulum: public Environment<float>
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = (theta - thetaRange->min()) * 10.0 / thetaRange->length();
       vars[1] = (velocity - velocityRange->min()) * 10.0 / velocityRange->length();
+
+      observations->at(0) = theta;
+      observations->at(1) = velocity;
+
       output->updateRTStep(r(), z(), endOfEpisode());
     }
     void initialize()

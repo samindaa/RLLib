@@ -91,6 +91,11 @@ class Acrobot: public Environment<float>
       vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length()) * 6.0;
       vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length()) * 6.0;
       output->updateRTStep(r(), z(), endOfEpisode());
+
+      observations->at(0) = theta1;
+      observations->at(1) = theta2;
+      observations->at(2) = theta1Dot;
+      observations->at(3) = theta2Dot;
     }
 
     void step(const Action& action)

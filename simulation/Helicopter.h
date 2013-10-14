@@ -445,6 +445,7 @@ class Helicopter: public Environment<float>
       const vector<double>& observation = heliDynamics.getObservation();
       for (unsigned int i = 0; i < observation.size(); i++)
       {
+        this->observations->at(i) = observation[i];
         vars[i] = observation[i];
         // TODO: scaling?
       }

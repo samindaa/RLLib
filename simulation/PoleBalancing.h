@@ -115,7 +115,10 @@ class PoleBalancing: public Environment<float>
     {
       DenseVector<float>& vars = *output->o_tp1;
       for (int i = 0; i < vars.dimension(); i++)
+      {
+        observations->at(i) = x[i];
         vars[i] = x[i];
+      }
       output->updateRTStep(r(), z(), endOfEpisode());
     }
     void step(const Action& action)

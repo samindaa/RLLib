@@ -82,7 +82,8 @@ class RandlovBike: public Environment<float>
   private:
     enum OperationMode
     {
-      start = 0, execute_action,
+      start = 0,
+      execute_action,
     };
 
     float calc_dist_to_goal(float xf, float xb, float yf, float yb)
@@ -217,6 +218,15 @@ class RandlovBike: public Environment<float>
       vars[4] /= THETA_DOT;
       vars[5] /= PSI_GOAL;
       vars[6] /= AUX_STATE;
+
+      observations->at(0) = omega;
+      observations->at(1) = omega_dot;
+      observations->at(2) = omega_d_dot;
+      observations->at(3) = theta;
+      observations->at(4) = theta_dot;
+      observations->at(5) = theta_d_dot;
+      observations->at(6) = psi_goal;
+      observations->at(7) = calc_dist_to_goal(xf, xb, yf, yb);
 
       // debug
       //for (int i = 0; i < env->getNumStateVars(); i++)

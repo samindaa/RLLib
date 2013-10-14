@@ -92,7 +92,7 @@ void ContinuousGridworldModel::doWork()
     }
     else
       window->views[i->first]->add(
-          Vec(i->second->getEnvironment()->getTRStep().o_tp1->at(0),
-              i->second->getEnvironment()->getTRStep().o_tp1->at(1)));
+          Vec(i->second->getEnvironment()->getObservations().at(0),
+              i->second->getEnvironment()->getObservations().at(1)));
   }
 }

@@ -154,6 +154,13 @@ class MCar3D: public Environment<float>
       vars[1] = (yposition - positionRange->min()) * 6.0 / positionRange->length();
       vars[2] = (xvelocity - velocityRange->min()) * 6.0 / velocityRange->length();
       vars[3] = (yvelocity - velocityRange->min()) * 6.0 / velocityRange->length();
+
+
+      observations->at(0) = xposition;
+      observations->at(1) = yposition;
+      observations->at(2) = xvelocity;
+      observations->at(3) = yvelocity;
+
       if (out.is_open() && getOn())
         out << xposition << " " << yposition << std::endl;
       output->updateRTStep(r(), z(), endOfEpisode());
