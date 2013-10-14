@@ -11,10 +11,15 @@ int main(int argc, char *argv[])
 
   RLLibViz::ViewBase* behaviorView = new RLLibViz::ContinuousGridworldView;
   RLLibViz::ViewBase* targetView = new RLLibViz::ContinuousGridworldView;
+  RLLibViz::ViewBase* behaviorPlot = new RLLibViz::PlotView;
+  RLLibViz::ViewBase* targetPlot = new RLLibViz::PlotView;
+
 
   RLLibViz::Window* window = new RLLibViz::Window;
   window->addView(behaviorView);
   window->addView(targetView);
+  window->addPlot(behaviorPlot);
+  window->addPlot(targetPlot);
   window->setWindowTitle("RLLibViz");
   window->show();
 

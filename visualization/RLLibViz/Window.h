@@ -2,7 +2,7 @@
 #define WINDOW_H
 
 #include <QWidget>
-#include <QHBoxLayout>
+#include <QGridLayout>
 #include "ViewBase.h"
 #include <vector>
 
@@ -17,14 +17,19 @@ public:
   typedef std::vector<ViewBase*> Views;
   typedef std::vector<ViewBase*> Plots;
   Views views;
-  QHBoxLayout* mainLayout;
+  Plots plots;
+  QLayout* grid;
+  int colsA, colsB;
+
 public:
   explicit Window(QWidget *parent = 0);
   virtual ~Window();
   void addView(ViewBase* view);
+  void addPlot(ViewBase* view);
 
 protected:
-  void keyPressEvent(QKeyEvent *);
+  void keyPressEvent(QKeyEvent* event);
+
 };
 
 }  // namespace RLLibViz

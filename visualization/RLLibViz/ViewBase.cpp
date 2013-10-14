@@ -17,9 +17,6 @@ ViewBase::ViewBase(QWidget *parent) :
   // Double buffering
   current = buffers[0];
   next = buffers[1];
-  // Set the background
-  setBackgroundRole(QPalette::Base);
-  setAutoFillBackground(true);
 }
 
 ViewBase::~ViewBase()

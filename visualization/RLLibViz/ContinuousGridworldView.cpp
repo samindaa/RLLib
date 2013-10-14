@@ -12,6 +12,9 @@ using namespace RLLibViz;
 ContinuousGridworldView::ContinuousGridworldView(QWidget *parent) :
     ViewBase(parent)
 {
+  // Set the background
+  setBackgroundRole(QPalette::Base);
+  setAutoFillBackground(true);
 }
 
 ContinuousGridworldView::~ContinuousGridworldView()

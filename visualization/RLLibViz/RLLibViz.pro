@@ -20,6 +20,7 @@ SOURCES += Main.cpp\
 	Framebuffer.cpp \
 	ContinuousGridworldView.cpp \
     	Window.cpp \
+	plot/qcustomplot.cpp \
 	PlotView.cpp
 
 HEADERS  += Mat.h \
@@ -31,6 +32,7 @@ HEADERS  += Mat.h \
 	Framebuffer.h \
 	ContinuousGridworldView.h \
 	ContinuousGridworldModel.h \
+	plot/qcustomplot.h \
 	PlotView.h
 
 	

@@ -44,6 +44,7 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
   evaluationRunner = new Simulator<double, float>(control, evaluationEnvironment, 5000);
   learningRunner->setVerbose(false);
   evaluationRunner->setEvaluate(true);
+  evaluationRunner->setVerbose(false);
 
   simulators.insert(std::make_pair(simulators.size(), learningRunner));
   simulators.insert(std::make_pair(simulators.size(), evaluationRunner));
@@ -83,12 +84,15 @@ void ContinuousGridworldModel::doWork()
   for (std::tr1::unordered_map<int, Simulator<double, float>*>::iterator i = simulators.begin();
       i != simulators.end(); ++i)
   {
-    if (i->second->isBeginingOfEpisode())
+    if (i->second->isEndingOfEpisode())
+    {
       window->views[i->first]->draw();
+      window->plots[i->first]->add(Vec(i->second->timeStep, 0));
+      window->plots[i->first]->draw();
+    }
     else
       window->views[i->first]->add(
           Vec(i->second->getEnvironment()->getTRStep().o_tp1->at(0),
               i->second->getEnvironment()->getTRStep().o_tp1->at(1)));
   }
-
 }

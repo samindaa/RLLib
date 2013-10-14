@@ -8,9 +8,13 @@
 #ifndef PLOTVIEW_H_
 #define PLOTVIEW_H_
 
+#include <vector>
+
+#include <QHBoxLayout>
+#include <QVector>
 #include "ViewBase.h"
 #include "Mat.h"
-#include <vector>
+#include "plot/qcustomplot.h"
 
 namespace RLLibViz
 {
@@ -19,7 +23,11 @@ class PlotView: public ViewBase
 {
   Q_OBJECT
   private:
-    std::vector<Vec> points;
+    QHBoxLayout* grid;
+    QCustomPlot* plot;
+    QVector<double> x, y;
+    double gMaxY;
+    double gMinY;
   public:
     PlotView(QWidget *parent = 0);
     virtual ~PlotView();
@@ -28,7 +36,6 @@ class PlotView: public ViewBase
     void add(const Vec& p);
 
     void draw();
-    void paintEvent(QPaintEvent* event);
 };
 
 }  // namespace RLLibViz
