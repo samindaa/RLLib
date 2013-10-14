@@ -48,7 +48,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdint.h> //<< Sam Abeyruwan
-
+#include <string.h>
 namespace RLLib
 {
 
@@ -145,6 +145,12 @@ class CollisionTable
 class Hashing
 {
   public:
+    enum
+    {
+      MAX_NUM_VARS = 20,          // Maximum number of variables in a grid-tiling
+      //MAX_NUM_COORDS = 100,     // Maximum number of hashing coordinates
+      MaxLONGINT = 2147483647
+    };
     virtual ~Hashing()
     {
     }
@@ -206,6 +212,7 @@ class MurmurHashing: public Hashing
 {
   protected:
     unsigned int seed;
+    uint8_t* key;
   public:
     MurmurHashing()
     {
@@ -213,6 +220,13 @@ class MurmurHashing: public Hashing
       srand(0);
       seed = (unsigned int) rand();
       srand(time(0));
+      key = new uint8_t[(MAX_NUM_VARS * 2 + 1) * 4]; //<< Arbitrary
+      ::memset(key, 0, (MAX_NUM_VARS * 2 + 1) * 4);
+    }
+
+    virtual ~MurmurHashing()
+    {
+      delete[] key;
     }
 
   public:
@@ -274,7 +288,7 @@ class MurmurHashing: public Hashing
     }
 
   private:
-    void pack(uint32_t val, uint8_t *dest)
+    void pack(const uint32_t& val, uint8_t* dest)
     {
       dest[0] = (val & 0xff000000) >> 24;
       dest[1] = (val & 0x00ff0000) >> 16;
@@ -284,12 +298,9 @@ class MurmurHashing: public Hashing
   public:
     int hash(int* ints/*coordinates*/, int num_ints, int m/*memory_size*/, int increment)
     {
-      uint8_t* key = new uint8_t[num_ints * 4]; // fixMe: find a better way to remove this
       for (int i = 0; i < num_ints; i++)
         pack(ints[i], &key[i * 4]);
-      int index = (int) (((long) murmurHashNeutral2(key, (num_ints * 4), seed) + INT_MAX) % m);
-      delete[] key;
-      return index;
+      return (int) (((long) murmurHashNeutral2(key, (num_ints * 4), seed) + INT_MAX) % m);
     }
 
 };
@@ -298,20 +309,13 @@ class MurmurHashing: public Hashing
 class Tiles
 {
   protected:
-    enum
-    {
-      MAX_NUM_VARS = 20,        // Maximum number of variables in a grid-tiling
-      MAX_NUM_COORDS = 100,     // Maximum number of hashing coordinates
-      MaxLONGINT = 2147483647
-    };
+    int qstate[Hashing::MAX_NUM_VARS];
+    int base[Hashing::MAX_NUM_VARS];
+    int wrap_widths_times_num_tilings[Hashing::MAX_NUM_VARS];
+    int coordinates[Hashing::MAX_NUM_VARS * 2 + 1]; /* one interval number per relevant dimension */
 
-    int qstate[MAX_NUM_VARS];
-    int base[MAX_NUM_VARS];
-    int wrap_widths_times_num_tilings[MAX_NUM_VARS];
-    int coordinates[MAX_NUM_VARS * 2 + 1]; /* one interval number per relevant dimension */
-
-    int i_tmp_arr[MAX_NUM_VARS];
-    float f_tmp_arr[MAX_NUM_VARS];
+    int i_tmp_arr[Hashing::MAX_NUM_VARS];
+    float f_tmp_arr[Hashing::MAX_NUM_VARS];
 
     Hashing* hashing; /*The has function*/
     Hashing* hashUNH;
@@ -340,7 +344,7 @@ class Tiles
 
       ct->calls++;
       j = hashUNH->hash(ints, num_ints, ct->m, 449);
-      ccheck = hashUNH->hash(ints, num_ints, MaxLONGINT, 457);
+      ccheck = hashUNH->hash(ints, num_ints, Hashing::MaxLONGINT, 457);
       if (ccheck == ct->data[j])
         ct->clearhits++;
       else if (ct->data[j] == -1)
@@ -352,7 +356,7 @@ class Tiles
         ct->collisions++;
       else
       {
-        long h2 = 1 + 2 * hashUNH->hash(ints, num_ints, (MaxLONGINT) / 4, 449);
+        long h2 = 1 + 2 * hashUNH->hash(ints, num_ints, (Hashing::MaxLONGINT) / 4, 449);
         int i = 0;
         while (++i)
         {
