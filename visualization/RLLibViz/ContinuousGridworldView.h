@@ -10,25 +10,30 @@
 
 #include "ViewBase.h"
 
+#include <QResizeEvent>
+
 namespace RLLibViz
 {
 
 class ContinuousGridworldView: public ViewBase
 {
-Q_OBJECT
+  Q_OBJECT
 
-public:
-  Vec vecE;
-  Vec vecX;
-  Vec vecY;
-  Mat T;
+  public:
+    Vec vecE;
+    Vec vecX;
+    Vec vecY;
+    Mat T;
 
-public:
-  ContinuousGridworldView(QWidget *parent = 0);
-  virtual ~ContinuousGridworldView();
+  public:
+    ContinuousGridworldView(QWidget *parent = 0);
+    virtual ~ContinuousGridworldView();
 
-  void initialize();
-  void add(const Vec& p);
+    void initialize();
+    void add(const Vec& p);
+
+  protected:
+    void resizeEvent(QResizeEvent *);
 };
 
 }  // namespace RLLibViz

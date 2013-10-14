@@ -41,3 +41,8 @@ void ContinuousGridworldView::add(const Vec& p)
   current->add(T * p);
 }
 
+void ContinuousGridworldView::resizeEvent(QResizeEvent* event)
+{
+  initialize();
+}
+
