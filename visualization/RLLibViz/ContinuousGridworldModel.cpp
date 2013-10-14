@@ -87,7 +87,7 @@ void ContinuousGridworldModel::doWork()
     if (i->second->isEndingOfEpisode())
     {
       window->views[i->first]->draw();
-      window->plots[i->first]->add(Vec(i->second->timeStep, 0));
+      window->plots[i->first]->add(Vec(i->second->timeStep, 0), Vec(i->second->episodeR, 0));
       window->plots[i->first]->draw();
     }
     else

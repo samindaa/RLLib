@@ -30,7 +30,7 @@ class ContinuousGridworldView: public ViewBase
     virtual ~ContinuousGridworldView();
 
     void initialize();
-    void add(const Vec& p);
+    void add(const Vec& p1, const Vec& p2);
 
   protected:
     void resizeEvent(QResizeEvent *);

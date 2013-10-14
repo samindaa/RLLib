@@ -25,15 +25,15 @@ class PlotView: public ViewBase
   private:
     QHBoxLayout* grid;
     QCustomPlot* plot;
-    QVector<double> x, y;
-    double gMaxY;
-    double gMinY;
+    QVector<double> x, yOne, yTwo;
+    Vec graphOne;
+    Vec graphTwo;
   public:
     PlotView(QWidget *parent = 0);
     virtual ~PlotView();
 
     void initialize();
-    void add(const Vec& p);
+    void add(const Vec& p1, const Vec& p2);
 
     void draw();
 };

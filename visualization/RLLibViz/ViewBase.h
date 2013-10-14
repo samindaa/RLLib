@@ -39,7 +39,7 @@ class ViewBase: public QWidget
     QSize sizeHint() const;
 
     virtual void initialize() =0;
-    virtual void add(const Vec& p) =0;
+    virtual void add(const Vec& p1, const Vec& p2 = Vec()) =0;
     virtual void draw();
 
   protected:

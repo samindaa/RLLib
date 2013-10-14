@@ -27,7 +27,9 @@ void SwingPendulumTest::testOffPACSwingPendulum()
 {
   srand(time(0));
   Environment<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
+  Hashing* hashing = new MurmurHashing;
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true,
+      hashing);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
 
@@ -60,6 +62,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
   sim->computeValueFunction();
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete critice;
@@ -77,7 +80,9 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
 {
   srand(time(0));
   Environment<float>* problem = new SwingPendulum;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, false);
+  Hashing* hashing = new MurmurHashing;
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, false,
+      hashing);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getContinuousActionList());
 
@@ -113,12 +118,13 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
   sim->run();
 
   sim->setEvaluate(true);
-  sim->setEpisodes(1000);
+  sim->setEpisodes(100);
   sim->run();
 
   sim->computeValueFunction();
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete critice;
@@ -235,8 +241,9 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
 {
   srand(time(0));
   Environment<float>* problem = new SwingPendulum;
-
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, true);
+  Hashing* hashing = new MurmurHashing;
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, true,
+      hashing);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
 
@@ -260,6 +267,7 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
   sim->computeValueFunction();
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete critice;
@@ -274,8 +282,8 @@ void SwingPendulumTest::run()
 {
   testOffPACSwingPendulum();
   testOnPolicySwingPendulum();
-  //testOffPACSwingPendulum2();
-  //testOffPACOnPolicySwingPendulum();
-  //testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum();
+  testOffPACSwingPendulum2();
+  testOffPACOnPolicySwingPendulum();
+  testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum();
 }
 
