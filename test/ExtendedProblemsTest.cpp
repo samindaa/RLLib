@@ -54,7 +54,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 100);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 1);
   sim->run();
   sim->setEvaluate(true);
   sim->run();
@@ -98,7 +98,7 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
       &problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 300);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
   sim->run();
   //sim->computeValueFunction();
   control->persist("visualization/mcar3d_greedy_gq.data");
@@ -142,7 +142,7 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
   OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
       toStateAction, sarsa);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 300);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
   sim->run();
   sim->setEvaluate(true);
   sim->run();
@@ -187,7 +187,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 1000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 1000, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -240,7 +240,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 300);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
   sim->run();
   sim->setEvaluate(true);
   sim->run();
@@ -285,7 +285,7 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
       &problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 500);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 500, 1);
   sim->run();
   sim->setEvaluate(true);
   sim->run();

@@ -45,7 +45,7 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
       &problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 5000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 50001, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -89,7 +89,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5, 5000, 3000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 3000, 5);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -144,7 +144,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 30000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 30000, 1);
   //sim->run(5, 5000, 3000);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
@@ -201,7 +201,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 8000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 8000, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -257,7 +257,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 1, 5000, 5000);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 5000, 1);
   sim->run();
   sim->computeValueFunction();
 

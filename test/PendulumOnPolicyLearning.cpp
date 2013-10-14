@@ -96,7 +96,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
   actor = new Actor<double, float>(alpha_u, policyDistribution);
   control = new ActorCritic<double, float>(critic, actor, projector, toStateAction);
 
-  sim = new Simulator<double, float>(control, problem, 1, 5000, 50);
+  sim = new Simulator<double, float>(control, problem, 5000, 50, 1);
   sim->run();
 
   evaluate();
@@ -132,7 +132,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblit
   control = new AverageRewardActorCritic<double, float>(critic, actor, projector, toStateAction,
       0.01);
 
-  sim = new Simulator<double, float>(control, problem, 1, 5000, 50);
+  sim = new Simulator<double, float>(control, problem, 5000, 50, 1);
   sim->run();
   sim->computeValueFunction();
   evaluate();

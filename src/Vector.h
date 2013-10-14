@@ -58,6 +58,7 @@ class Vector
     virtual double maxNorm() const =0;
     virtual double euclideanNorm() const =0;
     virtual T* operator()() const =0; // return the data as an array
+    virtual bool empty() const =0;
 
     virtual void persist(const std::string& f) const =0;
     virtual void resurrect(const std::string& f) =0;
@@ -159,6 +160,12 @@ class DenseVector: public Vector<T>
     {
       return capacity;
     }
+
+    bool empty() const
+    {
+      return (dimension() != 0);
+    }
+
     double maxNorm() const
     {
       double maxv = capacity > 0 ? fabs(data[0]) : 0.0;
@@ -582,6 +589,12 @@ class SparseVector: public Vector<T>
     {
       return indexesPositionLength;
     }
+
+    bool empty() const
+    {
+      return (dimension() != 0);
+    }
+
     double maxNorm() const
     {
       double maxv = nbActive > 0 ? fabs(values[0]) : 0.0;
