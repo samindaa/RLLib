@@ -51,6 +51,7 @@ class Simulator
     int nbRuns;
     int nbEpisodeDone;
     bool beginingOfEpisode;
+    bool endingOfEpisode;
     bool evaluate;
     bool verbose;
 
@@ -73,9 +74,9 @@ class Simulator
             new DenseVector<O>(environment->getVars().dimension())), x_tp1(
             new DenseVector<O>(environment->getVars().dimension())), maxEpisodeTimeSteps(
             maxEpisodeTimeSteps), nbEpisodes(nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), beginingOfEpisode(
-            true), evaluate(false), verbose(true), totalTimeInMilliseconds(0), enableStatistics(
-            false), enableTestEpisodesAfterEachRun(false), maxTestEpisodesAfterEachRun(20), timeStep(
-            0), episodeR(0), episodeZ(0)
+            true), endingOfEpisode(false), evaluate(false), verbose(true), totalTimeInMilliseconds(
+            0), enableStatistics(false), enableTestEpisodesAfterEachRun(false), maxTestEpisodesAfterEachRun(
+            20), timeStep(0), episodeR(0), episodeZ(0)
     {
     }
 
@@ -138,27 +139,27 @@ class Simulator
         episodeZ = 0;
         totalTimeInMilliseconds = 0;
         beginingOfEpisode = false;
+        endingOfEpisode = false;
       }
       else
       {
         environment->step(*a_t);
         const TRStep<O>& step = environment->getTRStep();
-        x_tp1->set(environment->getVars());
+        x_tp1->set(*step.o_tp1);
         ++timeStep;
         episodeR += step.r_tp1;
         episodeZ += step.z_tp1;
-        bool endOfEpisode = environment->getTRStep().endOfEpisode
-            || (timeStep == maxEpisodeTimeSteps);
+        endingOfEpisode = step.endOfEpisode || (timeStep == maxEpisodeTimeSteps);
         timer.start();
         a_t =
             evaluate ?
-                &agent->proposeAction(environment->getVars()) :
+                &agent->proposeAction(*x_tp1) :
                 &agent->step(*x_t, *a_t, *x_tp1, step.r_tp1, step.z_tp1);
         x_t->set(*x_tp1);
         timer.stop();
         totalTimeInMilliseconds += timer.getElapsedTimeInMilliSec();
 
-        if (endOfEpisode/*Episode ended*/)
+        if (endingOfEpisode/*Episode ended*/)
         {
           if (verbose)
           {
@@ -170,7 +171,6 @@ class Simulator
           }
           if (enableStatistics)
             statistics.push_back(timeStep);
-          timeStep = 0;
           ++nbEpisodeDone;
           beginingOfEpisode = true;
         }
@@ -220,6 +220,11 @@ class Simulator
     bool isBeginingOfEpisode() const
     {
       return beginingOfEpisode;
+    }
+
+    bool isEndingOfEpisode() const
+    {
+      return endingOfEpisode;
     }
 
     const Environment<O>* getEnvironment() const
