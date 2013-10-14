@@ -163,7 +163,7 @@ class DenseVector: public Vector<T>
 
     bool empty() const
     {
-      return (dimension() != 0);
+      return (dimension() == 0);
     }
 
     double maxNorm() const
@@ -592,7 +592,7 @@ class SparseVector: public Vector<T>
 
     bool empty() const
     {
-      return (dimension() != 0);
+      return (dimension() == 0);
     }
 
     double maxNorm() const

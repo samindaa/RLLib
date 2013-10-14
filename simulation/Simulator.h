@@ -147,6 +147,8 @@ class Simulator
         ++timeStep;
         episodeR += step.r_tp1;
         episodeZ += step.z_tp1;
+        bool endOfEpisode = environment->getTRStep().endOfEpisode
+            || (timeStep == maxEpisodeTimeSteps);
         timer.start();
         a_t =
             evaluate ?
@@ -155,25 +157,25 @@ class Simulator
         x_t->set(*x_tp1);
         timer.stop();
         totalTimeInMilliseconds += timer.getElapsedTimeInMilliSec();
+
+        if (endOfEpisode/*Episode ended*/)
+        {
+          if (verbose)
+          {
+            double averageTimePerStep = totalTimeInMilliseconds / timeStep;
+            std::cout << "{" << nbEpisodeDone << " [" << timeStep << " (" << episodeR << ","
+                << episodeZ << "," << averageTimePerStep << ")]} ";
+            //std::cout << ".";
+            std::cout.flush();
+          }
+          if (enableStatistics)
+            statistics.push_back(timeStep);
+          timeStep = 0;
+          ++nbEpisodeDone;
+          beginingOfEpisode = true;
+        }
       }
 
-      if (environment->getTRStep().endOfEpisode || (timeStep == maxEpisodeTimeSteps))
-      {
-        // Episode ended
-        if (verbose)
-        {
-          double averageTimePerStep = totalTimeInMilliseconds / timeStep;
-          std::cout << "{" << nbEpisodeDone << " [" << timeStep << " (" << episodeR << ","
-              << episodeZ << "," << averageTimePerStep << ")]} ";
-          //std::cout << ".";
-          std::cout.flush();
-        }
-        if (enableStatistics)
-          statistics.push_back(timeStep);
-        timeStep = 0;
-        ++nbEpisodeDone;
-        beginingOfEpisode = true;
-      }
     }
 
     void runEpisodes()
