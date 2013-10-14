@@ -65,7 +65,9 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
 {
   srand(time(0));
   Environment<float>* problem = new ContinuousGridworld;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
+  Hashing* hashing = new MurmurHashing;
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true,
+      hashing);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, &problem->getDiscreteActionList());
 
@@ -103,6 +105,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
   sim->run();
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete critice;

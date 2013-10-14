@@ -45,6 +45,7 @@ class ContinuousGridworldModel: public ModelBase
 // RLLib
     Environment<float>* behaviourEnvironment;
     Environment<float>* evaluationEnvironment;
+    Hashing* hashing;
     Projector<double, float>* projector;
     StateToStateAction<double, float>* toStateAction;
 

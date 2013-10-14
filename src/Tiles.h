@@ -47,6 +47,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <limits.h>
+#include <stdint.h> //<< Sam Abeyruwan
 
 namespace RLLib
 {
@@ -147,20 +148,14 @@ class Hashing
     virtual ~Hashing()
     {
     }
-    virtual int hash(int* ints/*coordinates*/, int num_ints, long m/*memory_size*/,
+    virtual int hash(int* ints/*coordinates*/, int num_ints, int m/*memory_size*/,
         int increment) =0;
 };
 
 class UNH: public Hashing
 {
   protected:
-    enum
-    {
-      URNDSEQ = 2047,
-      RNDSEQ = 2048
-    };
-
-    unsigned int rndseq[RNDSEQ];
+    unsigned int rndseq[16384]; // 2^14 (16384)  {old: 2048}
 
   public:
     UNH()
@@ -168,7 +163,7 @@ class UNH: public Hashing
       /*First call to hashing, initialize table of random numbers */
       //printf("inside tiles \n");
       srand(0);
-      for (int k = 0; k < RNDSEQ; k++)
+      for (int k = 0; k < 16384/*2048*/; k++)
       {
         rndseq[k] = 0;
         for (int i = 0; i < int(sizeof(int)); ++i)
@@ -180,7 +175,7 @@ class UNH: public Hashing
     /** hash_UNH
      *  Takes an array of integers and returns the corresponding tile after hashing
      */
-    int hash(int* ints/*coordinates*/, int num_ints, long m/*memory_size*/, int increment)
+    int hash(int* ints/*coordinates*/, int num_ints, int m/*memory_size*/, int increment)
     {
       long index;
       long sum = 0;
@@ -191,10 +186,9 @@ class UNH: public Hashing
         index = ints[i];
         index += (increment * i);
         /* index %= 2048; */
-        //index = index & 2047;
-        index = index & URNDSEQ;
+        index = index & 16383/*2047*/;
         while (index < 0)
-          index += RNDSEQ;
+          index += 16384/*2048*/;
 
         /* add selected random number to sum */
         sum += (long) rndseq[(int) index];
@@ -229,7 +223,7 @@ class MurmurHashing: public Hashing
      * Same as MurmurHash2, but endian- and alignment-neutral.
      * Half the speed though, alas.
      */
-    unsigned int MurmurHashNeutral2(const void * key, int len, unsigned int seed)
+    unsigned int murmurHashNeutral2(const void* key, int len, unsigned int seed)
     {
       // 'm' and 'r' are mixing constants generated off-line.
       // They're not really 'magic', they just happen to work well.
@@ -239,7 +233,7 @@ class MurmurHashing: public Hashing
 
       unsigned int h = seed ^ len;
 
-      const unsigned char * data = (const unsigned char *) key;
+      const unsigned char* data = (const unsigned char*) key;
 
       while (len >= 4)
       {
@@ -279,10 +273,23 @@ class MurmurHashing: public Hashing
       return h;
     }
 
-    int hash(int* ints/*coordinates*/, int num_ints, long m/*memory_size*/, int increment)
+  private:
+    void pack(uint32_t val, uint8_t *dest)
     {
-      // FixMe:
-      return (int) (((long) MurmurHashNeutral2(ints, num_ints, seed) + INT_MAX) % m);
+      dest[0] = (val & 0xff000000) >> 24;
+      dest[1] = (val & 0x00ff0000) >> 16;
+      dest[2] = (val & 0x0000ff00) >> 8;
+      dest[3] = (val & 0x000000ff);
+    }
+  public:
+    int hash(int* ints/*coordinates*/, int num_ints, int m/*memory_size*/, int increment)
+    {
+      uint8_t* key = new uint8_t[num_ints * 4]; // fixMe: find a better way to remove this
+      for (int i = 0; i < num_ints; i++)
+        pack(ints[i], &key[i * 4]);
+      int index = (int) (((long) murmurHashNeutral2(key, (num_ints * 4), seed) + INT_MAX) % m);
+      delete[] key;
+      return index;
     }
 
 };
@@ -415,7 +422,7 @@ class Tiles
         /* add additional indices for tiling and hashing_set so they hash differently */
         coordinates[i] = j;
 
-        the_tiles[j] = hashing->hash(coordinates, num_coordinates, memory_size, 449);
+        the_tiles[j] = hashing->hash(coordinates, num_coordinates, memory_size, 470/*449*/);
       }
       return;
     }
@@ -718,7 +725,7 @@ class Tiles
         /* add additional indices for tiling and hashing_set so they hash differently */
         coordinates[i] = j;
 
-        the_tiles[j] = hashing->hash(coordinates, num_coordinates, memory_size, 449);
+        the_tiles[j] = hashing->hash(coordinates, num_coordinates, memory_size, 470/*449*/);
       }
       return;
     }

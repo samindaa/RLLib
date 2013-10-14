@@ -15,12 +15,13 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
   // RLLib:
   behaviourEnvironment = new ContinuousGridworld;
   evaluationEnvironment = new ContinuousGridworld;
-  projector = new TileCoderHashing<double, float>(1000000, 10, true);
+  hashing = new MurmurHashing;
+  projector = new TileCoderHashing<double, float>(1000000, 10, true, hashing);
   toStateAction = new StateActionTilings<double, float>(projector,
       &behaviourEnvironment->getDiscreteActionList());
 
   alpha_v = 0.1 / projector->vectorNorm();
-  alpha_w = 0.0001 / projector->vectorNorm();
+  alpha_w = 0.0; //0.0001 / projector->vectorNorm();
   gamma = 0.99;
   lambda = 0.4;
   critice = new ATrace<double>(projector->dimension());
@@ -53,6 +54,7 @@ ContinuousGridworldModel::~ContinuousGridworldModel()
 {
   delete behaviourEnvironment;
   delete evaluationEnvironment;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete critice;
