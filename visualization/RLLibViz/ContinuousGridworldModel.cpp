@@ -86,13 +86,14 @@ void ContinuousGridworldModel::doWork()
   {
     if (i->second->isEndingOfEpisode())
     {
-      window->views[i->first]->draw();
-      window->plots[i->first]->add(Vec(i->second->timeStep, 0), Vec(i->second->episodeR, 0));
-      window->plots[i->first]->draw();
+      emit signal_draw(window->views[i->first]);
+      emit signal_add(window->plots[i->first], Vec(i->second->timeStep, 0),
+          Vec(i->second->episodeR, 0));
+      emit signal_draw(window->plots[i->first]);
     }
     else
-      window->views[i->first]->add(
+      emit signal_add(window->views[i->first],
           Vec(i->second->getEnvironment()->getObservations().at(0),
-              i->second->getEnvironment()->getObservations().at(1)));
+              i->second->getEnvironment()->getObservations().at(1)), Vec(0.0, 0.0, 0.0, 1.0));
   }
 }

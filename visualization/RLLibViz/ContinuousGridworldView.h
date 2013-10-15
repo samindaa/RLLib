@@ -28,9 +28,11 @@ class ContinuousGridworldView: public ViewBase
   public:
     ContinuousGridworldView(QWidget *parent = 0);
     virtual ~ContinuousGridworldView();
-
     void initialize();
-    void add(const Vec& p1, const Vec& p2);
+
+  public slots:
+    void add(QWidget* that, const Vec& p1, const Vec& p2);
+    void draw(QWidget* that);
 
   protected:
     void resizeEvent(QResizeEvent *);

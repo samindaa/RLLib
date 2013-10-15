@@ -10,12 +10,6 @@
 
 #include "ModelBase.h"
 
-#include <QObject>
-#include <vector>
-#include <QTimerEvent>
-
-#include "Window.h"
-
 // From the RLLib
 #include "Vector.h"
 #include "Trace.h"
@@ -31,6 +25,7 @@
 #include "ContinuousGridworldView.h"
 
 //
+#include <vector>
 #include <tr1/unordered_map>
 
 using namespace RLLib;

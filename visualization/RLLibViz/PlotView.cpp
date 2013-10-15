@@ -43,8 +43,10 @@ void PlotView::initialize()
 {
 }
 
-void PlotView::draw()
+void PlotView::draw(QWidget* that)
 {
+  if (this != that)
+    return;
   // find min and max
   for (QVector<double>::iterator i = yOne.begin(); i != yOne.end(); ++i)
   {
@@ -73,8 +75,10 @@ void PlotView::draw()
   plot->replot();
 }
 
-void PlotView::add(const Vec& graphOneP, const Vec& graphTwoP)
+void PlotView::add(QWidget* that, const Vec& graphOneP, const Vec& graphTwoP)
 {
+  if (this != that)
+    return;
   // O(N)
   for (size_t i = 1; i < yOne.size(); i++)
   {

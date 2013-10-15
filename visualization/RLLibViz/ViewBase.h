@@ -37,15 +37,15 @@ class ViewBase: public QWidget
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
-
     virtual void initialize() =0;
-    virtual void add(const Vec& p1, const Vec& p2 = Vec()) =0;
-    virtual void draw();
+
+  public slots:
+    virtual void add(QWidget* that, const Vec& p1, const Vec& p2) =0;
+    virtual void draw(QWidget* that) =0;
 
   protected:
+    virtual void swap();
     void paintEvent(QPaintEvent *);
-    void swap();
-
 };
 
 }  // namespace RLLibViz

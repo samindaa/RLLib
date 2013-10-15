@@ -25,7 +25,22 @@ void ModelBase::setWindow(Window* window)
 void ModelBase::initialize()
 {
   for (Window::Views::iterator iter = window->views.begin(); iter != window->views.end(); ++iter)
-    (*iter)->initialize();
+  {
+    ViewBase* view = *iter;
+    view->initialize();
+    connect(this, SIGNAL(signal_draw(QWidget*)), view, SLOT(draw(QWidget*)));
+    connect(this, SIGNAL(signal_add(QWidget*, const Vec&, const Vec&)), view,
+    SLOT(add(QWidget*,const Vec&, const Vec&)));
+  }
+
+  for (Window::Plots::iterator iter = window->plots.begin(); iter != window->plots.end(); ++iter)
+  {
+    ViewBase* view = *iter;
+    view->initialize();
+    connect(this, SIGNAL(signal_draw(QWidget*)), view, SLOT(draw(QWidget*)));
+    connect(this, SIGNAL(signal_add(QWidget*, const Vec&, const Vec&)), view,
+    SLOT(add(QWidget*,const Vec&, const Vec&)));
+  }
 }
 
 void ModelBase::run()

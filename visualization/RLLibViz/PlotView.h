@@ -31,11 +31,11 @@ class PlotView: public ViewBase
   public:
     PlotView(QWidget *parent = 0);
     virtual ~PlotView();
-
     void initialize();
-    void add(const Vec& p1, const Vec& p2);
 
-    void draw();
+  public slots:
+    void add(QWidget* that, const Vec& p1, const Vec& p2);
+    void draw(QWidget* that);
 };
 
 }  // namespace RLLibViz

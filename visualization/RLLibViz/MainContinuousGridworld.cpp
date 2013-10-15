@@ -5,9 +5,15 @@
 #include "ModelThread.h"
 #include "Window.h"
 
+
+using namespace RLLibViz;
+
+Q_DECLARE_METATYPE(Vec)
+
 int main(int argc, char *argv[])
 {
   QApplication a(argc, argv);
+  qRegisterMetaType<Vec>();
 
   RLLibViz::ViewBase* behaviorView = new RLLibViz::ContinuousGridworldView;
   RLLibViz::ViewBase* targetView = new RLLibViz::ContinuousGridworldView;

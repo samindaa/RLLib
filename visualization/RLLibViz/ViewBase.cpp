@@ -44,13 +44,6 @@ void ViewBase::paintEvent(QPaintEvent* event)
   next->draw(painter);
 }
 
-void ViewBase::draw()
-{
-  swap();
-  current->clear();
-  update();
-}
-
 void ViewBase::swap()
 {
   Framebuffer* temp = current;

@@ -16,6 +16,8 @@ namespace RLLibViz
 
 class ModelBase: public QObject
 {
+  Q_OBJECT
+
   protected:
     Window* window;
   public:
@@ -24,6 +26,11 @@ class ModelBase: public QObject
     void setWindow(Window* window);
     void run();
     virtual void initialize();
+
+  public:
+  signals:
+    void signal_draw(QWidget* that);
+    void signal_add(QWidget* that, const Vec& p, const Vec& q);
 
   protected:
     virtual void doWork() =0;

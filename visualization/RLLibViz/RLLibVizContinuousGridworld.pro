@@ -6,13 +6,13 @@
 
 QT       += core gui
 
-TARGET = RLLibViz
+TARGET = RLLibVizContinuousGridworld
 TEMPLATE = app
 
 INCLUDEPATH += ../../src \
                ../../simulation
 
-SOURCES += Main.cpp\
+SOURCES += MainContinuousGridworld.cpp\
         ModelBase.cpp \
 	ModelThread.cpp \
 	ContinuousGridworldModel.cpp \
