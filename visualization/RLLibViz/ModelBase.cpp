@@ -41,6 +41,15 @@ void ModelBase::initialize()
     connect(this, SIGNAL(signal_add(QWidget*, const Vec&, const Vec&)), view,
     SLOT(add(QWidget*,const Vec&, const Vec&)));
   }
+
+  if (window->valueFunctionView)
+  {
+    ViewBase* view = window->valueFunctionView;
+    view->initialize();
+    connect(this,
+    SIGNAL(signal_add(QWidget*, const Matrix*, double const&, double const&)), view,
+    SLOT(add(QWidget*, const Matrix*, double const&, double const&)));
+  }
 }
 
 void ModelBase::run()

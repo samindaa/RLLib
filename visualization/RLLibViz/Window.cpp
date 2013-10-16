@@ -6,7 +6,7 @@
 using namespace RLLibViz;
 
 Window::Window(QWidget *parent) :
-    QWidget(parent), grid(0), colsA(0), colsB(0)
+    QWidget(parent), valueFunctionView(0), grid(0), colsA(0), colsB(0)
 {
   grid = new QGridLayout(this);
   setLayout(grid);
@@ -26,6 +26,12 @@ void Window::addPlot(ViewBase* view)
 {
   plots.push_back(view);
   ((QGridLayout*) grid)->addWidget(view, 1, colsB++);
+}
+
+void Window::setValueFunctionView(ViewBase* valueFunctionView)
+{
+  this->valueFunctionView = valueFunctionView;
+  ((QGridLayout*) grid)->addWidget(this->valueFunctionView, 0, colsA++);
 }
 
 void Window::keyPressEvent(QKeyEvent* event)

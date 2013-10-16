@@ -41,6 +41,10 @@ void SwingPendulumView::add(QWidget* that, const Vec& p, const Vec& p2)
   rotation = rotateZ(p.x + M_PI);
 }
 
+void SwingPendulumView::add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV)
+{
+}
+
 void SwingPendulumView::paintEvent(QPaintEvent* event)
 {
   QPainter painter(this);

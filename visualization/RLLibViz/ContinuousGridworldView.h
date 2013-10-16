@@ -33,6 +33,7 @@ class ContinuousGridworldView: public ViewBase
   public slots:
     void add(QWidget* that, const Vec& p1, const Vec& p2);
     void draw(QWidget* that);
+    void add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
 
   protected:
     void resizeEvent(QResizeEvent *);

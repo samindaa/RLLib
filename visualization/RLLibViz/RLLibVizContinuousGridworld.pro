@@ -21,7 +21,8 @@ SOURCES += MainContinuousGridworld.cpp\
 	ContinuousGridworldView.cpp \
     	Window.cpp \
 	plot/qcustomplot.cpp \
-	PlotView.cpp
+	PlotView.cpp \
+	ValueFunctionView.cpp
 
 HEADERS  += Mat.h \
     	Vec.h \
@@ -33,6 +34,7 @@ HEADERS  += Mat.h \
 	ContinuousGridworldView.h \
 	ContinuousGridworldModel.h \
 	plot/qcustomplot.h \
-	PlotView.h
+	PlotView.h \
+	ValueFunctionView.h
 
 	

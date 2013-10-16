@@ -18,6 +18,7 @@ public:
   typedef std::vector<ViewBase*> Plots;
   Views views;
   Plots plots;
+  ViewBase* valueFunctionView;
   QLayout* grid;
   int colsA, colsB;
 
@@ -26,6 +27,7 @@ public:
   virtual ~Window();
   void addView(ViewBase* view);
   void addPlot(ViewBase* view);
+  void setValueFunctionView(ViewBase* valueFunctionView);
 
 protected:
   void keyPressEvent(QKeyEvent* event);

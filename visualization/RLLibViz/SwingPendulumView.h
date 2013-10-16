@@ -21,6 +21,7 @@ class SwingPendulumView: public ViewBase
     Vec p;
     Mat trans;
     Mat rotation;
+
   public:
     SwingPendulumView(QWidget *parent = 0);
     virtual ~SwingPendulumView();
@@ -29,6 +30,7 @@ class SwingPendulumView: public ViewBase
   public slots:
     void draw(QWidget* that);
     void add(QWidget* that, const Vec& p1, const Vec& p2);
+    void add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
 
   protected:
     void paintEvent(QPaintEvent* event);

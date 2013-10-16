@@ -88,3 +88,7 @@ void PlotView::add(QWidget* that, const Vec& graphOneP, const Vec& graphTwoP)
   yOne[yOne.size() - 1] = graphOneP.x;
   yTwo[yTwo.size() - 1] = graphTwoP.x;
 }
+
+void PlotView::add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV)
+{
+}

@@ -16,6 +16,7 @@
 #include "Projector.h"
 #include "ControlAlgorithm.h"
 #include "Representation.h"
+#include "Matrix.h"
 
 // From the simulation
 #include "ContinuousGridworld.h"
@@ -67,6 +68,8 @@ class ContinuousGridworldModel: public ModelBase
     Simulator<double, float>* evaluationRunner;
 
     std::tr1::unordered_map<int, Simulator<double, float>*> simulators;
+
+    RLLib::Matrix* valueFunction;
 
   public:
     ContinuousGridworldModel(QObject *parent = 0);

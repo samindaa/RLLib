@@ -8,25 +8,31 @@
 #include <QApplication>
 #include "SwingPendulumModel.h"
 #include "SwingPendulumView.h"
+#include "ValueFunctionView.h"
 #include "PlotView.h"
 #include "ModelThread.h"
 #include "Window.h"
 
+using namespace RLLib;
 using namespace RLLibViz;
 
 Q_DECLARE_METATYPE(Vec)
+Q_DECLARE_METATYPE(Matrix)
 
 int main(int argc, char *argv[])
 {
   QApplication a(argc, argv);
   qRegisterMetaType<Vec>();
+  qRegisterMetaType<Matrix>();
 
   RLLibViz::ViewBase* actingView = new RLLibViz::SwingPendulumView;
   RLLibViz::ViewBase* actingPlot = new RLLibViz::PlotView;
+  RLLibViz::ViewBase* valueFunctionView = new RLLibViz::ValueFunctionView;
 
   RLLibViz::Window* window = new RLLibViz::Window;
   window->addView(actingView);
   window->addPlot(actingPlot);
+  window->setValueFunctionView(valueFunctionView);
   window->setWindowTitle("RLLibViz");
   window->show();
 

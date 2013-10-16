@@ -10,6 +10,9 @@
 
 #include <QObject>
 #include "Window.h"
+#include "Matrix.h"
+
+using namespace RLLib;
 
 namespace RLLibViz
 {
@@ -31,6 +34,7 @@ class ModelBase: public QObject
   signals:
     void signal_draw(QWidget* that);
     void signal_add(QWidget* that, const Vec& p, const Vec& q);
+    void signal_add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
 
   protected:
     virtual void doWork() =0;

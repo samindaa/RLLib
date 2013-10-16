@@ -21,7 +21,8 @@ SOURCES += MainSwingPendulum.cpp\
 	SwingPendulumView.cpp \
     	Window.cpp \
 	plot/qcustomplot.cpp \
-	PlotView.cpp
+	PlotView.cpp \
+	ValueFunctionView.cpp
 
 HEADERS  += Mat.h \
     	Vec.h \
@@ -33,6 +34,7 @@ HEADERS  += Mat.h \
 	SwingPendulumView.h \
 	SwingPendulumModel.h \
 	plot/qcustomplot.h \
-	PlotView.h
+	PlotView.h \
+	ValueFunctionView.h
 
 	

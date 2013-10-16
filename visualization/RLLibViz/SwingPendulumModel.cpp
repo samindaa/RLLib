@@ -45,6 +45,8 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
       alpha_r);
 
   simulator = new Simulator<double, float>(control, problem, 5000);
+  valueFunction = new Matrix(100, 100); // << Fixed for 0:0.1:10
+
 }
 
 SwingPendulumModel::~SwingPendulumModel()
@@ -65,6 +67,7 @@ SwingPendulumModel::~SwingPendulumModel()
   delete acting;
   delete control;
   delete simulator;
+  delete valueFunction;
 }
 
 void SwingPendulumModel::initialize()
@@ -85,4 +88,32 @@ void SwingPendulumModel::doWork()
       Vec(simulator->getEnvironment()->getObservations().at(0),
           simulator->getEnvironment()->getObservations().at(1)), Vec(0.0, 0.0, 0.0, 1.0));
   emit signal_draw(window->views[0]);
+
+  // Value function
+  if (simulator->isEndingOfEpisode() && window->valueFunctionView != 0)
+  {
+    RLLib::DenseVector<float> x_t(2);
+    double maxValue = 0, minValue = 0;
+    float y = 0;
+    for (int i = 0; i < valueFunction->rows(); i++)
+    {
+      float x = 0;
+      for (int j = 0; j < valueFunction->cols(); j++)
+      {
+        x_t[0] = x;
+        x_t[1] = y;
+        double v = control->computeValueFunction(x_t);
+        valueFunction->at(i, j) = v;
+        if (v > maxValue)
+          maxValue = v;
+        if (v < minValue)
+          minValue = v;
+        x += 0.1;
+      }
+      y += 0.1;
+    }
+    //out.close();
+    emit signal_add(window->valueFunctionView, valueFunction, minValue, maxValue);
+    emit signal_draw(window->valueFunctionView);
+  }
 }

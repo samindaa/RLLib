@@ -61,6 +61,8 @@ class SwingPendulumModel: public ModelBase
 
     Simulator<double, float>* simulator;
 
+    RLLib::Matrix* valueFunction;
+
   public:
     SwingPendulumModel(QObject *parent = 0);
     virtual ~SwingPendulumModel();

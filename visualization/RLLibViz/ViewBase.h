@@ -18,8 +18,11 @@
 // RLLibViz
 #include "Mat.h"
 #include "Framebuffer.h"
+#include "Matrix.h"
 
 #include <vector>
+
+using namespace RLLib;
 
 namespace RLLibViz
 {
@@ -41,6 +44,7 @@ class ViewBase: public QWidget
 
   public slots:
     virtual void add(QWidget* that, const Vec& p1, const Vec& p2) =0;
+    virtual void add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV) =0;
     virtual void draw(QWidget* that) =0;
 
   protected:
