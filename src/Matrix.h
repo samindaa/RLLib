@@ -23,8 +23,8 @@
 #define MATRIX_H_
 
 #include <vector>
-#include <cstdarg>
 #include <iostream>
+#include <cassert>
 
 #ifdef DEBUG
 #define ASSERT(b) { if (! (b)) { char msg[256]; sprintf(msg, "ASSERT failed in file %s, line %d", __FILE__, __LINE__); throw msg; } }
@@ -132,11 +132,25 @@ class Matrix
 
     inline double& operator ()(unsigned int y, unsigned int x)
     {
+      assert(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 
     inline const double& operator ()(unsigned int y, unsigned int x) const
     {
+      assert(y < m_rows && x < m_rows);
+      return operator [](y * m_cols + x);
+    }
+
+    inline double& at(unsigned int y, unsigned int x)
+    {
+      assert(y < m_rows && x < m_rows);
+      return operator [](y * m_cols + x);
+    }
+
+    inline const double& at(unsigned int y, unsigned int x) const
+    {
+      assert(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 
@@ -696,29 +710,6 @@ class Matrix
 
     friend std::ostream& operator<<(std::ostream& out, const Matrix& that);
 
-    // A simple way to insert stuff
-    // Make suer that the inputs are properly formatted
-    void insert(double args, ...)
-    {
-      ASSERT(size() > 0);
-      va_list vaargs;
-      unsigned int i = 0;
-      va_start(vaargs, args);
-      for (unsigned y = 0; y < rows(); y++)
-      {
-        for (unsigned x = 0; x < cols(); x++)
-        {
-          if (y == 0 && x == 0)
-            operator()(y, x) = args;
-          else
-            operator()(y, x) = va_arg(vaargs, double);
-          ++i;
-          ASSERT(i < size());
-        }
-      }
-      va_end(vaargs);
-    }
-
     Matrix()
     {
       resize(0, 0);
@@ -746,7 +737,7 @@ class Matrix
     }
 };
 
-std::ostream& operator<<(std::ostream& out, const Matrix& that)
+inline std::ostream& operator<<(std::ostream& out, const Matrix& that)
 {
   unsigned int r, c;
   out << that.m_rows << " x " << that.m_cols << " matrix at object address " << &that
