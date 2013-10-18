@@ -12,41 +12,18 @@ using namespace RLLibViz;
 ViewBase::ViewBase(QWidget *parent) :
     QWidget(parent)
 {
-  for (int i = 0; i < 2; i++)
-    buffers[i] = new Framebuffer;
-  // Double buffering
-  current = buffers[0];
-  next = buffers[1];
 }
 
 ViewBase::~ViewBase()
 {
-  for (int i = 0; i < 2; i++)
-    delete buffers[i];
 }
 
 QSize ViewBase::minimumSizeHint() const
 {
-  return QSize(100, 100);
+  return QSize(200, 200);
 }
 
 QSize ViewBase::sizeHint() const
 {
   return QSize(400, 400);
-}
-
-void ViewBase::paintEvent(QPaintEvent* event)
-{
-  QPainter painter(this);
-  painter.setPen(QPen(Qt::blue, 1, Qt::SolidLine));
-  painter.setRenderHint(QPainter::Antialiasing, true);
-  // update() call this
-  next->draw(painter);
-}
-
-void ViewBase::swap()
-{
-  Framebuffer* temp = current;
-  current = next;
-  next = temp;
 }

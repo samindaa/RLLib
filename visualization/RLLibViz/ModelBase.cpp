@@ -42,9 +42,9 @@ void ModelBase::initialize()
     SLOT(add(QWidget*,const Vec&, const Vec&)));
   }
 
-  if (window->valueFunctionView)
+  for (Window::VFuns::iterator iter = window->vfuns.begin(); iter != window->vfuns.end(); ++iter)
   {
-    ViewBase* view = window->valueFunctionView;
+    ViewBase* view = *iter;
     view->initialize();
     connect(this,
     SIGNAL(signal_add(QWidget*, const Matrix*, double const&, double const&)), view,

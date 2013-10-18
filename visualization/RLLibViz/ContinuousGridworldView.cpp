@@ -15,10 +15,18 @@ ContinuousGridworldView::ContinuousGridworldView(QWidget *parent) :
   // Set the background
   setBackgroundRole(QPalette::Base);
   setAutoFillBackground(true);
+
+  for (int i = 0; i < 2; i++)
+    buffers[i] = new Framebuffer;
+  // Double buffering
+  current = buffers[0];
+  next = buffers[1];
 }
 
 ContinuousGridworldView::~ContinuousGridworldView()
 {
+  for (int i = 0; i < 2; i++)
+    delete buffers[i];
 }
 
 void ContinuousGridworldView::initialize()
@@ -29,9 +37,9 @@ void ContinuousGridworldView::initialize()
   vecY = Vec(width(), height());
 
   Vec diag = vecY - vecX;
-  Mat scaleX = scale(diag.x / vecE.x, 1.0, 1.0);
-  Mat scaleY = scale(1.0, diag.y / vecE.y, 1.0);
-  Mat trans = translate(vecX);
+  Mat scaleX = Mat::scale(diag.x / vecE.x, 1.0, 1.0);
+  Mat scaleY = Mat::scale(1.0, diag.y / vecE.y, 1.0);
+  Mat trans = Mat::translate(vecX);
   T = trans * (scaleX * scaleY);
 
 }
@@ -60,5 +68,21 @@ void ContinuousGridworldView::add(QWidget* that, const Matrix* mat, double const
 void ContinuousGridworldView::resizeEvent(QResizeEvent* event)
 {
   initialize();
+}
+
+void ContinuousGridworldView::paintEvent(QPaintEvent* event)
+{
+  QPainter painter(this);
+  painter.setPen(QPen(Qt::blue, 1, Qt::SolidLine));
+  painter.setRenderHint(QPainter::Antialiasing, true);
+  // update() call this
+  next->draw(painter);
+}
+
+void ContinuousGridworldView::swap()
+{
+  Framebuffer* temp = current;
+  current = next;
+  next = temp;
 }
 

@@ -37,8 +37,8 @@ void SwingPendulumView::add(QWidget* that, const Vec& p, const Vec& p2)
   if (this != that)
     return;
   this->p = p;
-  trans = translate(width() / 2.0, height() / 2.0, 0);
-  rotation = rotateZ(p.x + M_PI);
+  trans = Mat::translate(width() / 2.0, height() / 2.0, 0);
+  rotation = Mat::rotateZ(p.x + M_PI);
 }
 
 void SwingPendulumView::add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV)

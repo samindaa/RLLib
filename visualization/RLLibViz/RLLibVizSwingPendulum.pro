@@ -35,6 +35,7 @@ HEADERS  += Mat.h \
 	SwingPendulumModel.h \
 	plot/qcustomplot.h \
 	PlotView.h \
+	NULLView.h \
 	ValueFunctionView.h
 
 	

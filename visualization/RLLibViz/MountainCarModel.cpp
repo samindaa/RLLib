@@ -1,33 +1,33 @@
 /*
- * ContinuousGridworldModel.cpp
+ * MountainCarModel.cpp
  *
- *  Created on: Oct 11, 2013
+ *  Created on: Oct 17, 2013
  *      Author: sam
  */
 
-#include "ContinuousGridworldModel.h"
+#include "MountainCarModel.h"
 
 using namespace RLLibViz;
 
-ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
+MountainCarModel::MountainCarModel(QObject *parent) :
     ModelBase(parent)
 {
   // RLLib:
-  behaviourEnvironment = new ContinuousGridworld;
-  evaluationEnvironment = new ContinuousGridworld;
+  behaviourEnvironment = new MCar2D;
+  evaluationEnvironment = new MCar2D;
   hashing = new MurmurHashing;
   projector = new TileCoderHashing<double, float>(1000000, 10, true, hashing);
   toStateAction = new StateActionTilings<double, float>(projector,
       &behaviourEnvironment->getDiscreteActionList());
 
-  alpha_v = 0.1 / projector->vectorNorm();
+  alpha_v = 0.05 / projector->vectorNorm();
   alpha_w = 0.0001 / projector->vectorNorm();
   gamma = 0.99;
-  lambda = 0.4;
+  lambda = 0.0;//0.4;
   critice = new ATrace<double>(projector->dimension());
   critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
 
-  alpha_u = 0.001 / projector->vectorNorm();
+  alpha_u = 1.0 / projector->vectorNorm();
 
   target = new BoltzmannDistribution<double>(projector->dimension(),
       &behaviourEnvironment->getDiscreteActionList());
@@ -49,11 +49,11 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
   simulators.insert(std::make_pair(simulators.size(), learningRunner));
   simulators.insert(std::make_pair(simulators.size(), evaluationRunner));
 
-  valueFunction = new Matrix(101, 101); // << Fixed for 0:0.1:10
+  valueFunction = new Matrix(100, 100);
 
 }
 
-ContinuousGridworldModel::~ContinuousGridworldModel()
+MountainCarModel::~MountainCarModel()
 {
   delete behaviourEnvironment;
   delete evaluationEnvironment;
@@ -73,12 +73,12 @@ ContinuousGridworldModel::~ContinuousGridworldModel()
   delete valueFunction;
 }
 
-void ContinuousGridworldModel::initialize()
+void MountainCarModel::initialize()
 {
   ModelBase::initialize();
 }
 
-void ContinuousGridworldModel::doWork()
+void MountainCarModel::doWork()
 {
   for (std::tr1::unordered_map<int, Simulator<double, float>*>::iterator i = simulators.begin();
       i != simulators.end(); ++i)
@@ -128,3 +128,4 @@ void ContinuousGridworldModel::doWork()
     emit signal_draw(window->vfuns[1]);
   }
 }
+

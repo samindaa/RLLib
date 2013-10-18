@@ -72,6 +72,8 @@ void PlotView::draw(QWidget* that)
   plot->yAxis->setRange(minY, maxY);
   plot->graph(0)->setData(x, yOne);
   plot->graph(1)->setData(x, yTwo);
+  plot->graph(0)->rescaleAxes();
+  plot->graph(1)->rescaleAxes();
   plot->replot();
 }
 

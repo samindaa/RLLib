@@ -2,6 +2,7 @@
 #include "ContinuousGridworldModel.h"
 #include "ContinuousGridworldView.h"
 #include "ValueFunctionView.h"
+#include "NULLView.h"
 #include "PlotView.h"
 #include "ModelThread.h"
 #include "Window.h"
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
   RLLibViz::ViewBase* targetView = new RLLibViz::ContinuousGridworldView;
   RLLibViz::ViewBase* behaviorPlot = new RLLibViz::PlotView;
   RLLibViz::ViewBase* targetPlot = new RLLibViz::PlotView;
+  RLLibViz::ViewBase* valueFunctionNULLView = new RLLibViz::NULLView;
   RLLibViz::ViewBase* valueFunctionView = new RLLibViz::ValueFunctionView;
 
 
@@ -31,7 +33,8 @@ int main(int argc, char *argv[])
   window->addView(targetView);
   window->addPlot(behaviorPlot);
   window->addPlot(targetPlot);
-  window->setValueFunctionView(valueFunctionView);
+  window->addValueFunctionView(valueFunctionNULLView);
+  window->addValueFunctionView(valueFunctionView);
   window->setWindowTitle("RLLibViz");
   window->show();
 

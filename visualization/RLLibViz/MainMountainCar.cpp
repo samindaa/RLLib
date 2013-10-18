@@ -1,21 +1,21 @@
 /*
- * MainSwingPendulum.cpp
+ * MainMountainCar.cpp
  *
- *  Created on: Oct 14, 2013
+ *  Created on: Oct 17, 2013
  *      Author: sam
  */
-
 #include <QApplication>
-#include "SwingPendulumModel.h"
-#include "SwingPendulumView.h"
+
+#include "MountainCarModel.h"
+#include "MountainCarView.h"
 #include "ValueFunctionView.h"
-#include "PlotView.h"
 #include "NULLView.h"
+#include "PlotView.h"
 #include "ModelThread.h"
 #include "Window.h"
 
-using namespace RLLib;
 using namespace RLLibViz;
+using namespace RLLib;
 
 Q_DECLARE_METATYPE(Vec)
 Q_DECLARE_METATYPE(Matrix)
@@ -26,18 +26,24 @@ int main(int argc, char *argv[])
   qRegisterMetaType<Vec>();
   qRegisterMetaType<Matrix>();
 
-  RLLibViz::ViewBase* actingView = new RLLibViz::SwingPendulumView;
-  RLLibViz::ViewBase* actingPlot = new RLLibViz::PlotView;
+  RLLibViz::ViewBase* behaviorView = new RLLibViz::MountainCarView;
+  RLLibViz::ViewBase* targetView = new RLLibViz::MountainCarView;
+  RLLibViz::ViewBase* behaviorPlot = new RLLibViz::PlotView;
+  RLLibViz::ViewBase* targetPlot = new RLLibViz::PlotView;
+  RLLibViz::ViewBase* valueFunctionNULLView = new RLLibViz::NULLView;
   RLLibViz::ViewBase* valueFunctionView = new RLLibViz::ValueFunctionView;
 
   RLLibViz::Window* window = new RLLibViz::Window;
-  window->addView(actingView);
-  window->addPlot(actingPlot);
+  window->addView(behaviorView);
+  window->addView(targetView);
+  window->addPlot(behaviorPlot);
+  window->addPlot(targetPlot);
+  window->addValueFunctionView(valueFunctionNULLView);
   window->addValueFunctionView(valueFunctionView);
   window->setWindowTitle("RLLibViz");
   window->show();
 
-  RLLibViz::ModelBase* model = new RLLibViz::SwingPendulumModel;
+  RLLibViz::ModelBase* model = new RLLibViz::MountainCarModel;
   model->setWindow(window);
   model->initialize();
 

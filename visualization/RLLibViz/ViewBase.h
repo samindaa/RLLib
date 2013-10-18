@@ -17,7 +17,6 @@
 
 // RLLibViz
 #include "Mat.h"
-#include "Framebuffer.h"
 #include "Matrix.h"
 
 #include <vector>
@@ -29,27 +28,21 @@ namespace RLLibViz
 
 class ViewBase: public QWidget
 {
-  protected:
-    Framebuffer* buffers[2];
-    Framebuffer* current;
-    Framebuffer* next;
-
   public:
     ViewBase(QWidget *parent = 0);
     ~ViewBase();
 
+    // QT4
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
+
+    // RLLibViz
     virtual void initialize() =0;
 
   public slots:
     virtual void add(QWidget* that, const Vec& p1, const Vec& p2) =0;
     virtual void add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV) =0;
     virtual void draw(QWidget* that) =0;
-
-  protected:
-    virtual void swap();
-    void paintEvent(QPaintEvent *);
 };
 
 }  // namespace RLLibViz

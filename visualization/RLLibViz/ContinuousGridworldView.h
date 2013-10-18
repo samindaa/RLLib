@@ -9,6 +9,7 @@
 #define CONTINUOUSGRIDWORLDVIEW_H_
 
 #include "ViewBase.h"
+#include "Framebuffer.h"
 
 #include <QResizeEvent>
 
@@ -25,6 +26,11 @@ class ContinuousGridworldView: public ViewBase
     Vec vecY;
     Mat T;
 
+  protected:
+    Framebuffer* buffers[2];
+    Framebuffer* current;
+    Framebuffer* next;
+
   public:
     ContinuousGridworldView(QWidget *parent = 0);
     virtual ~ContinuousGridworldView();
@@ -36,7 +42,9 @@ class ContinuousGridworldView: public ViewBase
     void add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
 
   protected:
+    void swap();
     void resizeEvent(QResizeEvent *);
+    void paintEvent(QPaintEvent *);
 };
 
 }  // namespace RLLibViz

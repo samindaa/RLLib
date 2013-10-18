@@ -6,19 +6,19 @@
 
 QT       += core gui
 
-TARGET = RLLibVizContinuousGridworld
+TARGET = RLLibVizMountainCar
 TEMPLATE = app
 
 INCLUDEPATH += ../../src \
                ../../simulation
 
-SOURCES += MainContinuousGridworld.cpp\
+SOURCES += MainMountainCar.cpp\
         ModelBase.cpp \
 	ModelThread.cpp \
-	ContinuousGridworldModel.cpp \
+	MountainCarModel.cpp \
 	ViewBase.cpp \
 	Framebuffer.cpp \
-	ContinuousGridworldView.cpp \
+	MountainCarView.cpp \
     	Window.cpp \
 	plot/qcustomplot.cpp \
 	PlotView.cpp \
@@ -31,8 +31,8 @@ HEADERS  += Mat.h \
 	ModelBase.h \
 	ModelThread.h \
 	Framebuffer.h \
-	ContinuousGridworldView.h \
-	ContinuousGridworldModel.h \
+	MountainCarView.h \
+	MountainCarModel.h \
 	plot/qcustomplot.h \
 	PlotView.h \
 	NULLView.h \

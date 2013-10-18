@@ -16,18 +16,19 @@ Q_OBJECT
 public:
   typedef std::vector<ViewBase*> Views;
   typedef std::vector<ViewBase*> Plots;
+  typedef std::vector<ViewBase*> VFuns;
   Views views;
   Plots plots;
-  ViewBase* valueFunctionView;
+  VFuns vfuns;
   QLayout* grid;
-  int colsA, colsB;
+  int colsA, colsB, colsC;
 
 public:
   explicit Window(QWidget *parent = 0);
   virtual ~Window();
   void addView(ViewBase* view);
   void addPlot(ViewBase* view);
-  void setValueFunctionView(ViewBase* valueFunctionView);
+  void addValueFunctionView(ViewBase* valueFunctionView);
 
 protected:
   void keyPressEvent(QKeyEvent* event);
