@@ -43,6 +43,7 @@ class Simulator
     Environment<O>* environment;
 
     const Action* a_t;
+    DenseVector<O>* x_0; // << this is the terminal state
     DenseVector<O>* x_t;
     DenseVector<O>* x_tp1;
 
@@ -70,7 +71,7 @@ class Simulator
 
     Simulator(Control<T, O>* agent, Environment<O>* environment, const int& maxEpisodeTimeSteps,
         const int nbEpisodes = -1, const int nbRuns = -1) :
-        agent(agent), environment(environment), a_t(0), x_t(
+        agent(agent), environment(environment), a_t(0), x_0(new DenseVector<O>(0)), x_t(
             new DenseVector<O>(environment->getVars().dimension())), x_tp1(
             new DenseVector<O>(environment->getVars().dimension())), maxEpisodeTimeSteps(
             maxEpisodeTimeSteps), nbEpisodes(nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), beginingOfEpisode(
@@ -154,7 +155,8 @@ class Simulator
         a_t =
             evaluate ?
                 &agent->proposeAction(*x_tp1) :
-                &agent->step(*x_t, *a_t, *x_tp1, step.r_tp1, step.z_tp1);
+                &agent->step(*x_t, *a_t, (!step.endOfEpisode ? *x_tp1 : *x_0), step.r_tp1,
+                    step.z_tp1);
         x_t->set(*x_tp1);
         timer.stop();
         totalTimeInMilliseconds += timer.getElapsedTimeInMilliSec();

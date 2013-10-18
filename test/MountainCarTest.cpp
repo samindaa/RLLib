@@ -160,7 +160,7 @@ void MountainCarTest::testSarsaAdaptiveMountainCar()
   OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
       toStateAction, sarsaAdaptive);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 2);
+  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -326,7 +326,7 @@ void MountainCarTest::testOffPACMountainCar()
 
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
-  double lambda = 0.4;
+  double lambda = 0.0;//0.4;
   double gamma = 0.99;
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
@@ -347,6 +347,7 @@ void MountainCarTest::testOffPACMountainCar()
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 10);
   sim->setTestEpisodesAfterEachRun(true);
+  sim->setVerbose(false);
   sim->run();
   sim->computeValueFunction();
   control->persist("visualization/mcar_offpac.data");
@@ -355,6 +356,7 @@ void MountainCarTest::testOffPACMountainCar()
   control->resurrect("visualization/mcar_offpac.data");
   sim->setEpisodes(20);
   sim->setEvaluate(true);
+  sim->setVerbose(true);
   sim->run();
 
   delete problem;

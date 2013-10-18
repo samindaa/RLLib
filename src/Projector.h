@@ -80,6 +80,7 @@ class TileCoder: public Projector<T, O>
     const SparseVector<T>& project(const DenseVector<O>& x, int h1)
     {
       vector->clear();
+      if (x.empty()) return *vector;
       if (includeActiveFeature)
       {
         coder(*tileIndices, x, vector->dimension() - 1, h1);
@@ -96,6 +97,7 @@ class TileCoder: public Projector<T, O>
     const SparseVector<T>& project(const DenseVector<O>& x)
     {
       vector->clear();
+      if (x.empty()) return *vector;
       if (includeActiveFeature)
       {
         coder(*tileIndices, x, vector->dimension() - 1);

@@ -63,8 +63,6 @@ class MCar3D: public Environment<float>
     Range<float>* positionRange;
     Range<float>* velocityRange;
 
-    std::ofstream out;
-
   public:
     MCar3D() :
         Environment<float>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(
@@ -76,14 +74,12 @@ class MCar3D: public Environment<float>
         discreteActions->push_back(a, a);
       // not used
       continuousActions->push_back(0, 0.0);
-      out.open("visualization/mcar3D.txt");
     }
 
     virtual ~MCar3D()
     {
       delete positionRange;
       delete velocityRange;
-      out.close();
     }
 
   private:
@@ -155,14 +151,11 @@ class MCar3D: public Environment<float>
       vars[2] = (xvelocity - velocityRange->min()) * 6.0 / velocityRange->length();
       vars[3] = (yvelocity - velocityRange->min()) * 6.0 / velocityRange->length();
 
-
       observations->at(0) = xposition;
       observations->at(1) = yposition;
       observations->at(2) = xvelocity;
       observations->at(3) = yvelocity;
 
-      if (out.is_open() && getOn())
-        out << xposition << " " << yposition << std::endl;
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 
@@ -188,7 +181,7 @@ class MCar3D: public Environment<float>
 
     float r() const
     {
-      return endOfEpisode() ? 0 : -1.0;
+      return -1.0;
     }
 
     float z() const

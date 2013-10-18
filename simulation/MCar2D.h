@@ -40,8 +40,6 @@ class MCar2D: public Environment<float>
     float targetPosition;
     float throttleFactor;
 
-    std::ofstream outfile;
-
   public:
     MCar2D() :
         Environment<float>(2, 3, 1), position(0), velocity(0), positionRange(
@@ -54,8 +52,6 @@ class MCar2D: public Environment<float>
 
       // subject to change
       continuousActions->push_back(0, 0.0);
-
-      outfile.open("visualization/mcar.txt");
     }
 
     virtual ~MCar2D()
@@ -63,7 +59,6 @@ class MCar2D: public Environment<float>
       delete positionRange;
       delete velocityRange;
       delete actionRange;
-      outfile.close();
     }
 
     void updateRTStep()
@@ -76,10 +71,6 @@ class MCar2D: public Environment<float>
       observations->at(0) = position;
       observations->at(1) = velocity;
 
-      //if (outfile.is_open() && getOn())
-      //  outfile << position << std::endl;
-      if (outfile.is_open() && getOn())
-        outfile << vars[0] << " " << vars[1] << endl;
     }
 
     // Profiles
@@ -108,7 +99,7 @@ class MCar2D: public Environment<float>
 
     float r() const
     {
-      return endOfEpisode() ? 0 : -1.0;
+      return -1.0;
     }
 
     float z() const
