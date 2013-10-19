@@ -17,6 +17,8 @@ using namespace RLLib;
 namespace RLLibViz
 {
 
+class Window;
+
 class ModelBase: public QObject
 {
   Q_OBJECT

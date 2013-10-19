@@ -6,11 +6,12 @@
  */
 
 #include "ModelThread.h"
+#include <unistd.h>
 
 using namespace RLLibViz;
 
 ModelThread::ModelThread(QObject* parent) :
-    QThread(parent), model(0)
+    QThread(parent), model(0), isActive(true)
 {
 }
 
@@ -23,11 +24,17 @@ void ModelThread::setModel(ModelBase* model)
   this->model = model;
 }
 
+void ModelThread::setActive(const bool& isActive)
+{
+  this->isActive = isActive;
+}
+
 void ModelThread::run()
 {
   if (model != 0)
   {
-    while (true) /*fixMe*/
+    //sleep(30); // only for testing
+    while (isActive)
       model->run();
   }
   else

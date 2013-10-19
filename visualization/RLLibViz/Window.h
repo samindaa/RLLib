@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QGridLayout>
+
 #include "ViewBase.h"
 #include <vector>
 
@@ -11,27 +12,27 @@ namespace RLLibViz
 
 class Window: public QWidget
 {
-Q_OBJECT
+  Q_OBJECT
 
-public:
-  typedef std::vector<ViewBase*> Views;
-  typedef std::vector<ViewBase*> Plots;
-  typedef std::vector<ViewBase*> VFuns;
-  Views views;
-  Plots plots;
-  VFuns vfuns;
-  QLayout* grid;
-  int colsA, colsB, colsC;
+  public:
+    typedef std::vector<ViewBase*> Views;
+    typedef std::vector<ViewBase*> Plots;
+    typedef std::vector<ViewBase*> VFuns;
+    Views views;
+    Plots plots;
+    VFuns vfuns;
+    QLayout* grid;
+    int colsA, colsB, colsC;
 
-public:
-  explicit Window(QWidget *parent = 0);
-  virtual ~Window();
-  void addView(ViewBase* view);
-  void addPlot(ViewBase* view);
-  void addValueFunctionView(ViewBase* valueFunctionView);
+  public:
+    explicit Window(QWidget *parent = 0);
+    virtual ~Window();
+    void addView(ViewBase* view);
+    void addPlot(ViewBase* view);
+    void addValueFunctionView(ViewBase* valueFunctionView);
 
-protected:
-  void keyPressEvent(QKeyEvent* event);
+  protected:
+    void keyPressEvent(QKeyEvent* event);
 
 };
 

@@ -45,7 +45,7 @@ public:
   {
     return *(&x + i);
   }
-  const double operator [](int i) const
+  const double& operator [](int i) const
   {
     return *(&x + i);
   }

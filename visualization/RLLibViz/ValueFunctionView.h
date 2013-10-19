@@ -18,6 +18,7 @@
 #include "Mat.h"
 
 #include <vector>
+#include <cmath>
 
 namespace RLLibViz
 {
@@ -47,7 +48,7 @@ class ColorGradient
     //-- Inserts a new color point into its correct position:
     void addColorPoint(float red, float green, float blue, float value)
     {
-      for (int i = 0; i < color.size(); i++)
+      for (int i = 0; i < (int) color.size(); i++)
       {
         if (value < color[i].val)
         {
@@ -82,7 +83,7 @@ class ColorGradient
       if (color.size() == 0)
         return qRgb(255, 255, 255);
 
-      for (int i = 0; i < color.size(); i++)
+      for (int i = 0; i < (int) color.size(); i++)
       {
         ColorPoint &currC = color[i];
         if (value < currC.val)
@@ -127,8 +128,6 @@ class ValueFunctionView: public ViewBase
     void draw(QWidget* that);
     void add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
 };
-
-
 
 }  // namespace RLLibViz
 

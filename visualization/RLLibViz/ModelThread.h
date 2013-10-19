@@ -19,10 +19,13 @@ class ModelThread: public QThread
 Q_OBJECT
 private:
   ModelBase* model;
+  bool isActive;
+
 public:
   explicit ModelThread(QObject * parent = 0);
   virtual ~ModelThread();
   void setModel(ModelBase* model);
+  void setActive(const bool& isActive);
 
 protected:
   void run();

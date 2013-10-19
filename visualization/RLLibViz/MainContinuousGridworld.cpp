@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
   window->addPlot(targetPlot);
   window->addValueFunctionView(valueFunctionNULLView);
   window->addValueFunctionView(valueFunctionView);
-  window->setWindowTitle("RLLibViz");
+  window->setWindowTitle("RLLibViz (ContinuousGridworld)");
   window->show();
 
   RLLibViz::ModelBase* model = new RLLibViz::ContinuousGridworldModel;

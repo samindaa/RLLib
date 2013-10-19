@@ -1,4 +1,5 @@
 #include "Window.h"
+
 #include <QApplication>
 #include <QTime>
 #include <iostream>
