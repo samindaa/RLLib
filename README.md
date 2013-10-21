@@ -54,7 +54,8 @@ Features
 Demo
 ----
 
-* [![Off-PAC ContinuousGridworld](http://i1.ytimg.com/vi/SpBbdvhx4tM/3.jpg?time=1382317024739)](http://www.youtube.com/watch?v=SpBbdvhx4tM)
+[![Off-PAC ContinuousGridworld](http://i1.ytimg.com/vi/SpBbdvhx4tM/3.jpg?time=1382317024739)](http://www.youtube.com/watch?v=SpBbdvhx4tM)
+[![AverageRewardActorCritic SwingPendulum (Continuous Actions)](http://i1.ytimg.com/vi/nwxAG2WXl3Y/3.jpg?time=1382317239212)](http://www.youtube.com/watch?v=nwxAG2WXl3Y)
 
 Usage
 -----
