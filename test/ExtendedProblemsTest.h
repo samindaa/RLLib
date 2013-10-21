@@ -146,6 +146,7 @@ class AdvancedTilesProjector: public Projector<T, O>
     const SparseVector<T>& project(const DenseVector<O>& x, int h2)
     {
       vector->clear();
+      if (x.empty()) return *vector;
       int h1 = 0;
       // all 4
       tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension(), h1++, h2);
@@ -192,6 +193,7 @@ class AdvancedTilesProjector: public Projector<T, O>
     {
 
       vector->clear();
+      if (x.empty()) return *vector;
       // all 4
       tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x(), x.dimension());
       // 3 of 4

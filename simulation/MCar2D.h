@@ -84,7 +84,7 @@ class MCar2D: public Environment<float>
     void step(const Action& a)
     {
       float throttle = actionRange->bound(a.at()) * throttleFactor;
-      velocity = velocityRange->bound(velocity + throttle * 0.001 + cos(3 * position) * (-0.0025));
+      velocity = velocityRange->bound(velocity + throttle * 0.001 + cos(3.0 * position) * (-0.0025));
       position += velocity;
       if (position < positionRange->min())
         velocity = 0.0;

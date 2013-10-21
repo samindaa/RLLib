@@ -33,6 +33,10 @@ namespace RLLib
 template<class T>
 class Representations
 {
+  public:
+    typedef typename std::map<int, SparseVector<T>*>::iterator iterator;
+    typedef typename std::map<int, SparseVector<T>*>::const_iterator const_iterator;
+
   protected:
     std::map<int, SparseVector<T>*>* phis;
   public:
@@ -44,8 +48,8 @@ class Representations
     }
     ~Representations()
     {
-      for (typename std::map<int, SparseVector<T>*>::iterator iter = phis->begin(); iter != phis->end();
-          ++iter)
+      for (typename std::map<int, SparseVector<T>*>::iterator iter = phis->begin();
+          iter != phis->end(); ++iter)
         delete iter->second;
       phis->clear();
       delete phis;
@@ -66,9 +70,6 @@ class Representations
       return *phis->at(action.id());
     }
 
-    typedef typename std::vector<SparseVector<T>*>::iterator iterator;
-    typedef typename std::vector<SparseVector<T>*>::const_iterator const_iterator;
-
     iterator begin()
     {
       return phis->begin();
@@ -87,6 +88,13 @@ class Representations
     const_iterator end() const
     {
       return phis->end();
+    }
+
+    void clear()
+    {
+      for (typename std::map<int, SparseVector<T>*>::iterator iter = phis->begin();
+          iter != phis->end(); ++iter)
+        iter->second->clear();
     }
 };
 
@@ -126,6 +134,11 @@ class StateActionTilings: public StateToStateAction<T, O>
     const Representations<T>& stateActions(const DenseVector<O>& x)
     {
       assert(actions->dimension() == phis->dimension());
+      if (x.empty())
+      {
+        phis->clear();
+        return *phis;
+      }
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         if (actions->dimension() == 1)
