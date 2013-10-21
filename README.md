@@ -51,6 +51,11 @@ Features
  We provide a Qt4 based application to visualize benchmark problems.  
 
 
+Demo
+----
+
+* [![Off-PAC ContinuousGridworld](http://i1.ytimg.com/vi/SpBbdvhx4tM/3.jpg?time=1382317024739)](http://www.youtube.com/watch?v=SpBbdvhx4tM)
+
 Usage
 -----
 
@@ -119,6 +124,11 @@ Documentation
 * [http://web.cs.miami.edu/home/saminda/rllib.html](http://web.cs.miami.edu/home/saminda/rllib.html)
 * [mloss.org](https://mloss.org/software/view/502/)  
 
+
+Publication
+-----------
+
+[Dynamic Role Assignment using General ValueFunctions](http://www.humanoidsoccer.org/ws12/papers/HSR12_Abeyruwan.pdf)
 
 Contact
 -------
