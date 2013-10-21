@@ -1,0 +1,27 @@
+#!/bin/bash
+
+echo "RLLibVizContinuousGridworld"
+
+qmake RLLibVizContinuousGridworld.pro
+
+make 
+
+make clean
+
+echo "RLLibVizMountainCar"
+
+qmake RLLibVizMountainCar.pro
+
+make 
+
+make clean
+
+echo "RLLibVizSwingPendulum"
+
+qmake RLLibVizSwingPendulum.pro
+
+make 
+
+make clean
+
+rm Makefile
