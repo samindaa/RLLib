@@ -37,7 +37,7 @@ class Acrobot: public Environment<float>
     float targetPosition;
     float theta1, theta2, theta1Dot, theta2Dot;
     float transitionNoise;
-    std::ofstream outfile;
+    //std::ofstream outfile;
 
   public:
     Acrobot() :
@@ -54,7 +54,9 @@ class Acrobot: public Environment<float>
       // subject to change
       continuousActions->push_back(0, 0.0);
 
-      outfile.open("visualization/acrobot.txt");
+      for (int i = 0; i < getVars().dimension(); i++)
+        resolutions->at(i) = 6.0;
+      //outfile.open("visualization/acrobot.txt");
     }
     ~Acrobot()
     {
@@ -62,7 +64,7 @@ class Acrobot: public Environment<float>
       delete theta1DotRange;
       delete theta2DotRange;
       delete actionRange;
-      outfile.close();
+      //outfile.close();
     }
 
     void initialize()
@@ -86,10 +88,10 @@ class Acrobot: public Environment<float>
     {
       DenseVector<float>& vars = *output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
-      vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * 6.0;
-      vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * 6.0;
-      vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length()) * 6.0;
-      vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length()) * 6.0;
+      vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * resolutions->at(0);
+      vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * resolutions->at(1);
+      vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length()) * resolutions->at(2);
+      vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length()) * resolutions->at(3);
       output->updateRTStep(r(), z(), endOfEpisode());
 
       observations->at(0) = theta1;

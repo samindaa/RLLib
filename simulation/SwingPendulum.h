@@ -41,8 +41,9 @@ class SwingPendulum: public Environment<float>
     std::ofstream outfile;
   public:
     SwingPendulum() :
-        Environment<float>(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(0), maxVelocity(
-            M_PI_4 / stepTime), actionRange(new Range<float>(-uMax, uMax)), thetaRange(
+        Environment<float>(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(
+            0), maxVelocity(
+        M_PI_4 / stepTime), actionRange(new Range<float>(-uMax, uMax)), thetaRange(
             new Range<float>(-M_PI, M_PI)), velocityRange(
             new Range<float>(-maxVelocity, maxVelocity)), mass(1.0), length(1.0), g(9.8), requiredUpTime(
             10.0 /*seconds*/), upRange(M_PI_4 /*seconds*/), upTime(0)
@@ -54,6 +55,9 @@ class SwingPendulum: public Environment<float>
 
       // subject to change
       continuousActions->push_back(0, 0.0);
+
+      for (int i = 0; i < getVars().dimension(); i++)
+        resolutions->at(i) = 10.0;
 
       outfile.open("visualization/swingPendulum.txt");
     }
@@ -83,8 +87,8 @@ class SwingPendulum: public Environment<float>
 
       DenseVector<float>& vars = *output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
-      vars[0] = (theta - thetaRange->min()) * 10.0 / thetaRange->length();
-      vars[1] = (velocity - velocityRange->min()) * 10.0 / velocityRange->length();
+      vars[0] = (theta - thetaRange->min()) * resolutions->at(0) / thetaRange->length();
+      vars[1] = (velocity - velocityRange->min()) * resolutions->at(1) / velocityRange->length();
 
       observations->at(0) = theta;
       observations->at(1) = velocity;

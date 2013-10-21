@@ -72,11 +72,21 @@ class RandlovBike: public Environment<float>
         /* tyre radius */
         sigma_dot(v / R), I_bike((13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)), I_dc(
             Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl((1.0 / 2) * Md * R * R), l(1.11), pi(
-            3.1415927)
+        M_PI)
     {
 
       for (unsigned int i = 0; i < discreteActions->dimension(); i++)
         discreteActions->push_back(i, i);
+
+      // @@>> TODO: this needs a some work
+      resolutions->at(0) = 2.0 * pi;
+      resolutions->at(1) = 1.;
+      resolutions->at(2) = 1.;
+      resolutions->at(3) = pi / 4.0;
+      resolutions->at(4) = 1.;
+      resolutions->at(5) = 1.;
+      resolutions->at(6) = 1000;
+      resolutions->at(7) = 1.0f;
     }
 
   private:
@@ -202,22 +212,8 @@ class RandlovBike: public Environment<float>
       vars[6] = psi_goal;
       vars[7] = calc_dist_to_goal(xf, xb, yf, yb);
 
-      // @@>> TODO: this needs a some work
-      static float OMEGA = 2.0 * pi;
-      static float OMEGA_DOT = 1.;
-      static float OMEGA_DOT_DOT = 1.;
-      static float THETA = pi / 4.;
-      static float THETA_DOT = 1.;
-      static float PSI_GOAL = 1.;
-      static float AUX_STATE = 1000;
-
-      vars[0] /= OMEGA;
-      vars[1] /= OMEGA_DOT;
-      vars[2] /= OMEGA_DOT_DOT;
-      vars[3] /= THETA;
-      vars[4] /= THETA_DOT;
-      vars[5] /= PSI_GOAL;
-      vars[6] /= AUX_STATE;
+      for (int i = 0; i < getVars().dimension(); i++)
+        vars[i] /= resolutions->at(i);
 
       observations->at(0) = omega;
       observations->at(1) = omega_dot;

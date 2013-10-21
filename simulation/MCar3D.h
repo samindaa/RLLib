@@ -74,6 +74,9 @@ class MCar3D: public Environment<float>
         discreteActions->push_back(a, a);
       // not used
       continuousActions->push_back(0, 0.0);
+
+      for (int i = 0; i < getVars().dimension(); i++)
+        resolutions->at(i) = 6.0;
     }
 
     virtual ~MCar3D()
@@ -146,10 +149,10 @@ class MCar3D: public Environment<float>
     void updateRTStep()
     {
       DenseVector<float>& vars = *output->o_tp1;
-      vars[0] = (xposition - positionRange->min()) * 6.0 / positionRange->length();
-      vars[1] = (yposition - positionRange->min()) * 6.0 / positionRange->length();
-      vars[2] = (xvelocity - velocityRange->min()) * 6.0 / velocityRange->length();
-      vars[3] = (yvelocity - velocityRange->min()) * 6.0 / velocityRange->length();
+      vars[0] = (xposition - positionRange->min()) * resolutions->at(0) / positionRange->length();
+      vars[1] = (yposition - positionRange->min()) * resolutions->at(1) / positionRange->length();
+      vars[2] = (xvelocity - velocityRange->min()) * resolutions->at(2) / velocityRange->length();
+      vars[3] = (yvelocity - velocityRange->min()) * resolutions->at(3) / velocityRange->length();
 
       observations->at(0) = xposition;
       observations->at(1) = yposition;

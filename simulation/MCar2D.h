@@ -52,6 +52,9 @@ class MCar2D: public Environment<float>
 
       // subject to change
       continuousActions->push_back(0, 0.0);
+
+      for (int i = 0; i < getVars().dimension(); i++)
+        resolutions->at(i) = 10.0;
     }
 
     virtual ~MCar2D()
@@ -64,8 +67,8 @@ class MCar2D: public Environment<float>
     void updateRTStep()
     {
       DenseVector<float>& vars = *output->o_tp1;
-      vars[0] = (position - positionRange->min()) * 10.0 / positionRange->length();
-      vars[1] = (velocity - velocityRange->min()) * 10.0 / velocityRange->length();
+      vars[0] = (position - positionRange->min()) * resolutions->at(0) / positionRange->length();
+      vars[1] = (velocity - velocityRange->min()) * resolutions->at(1) / velocityRange->length();
       output->updateRTStep(r(), z(), endOfEpisode());
 
       observations->at(0) = position;
@@ -84,7 +87,8 @@ class MCar2D: public Environment<float>
     void step(const Action& a)
     {
       float throttle = actionRange->bound(a.at()) * throttleFactor;
-      velocity = velocityRange->bound(velocity + throttle * 0.001 + cos(3.0 * position) * (-0.0025));
+      velocity = velocityRange->bound(
+          velocity + throttle * 0.001 + cos(3.0 * position) * (-0.0025));
       position += velocity;
       if (position < positionRange->min())
         velocity = 0.0;

@@ -55,6 +55,9 @@ class ContinuousGridworld: public Environment<float>
           discreteActions->update(i, dimension, 1.0);
       }
 
+      for (int i = 0; i < getVars().dimension(); i++)
+        resolutions->at(i) = 10.0;
+
       // continuous actions are not setup for this problem
       outpath.open("visualization/continuousGridworldPath.txt");
     }
@@ -77,7 +80,7 @@ class ContinuousGridworld: public Environment<float>
     { // nothing
       // unit generalization
       for (int i = 0; i < output->o_tp1->dimension(); i++)
-        output->o_tp1->at(i) = observations->at(i) * 10.0;
+        output->o_tp1->at(i) = observations->at(i) * resolutions->at(i);
       //std::cout << __vars->at(0) << " " << __vars->at(1) << " || ";
       if (getOn())
       {

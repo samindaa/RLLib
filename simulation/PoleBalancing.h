@@ -111,6 +111,7 @@ class PoleBalancing: public Environment<float>
       mvnrnd(mu0, Sigma0, x);
       updateRTStep();
     }
+
     void updateRTStep()
     {
       DenseVector<float>& vars = *output->o_tp1;
@@ -121,6 +122,7 @@ class PoleBalancing: public Environment<float>
       }
       output->updateRTStep(r(), z(), endOfEpisode());
     }
+
     void step(const Action& action)
     {
       u(0) = action.at(0);
@@ -128,6 +130,7 @@ class PoleBalancing: public Environment<float>
       mvnrnd(mu, SigmaT, x);
       updateRTStep();
     }
+
     bool endOfEpisode() const
     {
       return fabs((double) x(0)) >= 1.5 || fabs((double) x(2)) >= M_PI / 6.0;
