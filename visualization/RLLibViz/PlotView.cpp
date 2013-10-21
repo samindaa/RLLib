@@ -29,8 +29,8 @@ PlotView::PlotView(QWidget* parent) :
   plot->addGraph();
   plot->addGraph();
   plot->graph(1)->setPen(QPen(Qt::red));
-  plot->xAxis->setLabel("Time");
-  //plot->yAxis->setLabel("Steps");
+  plot->xAxis->setLabel("Episodes");
+  plot->yAxis->setLabel("Rewards");
   setLayout(grid);
 }
 

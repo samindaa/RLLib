@@ -72,11 +72,32 @@ void ContinuousGridworldView::resizeEvent(QResizeEvent* event)
 
 void ContinuousGridworldView::paintEvent(QPaintEvent* event)
 {
-  QPainter painter(this);
-  painter.setPen(QPen(Qt::blue, 1, Qt::SolidLine));
-  painter.setRenderHint(QPainter::Antialiasing, true);
+  // Draw ellipse
+  Vec pVec[3] = { T * Vec(0.3, 0.6, 0.0, 1.0), T * Vec(0.4, 0.5, 0.0, 1.0), T
+      * Vec(0.8, 0.9, 0.0, 1.0) };
+  Vec vVec[3] =
+      { T * (Vec(0.1, 0.03) * 2.0), T * (Vec(0.03, 0.1) * 2.0), T * (Vec(0.03, 0.1) * 2.0) };
+
+  for (int i = 0; i < 3; i++)
+  {
+    QRadialGradient gradient(QPointF(pVec[i].x, pVec[i].y), std::max(vVec[i].x, vVec[i].y));
+    gradient.setColorAt(0.0, Qt::blue);
+    gradient.setColorAt(0.5, Qt::cyan);
+    gradient.setColorAt(1.0, Qt::green);
+    QPen circlePen = QPen(Qt::white);
+    circlePen.setWidth(1);
+    QPainter painter(this);
+    painter.setBrush(gradient);
+    painter.setPen(circlePen);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.drawEllipse(QPointF(pVec[i].x, pVec[i].y), vVec[i].x, vVec[i].y);
+  }
+
+  QPainter painter2(this);
+  painter2.setPen(QPen(Qt::blue, 1, Qt::SolidLine));
+  painter2.setRenderHint(QPainter::Antialiasing, true);
   // update() call this
-  next->draw(painter);
+  next->draw(painter2);
 }
 
 void ContinuousGridworldView::swap()

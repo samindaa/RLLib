@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
   window->addView(actingView);
   window->addPlot(actingPlot);
   window->addValueFunctionView(valueFunctionView);
-  window->setWindowTitle("RLLibViz");
+  window->setWindowTitle("RLLibViz (SwingPendulum)");
   window->show();
 
   RLLibViz::ModelBase* model = new RLLibViz::SwingPendulumModel;
