@@ -26,6 +26,7 @@
 #include <cassert>
 #include <limits>
 #include <vector>
+#include "Vector.h"
 
 namespace RLLib
 {
@@ -39,6 +40,17 @@ class Boundedness
     inline static bool checkValue(const T& value)
     {
       bool bvalue = !isnan(value) && !isinf(value);
+      assert(bvalue);
+      return bvalue;
+    }
+
+    template<class T>
+    inline static bool checkDistribution(const DenseVector<T>& distribution)
+    {
+      double sum = 0.0;
+      for (int i = 0; i < distribution.dimension(); i++)
+        sum += distribution[i];
+      bool bvalue = ::fabs(1.0 - sum) < 10e-8;
       assert(bvalue);
       return bvalue;
     }
@@ -88,7 +100,6 @@ class Range
       return min() + (length() / 2.0);
     }
 };
-
 
 template<class T>
 class Ranges
@@ -153,7 +164,6 @@ class Ranges
       return ranges->end();
     }
 
-
     unsigned int dimension() const
     {
       return ranges->size();
@@ -171,7 +181,6 @@ class Ranges
       return ranges->at(index);
     }
 };
-
 
 class Signum
 {

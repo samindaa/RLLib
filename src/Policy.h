@@ -323,6 +323,7 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
 
     const Action& sampleAction()
     {
+      Boundedness::checkDistribution(*distribution);
       double random = Probabilistic::nextDouble();
       double sum = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
