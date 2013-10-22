@@ -299,8 +299,8 @@ class MurmurHashing: public Hashing
     int hash(int* ints/*coordinates*/, int num_ints, int m/*memory_size*/, int increment)
     {
       for (int i = 0; i < num_ints; i++)
-        pack(ints[i], &key[i * 4]);
-      return (int) (((long) murmurHashNeutral2(key, (num_ints * 4), seed) + INT_MAX) % m);
+        pack((uint32_t) ints[i], &key[i * 4]);
+      return (int) (murmurHashNeutral2(key, (num_ints * 4), seed) % m);
     }
 
 };
