@@ -109,7 +109,7 @@ class TraceTest: public TraceTestBase
         trace.update(lambda, *s02);
         Assert::assertTrue(VectorsTestsUtils::checkConsistency(trace.vect()));
       }
-      Assert::assertEquals(s02->nbActiveEntries(),trace.vect().nbActiveEntries());
+      Assert::assertEquals(s02->nbActiveEntries(), trace.vect().nbActiveEntries());
       SVecDoubleType expectedVec(trace.vect().dimension());
       expectedVec.set(*s02, expected);
       Assert::checkVectorEquals(trace.vect(), expectedVec, 0.00001);
@@ -136,6 +136,34 @@ class TraceTest: public TraceTestBase
     {
       testTrace(0.9, *newTrace(AMaxTraceDouble), 5.0);
     }
+
+    template<class T, class O>
+    class PerformanceVerifier: public Simulator<T, O>::Event
+    {
+      private:
+        double minEpisodeReward;
+      public:
+        PerformanceVerifier() :
+            minEpisodeReward(-350)
+        {
+        }
+
+        void update() const
+        {
+          if (Simulator<T, O>::Event::nbEpisodeDone < 200)
+            return;
+          else
+          {
+            //std::cout << "[" << Simulator<T, O>::Event::episodeR << ","
+            //    << Simulator<T, O>::Event::averageTimePerStep << "] ";
+            Assert::assertFail(Simulator<T, O>::Event::episodeR < minEpisodeReward);
+          }
+        }
+    };
+
+    void runTestOnOnMountainCar(Projector<double, float>* projector, Trace<double>* trace);
+    void testSarsaOnMountainCarSVectorTraces();
+    void testSarsaOnMountainCarMaxLengthTraces();
 
   public:
     void run();

@@ -38,6 +38,30 @@
 template<class T, class O>
 class Simulator
 {
+  public:
+    class Event
+    {
+        friend class Simulator;
+      protected:
+        int nbTotalTimeSteps;
+        int nbEpisodeDone;
+        double averageTimePerStep;
+        double episodeR;
+        double episodeZ;
+
+      public:
+        Event() :
+            nbTotalTimeSteps(0), nbEpisodeDone(0), averageTimePerStep(0), episodeR(0), episodeZ(0)
+        {
+        }
+
+        virtual ~Event()
+        {
+        }
+
+        virtual void update() const=0;
+
+    };
   protected:
     Control<T, O>* agent;
     Environment<O>* environment;
@@ -68,6 +92,7 @@ class Simulator
     int timeStep;
     double episodeR;
     double episodeZ;
+    std::vector<Event*> onEpisodeEnd;
 
     Simulator(Control<T, O>* agent, Environment<O>* environment, const int& maxEpisodeTimeSteps,
         const int nbEpisodes = -1, const int nbRuns = -1) :
@@ -85,6 +110,7 @@ class Simulator
     {
       delete x_t;
       delete x_tp1;
+      onEpisodeEnd.clear();
     }
 
     void setVerbose(const bool& verbose)
@@ -105,6 +131,11 @@ class Simulator
     void setEpisodes(const int& nbEpisodes)
     {
       this->nbEpisodes = nbEpisodes;
+    }
+
+    void setEnableStatistics(const bool& enableStatistics)
+    {
+      this->enableStatistics = enableStatistics;
     }
 
     void setTestEpisodesAfterEachRun(const bool& enableTestEpisodesAfterEachRun)
@@ -155,7 +186,7 @@ class Simulator
         a_t =
             evaluate ?
                 &agent->proposeAction(*x_tp1) :
-                &agent->step(*x_t, *a_t, (!step.endOfEpisode ? *x_tp1 : *x_0), step.r_tp1,
+                &agent->step(*x_t, *a_t, (!endingOfEpisode ? *x_tp1 : *x_0), step.r_tp1,
                     step.z_tp1);
         x_t->set(*x_tp1);
         timer.stop();
@@ -175,6 +206,18 @@ class Simulator
             statistics.push_back(timeStep);
           ++nbEpisodeDone;
           beginingOfEpisode = true;
+          // Fire the events
+          for (typename std::vector<Event*>::iterator iter = onEpisodeEnd.begin();
+              iter != onEpisodeEnd.end(); ++iter)
+          {
+            Event* e = *iter;
+            e->nbTotalTimeSteps = timeStep;
+            e->nbEpisodeDone = nbEpisodeDone;
+            e->averageTimePerStep = (totalTimeInMilliseconds / timeStep);
+            e->episodeR = episodeR;
+            e->episodeZ = episodeZ;
+            e->update();
+          }
         }
       }
 
@@ -194,15 +237,17 @@ class Simulator
         std::cout << "## ControlLearner=" << typeid(*agent).name() << std::endl;
       for (int run = 0; run < nbRuns; run++)
       {
-        std::cout << "## nbRun=" << run << std::endl;
-        enableStatistics = true;
-        statistics.clear();
+        if (verbose)
+          std::cout << "## nbRun=" << run << std::endl;
+        if (enableStatistics)
+          statistics.clear();
         nbEpisodeDone = 0;
         // For each run
         if (!evaluate)
           agent->reset();
         runEpisodes();
-        benchmark();
+        if (enableStatistics)
+          benchmark();
 
         if (enableTestEpisodesAfterEachRun)
         {

@@ -39,7 +39,11 @@
 
 #include "Vector.h"
 #include "Trace.h"
-#include "Math.h"
+#include "Projector.h"
+#include "ControlAlgorithm.h"
+#include "Representation.h"
+#include "MCar2D.h"
+#include "Simulator.h"
 
 using namespace std;
 using namespace RLLib;
@@ -244,6 +248,11 @@ class Assert
     static void assertTrue(const bool& condition)
     {
       assert(condition);
+    }
+
+    static void assertFail(const bool& condition)
+    {
+      assert(!condition);
     }
 
     template<class T>

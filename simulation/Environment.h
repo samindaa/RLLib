@@ -108,6 +108,12 @@ class Environment
       return *resolutions;
     }
 
+    virtual void setResolution(const double& resolution)
+    {
+      for (int i = 0; i < resolutions->dimension(); i++)
+        resolutions->at(i) = resolution;
+    }
+
   protected:
     virtual void updateRTStep() =0;
     virtual bool endOfEpisode() const =0;
