@@ -325,7 +325,7 @@ void MountainCarTest::testOffPACMountainCar()
       projector, &problem->getDiscreteActionList());
 
   double alpha_v = 0.05 / projector->vectorNorm();
-  double alpha_w = .0001 / projector->vectorNorm();
+  double alpha_w = 0.0001 / projector->vectorNorm();
   double lambda = 0.0;//0.4;
   double gamma = 0.99;
   Trace<double>* critice = new ATrace<double>(projector->dimension());

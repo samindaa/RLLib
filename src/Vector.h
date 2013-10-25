@@ -272,8 +272,8 @@ class SparseVector: public Vector<T>
     T* values;
   public:
 
-    SparseVector(const int& capacity = 1) :
-        indexesPositionLength(capacity), activeIndexesLength(10), nbActive(0), indexesPosition(
+    SparseVector(const int& capacity = 1, const int& activeIndexesLength = 10) :
+        indexesPositionLength(capacity), activeIndexesLength(activeIndexesLength), nbActive(0), indexesPosition(
             new int[indexesPositionLength]), activeIndexes(new int[activeIndexesLength]), values(
             new T[activeIndexesLength])
     {

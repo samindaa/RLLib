@@ -170,9 +170,10 @@ enum TraceEnum
 };
 
 // Common assertion tests
-class Assert
+
+class VectorsTestsUtils
 {
-  public:
+  private:
     static bool checkSparseVectorConsistency(const SVecDoubleType& v)
     {
       const int* indexesPositions = v.getIndexesPosition();
@@ -197,6 +198,12 @@ class Assert
       return nbActiveCounted != v.nbActiveEntries() ? false : true;
     }
 
+  public:
+    static bool checkConsistency(const SVecDoubleType& v)
+    {
+      return checkSparseVectorConsistency(v);
+    }
+
     static bool checkVectorEquals(const SVecDoubleType& a, const SVecDoubleType& b, double margin)
     {
       if (a.dimension() != b.dimension())
@@ -210,9 +217,39 @@ class Assert
       return true;
     }
 
+};
+
+class Assert
+{
+  public:
     static void checkVectorEquals(const SVecDoubleType& a, const SVecDoubleType& b)
     {
-      assert(checkVectorEquals(a, b, numeric_limits<float>::epsilon()));
+      assert(VectorsTestsUtils::checkConsistency(a));
+      assert(VectorsTestsUtils::checkConsistency(b));
+      assert(VectorsTestsUtils::checkVectorEquals(a, b, numeric_limits<float>::epsilon()));
+    }
+
+    static void checkVectorEquals(const SVecDoubleType& a, const SVecDoubleType& b, double margin)
+    {
+      assert(VectorsTestsUtils::checkConsistency(a));
+      assert(VectorsTestsUtils::checkConsistency(b));
+      assert(VectorsTestsUtils::checkVectorEquals(a, b, margin));
+    }
+
+    static void checkConsistency(const SVecDoubleType& v)
+    {
+      assert(VectorsTestsUtils::checkConsistency(v));
+    }
+
+    static void assertTrue(const bool& condition)
+    {
+      assert(condition);
+    }
+
+    template<class T>
+    static void assertEquals(const T& a, const T& b)
+    {
+      assert(a == b);
     }
 };
 

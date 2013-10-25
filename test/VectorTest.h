@@ -51,7 +51,7 @@ class SparseVectorTest: public SparseVectorTestBase
 
     SVecDoubleType* newVector(const int& size)
     {
-      SVecDoubleType* type = new SVecDoubleType(size);
+      SVecDoubleType* type = new SVecDoubleType(size, 2);
       vectors.push_back(type);
       return type;
     }
@@ -70,7 +70,7 @@ class SparseVectorTest: public SparseVectorTestBase
       int nbActive = rand() % maxActive;
       for (int i = 0; i < nbActive; i++)
         type->setEntry(rand() % maxActive, Probabilistic::nextDouble() * 2 - 1);
-      assert(Assert::checkSparseVectorConsistency(*type));
+      Assert::checkConsistency(*type);
       return type;
     }
 
@@ -78,8 +78,8 @@ class SparseVectorTest: public SparseVectorTestBase
     {
       SVecDoubleType pa(a);
       SVecDoubleType pb(b);
-      assert(Assert::checkSparseVectorConsistency(pa));
-      assert(Assert::checkSparseVectorConsistency(pb));
+      Assert::checkConsistency(pa);
+      Assert::checkConsistency(pb);
       Assert::checkVectorEquals(pa, a);
       Assert::checkVectorEquals(pb, b);
       Assert::checkVectorEquals(pa.addToSelf(pb), a.addToSelf(b));
@@ -91,26 +91,22 @@ class SparseVectorTest: public SparseVectorTestBase
   protected:
     void testActiveIndices()
     {
-      const double aValues[] =
-      { 0.0, 3.0, 2.0, 0.0, 1.0 };
-      const double bValues[] =
-      { 3.0, 4.0, 0.0, 0.0, 4.0 };
+      const double aValues[] = { 0.0, 3.0, 2.0, 0.0, 1.0 };
+      const double bValues[] = { 3.0, 4.0, 0.0, 0.0, 4.0 };
       SVecDoubleType* a = newVector(aValues, Arrays::length(aValues));
       SVecDoubleType* b = newVector(bValues, Arrays::length(bValues));
 
-      const int aGroundTruthActiveIndices[] =
-      { 1, 2, 4 };
-      const int bGroundTruthActiveIndices[] =
-      { 0, 1, 4 };
+      const int aGroundTruthActiveIndices[] = { 1, 2, 4 };
+      const int bGroundTruthActiveIndices[] = { 0, 1, 4 };
       const int* aActiveIndices = a->getActiveIndexes();
       const int* bActiveIndices = b->getActiveIndexes();
 
-      assert(3 == a->nbActiveEntries());
-      assert(3 == b->nbActiveEntries());
+      Assert::assertEquals(3, a->nbActiveEntries());
+      Assert::assertEquals(3, b->nbActiveEntries());
       for (int i = 0; i < a->nbActiveEntries(); i++)
-        assert(aGroundTruthActiveIndices[i] == aActiveIndices[i]);
+        Assert::assertEquals(aGroundTruthActiveIndices[i], aActiveIndices[i]);
       for (int i = 0; i < b->nbActiveEntries(); i++)
-        assert(bGroundTruthActiveIndices[i] == bActiveIndices[i]);
+        Assert::assertEquals(bGroundTruthActiveIndices[i], bActiveIndices[i]);
 
       // Now we are ready to use them
       _a = a;
@@ -120,14 +116,12 @@ class SparseVectorTest: public SparseVectorTestBase
 
     void testSparseVectorSet()
     {
-      const double aValues[] =
-      { 1.0, 2.0, 2.0, 4.0 };
-      const double bValues[] =
-      { 0.0, 1.0, 0.0, 0.0 };
+      const double aValues[] = { 1.0, 2.0, 2.0, 4.0 };
+      const double bValues[] = { 0.0, 1.0, 0.0, 0.0 };
       SVecDoubleType* a = newVector(aValues, Arrays::length(aValues));
       SVecDoubleType* b = newVector(bValues, Arrays::length(bValues));
       a->set(*b);
-      assert(Assert::checkSparseVectorConsistency(*a));
+      Assert::checkConsistency(*a);
     }
 
     void testRandomVectors()
@@ -148,10 +142,8 @@ class SparseVectorTest: public SparseVectorTestBase
     {
       SVecDoubleType v(*_a);
       v.setEntry(1, 3);
-      const double bValues[] =
-      { 0.0, 3.0, 2.0, 0.0, 1.0 };
-      const double cValues[] =
-      { 0.0, 0.0, 2.0, 0.0, 1.0 };
+      const double bValues[] = { 0.0, 3.0, 2.0, 0.0, 1.0 };
+      const double cValues[] = { 0.0, 0.0, 2.0, 0.0, 1.0 };
       SVecDoubleType* b = newVector(bValues, Arrays::length(bValues));
       Assert::checkVectorEquals(*b, v);
       v.setEntry(0, 0);
@@ -162,26 +154,25 @@ class SparseVectorTest: public SparseVectorTestBase
 
     void testSum()
     {
-      assert(6.0 == _a->sum());
-      assert(11.0 == _b->sum());
+      Assert::assertEquals(6.0, _a->sum());
+      Assert::assertEquals(11.0, _b->sum());
     }
 
     void testDotProduct()
     {
-      assert(16.0 == _a->dot(*_b));
-      assert(16.0 == _b->dot(*_a));
+      Assert::assertEquals(16.0, _a->dot(*_b));
+      Assert::assertEquals(16.0, _b->dot(*_a));
 
       SVecDoubleType c(*_b);
-      assert(16.0 == _a->dot(c));
-      assert(16.0 == c.dot(*_a));
+      Assert::assertEquals(16.0, _a->dot(c));
+      Assert::assertEquals(16.0, c.dot(*_a));
     }
 
     void testPlus()
     {
       SVecDoubleType a(*_a);
       SVecDoubleType b(*_b);
-      const double cValues[] =
-      { 3.0, 7.0, 2.0, 0.0, 5.0 };
+      const double cValues[] = { 3.0, 7.0, 2.0, 0.0, 5.0 };
       SVecDoubleType* c = newVector(cValues, Arrays::length(cValues));
       Assert::checkVectorEquals(*c, a.addToSelf(b));
     }
@@ -191,10 +182,8 @@ class SparseVectorTest: public SparseVectorTestBase
       SVecDoubleType a(*_a);
       SVecDoubleType b(*_b);
 
-      const double cValues[] =
-      { -3.0, -1.0, 2.0, 0.0, -3.0 };
-      const double dValues[] =
-      { -3.0, 2.0, 4.0, 0.0, -2.0 };
+      const double cValues[] = { -3.0, -1.0, 2.0, 0.0, -3.0 };
+      const double dValues[] = { -3.0, 2.0, 4.0, 0.0, -2.0 };
       SVecDoubleType* c = newVector(cValues, Arrays::length(cValues));
       SVecDoubleType* d = newVector(dValues, Arrays::length(dValues));
       Assert::checkVectorEquals(*c, a.substractToSelf(b));
@@ -206,10 +195,8 @@ class SparseVectorTest: public SparseVectorTestBase
     {
       SVecDoubleType a(*_a);
       SVecDoubleType b(*_b);
-      const double cValues[] =
-      { 0.0, 15.0, 10.0, 0.0, 5.0 };
-      const double dValues[] =
-      { 0.0, 0.0, 0.0, 0.0, 0.0 };
+      const double cValues[] = { 0.0, 15.0, 10.0, 0.0, 5.0 };
+      const double dValues[] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
       SVecDoubleType* c = newVector(cValues, Arrays::length(cValues));
       SVecDoubleType* d = newVector(dValues, Arrays::length(dValues));
       Assert::checkVectorEquals(*c, a.multiplyToSelf(5.0));
@@ -218,10 +205,9 @@ class SparseVectorTest: public SparseVectorTestBase
 
     void testMaxNorm()
     {
-      const double aValues[] =
-      { 1.0, -2.0, -3.0, 0.0, 2.0 };
+      const double aValues[] = { 1.0, -2.0, -3.0, 0.0, 2.0 };
       SVecDoubleType* a = newVector(aValues, Arrays::length(aValues));
-      assert(3.0 == a->maxNorm());
+      Assert::assertEquals(3.0, a->maxNorm());
     }
 
     void testFullVector()
@@ -253,37 +239,40 @@ class SparseVectorTest: public SparseVectorTestBase
     void testSparseVector()
     {
 
-      SVecFloatType a(20);
-      SVecFloatType b(20);
+      SVecFloatType a(20, 2);
+      SVecFloatType b(20, 2);
       for (int i = 0; i < 5; i++)
       {
-        a.insertEntry(i, 1);
-        b.insertEntry(i, 2);
+        a.insertEntry(i, i + 1);
+        b.insertEntry(i, i + 11);
       }
 
-      cout << a << endl;
-      cout << b << endl;
-      cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
+      //cout << a << endl;
+      //cout << b << endl;
+      //cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
+      Assert::assertEquals(5, a.nbActiveEntries());
+      Assert::assertEquals(5, b.nbActiveEntries());
+      Assert::assertEquals(205, (int) a.dot(b));
       b.removeEntry(2);
-      cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
-      cout << a << endl;
-      cout << b << endl;
-      cout << "dot=" << a.dot(b) << endl;
+      //cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
+      Assert::assertEquals(4, b.nbActiveEntries());
+      //cout << a << endl;
+      //cout << b << endl;
+      Assert::assertEquals(166, (int) a.dot(b));
+      //cout << "dot=" << a.dot(b) << endl;
       cout << a.addToSelf(b) << endl;
       a.clear();
       b.clear();
-      cout << a << endl;
-      cout << b << endl;
+      Assert::assertEquals(0, (int) a.dot(b));
+      //cout << a << endl;
+      //cout << b << endl;
     }
 
     void testEbeMultiply()
     {
-      const double a2Values[] =
-      { 3, 4, 5 };
-      const double a1Values[] =
-      { -1, 1, 2 };
-      const double cValues[] =
-      { -3, 4, 10 };
+      const double a2Values[] = { 3, 4, 5 };
+      const double a1Values[] = { -1, 1, 2 };
+      const double cValues[] = { -3, 4, 10 };
       SVecDoubleType* a2 = newVector(a2Values, Arrays::length(a2Values));
       SVecDoubleType* a1 = newVector(a1Values, Arrays::length(a1Values));
 

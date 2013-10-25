@@ -37,8 +37,8 @@ class TraceTest: public TraceTestBase
     TraceTest() :
         s01(0), s02(0)
     {
-      s01 = new SVecDoubleType(100);
-      s02 = new SVecDoubleType(100);
+      s01 = new SVecDoubleType(100, 2);
+      s02 = new SVecDoubleType(100, 2);
 
       s01->setEntry(1, 1.0);
       s01->setEntry(2, 1.0);
@@ -107,10 +107,9 @@ class TraceTest: public TraceTestBase
       for (int i = 0; i < 1000; i++)
       {
         trace.update(lambda, *s02);
-        Assert::checkSparseVectorConsistency(trace.vect());
+        Assert::assertTrue(VectorsTestsUtils::checkConsistency(trace.vect()));
       }
-      assert(s02->nbActiveEntries() == trace.vect().nbActiveEntries());
-      // TODO: expected:
+      Assert::assertEquals(s02->nbActiveEntries(),trace.vect().nbActiveEntries());
       SVecDoubleType expectedVec(trace.vect().dimension());
       expectedVec.set(*s02, expected);
       Assert::checkVectorEquals(trace.vect(), expectedVec, 0.00001);
