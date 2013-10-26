@@ -8,6 +8,8 @@
 #ifndef FUNCTION_H_
 #define FUNCTION_H_
 
+#include "Vector.h"
+
 namespace RLLib
 {
 
@@ -31,6 +33,7 @@ class LinearLearner: public ParameterizedFunction<T>
     }
     virtual double initialize() =0;
     virtual void reset() =0;
+    virtual const SparseVector<T>& weights() const =0;
 };
 
 }  // namespace RLLib

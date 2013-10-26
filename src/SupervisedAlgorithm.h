@@ -67,9 +67,15 @@ class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
     {
       w->persist(f);
     }
+
     void resurrect(const std::string& f)
     {
       w->resurrect(f);
+    }
+
+    const SparseVector<T>& weights() const
+    {
+      return *w;
     }
 };
 
@@ -148,6 +154,11 @@ class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
     void resurrect(const std::string& f)
     {
       w->resurrect(f);
+    }
+
+    const SparseVector<T>& weights() const
+    {
+      return *w;
     }
 };
 
@@ -228,6 +239,11 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
     void resurrect(const std::string& f)
     {
       w->resurrect(f);
+    }
+
+    const SparseVector<T>& weights() const
+    {
+      return *w;
     }
 };
 
@@ -332,9 +348,15 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
     {
       w->persist(f);
     }
+
     void resurrect(const std::string& f)
     {
       w->resurrect(f);
+    }
+
+    const SparseVector<T>& weights() const
+    {
+      return *w;
     }
 };
 

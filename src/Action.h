@@ -91,6 +91,7 @@ class ActionList
     virtual const Action& operator[](const int& index) const =0;
     virtual const Action& at(const int& index) const =0;
     virtual void push_back(const int& index, const double& value) =0;
+    virtual void erase(const int& index) =0;
     virtual void update(const int& actionIndex, const unsigned int& vectorIndex,
         const double& value) =0;
 
@@ -147,6 +148,21 @@ class GeneralActionList: public ActionList
     void push_back(const int& index, const double& value)
     {
       actions.at(index)->push_back(value);
+    }
+
+    void erase(const int& index)
+    {
+      std::vector<Action*>::iterator iter = actions.begin();
+      while (iter != actions.end())
+      {
+        if ((*iter)->id() == index)
+        {
+          actions.erase(iter);
+          break;
+        }
+        else
+          ++iter;
+      }
     }
 
     void update(const int& actionIndex, const unsigned int& vectorIndex, const double& value)

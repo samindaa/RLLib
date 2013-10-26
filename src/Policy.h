@@ -155,7 +155,8 @@ class NormalDistribution: public PolicyDistribution<T>
 
     const Action& sampleAction()
     {
-      actions->update(defaultAction, defaultAction, Probabilistic::nextNormalGaussian() * stddev + mean);
+      actions->update(defaultAction, defaultAction,
+          Probabilistic::nextNormalGaussian() * stddev + mean);
       return actions->at(defaultAction);
     }
 
@@ -309,6 +310,14 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
     StochasticPolicy(ActionList* actions) :
         actions(actions), distribution(new DenseVector<double>(actions->dimension()))
     {
+    }
+
+    StochasticPolicy(ActionList* actions, DenseVector<double>* distribution) :
+        actions(actions), distribution(new DenseVector<double>(actions->dimension()))
+    {
+      assert((int )actions->dimension() == distribution->dimension());
+      for (int i = 0; i < distribution->dimension(); i++)
+        this->distribution->at(i) = distribution->at(i);
     }
 
     virtual ~StochasticPolicy()
@@ -759,6 +768,56 @@ class BoltzmannDistributionPerturbed: public Policy<T>
       return sampleAction();
     }
 
+};
+
+template<class T>
+class SingleActionPolicy: public Policy<T>
+{
+  private:
+    ActionList* actions;
+  public:
+    SingleActionPolicy(ActionList* actions) :
+        actions(actions)
+    {
+      assert(actions->dimension() == 1);
+    }
+
+    void update(const Representations<T>& phis)
+    {
+    }
+
+    double pi(const Action& a)
+    {
+      return a.id() == actions->at(0).id() ? 1.0 : 0.0;
+    }
+
+    const Action& sampleAction()
+    {
+      return actions->at(0);
+    }
+
+    const Action& sampleBestAction()
+    {
+      return sampleAction();
+    }
+};
+
+template<class T>
+class ConstantPolicy: public StochasticPolicy<T>
+{
+  public:
+    ConstantPolicy(ActionList* actions, DenseVector<double>* distribution) :
+        StochasticPolicy<T>(actions, distribution)
+    {
+    }
+
+    virtual ~ConstantPolicy()
+    {
+    }
+
+    void update(const Representations<T>& xas)
+    {
+    }
 };
 
 } // namespace RLLib

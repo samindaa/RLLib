@@ -93,6 +93,11 @@ class TD: public OnPolicyTD<T>
       v->resurrect(f);
     }
 
+    const SparseVector<T>& weights() const
+    {
+      return *v;
+    }
+
 };
 
 template<class T>
@@ -252,6 +257,11 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
     {
       v->resurrect(f);
     }
+
+    const SparseVector<T>& weights() const
+    {
+      return *v;
+    }
 };
 
 template<class T>
@@ -366,11 +376,16 @@ class GQ: public Predictor<T>, public LinearLearner<T>
     {
       v->resurrect(f);
     }
+
+    const SparseVector<T>& weights() const
+    {
+      return *v;
+    }
 };
 
 // Prediction problems
 template<class T>
-class GTDLambda: public GVF<T>
+class GTDLambda: public OnPolicyTD<T>, public GVF<T>
 {
   private:
     double delta_t;
@@ -435,6 +450,11 @@ class GTDLambda: public GVF<T>
       return update(phi_t, phi_tp1, gamma_t, lambda_t, rho_t, r_tp1, z_tp1);
     }
 
+    double update(const SparseVector<T>& x_t, const SparseVector<T>& x_tp1, double r_tp1)
+    {
+      return update(x_t, x_tp1, gamma_t, lambda_t, 1.0, r_tp1, 0.0);
+    }
+
     void reset()
     {
       e->clear();
@@ -452,11 +472,16 @@ class GTDLambda: public GVF<T>
     {
       v->persist(f);
     }
+
     void resurrect(const std::string& f)
     {
       v->resurrect(f);
     }
 
+    const SparseVector<T>& weights() const
+    {
+      return *v;
+    }
 };
 
 } // namespace RLLib

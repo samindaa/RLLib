@@ -101,12 +101,12 @@ class SparseVectorTest: public SparseVectorTestBase
       const int* aActiveIndices = a->getActiveIndexes();
       const int* bActiveIndices = b->getActiveIndexes();
 
-      Assert::assertEquals(3, a->nbActiveEntries());
-      Assert::assertEquals(3, b->nbActiveEntries());
+      Assert::equals(3, a->nbActiveEntries());
+      Assert::equals(3, b->nbActiveEntries());
       for (int i = 0; i < a->nbActiveEntries(); i++)
-        Assert::assertEquals(aGroundTruthActiveIndices[i], aActiveIndices[i]);
+        Assert::equals(aGroundTruthActiveIndices[i], aActiveIndices[i]);
       for (int i = 0; i < b->nbActiveEntries(); i++)
-        Assert::assertEquals(bGroundTruthActiveIndices[i], bActiveIndices[i]);
+        Assert::equals(bGroundTruthActiveIndices[i], bActiveIndices[i]);
 
       // Now we are ready to use them
       _a = a;
@@ -154,18 +154,18 @@ class SparseVectorTest: public SparseVectorTestBase
 
     void testSum()
     {
-      Assert::assertEquals(6.0, _a->sum());
-      Assert::assertEquals(11.0, _b->sum());
+      Assert::equals(6.0, _a->sum());
+      Assert::equals(11.0, _b->sum());
     }
 
     void testDotProduct()
     {
-      Assert::assertEquals(16.0, _a->dot(*_b));
-      Assert::assertEquals(16.0, _b->dot(*_a));
+      Assert::equals(16.0, _a->dot(*_b));
+      Assert::equals(16.0, _b->dot(*_a));
 
       SVecDoubleType c(*_b);
-      Assert::assertEquals(16.0, _a->dot(c));
-      Assert::assertEquals(16.0, c.dot(*_a));
+      Assert::equals(16.0, _a->dot(c));
+      Assert::equals(16.0, c.dot(*_a));
     }
 
     void testPlus()
@@ -207,7 +207,7 @@ class SparseVectorTest: public SparseVectorTestBase
     {
       const double aValues[] = { 1.0, -2.0, -3.0, 0.0, 2.0 };
       SVecDoubleType* a = newVector(aValues, Arrays::length(aValues));
-      Assert::assertEquals(3.0, a->maxNorm());
+      Assert::equals(3.0, a->maxNorm());
     }
 
     void testFullVector()
@@ -250,20 +250,20 @@ class SparseVectorTest: public SparseVectorTestBase
       //cout << a << endl;
       //cout << b << endl;
       //cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
-      Assert::assertEquals(5, a.nbActiveEntries());
-      Assert::assertEquals(5, b.nbActiveEntries());
-      Assert::assertEquals(205, (int) a.dot(b));
+      Assert::equals(5, a.nbActiveEntries());
+      Assert::equals(5, b.nbActiveEntries());
+      Assert::equals(205, (int) a.dot(b));
       b.removeEntry(2);
       //cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
-      Assert::assertEquals(4, b.nbActiveEntries());
+      Assert::equals(4, b.nbActiveEntries());
       //cout << a << endl;
       //cout << b << endl;
-      Assert::assertEquals(166, (int) a.dot(b));
+      Assert::equals(166, (int) a.dot(b));
       //cout << "dot=" << a.dot(b) << endl;
       cout << a.addToSelf(b) << endl;
       a.clear();
       b.clear();
-      Assert::assertEquals(0, (int) a.dot(b));
+      Assert::equals(0, (int) a.dot(b));
       //cout << a << endl;
       //cout << b << endl;
     }

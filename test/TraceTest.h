@@ -107,9 +107,9 @@ class TraceTest: public TraceTestBase
       for (int i = 0; i < 1000; i++)
       {
         trace.update(lambda, *s02);
-        Assert::assertTrue(VectorsTestsUtils::checkConsistency(trace.vect()));
+        Assert::pass(VectorsTestsUtils::checkConsistency(trace.vect()));
       }
-      Assert::assertEquals(s02->nbActiveEntries(), trace.vect().nbActiveEntries());
+      Assert::equals(s02->nbActiveEntries(), trace.vect().nbActiveEntries());
       SVecDoubleType expectedVec(trace.vect().dimension());
       expectedVec.set(*s02, expected);
       Assert::checkVectorEquals(trace.vect(), expectedVec, 0.00001);
@@ -156,7 +156,7 @@ class TraceTest: public TraceTestBase
           {
             //std::cout << "[" << Simulator<T, O>::Event::episodeR << ","
             //    << Simulator<T, O>::Event::averageTimePerStep << "] ";
-            Assert::assertFail(Simulator<T, O>::Event::episodeR < minEpisodeReward);
+            Assert::fail(Simulator<T, O>::Event::episodeR < minEpisodeReward);
           }
         }
     };

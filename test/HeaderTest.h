@@ -44,6 +44,7 @@
 #include "Representation.h"
 #include "MCar2D.h"
 #include "Simulator.h"
+#include "StateGraph.h"
 
 using namespace std;
 using namespace RLLib;
@@ -221,6 +222,17 @@ class VectorsTestsUtils
       return true;
     }
 
+    static bool checkValue(const SVecDoubleType& v)
+    {
+      const double* values = v.getValues();
+      for (int position = 0; position < v.nbActiveEntries(); position++)
+      {
+        if (!Boundedness::checkValue(values[position]))
+          return false;
+      }
+      return true;
+    }
+
 };
 
 class Assert
@@ -245,18 +257,23 @@ class Assert
       assert(VectorsTestsUtils::checkConsistency(v));
     }
 
-    static void assertTrue(const bool& condition)
+    static void checkValue(const SVecDoubleType& v)
+    {
+      assert(VectorsTestsUtils::checkValue(v));
+    }
+
+    static void pass(const bool& condition)
     {
       assert(condition);
     }
 
-    static void assertFail(const bool& condition)
+    static void fail(const bool& condition)
     {
       assert(!condition);
     }
 
     template<class T>
-    static void assertEquals(const T& a, const T& b)
+    static void equals(const T& a, const T& b)
     {
       assert(a == b);
     }
