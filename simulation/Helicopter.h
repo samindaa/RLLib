@@ -334,20 +334,20 @@ class HelicopterDynamics
       for (int a_i = 0; a_i < 4; a_i++)
         a[a_i] = ActionRanges[a_i].bound(agentAction.at(a_i));
 
-      double noise_mult = 2.0;
-      double noise_std[] =
-      { 0.1941, 0.2975, 0.6058, 0.1508, 0.2492, 0.0734 }; // u,
-                                                          // v,
-                                                          // w,
-                                                          // p,
-                                                          // q,
-                                                          // r
+      static double noise_mult = 2.0;
+      static double noise_std[] = { 0.1941, 0.2975, 0.6058, 0.1508, 0.2492, 0.0734 }; // u,
+                                                                                      // v,
+                                                                                      // w,
+                                                                                      // p,
+                                                                                      // q,
+                                                                                      // r
       double noise_memory = .8;
       // generate Gaussian random numbers
 
       for (int i = 0; i < 6; ++i)
         noise[i] = noise_memory * noise[i]
-            + (1.0 - noise_memory) * Probabilistic::nextNormalGaussian() * noise_std[i] * noise_mult;
+            + (1.0 - noise_memory) * Probabilistic::nextNormalGaussian() * noise_std[i]
+                * noise_mult;
 
       for (int t = 0; t < 10; ++t)
       {
@@ -407,10 +407,10 @@ class Helicopter: public Environment<float>
 
   public:
     Helicopter(const int episodeLength = 6000) :
-        Environment<float>(12, 1, 4), episodeLength(episodeLength), step_time(0)
+        Environment<float>(12, 1, 1), episodeLength(episodeLength), step_time(0)
     {
       // Discrete actions are not setup for this problem.
-      for (unsigned int i = 0; i < continuousActions->dimension(); i++)
+      for (unsigned int i = 0; i < 4/*four values in the action*/; i++)
         continuousActions->push_back(0, 0);
     }
 

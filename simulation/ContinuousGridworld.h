@@ -40,15 +40,15 @@ class ContinuousGridworld: public Environment<float>
             new Range<float>(-0.05, 0.05)), absoluteNoise(0.025)
     {
       // discrete actions
-      for (unsigned int i = 0; i < discreteActions->dimension(); i++)
+      for (int i = 0; i < discreteActions->dimension(); i++)
       {
         for (int k = 0; k < 2; k++)
           discreteActions->push_back(i, 0);
       }
-      for (unsigned int i = 0; i < discreteActions->dimension() - 1; i++)
+      for (int i = 0; i < discreteActions->dimension() - 1; i++)
       {
-        unsigned int dimension = i / 2;
-        unsigned int dimensionAction = i % 2;
+        int dimension = i / 2;
+        int dimensionAction = i % 2;
         if (dimensionAction == 0)
           discreteActions->update(i, dimension, -1.0);
         else

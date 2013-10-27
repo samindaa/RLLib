@@ -75,7 +75,7 @@ class RandlovBike: public Environment<float>
         M_PI)
     {
 
-      for (unsigned int i = 0; i < discreteActions->dimension(); i++)
+      for (int i = 0; i < discreteActions->dimension(); i++)
         discreteActions->push_back(i, i);
 
       // @@>> TODO: this needs a some work

@@ -57,7 +57,7 @@ class HelicopterTest: public HelicopterTestBase
           helicopter.step(helicopter.getContinuousActionList().at(0));
           assert(helicopter.r() <= 0);
           for (int i = 0; i < helicopter.getVars().dimension(); i++)
-            assert( helicopter.heliDynamics.ObservationRanges[i].in(helicopter.getVars()[i]));
+            assert(helicopter.heliDynamics.ObservationRanges[i].in(helicopter.getVars()[i]));
         }
       }
     }

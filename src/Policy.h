@@ -629,7 +629,7 @@ class Greedy: public DiscreteActionPolicy<T>
     void findBestAction()
     {
       bestAction = &actions->at(0);
-      for (unsigned int i = 1; i < actions->dimension(); i++)
+      for (int i = 1; i < actions->dimension(); i++)
       {
         if (actionValues[i] > actionValues[bestAction->id()])
           bestAction = &actions->at(i);

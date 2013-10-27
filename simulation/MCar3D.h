@@ -70,7 +70,7 @@ class MCar3D: public Environment<float>
             new Range<float>(-0.07, 0.07))
     {
 
-      for (unsigned int a = 0; a < discreteActions->dimension(); a++)
+      for (int a = 0; a < discreteActions->dimension(); a++)
         discreteActions->push_back(a, a);
       // not used
       continuousActions->push_back(0, 0.0);

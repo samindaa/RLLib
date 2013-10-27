@@ -71,7 +71,7 @@ class Action
       return actionID;
     }
 
-    const unsigned int dimension() const
+    const int dimension() const
     {
       return values.size();
     }
@@ -87,7 +87,7 @@ class ActionList
     {
     }
 
-    virtual const unsigned int dimension() const =0;
+    virtual const int dimension() const =0;
     virtual const Action& operator[](const int& index) const =0;
     virtual const Action& at(const int& index) const =0;
     virtual void push_back(const int& index, const double& value) =0;
@@ -170,7 +170,7 @@ class GeneralActionList: public ActionList
       actions.at(actionIndex)->update(vectorIndex, value);
     }
 
-    const unsigned int dimension() const
+    const int dimension() const
     {
       return actions.size();
     }
