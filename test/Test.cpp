@@ -64,12 +64,8 @@ int main(int argc, char** argv)
     string str;
     while (getline(inf, str))
     {
-      if (str.length())
-      {
-        unsigned int found = str.find_first_of("#");
-        if ((found != string::npos) && (found > str.size()))
-          activeTestSet.insert(str);
-      }
+      if (str.length() && (str.at(0) != '#'))
+        activeTestSet.insert(str);
     }
   }
   else
