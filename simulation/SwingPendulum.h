@@ -22,9 +22,9 @@
 #ifndef SWINGPENDULUM_H_
 #define SWINGPENDULUM_H_
 
-#include <iostream>
-#include <fstream>
 #include "Environment.h"
+
+using namespace RLLib;
 
 class SwingPendulum: public Environment<float>
 {
@@ -59,7 +59,6 @@ class SwingPendulum: public Environment<float>
       for (int i = 0; i < getVars().dimension(); i++)
         resolutions->at(i) = 10.0;
 
-      outfile.open("visualization/swingPendulum.txt");
     }
 
     virtual ~SwingPendulum()
@@ -67,7 +66,6 @@ class SwingPendulum: public Environment<float>
       delete actionRange;
       delete thetaRange;
       delete velocityRange;
-      outfile.close();
     }
 
   private:
@@ -82,9 +80,6 @@ class SwingPendulum: public Environment<float>
   public:
     void updateRTStep()
     {
-      if (outfile.is_open() && getOn())
-        outfile << ((theta * 180 / M_PI) + 180.0) << " " << cos(theta) << std::endl;
-
       DenseVector<float>& vars = *output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = (theta - thetaRange->min()) * resolutions->at(0) / thetaRange->length();

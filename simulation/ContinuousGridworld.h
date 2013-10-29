@@ -22,9 +22,9 @@
 #ifndef CONTINUOUSGRIDWORLD_H_
 #define CONTINUOUSGRIDWORLD_H_
 
-#include <fstream>
-#include <iostream>
 #include "Environment.h"
+
+using namespace RLLib;
 
 class ContinuousGridworld: public Environment<float>
 {
@@ -59,14 +59,12 @@ class ContinuousGridworld: public Environment<float>
         resolutions->at(i) = 10.0;
 
       // continuous actions are not setup for this problem
-      outpath.open("visualization/continuousGridworldPath.txt");
     }
 
     virtual ~ContinuousGridworld()
     {
       delete observationRange;
       delete actionRange;
-      outpath.close();
     }
 
     void initialize()
@@ -82,12 +80,6 @@ class ContinuousGridworld: public Environment<float>
       for (int i = 0; i < output->o_tp1->dimension(); i++)
         output->o_tp1->at(i) = observations->at(i) * resolutions->at(i);
       //std::cout << __vars->at(0) << " " << __vars->at(1) << " || ";
-      if (getOn())
-      {
-        for (int i = 0; i < output->o_tp1->dimension(); i++)
-          outpath << output->o_tp1->at(i) << " ";
-        outpath << std::endl;
-      }
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 

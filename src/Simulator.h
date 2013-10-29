@@ -22,18 +22,19 @@
 #ifndef SIMULATOR_H_
 #define SIMULATOR_H_
 
-#include <iostream>
-#include <fstream>
 #include <cmath>
 #include <numeric>
 #include <typeinfo>
+
+#include <iostream>
+#include <vector>
 
 #include "Control.h"
 #include "Environment.h"
 #include "Timer.h"
 
-#include <iostream>
-#include <vector>
+namespace RLLib
+{
 
 template<class T, class O>
 class Simulator
@@ -162,7 +163,6 @@ class Simulator
     {
       if (beginingOfEpisode)
       {
-        environment->setOn(false);
         environment->initialize();
         x_t->set(environment->getVars());
         a_t = &agent->initialize(*x_t);
@@ -307,5 +307,7 @@ class Simulator
       environment->draw();
     }
 };
+
+}  // namespace RLLib
 
 #endif /* SIMULATOR_H_ */

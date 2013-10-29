@@ -22,8 +22,6 @@
 #ifndef ACROBOT_H_
 #define ACROBOT_H_
 
-#include <iostream>
-#include <fstream>
 #include "Environment.h"
 
 class Acrobot: public Environment<float>
@@ -37,7 +35,6 @@ class Acrobot: public Environment<float>
     float targetPosition;
     float theta1, theta2, theta1Dot, theta2Dot;
     float transitionNoise;
-    //std::ofstream outfile;
 
   public:
     Acrobot() :
@@ -56,7 +53,6 @@ class Acrobot: public Environment<float>
 
       for (int i = 0; i < getVars().dimension(); i++)
         resolutions->at(i) = 6.0;
-      //outfile.open("visualization/acrobot.txt");
     }
     ~Acrobot()
     {
@@ -64,7 +60,6 @@ class Acrobot: public Environment<float>
       delete theta1DotRange;
       delete theta2DotRange;
       delete actionRange;
-      //outfile.close();
     }
 
     void initialize()

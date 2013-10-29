@@ -22,9 +22,9 @@
 #ifndef MCAR2D_H_
 #define MCAR2D_H_
 
-#include <iostream>
-#include <fstream>
 #include "Environment.h"
+
+using namespace RLLib;
 
 class MCar2D: public Environment<float>
 {

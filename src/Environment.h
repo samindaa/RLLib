@@ -12,7 +12,8 @@
 #include "Action.h"
 #include "Math.h"
 
-using namespace RLLib;
+namespace RLLib
+{
 
 template<class O>
 class TRStep
@@ -43,11 +44,17 @@ class TRStep
 template<class O>
 class Environment
 {
+  protected:
+    DenseVector<O>* observations;
+    DenseVector<O>* resolutions;
+    TRStep<O>* output;
+    ActionList* discreteActions;
+    ActionList* continuousActions;
   public:
     Environment(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
         observations(new DenseVector<float>(nbVars)), resolutions(new DenseVector<float>(nbVars)), output(
             new TRStep<O>(nbVars)), discreteActions(new GeneralActionList(nbDiscreteActions)), continuousActions(
-            new GeneralActionList(nbContinuousActions)), itsOn(false)
+            new GeneralActionList(nbContinuousActions))
     {
     }
 
@@ -63,19 +70,13 @@ class Environment
   public:
     virtual void initialize() =0;
     virtual void step(const Action& action) =0;
+    virtual void updateRTStep() =0;
+    virtual bool endOfEpisode() const =0;
+    virtual float r() const =0;
+    virtual float z() const =0;
 
     virtual void draw() const
     {/*To output useful information*/
-    }
-
-    virtual void setOn(const bool& itsOn)
-    {
-      this->itsOn = itsOn;
-    }
-
-    virtual bool getOn() const
-    {
-      return itsOn;
     }
 
     virtual ActionList& getDiscreteActionList() const
@@ -113,20 +114,8 @@ class Environment
       for (int i = 0; i < resolutions->dimension(); i++)
         resolutions->at(i) = resolution;
     }
-
-  protected:
-    virtual void updateRTStep() =0;
-    virtual bool endOfEpisode() const =0;
-    virtual float r() const =0;
-    virtual float z() const =0;
-
-  protected:
-    DenseVector<O>* observations;
-    DenseVector<O>* resolutions;
-    TRStep<O>* output;
-    ActionList* discreteActions;
-    ActionList* continuousActions;
-    bool itsOn;
 };
+
+}  // namespace RLLib
 
 #endif /* ENVIRONMENT_H_ */
