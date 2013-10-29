@@ -215,6 +215,32 @@ class NormalDistributionScaled: public NormalDistribution<T>
 };
 
 template<class T>
+class NormalDistributionSkewed: public NormalDistribution<T>
+{
+  public:
+
+    typedef NormalDistribution<T> super;
+
+    NormalDistributionSkewed(const double& initialMean, const double& initialStddev,
+        const int& nbFeatures, ActionList* actions) :
+        NormalDistribution<T>(initialMean, initialStddev, nbFeatures, actions)
+    {
+    }
+
+    virtual ~NormalDistributionSkewed()
+    {
+    }
+
+    virtual void updateStep(const Action& action)
+    {
+      double a = action.at(super::defaultAction);
+      super::meanStep = (a - super::mean);
+      super::stddevStep = (a - super::mean) * (a - super::mean) / super::sigma2 - 1.0;
+    }
+
+};
+
+template<class T>
 class ScaledPolicyDistribution: public PolicyDistribution<T>
 {
   protected:

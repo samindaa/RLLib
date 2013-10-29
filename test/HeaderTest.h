@@ -43,6 +43,7 @@
 #include "ControlAlgorithm.h"
 #include "Representation.h"
 #include "MCar2D.h"
+#include "NoStateProblem.h"
 #include "Simulator.h"
 #include "StateGraph.h"
 

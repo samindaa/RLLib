@@ -281,7 +281,6 @@ void MountainCarTest::testGreedyGQMountainCar()
 void MountainCarTest::testSoftmaxGQOnMountainCar()
 {
   srand(time(0));
-  cout << "MountainCarTest::testSoftmaxGQOnMountainCar" << endl;
   Environment<float>* problem = new MCar2D;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(

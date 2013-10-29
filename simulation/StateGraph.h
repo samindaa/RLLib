@@ -463,7 +463,7 @@ class FSGAgentState: public Projector<T, O>
 
     int dimension() const
     {
-      return (int) stateIndexes->size();
+      return stateIndexes->size();
     }
 };
 
