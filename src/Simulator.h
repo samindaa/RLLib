@@ -76,7 +76,6 @@ class Simulator
     int nbEpisodes;
     int nbRuns;
     int nbEpisodeDone;
-    bool beginingOfEpisode;
     bool endingOfEpisode;
     bool evaluate;
     bool verbose;
@@ -100,10 +99,10 @@ class Simulator
         agent(agent), environment(environment), a_t(0), x_0(new DenseVector<O>(0)), x_t(
             new DenseVector<O>(environment->getVars().dimension())), x_tp1(
             new DenseVector<O>(environment->getVars().dimension())), maxEpisodeTimeSteps(
-            maxEpisodeTimeSteps), nbEpisodes(nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), beginingOfEpisode(
-            true), endingOfEpisode(false), evaluate(false), verbose(true), totalTimeInMilliseconds(
-            0), enableStatistics(false), enableTestEpisodesAfterEachRun(false), maxTestEpisodesAfterEachRun(
-            20), timeStep(0), episodeR(0), episodeZ(0)
+            maxEpisodeTimeSteps), nbEpisodes(nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), endingOfEpisode(
+            false), evaluate(false), verbose(true), totalTimeInMilliseconds(0), enableStatistics(
+            false), enableTestEpisodesAfterEachRun(false), maxTestEpisodesAfterEachRun(20), timeStep(
+            0), episodeR(0), episodeZ(0)
     {
     }
 
@@ -161,21 +160,32 @@ class Simulator
 
     void step()
     {
-      if (beginingOfEpisode)
+      if (!a_t)
       {
+        /*Initialize the problem*/
         environment->initialize();
         x_t->set(environment->getVars());
-        a_t = &agent->initialize(*x_t);
+        /*Statistic variables*/
         timeStep = 0;
         episodeR = 0;
         episodeZ = 0;
         totalTimeInMilliseconds = 0;
-        beginingOfEpisode = false;
+        /*The episode is just started*/
         endingOfEpisode = false;
       }
       else
       {
+        /*Step through the problem*/
         environment->step(*a_t);
+      }
+
+      if (!a_t)
+      {
+        /*Initialize the control agent and get the first action*/
+        a_t = &agent->initialize(*x_t);
+      }
+      else
+      {
         const TRStep<O>& step = environment->getTRStep();
         x_tp1->set(*step.o_tp1);
         ++timeStep;
@@ -192,32 +202,34 @@ class Simulator
         timer.stop();
         totalTimeInMilliseconds += timer.getElapsedTimeInMilliSec();
 
-        if (endingOfEpisode/*Episode ended*/)
+      }
+
+      if (endingOfEpisode/*The episode is just ended*/)
+      {
+        if (verbose)
         {
-          if (verbose)
-          {
-            double averageTimePerStep = totalTimeInMilliseconds / timeStep;
-            std::cout << "{" << nbEpisodeDone << " [" << timeStep << " (" << episodeR << ","
-                << episodeZ << "," << averageTimePerStep << ")]} ";
-            //std::cout << ".";
-            std::cout.flush();
-          }
-          if (enableStatistics)
-            statistics.push_back(timeStep);
-          ++nbEpisodeDone;
-          beginingOfEpisode = true;
-          // Fire the events
-          for (typename std::vector<Event*>::iterator iter = onEpisodeEnd.begin();
-              iter != onEpisodeEnd.end(); ++iter)
-          {
-            Event* e = *iter;
-            e->nbTotalTimeSteps = timeStep;
-            e->nbEpisodeDone = nbEpisodeDone;
-            e->averageTimePerStep = (totalTimeInMilliseconds / timeStep);
-            e->episodeR = episodeR;
-            e->episodeZ = episodeZ;
-            e->update();
-          }
+          double averageTimePerStep = totalTimeInMilliseconds / timeStep;
+          std::cout << "{" << nbEpisodeDone << " [" << timeStep << " (" << episodeR << ","
+              << episodeZ << "," << averageTimePerStep << ")]} ";
+          //std::cout << ".";
+          std::cout.flush();
+        }
+        if (enableStatistics)
+          statistics.push_back(timeStep);
+        ++nbEpisodeDone;
+        /*Set the initial marker*/
+        a_t = 0;
+        // Fire the events
+        for (typename std::vector<Event*>::iterator iter = onEpisodeEnd.begin();
+            iter != onEpisodeEnd.end(); ++iter)
+        {
+          Event* e = *iter;
+          e->nbTotalTimeSteps = timeStep;
+          e->nbEpisodeDone = nbEpisodeDone;
+          e->averageTimePerStep = (totalTimeInMilliseconds / timeStep);
+          e->episodeR = episodeR;
+          e->episodeZ = episodeZ;
+          e->update();
         }
       }
 
@@ -266,7 +278,7 @@ class Simulator
 
     bool isBeginingOfEpisode() const
     {
-      return beginingOfEpisode;
+      return a_t == 0;
     }
 
     bool isEndingOfEpisode() const
