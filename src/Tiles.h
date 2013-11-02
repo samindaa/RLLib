@@ -53,95 +53,6 @@ namespace RLLib
 {
 
 // ============================================================================
-class CollisionTable
-{
-  public:
-    long m;
-    long *data;
-    int safe;
-    long calls;
-    long clearhits;
-    long collisions;
-
-    CollisionTable(int size, int safety)
-    {
-      int tmp = size;
-      while (tmp > 2)
-      {
-        if (tmp % 2 != 0)
-        {
-          printf("\nSize of collision table must be power of 2 %d", size);
-          exit(0);
-        }
-        tmp /= 2;
-      }
-      data = new long[size];
-      m = size;
-      safe = safety;
-      // reset();
-
-      for (int i = 0; i < m; i++)
-        data[i] = -1;
-      calls = 0;
-      clearhits = 0;
-      collisions = 0;
-    }
-
-    ~CollisionTable()
-    {
-      delete[] data;
-    }
-
-    int usage()
-    {
-      int count = 0;
-      for (int i = 0; i < m; i++)
-        if (data[i] != -1)
-        {
-          count++;
-        }
-
-      return count;
-    }
-
-    void print()
-    {
-      printf("Collision table: Safety : %d Usage : %d Size : %ld Calls : %ld Collisions : %ld\n",
-          this->safe, this->usage(), this->m, this->calls, this->collisions);
-    }
-
-    void save(int file)
-    {
-      assert(write(file, (char * ) &m, sizeof(long)));
-      assert(write(file, (char * ) &safe, sizeof(int)));
-      assert(write(file, (char * ) &calls, sizeof(long)));
-      assert(write(file, (char * ) &clearhits, sizeof(long)));
-      assert(write(file, (char * ) &collisions, sizeof(long)));
-      assert(write(file, (char * ) data, m * sizeof(long)));
-    }
-
-    void restore(int file)
-    {
-      assert(read(file, (char * ) &m, sizeof(long)));
-      assert(read(file, (char * ) &safe, sizeof(int)));
-      assert(read(file, (char * ) &calls, sizeof(long)));
-      assert(read(file, (char * ) &clearhits, sizeof(long)));
-      assert(read(file, (char * ) &collisions, sizeof(long)));
-      assert(read(file, (char * ) data, m * sizeof(long)));
-    }
-
-    void save(const char *filename)
-    {
-      //write(open(filename, O_BINARY | O_CREAT | O_WRONLY);
-    }
-
-    void restore(const char *filename)
-    {
-      //read(open(filename, O_BINARY | O_CREAT | O_WRONLY);
-    }
-};
-
-// ============================================================================
 class Hashing
 {
   public:
@@ -303,6 +214,95 @@ class MurmurHashing: public Hashing
       return (int) (murmurHashNeutral2(key, (num_ints * 4), seed) % m);
     }
 
+};
+
+// ============================================================================
+class CollisionTable
+{
+  public:
+    long m;
+    long *data;
+    int safe;
+    long calls;
+    long clearhits;
+    long collisions;
+
+    CollisionTable(int size, int safety)
+    {
+      int tmp = size;
+      while (tmp > 2)
+      {
+        if (tmp % 2 != 0)
+        {
+          printf("\nSize of collision table must be power of 2 %d", size);
+          exit(0);
+        }
+        tmp /= 2;
+      }
+      data = new long[size];
+      m = size;
+      safe = safety;
+      // reset();
+
+      for (int i = 0; i < m; i++)
+        data[i] = -1;
+      calls = 0;
+      clearhits = 0;
+      collisions = 0;
+    }
+
+    ~CollisionTable()
+    {
+      delete[] data;
+    }
+
+    int usage()
+    {
+      int count = 0;
+      for (int i = 0; i < m; i++)
+        if (data[i] != -1)
+        {
+          count++;
+        }
+
+      return count;
+    }
+
+    void print()
+    {
+      printf("Collision table: Safety : %d Usage : %d Size : %ld Calls : %ld Collisions : %ld\n",
+          this->safe, this->usage(), this->m, this->calls, this->collisions);
+    }
+
+    void save(int file)
+    {
+      assert(write(file, (char * ) &m, sizeof(long)));
+      assert(write(file, (char * ) &safe, sizeof(int)));
+      assert(write(file, (char * ) &calls, sizeof(long)));
+      assert(write(file, (char * ) &clearhits, sizeof(long)));
+      assert(write(file, (char * ) &collisions, sizeof(long)));
+      assert(write(file, (char * ) data, m * sizeof(long)));
+    }
+
+    void restore(int file)
+    {
+      assert(read(file, (char * ) &m, sizeof(long)));
+      assert(read(file, (char * ) &safe, sizeof(int)));
+      assert(read(file, (char * ) &calls, sizeof(long)));
+      assert(read(file, (char * ) &clearhits, sizeof(long)));
+      assert(read(file, (char * ) &collisions, sizeof(long)));
+      assert(read(file, (char * ) data, m * sizeof(long)));
+    }
+
+    void save(const char *filename)
+    {
+      //write(open(filename, O_BINARY | O_CREAT | O_WRONLY);
+    }
+
+    void restore(const char *filename)
+    {
+      //read(open(filename, O_BINARY | O_CREAT | O_WRONLY);
+    }
 };
 
 // ============================================================================
