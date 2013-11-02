@@ -197,10 +197,15 @@ class Probabilistic
 {
   public:
 
+    inline static void srand(unsigned int& seed)
+    {
+      ::srand(seed);
+    }
+
     // [0..1]
     inline static float nextFloat()
     {
-      return float(rand()) * (1.f / static_cast<float>(RAND_MAX));
+      return float(rand()) * (1.0f / static_cast<float>(RAND_MAX));
     }
 
     // [0..1]
