@@ -172,7 +172,7 @@ class FiniteStateGraph
         if (s_t == 0)
           s_t = O;
       }
-      //a_t = Policies.decide(acting, s_t.v()); // fixMe
+      //a_t = Policies.decide(acting, s_t.v());
       a_t = &acting->sampleAction(); // fixMe
       double r_t = s_t->reward;
       if (!s_t->hasNextState())

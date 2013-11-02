@@ -28,7 +28,7 @@ void OnOffPolicyPredictionTest::testTD(FSGAgentState<double, double>* agentState
   while (distanceToSolution(solution, td->weights()) > precision)
   {
     FiniteStateGraph::StepData stepData = graph->step();
-    x_t->set(agentState->project(stepData.v_t()));
+    //x_t->set(agentState->project(stepData.v_t()));
     x_tp1->set(agentState->project(stepData.v_tp1()));
     if (stepData.v_t().empty())
       td->initialize();
@@ -71,7 +71,7 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState<double, double>* 
   while (distanceToSolution(solution, gtd->weights()) > precision)
   {
     FiniteStateGraph::StepData stepData = problem->step();
-    phi_t->set(agentState->project(stepData.v_t()));
+    //phi_t->set(agentState->project(stepData.v_t()));
     phi_tp1->set(agentState->project(stepData.v_tp1()));
     if (stepData.v_t().empty())
       gtd->initialize();
