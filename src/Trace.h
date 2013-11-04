@@ -35,11 +35,11 @@ class Trace
     virtual ~Trace()
     {
     }
-    virtual void update(const double& lambda, const SparseVector<T>& phi) =0;
+    virtual void update(const double& lambda, const Vector<T>* phi) =0;
     virtual void multiplyToSelf(const double& factor) =0;
     virtual void setEntry(const int& index, const T& value) =0;
     virtual void clear() =0;
-    virtual const SparseVector<T>& vect() const =0;
+    virtual const Vector<T>* vect() const =0;
 };
 
 template<class T>
@@ -51,7 +51,7 @@ class ATrace: public Trace<T>
     SparseVector<T>* vector;
   public:
     ATrace(const int& numFeatures, const double& threshold = 1e-8) :
-        defaultThreshold(threshold), threshold(threshold), vector(new SparseVector<T>(numFeatures))
+        defaultThreshold(threshold), threshold(threshold), vector(new SVector<T>(numFeatures))
     {
     }
     virtual ~ATrace()
@@ -63,9 +63,9 @@ class ATrace: public Trace<T>
     virtual void clearBelowThreshold()
     {
       const T* values = vector->getValues();
-      const int* indexes = vector->getActiveIndexes();
+      const int* indexes = vector->nonZeroIndexes();
       int i = 0;
-      while (i < vector->nbActiveEntries())
+      while (i < vector->nonZeroElements())
       {
         T absValue = fabs(values[i]);
         if (absValue <= threshold)
@@ -76,13 +76,13 @@ class ATrace: public Trace<T>
     }
 
   public:
-    virtual void updateVector(const double& lambda, const SparseVector<T>& phi)
+    virtual void updateVector(const double& lambda, const Vector<T>* phi)
     {
-      vector->multiplyToSelf(lambda);
+      vector->mapMultiplyToSelf(lambda);
       vector->addToSelf(phi);
     }
 
-    void update(const double& lambda, const SparseVector<T>& phi)
+    void update(const double& lambda, const Vector<T>* phi)
     {
       updateVector(lambda, phi);
       adjustUpdate();
@@ -91,7 +91,7 @@ class ATrace: public Trace<T>
 
     void multiplyToSelf(const double& factor)
     {
-      vector->multiplyToSelf(factor);
+      vector->mapMultiplyToSelf(factor);
     }
 
     void setEntry(const int& index, const T& value)
@@ -104,9 +104,9 @@ class ATrace: public Trace<T>
       vector->clear();
       threshold = defaultThreshold;
     }
-    const SparseVector<T>& vect() const
+    const Vector<T>* vect() const
     {
-      return *vector;
+      return vector;
     }
 
   protected:
@@ -130,16 +130,17 @@ class RTrace: public ATrace<T>
     }
 
   private:
-    void replaceWith(const SparseVector<T>& phi)
-    {
-      const int* indexes = phi.getActiveIndexes();
-      for (const int* index = indexes; index < indexes + phi.nbActiveEntries(); ++index)
+    void replaceWith(const Vector<T>* x)
+    { // FixMe:
+      const SparseVector<T>& phi = *(const SparseVector<T>*) x;
+      const int* indexes = phi.nonZeroIndexes();
+      for (const int* index = indexes; index < indexes + phi.nonZeroElements(); ++index)
         ATrace<T>::vector->setEntry(*index, phi.getEntry(*index));
     }
   public:
-    virtual void updateVector(const double& lambda, const SparseVector<T>& phi)
+    virtual void updateVector(const double& lambda, const Vector<T>* phi)
     {
-      ATrace<T>::vector->multiplyToSelf(lambda);
+      ATrace<T>::vector->mapMultiplyToSelf(lambda);
       replaceWith(phi);
     }
 
@@ -165,9 +166,9 @@ class AMaxTrace: public ATrace<T>
     virtual void adjustUpdate()
     {
       const T* values = ATrace<T>::vector->getValues();
-      const int* indexes = ATrace<T>::vector->getActiveIndexes();
+      const int* indexes = ATrace<T>::vector->nonZeroIndexes();
 
-      for (int i = 0; i < ATrace<T>::vector->nbActiveEntries(); i++)
+      for (int i = 0; i < ATrace<T>::vector->nonZeroElements(); i++)
       {
         T absValue = fabs(values[i]);
         if (absValue > maximumValue)
@@ -196,16 +197,17 @@ class MaxLengthTrace: public Trace<T>
 
   private:
     void controlLength()
-    {
-      if (trace->vect().nbActiveEntries() < maximumLength)
+    {// FixMe:
+      const SparseVector<T>* v = (const SparseVector<T>*)trace->vect();
+      if (v->nonZeroElements() < maximumLength)
         return;
-      while (trace->vect().nbActiveEntries() > maximumLength)
+      while (v->nonZeroElements() > maximumLength)
       {
-        const T* values = trace->vect().getValues();
-        const int* indexes = trace->vect().getActiveIndexes();
+        const T* values = v->getValues();
+        const int* indexes = v->nonZeroIndexes();
         T minValue = values[0];
         int minIndex = indexes[0];
-        for (int i = 1; i < trace->vect().nbActiveEntries(); i++)
+        for (int i = 1; i < v->nonZeroElements(); i++)
         {
           if (values[i] < minValue)
           {
@@ -219,7 +221,7 @@ class MaxLengthTrace: public Trace<T>
 
   public:
 
-    void update(const double& lambda, const SparseVector<T>& phi)
+    void update(const double& lambda, const Vector<T>* phi)
     {
       trace->update(lambda, phi);
       controlLength();
@@ -239,7 +241,7 @@ class MaxLengthTrace: public Trace<T>
     {
       trace->clear();
     }
-    const SparseVector<T>& vect() const
+    const Vector<T>* vect() const
     {
       return trace->vect();
     }

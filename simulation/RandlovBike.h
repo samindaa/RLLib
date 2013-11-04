@@ -212,7 +212,7 @@ class RandlovBike: public Environment<float>
       vars[6] = psi_goal;
       vars[7] = calc_dist_to_goal(xf, xb, yf, yb);
 
-      for (int i = 0; i < getVars().dimension(); i++)
+      for (int i = 0; i < dimension(); i++)
         vars[i] /= resolutions->at(i);
 
       observations->at(0) = omega;

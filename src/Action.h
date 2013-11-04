@@ -88,8 +88,8 @@ class ActionList
     }
 
     virtual const int dimension() const =0;
-    virtual const Action& operator[](const int& index) const =0;
-    virtual const Action& at(const int& index) const =0;
+    virtual const Action* operator[](const int& index) const =0;
+    virtual const Action* at(const int& index) const =0;
     virtual void push_back(const int& index, const double& value) =0;
     virtual void erase(const int& index) =0;
     virtual void update(const int& actionIndex, const unsigned int& vectorIndex,
@@ -135,14 +135,14 @@ class GeneralActionList: public ActionList
       actions.clear();
     }
 
-    const Action& operator[](const int& index) const
+    const Action* operator[](const int& index) const
     {
-      return *actions.at(index);
+      return actions.at(index);
     }
 
-    const Action& at(const int& index) const
+    const Action* at(const int& index) const
     {
-      return *actions.at(index);
+      return actions.at(index);
     }
 
     void push_back(const int& index, const double& value)

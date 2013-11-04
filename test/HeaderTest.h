@@ -41,7 +41,7 @@
 #include "Trace.h"
 #include "Projector.h"
 #include "ControlAlgorithm.h"
-#include "Representation.h"
+#include "StateToStateAction.h"
 #include "MCar2D.h"
 #include "NoStateProblem.h"
 #include "Simulator.h"
@@ -157,9 +157,6 @@ class RLLibTestCaseLoader
   RLLibTestCaseLoader<NAME> __theTestcaseLoader##NAME;
 
 /** Test generic code **/
-typedef SparseVector<double> SVecDoubleType;
-typedef SparseVector<float> SVecFloatType;
-typedef DenseVector<float> DVecFloatType;
 typedef Trace<double> TraceDoubleType;
 typedef ATrace<double> ATraceDoubleType;
 typedef RTrace<double> RTraceDoubleType;
@@ -180,19 +177,20 @@ enum TraceEnum
 class VectorsTestsUtils
 {
   private:
-    static bool checkSparseVectorConsistency(const SVecDoubleType& v)
+    template<class T>
+    static bool checkSparseVectorConsistency(const SparseVector<T>* v)
     {
-      const int* indexesPositions = v.getIndexesPosition();
-      const int* activeIndexes = v.getActiveIndexes();
+      const int* indexesPositions = v->getIndexesPosition();
+      const int* activeIndexes = v->nonZeroIndexes();
       int nbActiveCounted = 0;
-      bool positionChecked[v.nbActiveEntries()];
-      std::fill(positionChecked, positionChecked + v.nbActiveEntries(), false);
-      for (int index = 0; index < v.dimension(); index++)
+      bool positionChecked[v->nonZeroElements()];
+      std::fill(positionChecked, positionChecked + v->nonZeroElements(), false);
+      for (int index = 0; index < v->dimension(); index++)
       {
         const int position = indexesPositions[index];
         if (position == -1)
           continue;
-        if (nbActiveCounted >= v.nbActiveEntries())
+        if (nbActiveCounted >= v->nonZeroElements())
           return false;
         if (positionChecked[position])
           return false;
@@ -201,32 +199,36 @@ class VectorsTestsUtils
         positionChecked[position] = true;
         ++nbActiveCounted;
       }
-      return nbActiveCounted != v.nbActiveEntries() ? false : true;
+      return nbActiveCounted != v->nonZeroElements() ? false : true;
     }
 
   public:
-    static bool checkConsistency(const SVecDoubleType& v)
+    template<class T>
+    static bool checkConsistency(const Vector<T>* v)
     {
-      return checkSparseVectorConsistency(v);
+      return checkSparseVectorConsistency(dynamic_cast<const SparseVector<T>*>(v));
     }
 
-    static bool checkVectorEquals(const SVecDoubleType& a, const SVecDoubleType& b, double margin)
+    template<class T>
+    static bool checkVectorEquals(const Vector<T>* a, const Vector<T>* b, double margin)
     {
-      if (a.dimension() != b.dimension())
+      if (a->dimension() != b->dimension())
         return false;
-      for (int i = 0; i < a.dimension(); i++)
+      for (int i = 0; i < a->dimension(); i++)
       {
-        double diff = fabs(a.getEntry(i) - b.getEntry(i));
+        double diff = fabs(a->getEntry(i) - b->getEntry(i));
         if (diff > margin)
           return false;
       }
       return true;
     }
 
-    static bool checkValue(const SVecDoubleType& v)
+    template<class T>
+    static bool checkValue(const Vector<T>* x)
     {
-      const double* values = v.getValues();
-      for (int position = 0; position < v.nbActiveEntries(); position++)
+      const SparseVector<T>* v = dynamic_cast<const SparseVector<T>*>(x);
+      const double* values = v->getValues();
+      for (int position = 0; position < v->nonZeroElements(); position++)
       {
         if (!Boundedness::checkValue(values[position]))
           return false;
@@ -239,26 +241,30 @@ class VectorsTestsUtils
 class Assert
 {
   public:
-    static void checkVectorEquals(const SVecDoubleType& a, const SVecDoubleType& b)
+    template <class T>
+    static void checkVectorEquals(const Vector<T>* a, const Vector<T>* b)
     {
       assert(VectorsTestsUtils::checkConsistency(a));
       assert(VectorsTestsUtils::checkConsistency(b));
       assert(VectorsTestsUtils::checkVectorEquals(a, b, numeric_limits<float>::epsilon()));
     }
 
-    static void checkVectorEquals(const SVecDoubleType& a, const SVecDoubleType& b, double margin)
+    template <class T>
+    static void checkVectorEquals(const Vector<T>* a, const Vector<T>* b, double margin)
     {
       assert(VectorsTestsUtils::checkConsistency(a));
       assert(VectorsTestsUtils::checkConsistency(b));
       assert(VectorsTestsUtils::checkVectorEquals(a, b, margin));
     }
 
-    static void checkConsistency(const SVecDoubleType& v)
+    template <class T>
+    static void checkConsistency(const Vector<T>* v)
     {
       assert(VectorsTestsUtils::checkConsistency(v));
     }
 
-    static void checkValue(const SVecDoubleType& v)
+    template <class T>
+    static void checkValue(const Vector<T>* v)
     {
       assert(VectorsTestsUtils::checkValue(v));
     }

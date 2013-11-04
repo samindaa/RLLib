@@ -10,6 +10,7 @@
 
 #include "Environment.h"
 
+using namespace RLLib;
 /**
  * Incremental Evolution of Complex General Behavior
  * Faustino Gomez and Risto Miikkulainen, 1996

@@ -56,7 +56,7 @@ class SwingPendulum: public Environment<float>
       // subject to change
       continuousActions->push_back(0, 0.0);
 
-      for (int i = 0; i < getVars().dimension(); i++)
+      for (int i = 0; i < dimension(); i++)
         resolutions->at(i) = 10.0;
 
     }
@@ -103,10 +103,10 @@ class SwingPendulum: public Environment<float>
       updateRTStep();
     }
 
-    void step(const Action& a)
+    void step(const Action* a)
     {
       //std::cout << a.at() << std::endl;
-      float torque = actionRange->bound(a.at());
+      float torque = actionRange->bound(a->at(0));
       float thetaAcc = -stepTime * velocity + mass * g * length * sin(theta) + torque;
       velocity = velocityRange->bound(velocity + thetaAcc);
       theta += velocity * stepTime;

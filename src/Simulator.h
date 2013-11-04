@@ -68,9 +68,9 @@ class Simulator
     Environment<O>* environment;
 
     const Action* a_t;
-    DenseVector<O>* x_0; // << this is the terminal state
-    DenseVector<O>* x_t;
-    DenseVector<O>* x_tp1;
+    PVector<O>* x_0; // << this is the terminal state
+    PVector<O>* x_t;
+    PVector<O>* x_tp1;
 
     int maxEpisodeTimeSteps;
     int nbEpisodes;
@@ -96,13 +96,12 @@ class Simulator
 
     Simulator(Control<T, O>* agent, Environment<O>* environment, const int& maxEpisodeTimeSteps,
         const int nbEpisodes = -1, const int nbRuns = -1) :
-        agent(agent), environment(environment), a_t(0), x_0(new DenseVector<O>(0)), x_t(
-            new DenseVector<O>(environment->getVars().dimension())), x_tp1(
-            new DenseVector<O>(environment->getVars().dimension())), maxEpisodeTimeSteps(
-            maxEpisodeTimeSteps), nbEpisodes(nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), endingOfEpisode(
-            false), evaluate(false), verbose(true), totalTimeInMilliseconds(0), enableStatistics(
-            false), enableTestEpisodesAfterEachRun(false), maxTestEpisodesAfterEachRun(20), timeStep(
-            0), episodeR(0), episodeZ(0)
+        agent(agent), environment(environment), a_t(0), x_0(new PVector<O>(0)), x_t(
+            new PVector<O>(environment->dimension())), x_tp1(
+            new PVector<O>(environment->dimension())), maxEpisodeTimeSteps(maxEpisodeTimeSteps), nbEpisodes(
+            nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), endingOfEpisode(false), evaluate(false), verbose(
+            true), totalTimeInMilliseconds(0), enableStatistics(false), enableTestEpisodesAfterEachRun(
+            false), maxTestEpisodesAfterEachRun(20), timeStep(0), episodeR(0), episodeZ(0)
     {
     }
 
@@ -164,7 +163,7 @@ class Simulator
       {
         /*Initialize the problem*/
         environment->initialize();
-        x_t->set(environment->getVars());
+        x_t->set(environment->getTRStep()->o_tp1);
         /*Statistic variables*/
         timeStep = 0;
         episodeR = 0;
@@ -176,29 +175,28 @@ class Simulator
       else
       {
         /*Step through the problem*/
-        environment->step(*a_t);
+        environment->step(a_t);
       }
 
       if (!a_t)
       {
         /*Initialize the control agent and get the first action*/
-        a_t = &agent->initialize(*x_t);
+        a_t = agent->initialize(x_t);
       }
       else
       {
-        const TRStep<O>& step = environment->getTRStep();
-        x_tp1->set(*step.o_tp1);
+        const TRStep<O>* step = environment->getTRStep();
+        x_tp1->set(step->o_tp1);
         ++timeStep;
-        episodeR += step.r_tp1;
-        episodeZ += step.z_tp1;
-        endingOfEpisode = step.endOfEpisode || (timeStep == maxEpisodeTimeSteps);
+        episodeR += step->r_tp1;
+        episodeZ += step->z_tp1;
+        endingOfEpisode = step->endOfEpisode || (timeStep == maxEpisodeTimeSteps);
         timer.start();
         a_t =
             evaluate ?
-                &agent->proposeAction(*x_tp1) :
-                &agent->step(*x_t, *a_t, (!endingOfEpisode ? *x_tp1 : *x_0), step.r_tp1,
-                    step.z_tp1);
-        x_t->set(*x_tp1);
+                agent->proposeAction(x_tp1) :
+                agent->step(x_t, a_t, (!endingOfEpisode ? x_tp1 : x_0), step->r_tp1, step->z_tp1);
+        x_t->set(x_tp1);
         timer.stop();
         totalTimeInMilliseconds += timer.getElapsedTimeInMilliSec();
 
@@ -298,20 +296,21 @@ class Simulator
 
     void computeValueFunction(const char* outFile = "visualization/valueFunction.txt") const
     {
-      if (environment->getVars().dimension() == 2) // only for two state variables
+      if (environment->dimension() == 2) // only for two state variables
       {
         std::ofstream out(outFile);
-        DenseVector<float> x_t(2);
+        DenseVector<float>* x_t = new PVector<float>(2);
         for (float x = 0; x <= 10; x += 0.1)
         {
           for (float y = 0; y <= 10; y += 0.1)
           {
-            x_t[0] = x;
-            x_t[1] = y;
+            x_t->at(0) = x;
+            x_t->at(1) = y;
             out << agent->computeValueFunction(x_t) << " ";
           }
           out << std::endl;
         }
+        delete x_t;
         out.close();
       }
 

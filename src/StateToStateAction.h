@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Representation.h
+ * StateToStateAction.h
  *
- *  Created on: Aug 31, 2012
+ *  Created on: Nov 4, 2013
  *      Author: sam
  */
 
-#ifndef REPRESENTATION_H_
-#define REPRESENTATION_H_
+#ifndef STATETOSTATEACTION_H_
+#define STATETOSTATEACTION_H_
 
 #include <map>
 #include "Action.h"
@@ -34,22 +34,22 @@ template<class T>
 class Representations
 {
   public:
-    typedef typename std::map<int, SparseVector<T>*>::iterator iterator;
-    typedef typename std::map<int, SparseVector<T>*>::const_iterator const_iterator;
+    typedef typename std::map<int, Vector<T>*>::iterator iterator;
+    typedef typename std::map<int, Vector<T>*>::const_iterator const_iterator;
 
   protected:
-    std::map<int, SparseVector<T>*>* phis;
+    std::map<int, Vector<T>*>* phis;
   public:
     Representations(const int& numFeatures, const ActionList* actions) :
-        phis(new std::map<int, SparseVector<T>*>())
+        phis(new std::map<int, Vector<T>*>())
     {
       for (ActionList::const_iterator iter = actions->begin(); iter != actions->end(); ++iter)
-        phis->insert(std::make_pair((*iter)->id(), new SparseVector<T>(numFeatures)));
+        phis->insert(std::make_pair((*iter)->id(), new SVector<T>(numFeatures)));
     }
     ~Representations()
     {
-      for (typename std::map<int, SparseVector<T>*>::iterator iter = phis->begin();
-          iter != phis->end(); ++iter)
+      for (typename std::map<int, Vector<T>*>::iterator iter = phis->begin(); iter != phis->end();
+          ++iter)
         delete iter->second;
       phis->clear();
       delete phis;
@@ -60,14 +60,14 @@ class Representations
       return phis->size();
     }
 
-    void set(const SparseVector<T>& phi, const Action& action)
+    void set(const Vector<T>* phi, const Action* action)
     {
-      phis->at(action.id())->set(phi);
+      phis->at(action->id())->set(phi);
     }
 
-    const SparseVector<T>& at(const Action& action) const
+    const Vector<T>* at(const Action* action) const
     {
-      return *phis->at(action.id());
+      return phis->at(action->id());
     }
 
     iterator begin()
@@ -92,8 +92,8 @@ class Representations
 
     void clear()
     {
-      for (typename std::map<int, SparseVector<T>*>::iterator iter = phis->begin();
-          iter != phis->end(); ++iter)
+      for (typename std::map<int, Vector<T>*>::iterator iter = phis->begin(); iter != phis->end();
+          ++iter)
         iter->second->clear();
     }
 };
@@ -105,8 +105,8 @@ class StateToStateAction
     virtual ~StateToStateAction()
     {
     }
-    virtual const Representations<T>& stateActions(const DenseVector<O>& x) =0;
-    virtual const ActionList& getActionList() const =0;
+    virtual const Representations<T>* stateActions(const Vector<O>* x) =0;
+    virtual const ActionList* getActionList() const =0;
     virtual double vectorNorm() const =0;
     virtual int dimension() const =0;
 };
@@ -131,27 +131,27 @@ class StateActionTilings: public StateToStateAction<T, O>
       delete phis;
     }
 
-    const Representations<T>& stateActions(const DenseVector<O>& x)
+    const Representations<T>* stateActions(const Vector<O>* x)
     {
       assert(actions->dimension() == phis->dimension());
-      if (x.empty())
+      if (x->empty())
       {
         phis->clear();
-        return *phis;
+        return phis;
       }
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         if (actions->dimension() == 1)
-          phis->set(projector->project(x), **a); // projection from whole space
+          phis->set(projector->project(x), *a); // projection from whole space
         else
-          phis->set(projector->project(x, (*a)->id()), **a);
+          phis->set(projector->project(x, (*a)->id()), *a);
       }
-      return *phis;
+      return phis;
     }
 
-    const ActionList& getActionList() const
+    const ActionList* getActionList() const
     {
-      return *actions;
+      return actions;
     }
 
     double vectorNorm() const
@@ -181,7 +181,7 @@ class TabularAction: public StateToStateAction<T, O>
                 includeActiveFeature ?
                     actions->dimension() * projector->dimension() + 1 :
                     actions->dimension() * projector->dimension(), actions)), _phi(
-            new SparseVector<T>(
+            new SVector<T>(
                 includeActiveFeature ?
                     actions->dimension() * projector->dimension() + 1 :
                     actions->dimension() * projector->dimension())), includeActiveFeature(
@@ -195,23 +195,23 @@ class TabularAction: public StateToStateAction<T, O>
       delete _phi;
     }
 
-    const Representations<T>& stateActions(const DenseVector<O>& x)
+    const Representations<T>* stateActions(const Vector<O>* x)
     {
       assert(actions->dimension() == phis->dimension());
-      const SparseVector<T>& phi = projector->project(x);
+      const Vector<T>* phi = projector->project(x);
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         _phi->set(phi, projector->dimension() * (*a)->id());
         if (includeActiveFeature)
           _phi->insertLast(1.0);
-        phis->set(*_phi, **a);
+        phis->set(_phi, *a);
       }
-      return *phis;
+      return phis;
     }
 
-    const ActionList& getActionList() const
+    const ActionList* getActionList() const
     {
-      return *actions;
+      return actions;
     }
 
     double vectorNorm() const
@@ -230,4 +230,4 @@ class TabularAction: public StateToStateAction<T, O>
 
 } // namespace RLLib
 
-#endif /* REPRESENTATION_H_ */
+#endif /* STATETOSTATEACTION_H_ */

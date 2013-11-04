@@ -41,10 +41,10 @@ class Dynamics
 
   public:
     Dynamics(const int& dimensions, const double& dt) :
-        dimensions(dimensions), dt(dt), t(0), dxdt(new DenseVector<double>(dimensions)), x(
-            new DenseVector<double>(dimensions)), xout(new DenseVector<double>(dimensions)), dxm(
-            new DenseVector<double>(dimensions)), dxt(new DenseVector<double>(dimensions)), xt(
-            new DenseVector<double>(dimensions))
+        dimensions(dimensions), dt(dt), t(0), dxdt(new PVector<double>(dimensions)), x(
+            new PVector<double>(dimensions)), xout(new PVector<double>(dimensions)), dxm(
+            new PVector<double>(dimensions)), dxt(new PVector<double>(dimensions)), xt(
+            new PVector<double>(dimensions))
     {
     }
     virtual ~Dynamics()

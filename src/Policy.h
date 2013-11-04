@@ -32,7 +32,7 @@
 #include "Vector.h"
 #include "Action.h"
 #include "Predictor.h"
-#include "Representation.h"
+#include "StateToStateAction.h"
 #include "Math.h"
 
 using namespace std;
@@ -46,24 +46,24 @@ class Policy
     virtual ~Policy()
     {
     }
-    virtual void update(const Representations<T>& phis) =0;
-    virtual double pi(const Action& a) =0;
-    virtual const Action& sampleAction() =0;
-    virtual const Action& sampleBestAction() =0;
+    virtual void update(const Representations<T>* phis) =0;
+    virtual double pi(const Action* a) =0;
+    virtual const Action* sampleAction() =0;
+    virtual const Action* sampleBestAction() =0;
 };
 
 class Policies
 {
   public:
     template<class T>
-    static const Action& sampleAction(Policy<T>* policy, const Representations<T>& phis)
+    static const Action* sampleAction(Policy<T>* policy, const Representations<T>* phis)
     {
       policy->update(phis);
       return policy->sampleAction();
     }
 
     template<class T>
-    static const Action& sampleBestAction(Policy<T>* policy, const Representations<T>& phis)
+    static const Action* sampleBestAction(Policy<T>* policy, const Representations<T>* phis)
     {
       policy->update(phis);
       return policy->sampleBestAction();
@@ -87,8 +87,8 @@ class PolicyDistribution: public virtual Policy<T>
     virtual ~PolicyDistribution()
     {
     }
-    virtual const SparseVectors<T>& computeGradLog(const Representations<T>& phis,
-        const Action& action) =0;
+    virtual const SparseVectors<T>& computeGradLog(const Representations<T>* phis,
+        const Action* action) =0;
     virtual SparseVectors<T>* parameters() const =0;
 };
 
@@ -112,11 +112,10 @@ class NormalDistribution: public PolicyDistribution<T>
     NormalDistribution(const double& initialMean, const double& initialStddev,
         const int& nbFeatures, ActionList* actions) :
         initialMean(initialMean), initialStddev(initialStddev), sigma2(0), mean(0), stddev(0), meanStep(
-            0), stddevStep(0), u_mean(new SparseVector<T>(nbFeatures)), u_stddev(
-            new SparseVector<T>(nbFeatures)), gradMean(new SparseVector<T>(u_mean->dimension())), gradStddev(
-            new SparseVector<T>(u_stddev->dimension())), x(new SparseVector<T>(nbFeatures)), actions(
-            actions), multiu(new SparseVectors<T>()), multigrad(new SparseVectors<T>()), defaultAction(
-            0)
+            0), stddevStep(0), u_mean(new SVector<T>(nbFeatures)), u_stddev(
+            new SVector<T>(nbFeatures)), gradMean(new SVector<T>(u_mean->dimension())), gradStddev(
+            new SVector<T>(u_stddev->dimension())), x(new SVector<T>(nbFeatures)), actions(actions), multiu(
+            new SparseVectors<T>()), multigrad(new SparseVectors<T>()), defaultAction(0)
     {
       multiu->push_back(u_mean);
       multiu->push_back(u_stddev);
@@ -136,49 +135,49 @@ class NormalDistribution: public PolicyDistribution<T>
     }
 
   public:
-    void update(const Representations<T>& xs_t)
+    void update(const Representations<T>* phi)
     {
       // N(mu,var) for single action, single representation only
-      assert((xs_t.dimension() == 1) && (actions->dimension() == 1));
-      x->set(xs_t.at(actions->at(defaultAction)));
-      mean = u_mean->dot(*x) + initialMean;
-      stddev = exp(u_stddev->dot(*x)) * initialStddev + 10e-8;
+      assert((phi->dimension() == 1) && (actions->dimension() == 1));
+      x->set(phi->at(actions->at(defaultAction)));
+      mean = u_mean->dot(x) + initialMean;
+      stddev = exp(u_stddev->dot(x)) * initialStddev + 10e-8;
       sigma2 = stddev * stddev;
     }
 
-    double pi(const Action& a)
+    double pi(const Action* a)
     {
-      return Probabilistic::gaussianProbability(a.at(defaultAction), mean, stddev);
+      return Probabilistic::gaussianProbability(a->at(defaultAction), mean, stddev);
     }
 
   public:
 
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
       actions->update(defaultAction, defaultAction,
           Probabilistic::nextNormalGaussian() * stddev + mean);
       return actions->at(defaultAction);
     }
 
-    const Action& sampleBestAction()
+    const Action* sampleBestAction()
     {
       return sampleAction();
     }
 
-    virtual void updateStep(const Action& action)
+    virtual void updateStep(const Action* action)
     {
-      double a = action.at(defaultAction);
+      double a = action->at(defaultAction);
       meanStep = (a - mean) / sigma2;
       stddevStep = (a - mean) * (a - mean) / sigma2 - 1.0;
     }
 
-    const SparseVectors<T>& computeGradLog(const Representations<T>& xs, const Action& action)
+    const SparseVectors<T>& computeGradLog(const Representations<T>* phi, const Action* action)
     {
-      assert((xs.dimension() == 1) && (actions->dimension() == 1));
+      assert((phi->dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
-      x->set(xs.at(actions->at(defaultAction)));
-      gradMean->set(*x).multiplyToSelf(meanStep);
-      gradStddev->set(*x).multiplyToSelf(stddevStep);
+      x->set(phi->at(actions->at(defaultAction)));
+      gradMean->set(x)->mapMultiplyToSelf(meanStep);
+      gradStddev->set(x)->mapMultiplyToSelf(stddevStep);
       return *multigrad;
     }
 
@@ -205,9 +204,9 @@ class NormalDistributionScaled: public NormalDistribution<T>
     {
     }
 
-    virtual void updateStep(const Action& action)
+    virtual void updateStep(const Action* action)
     {
-      double a = action.at(super::defaultAction);
+      double a = action->at(super::defaultAction);
       super::meanStep = (a - super::mean);
       super::stddevStep = (a - super::mean) * (a - super::mean) - super::sigma2;
     }
@@ -231,9 +230,9 @@ class NormalDistributionSkewed: public NormalDistribution<T>
     {
     }
 
-    virtual void updateStep(const Action& action)
+    virtual void updateStep(const Action* action)
     {
-      double a = action.at(super::defaultAction);
+      double a = action->at(super::defaultAction);
       super::meanStep = (a - super::mean);
       super::stddevStep = (a - super::mean) * (a - super::mean) / super::sigma2 - 1.0;
     }
@@ -277,47 +276,47 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
       return (a * range->length() / 2.0) + range->center();
     }
 
-    const Action& problemToPolicy(const double& problemAction)
+    const Action* problemToPolicy(const double& problemAction)
     {
       double normalizedAction = normalize(problemRange, problemAction);
       double scaledAction = scale(policyRange, normalizedAction);
       a_t->update(0, scaledAction);
-      return *a_t;
+      return a_t;
     }
 
-    const Action& policyToProblem(const double& policyAction)
+    const Action* policyToProblem(const double& policyAction)
     {
       double normalizedAction = normalize(policyRange, policyAction);
       double scaledAction = scale(problemRange, normalizedAction);
       a_t->update(0, scaledAction);
-      return *a_t;
+      return a_t;
     }
 
   public:
-    void update(const Representations<T>& phis)
+    void update(const Representations<T>* phis)
     {
       policy->update(phis);
     }
 
-    double pi(const Action& a)
+    double pi(const Action* a)
     {
-      return policy->pi(problemToPolicy(a.at(0)));
+      return policy->pi(problemToPolicy(a->at(0)));
     }
 
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
-      actions->update(0, 0, policyToProblem(policy->sampleAction().at(0)).at(0));
+      actions->update(0, 0, policyToProblem(policy->sampleAction()->at(0))->at(0));
       return actions->at(0);
     }
 
-    const Action& sampleBestAction()
+    const Action* sampleBestAction()
     {
       return sampleAction();
     }
 
-    const SparseVectors<T>& computeGradLog(const Representations<T>& phis, const Action& action)
+    const SparseVectors<T>& computeGradLog(const Representations<T>* phis, const Action* action)
     {
-      return policy->computeGradLog(phis, problemToPolicy(action.at(0)));
+      return policy->computeGradLog(phis, problemToPolicy(action->at(0)));
     }
 
     SparseVectors<T>* parameters() const
@@ -331,15 +330,15 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
 {
   protected:
     ActionList* actions;
-    DenseVector<double>* distribution;
+    PVector<double>* distribution;
   public:
     StochasticPolicy(ActionList* actions) :
-        actions(actions), distribution(new DenseVector<double>(actions->dimension()))
+        actions(actions), distribution(new PVector<double>(actions->dimension()))
     {
     }
 
     StochasticPolicy(ActionList* actions, DenseVector<double>* distribution) :
-        actions(actions), distribution(new DenseVector<double>(actions->dimension()))
+        actions(actions), distribution(new PVector<double>(actions->dimension()))
     {
       assert((int )actions->dimension() == distribution->dimension());
       for (int i = 0; i < distribution->dimension(); i++)
@@ -351,12 +350,12 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
       delete distribution;
     }
 
-    double pi(const Action& action)
+    double pi(const Action* action)
     {
-      return distribution->at(action.id());
+      return distribution->at(action->id());
     }
 
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
       Boundedness::checkDistribution(*distribution);
       double random = Probabilistic::nextDouble();
@@ -365,12 +364,12 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
       {
         sum += distribution->at((*a)->id());
         if (sum >= random)
-          return **a;
+          return *a;
       }
       return actions->at(actions->dimension() - 1);
     }
 
-    const Action& sampleBestAction()
+    const Action* sampleBestAction()
     {
       return sampleAction();
     }
@@ -388,8 +387,8 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
     typedef StochasticPolicy<T> super;
   public:
     BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
-        StochasticPolicy<T>(actions), avg(new SparseVector<T>(numFeatures)), grad(
-            new SparseVector<T>(numFeatures)), u(new SparseVector<T>(numFeatures)), multiu(
+        StochasticPolicy<T>(actions), avg(new SVector<T>(numFeatures)), grad(
+            new SVector<T>(numFeatures)), u(new SVector<T>(numFeatures)), multiu(
             new SparseVectors<T>()), multigrad(new SparseVectors<T>())
     {
       // Parameter setting
@@ -406,9 +405,9 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       delete multigrad;
     }
 
-    void update(const Representations<T>& xas)
+    void update(const Representations<T>* phi)
     {
-      assert(super::actions->dimension() == xas.dimension());
+      assert(super::actions->dimension() == phi->dimension());
       super::distribution->clear();
       avg->clear();
       double sum = 0;
@@ -418,7 +417,7 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       double maxValue = 0;
       for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
       {
-        double tmp = u->dot(xas.at(**a));
+        double tmp = u->dot(phi->at(*a));
         if (tmp > maxValue)
           maxValue = tmp;
       }
@@ -426,10 +425,10 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
       {
         const int id = (*a)->id();
-        super::distribution->at(id) = exp(u->dot(xas.at(**a)) - maxValue);
+        super::distribution->at(id) = exp(u->dot(phi->at(*a)) - maxValue);
         Boundedness::checkValue(super::distribution->at(id));
         sum += super::distribution->at(id);
-        avg->addToSelf(super::distribution->at(id), xas.at(**a));
+        avg->addToSelf(super::distribution->at(id), phi->at(*a));
       }
 
       for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
@@ -438,13 +437,13 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
         super::distribution->at(id) /= sum;
         Boundedness::checkValue(super::distribution->at(id));
       }
-      avg->multiplyToSelf(1.0 / sum);
+      avg->mapMultiplyToSelf(1.0 / sum);
     }
 
-    const SparseVectors<T>& computeGradLog(const Representations<T>& xas, const Action& action)
+    const SparseVectors<T>& computeGradLog(const Representations<T>* phi, const Action* action)
     {
-      grad->set(xas.at(action));
-      grad->substractToSelf(*avg);
+      grad->set(phi->at(action));
+      grad->subtractToSelf(avg);
       return *multigrad;
     }
 
@@ -453,17 +452,17 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       return multiu;
     }
 
-    double pi(const Action& action)
+    double pi(const Action* action)
     {
       return super::pi(action);
     }
 
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
       return super::sampleAction();
     }
 
-    const Action& sampleBestAction()
+    const Action* sampleBestAction()
     {
       return super::sampleBestAction();
     }
@@ -486,9 +485,9 @@ class SoftMax: public StochasticPolicy<T>
     {
     }
 
-    void update(const Representations<T>& xas)
+    void update(const Representations<T>* phi)
     {
-      assert(super::actions->dimension() == xas.dimension());
+      assert(super::actions->dimension() == phi->dimension());
       super::distribution->clear();
       double sum = 0;
       // The exponential function may become very large and overflow.
@@ -497,7 +496,7 @@ class SoftMax: public StochasticPolicy<T>
       double maxValue = 0;
       for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
       {
-        double tmp = predictor->predict(xas.at(**a));
+        double tmp = predictor->predict(phi->at(*a));
         if (tmp > maxValue)
           maxValue = tmp;
       }
@@ -506,7 +505,7 @@ class SoftMax: public StochasticPolicy<T>
       {
         const int id = (*a)->id();
         super::distribution->at(id) = exp(
-            (predictor->predict(xas.at(**a)) - maxValue) / temperature);
+            (predictor->predict(phi->at(*a)) - maxValue) / temperature);
         Boundedness::checkValue(super::distribution->at(id));
         sum += super::distribution->at(id);
       }
@@ -535,18 +534,18 @@ class RandomPolicy: public Policy<T>
     {
     }
 
-    void update(const Representations<T>& xas)
+    void update(const Representations<T>* phi)
     {
     }
-    double pi(const Action& a)
+    double pi(const Action* a)
     {
       return 1.0 / actions->dimension();
     }
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
       return actions->at(rand() % actions->dimension());
     }
-    const Action& sampleBestAction()
+    const Action* sampleBestAction()
     {
       assert(false);
       return actions->at(0);
@@ -559,11 +558,11 @@ class RandomBiasPolicy: public Policy<T>
   protected:
     ActionList* actions;
     const Action* prev;
-    DenseVector<double>* distribution;
+    PVector<double>* distribution;
   public:
     RandomBiasPolicy(ActionList* actions) :
         actions(actions), prev(&actions->at(0)), distribution(
-            new DenseVector<double>(actions->dimension()))
+            new PVector<double>(actions->dimension()))
     {
     }
 
@@ -572,7 +571,7 @@ class RandomBiasPolicy: public Policy<T>
       delete distribution;
     }
 
-    void update(const Representations<T>& xas)
+    void update(const Representations<T>* phi)
     {
       // 50% prev action
       distribution->clear();
@@ -604,16 +603,16 @@ class RandomBiasPolicy: public Policy<T>
       prev = &actions->at(actions->dimension() - 1);
     }
 
-    double pi(const Action& action)
+    double pi(const Action* action)
     {
-      return distribution->at(action.id());
+      return distribution->at(action->id());
     }
 
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
       return *prev;
     }
-    const Action& sampleBestAction()
+    const Action* sampleBestAction()
     {
       assert(false);
       return actions->at(0);
@@ -643,46 +642,46 @@ class Greedy: public DiscreteActionPolicy<T>
 
   private:
 
-    void updateActionValues(const Representations<T>& xas_tp1)
+    void updateActionValues(const Representations<T>* phi_tp1)
     {
       for (ActionList::const_iterator iter = actions->begin(); iter != actions->end(); ++iter)
       {
         const int id = (*iter)->id();
-        actionValues[id] = predictor->predict(xas_tp1.at(**iter));
+        actionValues[id] = predictor->predict(phi_tp1->at(*iter));
       }
     }
 
     void findBestAction()
     {
-      bestAction = &actions->at(0);
+      bestAction = actions->at(0);
       for (int i = 1; i < actions->dimension(); i++)
       {
         if (actionValues[i] > actionValues[bestAction->id()])
-          bestAction = &actions->at(i);
+          bestAction = actions->at(i);
       }
     }
 
   public:
 
-    void update(const Representations<T>& xas_tp1)
+    void update(const Representations<T>* phi_tp1)
     {
-      updateActionValues(xas_tp1);
+      updateActionValues(phi_tp1);
       findBestAction();
     }
 
-    double pi(const Action& a)
+    double pi(const Action* a)
     {
-      return (bestAction == &a) ? 1.0 : 0;
+      return (bestAction->id() == a->id()) ? 1.0f : 0.0f;
     }
 
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
-      return *bestAction;
+      return bestAction;
     }
 
-    const Action& sampleBestAction()
+    const Action* sampleBestAction()
     {
-      return *bestAction;
+      return bestAction;
     }
 
 };
@@ -698,17 +697,17 @@ class EpsilonGreedy: public Greedy<T>
     {
     }
 
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
       if (Probabilistic::nextDouble() < epsilon)
-        return (*Greedy<T>::actions)[rand() % Greedy<T>::actions->dimension()];
+        return Greedy<T>::actions->at(rand() % Greedy<T>::actions->dimension());
       else
-        return *Greedy<T>::bestAction;
+        return Greedy<T>::bestAction;
     }
 
-    double pi(const Action& a)
+    double pi(const Action* a)
     {
-      double probability = (a == *Greedy<T>::bestAction) ? 1.0 - epsilon : 0.0;
+      double probability = (a->id() == Greedy<T>::bestAction->id()) ? 1.0 - epsilon : 0.0;
       return probability + epsilon / Greedy<T>::actions->dimension();
     }
 
@@ -721,13 +720,13 @@ class BoltzmannDistributionPerturbed: public Policy<T>
   protected:
     SparseVector<T>* u;
     ActionList* actions;
-    DenseVector<double>* distribution;
+    PVector<double>* distribution;
     double epsilon;
     double perturbation;
   public:
     BoltzmannDistributionPerturbed(SparseVector<T>* u, ActionList* actions, const double& epsilon,
         const double& perturbation) :
-        u(u), actions(actions), distribution(new DenseVector<double>(actions->dimension())), epsilon(
+        u(u), actions(actions), distribution(new PVector<double>(actions->dimension())), epsilon(
             epsilon), perturbation(perturbation)
     {
     }
@@ -737,9 +736,9 @@ class BoltzmannDistributionPerturbed: public Policy<T>
       delete distribution;
     }
 
-    void update(const Representations<T>& phis)
+    void update(const Representations<T>* phis)
     {
-      assert(actions->dimension() == phis.dimension());
+      assert(actions->dimension() == phis->dimension());
       distribution->clear();
       double sum = 0;
       // The exponential function may become very large and overflow.
@@ -748,7 +747,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
       double maxValue = 0;
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
-        double tmp = u->dot(phis.at(**a));
+        double tmp = u->dot(phis->at(*a));
         if (tmp > maxValue)
           maxValue = tmp;
       }
@@ -757,7 +756,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
       {
         const int id = (*a)->id();
         double perturb = Probabilistic::nextDouble() < epsilon ? perturbation : 0.0f;
-        distribution->at(id) = exp(u->dot(phis.at(**a)) + perturb - maxValue);
+        distribution->at(id) = exp(u->dot(phis->at(*a)) + perturb - maxValue);
         Boundedness::checkValue(distribution->at(id));
         sum += distribution->at(id);
       }
@@ -771,12 +770,12 @@ class BoltzmannDistributionPerturbed: public Policy<T>
 
     }
 
-    double pi(const Action& action)
+    double pi(const Action* action)
     {
-      return distribution->at(action.id());
+      return distribution->at(action->id());
     }
 
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
       double random = Probabilistic::nextDouble();
       double sum = 0;
@@ -784,12 +783,12 @@ class BoltzmannDistributionPerturbed: public Policy<T>
       {
         sum += distribution->at((*a)->id());
         if (sum >= random)
-          return **a;
+          return *a;
       }
       return actions->at(actions->dimension() - 1);
     }
 
-    const Action& sampleBestAction()
+    const Action* sampleBestAction()
     {
       return sampleAction();
     }
@@ -808,21 +807,21 @@ class SingleActionPolicy: public Policy<T>
       assert(actions->dimension() == 1);
     }
 
-    void update(const Representations<T>& phis)
+    void update(const Representations<T>* phis)
     {
     }
 
-    double pi(const Action& a)
+    double pi(const Action* a)
     {
-      return a.id() == actions->at(0).id() ? 1.0 : 0.0;
+      return a->id() == actions->at(0)->id() ? 1.0 : 0.0;
     }
 
-    const Action& sampleAction()
+    const Action* sampleAction()
     {
       return actions->at(0);
     }
 
-    const Action& sampleBestAction()
+    const Action* sampleBestAction()
     {
       return sampleAction();
     }
@@ -841,7 +840,7 @@ class ConstantPolicy: public StochasticPolicy<T>
     {
     }
 
-    void update(const Representations<T>& xas)
+    void update(const Representations<T>* phi)
     {
     }
 };

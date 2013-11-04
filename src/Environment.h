@@ -38,7 +38,7 @@ class TRStep
     double z_tp1;
     bool endOfEpisode;
     TRStep(const int& nbVars) :
-        o_tp1(new DenseVector<O>(nbVars)), r_tp1(0.0f), z_tp1(0.0f), endOfEpisode(false)
+        o_tp1(new PVector<O>(nbVars)), r_tp1(0.0f), z_tp1(0.0f), endOfEpisode(false)
     {
     }
 
@@ -66,7 +66,7 @@ class Environment
     ActionList* continuousActions;
   public:
     Environment(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
-        observations(new DenseVector<float>(nbVars)), resolutions(new DenseVector<float>(nbVars)), output(
+        observations(new PVector<float>(nbVars)), resolutions(new PVector<float>(nbVars)), output(
             new TRStep<O>(nbVars)), discreteActions(new GeneralActionList(nbDiscreteActions)), continuousActions(
             new GeneralActionList(nbContinuousActions))
     {
@@ -83,7 +83,7 @@ class Environment
 
   public:
     virtual void initialize() =0;
-    virtual void step(const Action& action) =0;
+    virtual void step(const Action* action) =0;
     virtual void updateRTStep() =0;
     virtual bool endOfEpisode() const =0;
     virtual float r() const =0;
@@ -93,40 +93,40 @@ class Environment
     {/*To output useful information*/
     }
 
-    virtual ActionList& getDiscreteActionList() const
+    virtual ActionList* getDiscreteActionList() const
     {
-      return *discreteActions;
+      return discreteActions;
     }
 
-    virtual ActionList& getContinuousActionList() const
+    virtual ActionList* getContinuousActionList() const
     {
-      return *continuousActions;
+      return continuousActions;
     }
 
-    virtual const TRStep<O>& getTRStep() const
+    virtual const TRStep<O>* getTRStep() const
     {
-      return *output;
+      return output;
     }
 
-    virtual const DenseVector<O>& getVars() const
+    virtual const DenseVector<O>* getObservations() const
     {
-      return *output->o_tp1;
+      return observations;
     }
 
-    virtual const DenseVector<O>& getObservations() const
+    virtual const DenseVector<O>* getResolutions() const
     {
-      return *observations;
-    }
-
-    virtual const DenseVector<O>& getResolutions() const
-    {
-      return *resolutions;
+      return resolutions;
     }
 
     virtual void setResolution(const double& resolution)
     {
       for (int i = 0; i < resolutions->dimension(); i++)
         resolutions->at(i) = resolution;
+    }
+
+    virtual int dimension() const
+    {
+      return observations->dimension();
     }
 };
 

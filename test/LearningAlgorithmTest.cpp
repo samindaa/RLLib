@@ -41,7 +41,7 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
   int memorySize = 512;
   int numTiling = 16;
   TileCoderHashing<double, float> coder(memorySize, numTiling, true);
-  DVecFloatType x(numObservations);
+  PVector<float> x(numObservations);
   Adaline<double> adaline(coder.dimension(), 0.1 / coder.vectorNorm());
   IDBD<double> idbd(coder.dimension(), 0.001); // This value looks good
   Autostep<double> autostep(coder.dimension());
@@ -52,20 +52,19 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
     for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
     {
       x[0] = 2.0 * iter->first / M_PI; // normalized and unit generalized
-      const SVecDoubleType& phi = coder.project(x);
+      const Vector<double>* phi = coder.project(&x);
       adaline.learn(phi, iter->second);
       idbd.learn(phi, iter->second);
       autostep.learn(phi, iter->second);
     }
 
     // Calculate the error
-    double mse[3] =
-    { 0 };
+    double mse[3] = { 0 };
     for (multimap<double, double>::const_iterator iterMse = X.begin(); iterMse != X.end();
         ++iterMse)
     {
       x[0] = 2.0 * iterMse->first / M_PI;
-      const SVecDoubleType& phi = coder.project(x);
+      const Vector<double>* phi = coder.project(&x);
       mse[0] += pow(iterMse->second - adaline.predict(phi), 2) / X.size();
       mse[1] += pow(iterMse->second - idbd.predict(phi), 2) / X.size();
       mse[2] += pow(iterMse->second - autostep.predict(phi), 2) / X.size();
@@ -80,7 +79,7 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
   for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
   {
     x[0] = 2.0 * iter->first / M_PI;
-    const SVecDoubleType& phi = coder.project(x);
+    const Vector<double>* phi = coder.project(&x);
     if (outFilePrediction.is_open())
       outFilePrediction << iter->first << " " << iter->second << " " << adaline.predict(phi) << " "
           << idbd.predict(phi) << " " << autostep.predict(phi) << endl;
@@ -111,7 +110,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
   int numObservations = 1;
   int memorySize = 512;
   int numTiling = 16;
-  DVecFloatType x(numObservations);
+  PVector<float> x(numObservations);
   TileCoderHashing<double, float> coder(memorySize, numTiling, true);
   SemiLinearIDBD<double> semiLinearIdbd(coder.dimension(), 0.001 / x.dimension()); // This value looks good
   int traininCounter = 0;
@@ -121,7 +120,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
     for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
     {
       x[0] = 10.0 * iter->first; // normalized and unit generalized
-      const SVecDoubleType& phi = coder.project(x);
+      const Vector<double>* phi = coder.project(&x);
       semiLinearIdbd.learn(phi, iter->second);
     }
 
@@ -131,7 +130,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
         iterCrossEntropy != X.end(); ++iterCrossEntropy)
     {
       x[0] = 10.0 * iterCrossEntropy->first;
-      const SVecDoubleType& phi = coder.project(x);
+      const Vector<double>* phi = coder.project(&x);
       crossEntropy += -iterCrossEntropy->second * log(semiLinearIdbd.predict(phi))
           - (1.0 - iterCrossEntropy->second) * log(1.0 - semiLinearIdbd.predict(phi));
     }
@@ -145,7 +144,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
   for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
   {
     x[0] = 10.0 * iter->first;
-    const SVecDoubleType& phi = coder.project(x);
+    const Vector<double>* phi = coder.project(&x);
     if (outFilePrediction.is_open())
       outFilePrediction << iter->first << " " << iter->second << " " << semiLinearIdbd.predict(phi)
           << endl;
@@ -168,7 +167,7 @@ void SupervisedAlgorithmTest::linearRegressionWithRegularFeatures()
 
   // train
   int numObservations = 1;
-  SVecDoubleType phi(numObservations + 1);
+  PVector<double> phi(numObservations + 1);
   phi.insertLast(1.0);
   Adaline<double> adaline(phi.dimension(), 0.00001);
   IDBD<double> idbd(phi.dimension(), 0.001); // This value looks good
@@ -180,21 +179,20 @@ void SupervisedAlgorithmTest::linearRegressionWithRegularFeatures()
     for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
     {
       phi.insertEntry(0, iter->first);
-      adaline.learn(phi, iter->second);
-      idbd.learn(phi, iter->second);
-      autostep.learn(phi, iter->second);
+      adaline.learn(&phi, iter->second);
+      idbd.learn(&phi, iter->second);
+      autostep.learn(&phi, iter->second);
     }
 
     // Calculate the error
-    double mse[3] =
-    { 0 };
+    double mse[3] = { 0 };
     for (multimap<double, double>::const_iterator iterMse = X.begin(); iterMse != X.end();
         ++iterMse)
     {
       phi.insertEntry(0, iterMse->first);
-      mse[0] += pow(iterMse->second - adaline.predict(phi), 2) / X.size();
-      mse[1] += pow(iterMse->second - idbd.predict(phi), 2) / X.size();
-      mse[2] += pow(iterMse->second - autostep.predict(phi), 2) / X.size();
+      mse[0] += pow(iterMse->second - adaline.predict(&phi), 2) / X.size();
+      mse[1] += pow(iterMse->second - idbd.predict(&phi), 2) / X.size();
+      mse[2] += pow(iterMse->second - autostep.predict(&phi), 2) / X.size();
     }
     if (outFileError.is_open())
       outFileError << mse[0] << " " << mse[1] << " " << mse[2] << endl;
@@ -207,8 +205,8 @@ void SupervisedAlgorithmTest::linearRegressionWithRegularFeatures()
   {
     phi.insertEntry(0, iter->first);
     if (outFilePrediction.is_open())
-      outFilePrediction << iter->first << " " << iter->second << " " << adaline.predict(phi) << " "
-          << idbd.predict(phi) << " " << autostep.predict(phi) << endl;
+      outFilePrediction << iter->first << " " << iter->second << " " << adaline.predict(&phi) << " "
+          << idbd.predict(&phi) << " " << autostep.predict(&phi) << endl;
   }
   outFilePrediction.close();
 }
@@ -234,7 +232,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithRegularFeatures()
 
   // train
   int numObservations = 1;
-  SVecDoubleType phi(numObservations + 1);
+  PVector<double> phi(numObservations + 1);
   phi.insertLast(1.0);
   SemiLinearIDBD<double> semiLinearIdbd(phi.dimension(), 0.001 / phi.dimension()); // This value looks good
   int traininCounter = 0;
@@ -244,7 +242,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithRegularFeatures()
     for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
     {
       phi.insertEntry(0, iter->first);
-      semiLinearIdbd.learn(phi, iter->second);
+      semiLinearIdbd.learn(&phi, iter->second);
     }
 
     // Calculate the error
@@ -253,8 +251,8 @@ void SupervisedAlgorithmTest::logisticRegressionWithRegularFeatures()
         iterCrossEntropy != X.end(); ++iterCrossEntropy)
     {
       phi.insertEntry(0, iterCrossEntropy->first);
-      crossEntropy += -iterCrossEntropy->second * log(semiLinearIdbd.predict(phi))
-          - (1.0 - iterCrossEntropy->second) * log(1.0 - semiLinearIdbd.predict(phi));
+      crossEntropy += -iterCrossEntropy->second * log(semiLinearIdbd.predict(&phi))
+          - (1.0 - iterCrossEntropy->second) * log(1.0 - semiLinearIdbd.predict(&phi));
     }
     if (outFileError.is_open())
       outFileError << crossEntropy << endl;
@@ -267,7 +265,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithRegularFeatures()
   {
     phi.insertEntry(0, iter->first);
     if (outFilePrediction.is_open())
-      outFilePrediction << iter->first << " " << iter->second << " " << semiLinearIdbd.predict(phi)
+      outFilePrediction << iter->first << " " << iter->second << " " << semiLinearIdbd.predict(&phi)
           << endl;
   }
   outFilePrediction.close();

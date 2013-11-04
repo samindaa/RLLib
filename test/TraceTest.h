@@ -30,15 +30,15 @@ class TraceTest: public TraceTestBase
 {
   protected:
     vector<TraceDoubleType*> traces;
-    SVecDoubleType* s01;
-    SVecDoubleType* s02;
+    SparseVector<double>* s01;
+    SparseVector<double>* s02;
 
   public:
     TraceTest() :
         s01(0), s02(0)
     {
-      s01 = new SVecDoubleType(100, 2);
-      s02 = new SVecDoubleType(100, 2);
+      s01 = new SVector<double>(100, 2);
+      s02 = new SVector<double>(100, 2);
 
       s01->setEntry(1, 1.0);
       s01->setEntry(2, 1.0);
@@ -101,18 +101,19 @@ class TraceTest: public TraceTestBase
     void testTraceWithDiscounting(const double& lambda, TraceDoubleType& trace,
         const double& expected)
     {
-      trace.update(lambda, *s01);
-      SVecDoubleType a(*s01);
-      Assert::checkVectorEquals(trace.vect(), a);
+      trace.update(lambda, s01);
+      SVector<double> a(s01);
+      Assert::checkVectorEquals(trace.vect(), &a);
       for (int i = 0; i < 1000; i++)
       {
-        trace.update(lambda, *s02);
+        trace.update(lambda, s02);
         Assert::pass(VectorsTestsUtils::checkConsistency(trace.vect()));
       }
-      Assert::equals(s02->nbActiveEntries(), trace.vect().nbActiveEntries());
-      SVecDoubleType expectedVec(trace.vect().dimension());
-      expectedVec.set(*s02, expected);
-      Assert::checkVectorEquals(trace.vect(), expectedVec, 0.00001);
+      Assert::equals(s02->nonZeroElements(),
+          ((const SparseVector<double>*) trace.vect())->nonZeroElements());
+      SVector<double> expectedVec(trace.vect()->dimension());
+      expectedVec.set(s02, expected);
+      Assert::checkVectorEquals(trace.vect(), &expectedVec, 0.00001);
     }
 
     void testTrace(const double& lambda, TraceDoubleType& trace, const double& expected)

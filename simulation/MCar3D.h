@@ -75,7 +75,7 @@ class MCar3D: public Environment<float>
       // not used
       continuousActions->push_back(0, 0.0);
 
-      for (int i = 0; i < getVars().dimension(); i++)
+      for (int i = 0; i < dimension(); i++)
         resolutions->at(i) = 6.0;
     }
 
@@ -105,10 +105,10 @@ class MCar3D: public Environment<float>
       yvelocity = 0.;
     }
 
-    void update_velocity(const Action& act)
+    void update_velocity(const Action* act)
     {
 
-      switch (act.id())
+      switch (act->id())
       {
       case 0:
         xvelocity += cos(3 * xposition) * (-0.0025);
@@ -170,7 +170,7 @@ class MCar3D: public Environment<float>
       updateRTStep();
     }
 
-    void step(const Action& a)
+    void step(const Action* a)
     {
       update_velocity(a);
       update_position();

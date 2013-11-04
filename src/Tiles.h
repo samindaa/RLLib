@@ -79,14 +79,14 @@ class UNH: public Hashing
     {
       /*First call to hashing, initialize table of random numbers */
       //printf("inside tiles \n");
-      srand(0);
+      //srand(0);
       for (int k = 0; k < 16384/*2048*/; k++)
       {
         rndseq[k] = 0;
         for (int i = 0; i < int(sizeof(int)); ++i)
           rndseq[k] = (rndseq[k] << 8) | (rand() & 0xff);
       }
-      srand(time(0));
+      //srand(time(0));
     }
 
     /** hash_UNH
@@ -128,9 +128,9 @@ class MurmurHashing: public Hashing
     MurmurHashing()
     {
       // Constant seed
-      srand(0);
+      //srand(0);
       seed = (unsigned int) rand();
-      srand(time(0));
+      //srand(time(0));
       key = new uint8_t[(MAX_NUM_VARS * 2 + 1) * 4]; //<< Arbitrary
       ::memset(key, 0, (MAX_NUM_VARS * 2 + 1) * 4);
     }
@@ -384,7 +384,7 @@ class Tiles
     void tiles(int the_tiles[],             // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
         int memory_size,           // total number of possible tiles
-        float floats[],            // array of floating point variables
+        const float floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int ints[],                   // array of integer variables
         int num_ints)              // number of integer variables
@@ -434,7 +434,7 @@ class Tiles
     void tiles(int the_tiles[],             // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
         CollisionTable *ctable,    // total number of possible tiles
-        float floats[],            // array of floating point variables
+        const float floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int ints[],                   // array of integer variables
         int num_ints)              // number of integer variables
@@ -482,38 +482,39 @@ class Tiles
     }
 
 // No ints
-    void tiles(int the_tiles[], int nt, int memory, float floats[], int nf)
+    void tiles(int the_tiles[], int nt, int memory, const float floats[], int nf)
     {
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 0);
     }
 
-    void tiles(int the_tiles[], int nt, CollisionTable *ct, float floats[], int nf)
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, const float floats[], int nf)
     {
       tiles(the_tiles, nt, ct, floats, nf, i_tmp_arr, 0);
     }
 
 //one int
-    void tiles(int the_tiles[], int nt, int memory, float floats[], int nf, int h1)
+    void tiles(int the_tiles[], int nt, int memory, const float floats[], int nf, int h1)
     {
       i_tmp_arr[0] = h1;
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 1);
     }
 
-    void tiles(int the_tiles[], int nt, CollisionTable *ct, float floats[], int nf, int h1)
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, const float floats[], int nf, int h1)
     {
       i_tmp_arr[0] = h1;
       tiles(the_tiles, nt, ct, floats, nf, i_tmp_arr, 1);
     }
 
 // two ints
-    void tiles(int the_tiles[], int nt, int memory, float floats[], int nf, int h1, int h2)
+    void tiles(int the_tiles[], int nt, int memory, const float floats[], int nf, int h1, int h2)
     {
       i_tmp_arr[0] = h1;
       i_tmp_arr[1] = h2;
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 2);
     }
 
-    void tiles(int the_tiles[], int nt, CollisionTable *ct, float floats[], int nf, int h1, int h2)
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, const float floats[], int nf, int h1,
+        int h2)
     {
       i_tmp_arr[0] = h1;
       i_tmp_arr[1] = h2;
@@ -521,7 +522,8 @@ class Tiles
     }
 
 // three ints
-    void tiles(int the_tiles[], int nt, int memory, float floats[], int nf, int h1, int h2, int h3)
+    void tiles(int the_tiles[], int nt, int memory, const float floats[], int nf, int h1, int h2,
+        int h3)
     {
       i_tmp_arr[0] = h1;
       i_tmp_arr[1] = h2;
@@ -529,8 +531,8 @@ class Tiles
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 3);
     }
 
-    void tiles(int the_tiles[], int nt, CollisionTable *ct, float floats[], int nf, int h1, int h2,
-        int h3)
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, const float floats[], int nf, int h1,
+        int h2, int h3)
     {
       i_tmp_arr[0] = h1;
       i_tmp_arr[1] = h2;
@@ -678,7 +680,7 @@ class Tiles
     void tileswrap(int the_tiles[],         // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
         int memory_size,           // total number of possible tiles
-        float floats[],            // array of floating point variables
+        const float floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int wrap_widths[],         // array of widths (length and units as in floats)
         int ints[],                  // array of integer variables
@@ -737,7 +739,7 @@ class Tiles
     void tileswrap(int the_tiles[],         // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
         CollisionTable *ctable,   // total number of possible tiles
-        float floats[],            // array of floating point variables
+        const float floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int wrap_widths[],         // array of widths (length and units as in floats)
         int ints[],                  // array of integer variables

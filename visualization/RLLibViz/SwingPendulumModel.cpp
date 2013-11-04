@@ -16,7 +16,7 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
   hashing = new MurmurHashing;
   projector = new TileCoderHashing<double, float>(1000, 10, false, hashing);
   toStateAction = new StateActionTilings<double, float>(projector,
-      &problem->getContinuousActionList());
+      problem->getContinuousActionList());
 
   alpha_v = 0.1 / projector->vectorNorm();
   alpha_u = 0.001 / projector->vectorNorm();
@@ -28,10 +28,10 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
   critic = new TDLambda<double>(alpha_v, gamma, lambda, critice);
 
   policyDistribution = new NormalDistributionScaled<double>(0, 1.0, projector->dimension(),
-      &problem->getContinuousActionList());
+      problem->getContinuousActionList());
   policyRange = new Range<double>(-2.0, 2.0);
   problemRange = new Range<double>(-2.0, 2.0);
-  acting = new ScaledPolicyDistribution<double>(&problem->getContinuousActionList(),
+  acting = new ScaledPolicyDistribution<double>(problem->getContinuousActionList(),
       policyDistribution, policyRange, problemRange);
 
   actore1 = new ATrace<double>(projector->dimension());
@@ -86,14 +86,14 @@ void SwingPendulumModel::doWork()
   }
 
   emit signal_add(window->views[0],
-      Vec(simulator->getEnvironment()->getObservations().at(0),
-          simulator->getEnvironment()->getObservations().at(1)), Vec(0.0, 0.0, 0.0, 1.0));
+      Vec(simulator->getEnvironment()->getObservations()->at(0),
+          simulator->getEnvironment()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
   emit signal_draw(window->views[0]);
 
   // Value function
   if (simulator->isEndingOfEpisode() && window->vfuns.size() > 0)
   {
-    RLLib::DenseVector<float> x_t(2);
+    RLLib::PVector<float> x_t(2);
     double maxValue = 0, minValue = 0;
     float y = 0;
     for (int i = 0; i < valueFunction->rows(); i++)
@@ -103,7 +103,7 @@ void SwingPendulumModel::doWork()
       {
         x_t[0] = y;
         x_t[1] = x;
-        double v = control->computeValueFunction(x_t);
+        double v = control->computeValueFunction(&x_t);
         valueFunction->at(i, j) = v;
         if (v > maxValue)
           maxValue = v;

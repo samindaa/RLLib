@@ -40,8 +40,8 @@ class Projector
     virtual ~Projector()
     {
     }
-    virtual const SparseVector<T>& project(const DenseVector<O>& x, int h1) =0;
-    virtual const SparseVector<T>& project(const DenseVector<O>& x) =0;
+    virtual const Vector<T>* project(const Vector<O>* x, int h1) =0;
+    virtual const Vector<T>* project(const Vector<O>* x) =0;
     virtual double vectorNorm() const =0;
     virtual int dimension() const =0;
 };
@@ -57,12 +57,12 @@ class TileCoder: public Projector<T, O>
   protected:
     bool includeActiveFeature;
     SparseVector<T>* vector;
-    DenseVector<int>* tileIndices;
+    PVector<int>* tileIndices;
   public:
     TileCoder(const int& memorySize, const int& numTiling, bool includeActiveFeature = true) :
-        includeActiveFeature(includeActiveFeature),
-            vector(new SparseVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)),
-            tileIndices(new DenseVector<int>(numTiling))
+        includeActiveFeature(includeActiveFeature), vector(
+            new SVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)), tileIndices(
+            new PVector<int>(numTiling))
     {
     }
 
@@ -73,42 +73,44 @@ class TileCoder: public Projector<T, O>
       delete tileIndices;
     }
 
-    virtual void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory) =0;
-    virtual void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory,
+    virtual void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory) =0;
+    virtual void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory,
         const int& h1) =0;
 
-    const SparseVector<T>& project(const DenseVector<O>& x, int h1)
+    const Vector<T>* project(const Vector<O>* x, int h1)
     {
       vector->clear();
-      if (x.empty()) return *vector;
+      if (x->empty())
+        return vector;
       if (includeActiveFeature)
       {
-        coder(*tileIndices, x, vector->dimension() - 1, h1);
+        coder(tileIndices, x, vector->dimension() - 1, h1);
         vector->insertLast(1.0);
       }
       else
-        coder(*tileIndices, x, vector->dimension(), h1);
+        coder(tileIndices, x, vector->dimension(), h1);
 
       for (int i = 0; i < tileIndices->dimension(); i++)
         vector->insertEntry(tileIndices->at(i), 1.0);
-      return *vector;
+      return vector;
     }
 
-    const SparseVector<T>& project(const DenseVector<O>& x)
+    const Vector<T>* project(const Vector<O>* x)
     {
       vector->clear();
-      if (x.empty()) return *vector;
+      if (x->empty())
+        return vector;
       if (includeActiveFeature)
       {
-        coder(*tileIndices, x, vector->dimension() - 1);
+        coder(tileIndices, x, vector->dimension() - 1);
         vector->insertLast(1.0);
       }
       else
-        coder(*tileIndices, x, vector->dimension());
+        coder(tileIndices, x, vector->dimension());
 
       for (int i = 0; i < tileIndices->dimension(); i++)
         vector->insertEntry(tileIndices->at(i), 1.0);
-      return *vector;
+      return vector;
 
     }
 
@@ -141,15 +143,16 @@ class TileCoderHashing: public TileCoder<T, O>
       delete tiles;
     }
 
-    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory)
+    void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory)
     {
-      tiles->tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension());
+      tiles->tiles(theTiles->getValues(), theTiles->dimension(), memory, x->getValues(),
+          x->dimension());
     }
 
-    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory,
-        const int& h1)
+    void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory, const int& h1)
     {
-      tiles->tiles(theTiles(), theTiles.dimension(), memory, x(), x.dimension(), h1);
+      tiles->tiles(theTiles->getValues(), theTiles->dimension(), memory, x->getValues(),
+          x->dimension(), h1);
     }
 
 };
@@ -178,7 +181,7 @@ class TileCoderNoHashing: public TileCoder<T, O>
 
       // The vector needs to reflect the correct memory size
       delete TileCoder<T, O>::vector;
-      TileCoder<T, O>::vector = new SparseVector<T>(includeActiveFeature ? v + 1 : v);
+      TileCoder<T, O>::vector = new SVector<T>(includeActiveFeature ? v + 1 : v);
       ct = new CollisionTable(v, 1);
     }
 
@@ -188,15 +191,16 @@ class TileCoderNoHashing: public TileCoder<T, O>
       delete ct;
     }
 
-    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory)
+    void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory)
     {
-      tiles->tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension());
+      tiles->tiles(theTiles->getValues(), theTiles->dimension(), ct, x->getValues(),
+          x->dimension());
     }
 
-    void coder(DenseVector<int>& theTiles, const DenseVector<O>& x, const int& memory,
-        const int& h1)
+    void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory, const int& h1)
     {
-      tiles->tiles(theTiles(), theTiles.dimension(), ct, x(), x.dimension(), h1);
+      tiles->tiles(theTiles->getValues(), theTiles->dimension(), ct, x->getValues(), x->dimension(),
+          h1);
     }
 };
 

@@ -29,7 +29,7 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
   Environment<float>* problem = new ContinuousGridworld;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, false);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
@@ -39,11 +39,11 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
   GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
   //double epsilon = 0.01;
   /*Policy<double>* behavior = new EpsilonGreedy<double>(gq,
-   &problem->getDiscreteActionList(), 0.01);*/
-  Policy<double>* behavior = new RandomPolicy<double>(&problem->getDiscreteActionList());
-  Policy<double>* target = new Greedy<double>(gq, &problem->getDiscreteActionList());
+   problem->getDiscreteActionList(), 0.01);*/
+  Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
+  Policy<double>* target = new Greedy<double>(gq, problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
-      &problem->getDiscreteActionList(), toStateAction, gq);
+      problem->getDiscreteActionList(), toStateAction, gq);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 50001, 1);
   sim->setTestEpisodesAfterEachRun(true);
@@ -69,7 +69,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true,
       hashing);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = 0.0001 / projector->vectorNorm();
@@ -79,7 +79,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
   double alpha_u = 0.001 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
-      &problem->getDiscreteActionList());
+      problem->getDiscreteActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
@@ -87,7 +87,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
   ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
       lambda, target, actoreTraces);
 
-  Policy<double>* behavior = new RandomPolicy<double>(&problem->getDiscreteActionList());
+  Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
@@ -126,7 +126,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
   Environment<float>* problem = new ContinuousGridworld;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = 0.0001 / projector->vectorNorm();
@@ -136,7 +136,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
   double alpha_u = 0.001 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
-      &problem->getDiscreteActionList());
+      problem->getDiscreteActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
@@ -144,7 +144,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
   ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
       lambda, target, actoreTraces);
 
-  Policy<double>* behavior = new RandomPolicy<double>(&problem->getDiscreteActionList());
+  Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
@@ -180,7 +180,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
   Environment<float>* problem = new ContinuousGridworld;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = 0.0001 / projector->vectorNorm();
@@ -192,7 +192,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
       critice);
   double alpha_u = 0.001 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
-      &problem->getDiscreteActionList());
+      problem->getDiscreteActionList());
 
   Trace<double>* actore = new RTrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
@@ -201,7 +201,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
       lambda_actor, target, actoreTraces);
 
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
-      &problem->getDiscreteActionList(), 0.01f, 1.0f);
+      problem->getDiscreteActionList(), 0.01f, 1.0f);
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
@@ -237,7 +237,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
   Environment<float>* problem = new ContinuousGridworld;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = 0.0001 / projector->vectorNorm();
@@ -248,7 +248,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, criticeML);
   double alpha_u = 0.001 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
-      &problem->getDiscreteActionList());
+      problem->getDiscreteActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
@@ -257,7 +257,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
   ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
       lambda, target, actoreTraces);
 
-  Policy<double>* behavior = new RandomPolicy<double>(&problem->getDiscreteActionList());
+  Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 

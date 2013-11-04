@@ -45,7 +45,7 @@ class Boundedness
     }
 
     template<class T>
-    inline static bool checkDistribution(const DenseVector<T>& distribution)
+    inline static bool checkDistribution(const PVector<T>& distribution)
     {
       double sum = 0.0;
       for (int i = 0; i < distribution.dimension(); i++)
@@ -197,9 +197,20 @@ class Probabilistic
 {
   public:
 
-    inline static void srand(unsigned int& seed)
+    inline static void srand(const long& seed)
     {
       ::srand(seed);
+    }
+
+    inline static int rand()
+    {
+      return ::rand();
+    }
+
+    // [0 .. size)
+    inline static int nextInt(const int& size)
+    {
+      return rand() % size;
     }
 
     // [0..1]

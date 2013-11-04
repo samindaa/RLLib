@@ -15,7 +15,7 @@
 #include "Trace.h"
 #include "Projector.h"
 #include "ControlAlgorithm.h"
-#include "Representation.h"
+#include "StateToStateAction.h"
 
 // From the simulation
 #include "SwingPendulum.h"

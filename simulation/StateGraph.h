@@ -17,13 +17,12 @@
 
 namespace RLLib
 {
-typedef DenseVector<double> RealVector;
 
 class GraphState
 {
   protected:
     std::map<int, GraphState*> transitions;
-    RealVector* vectorRepresentation;
+    Vector<double>* vectorRepresentation;
 
   public:
     std::string name;
@@ -49,12 +48,12 @@ class GraphState
       return !transitions.empty();
     }
 
-    void setVectorRepresentation(RealVector* vectorRepresentation)
+    void setVectorRepresentation(Vector<double>* vectorRepresentation)
     {
       this->vectorRepresentation = vectorRepresentation;
     }
 
-    RealVector* v() const
+    Vector<double>* v() const
     {
       return vectorRepresentation;
     }
@@ -79,14 +78,14 @@ class FiniteStateGraph
         {
         }
 
-        const RealVector& v_t() const
+        Vector<double>* v_t() const
         {
-          return *s_t->v();
+          return s_t->v();
         }
 
-        const RealVector& v_tp1() const
+        Vector<double>* v_tp1() const
         {
-          return *s_tp1->v();
+          return s_tp1->v();
         }
 
         bool operator==(const StepData& that) const
@@ -119,7 +118,7 @@ class FiniteStateGraph
             new Action(std::numeric_limits<int>::max())), stepTime(-1), s_0(0), a_t(0), s_t(0), acting(
             0), graphStates(0)
     {
-      O->setVectorRepresentation(new RealVector(0));
+      O->setVectorRepresentation(new PVector<double>(0));
     }
 
     virtual ~FiniteStateGraph()
@@ -151,9 +150,9 @@ class FiniteStateGraph
       return *graphStates;
     }
 
-    GraphState* state(const RealVector& s)
+    GraphState* state(const Vector<double>* s)
     {
-      return graphStates->at(s.at(0));
+      return graphStates->at(s->getEntry(0));
     }
 
     StepData/*small object*/step()
@@ -173,7 +172,7 @@ class FiniteStateGraph
           s_t = O;
       }
       //a_t = Policies.decide(acting, s_t.v());
-      a_t = &acting->sampleAction(); // fixMe
+      a_t = acting->sampleAction(); // fixMe
       double r_t = s_t->reward;
       if (!s_t->hasNextState())
       {
@@ -184,7 +183,7 @@ class FiniteStateGraph
     }
 
     virtual double gamma() const=0;
-    virtual const DenseVector<double>& expectedDiscountedSolution() const=0;
+    virtual const Vector<double>* expectedDiscountedSolution() const=0;
     virtual ActionList* actions() const =0;
 };
 
@@ -206,7 +205,7 @@ class LineProblem: public FiniteStateGraph
     LineProblem() :
         FiniteStateGraph(), Gamma(0.9), actionList(new GeneralActionList(1)), acting(
             new SingleActionPolicy<double>(actionList)), states(new std::vector<GraphState*>()), solution(
-            new RealVector(3)), Move(&actionList->at(0))
+            new PVector<double>(3)), Move(actionList->at(0))
     {
       A = new GraphState("A", 0.0);
       B = new GraphState("B", 0.0);
@@ -221,7 +220,7 @@ class LineProblem: public FiniteStateGraph
       int stateIndex = 0;
       for (std::vector<GraphState*>::iterator i = states->begin(); i != states->end(); ++i)
       {
-        RealVector* v = new RealVector;
+        DenseVector<double>* v = new PVector<double>(1);
         v->at(0) = stateIndex++;
         (*i)->setVectorRepresentation(v);
       }
@@ -259,9 +258,9 @@ class LineProblem: public FiniteStateGraph
       return Gamma;
     }
 
-    const DenseVector<double>& expectedDiscountedSolution() const
+    const Vector<double>* expectedDiscountedSolution() const
     {
-      return *solution;
+      return solution;
     }
 
     ActionList* actions() const
@@ -289,13 +288,13 @@ class RandomWalk: public FiniteStateGraph
     GraphState* E;
     GraphState* TR;
 
-    RealVector* distribution;
+    DenseVector<double>* distribution;
     Policy<double>* acting;
 
     RandomWalk() :
         FiniteStateGraph(), Gamma(0.9), actionList(new GeneralActionList(2)), states(
-            new std::vector<GraphState*>()), solution(new RealVector(5)), Left(&actionList->at(0)), Right(
-            &actionList->at(1))
+            new std::vector<GraphState*>()), solution(new PVector<double>(5)), Left(
+            actionList->at(0)), Right(actionList->at(1))
     {
       TL = new GraphState("TL", 0.0);
       A = new GraphState("A", 0.0);
@@ -313,7 +312,7 @@ class RandomWalk: public FiniteStateGraph
       states->push_back(E);
       states->push_back(TR);
 
-      distribution = new RealVector(actionList->dimension());
+      distribution = new PVector<double>(actionList->dimension());
       for (int i = 0; i < distribution->dimension(); i++)
         distribution->at(i) = 1.0 / actionList->dimension();
 
@@ -322,7 +321,7 @@ class RandomWalk: public FiniteStateGraph
       int stateIndex = 0;
       for (std::vector<GraphState*>::iterator i = states->begin(); i != states->end(); ++i)
       {
-        RealVector* v = new RealVector;
+        DenseVector<double>* v = new PVector<double>(1);
         v->at(0) = stateIndex++;
         (*i)->setVectorRepresentation(v);
       }
@@ -374,9 +373,9 @@ class RandomWalk: public FiniteStateGraph
       return Gamma;
     }
 
-    const DenseVector<double>& expectedDiscountedSolution() const
+    const Vector<double>* expectedDiscountedSolution() const
     {
-      return *solution;
+      return solution;
     }
 
     ActionList* actions() const
@@ -430,7 +429,7 @@ class FSGAgentState: public Projector<T, O>
         if ((*iter)->hasNextState())
           stateIndexes->insert(std::make_pair(*iter, stateIndexes->size()));
       }
-      featureState = new SparseVector<T>(stateIndexes->size(), stateIndexes->size());
+      featureState = new SVector<T>(stateIndexes->size(), stateIndexes->size());
     }
 
     ~FSGAgentState()
@@ -439,19 +438,19 @@ class FSGAgentState: public Projector<T, O>
       delete stateIndexes;
     }
 
-    const SparseVector<T>& project(const DenseVector<O>& x)
+    const Vector<T>* project(const Vector<O>* x)
     {
       featureState->clear();
-      if (x.empty())
-        return *featureState;
+      if (x->empty())
+        return featureState;
       GraphState* sg = graph->state(x);
       if (!sg->hasNextState())
-        return *featureState;
+        return featureState;
       featureState->setEntry(stateIndexes->at(sg), 1.0);
-      return *featureState;
+      return featureState;
     }
 
-    const SparseVector<T>& project(const DenseVector<O>& x, int h1)
+    const Vector<T>* project(const Vector<O>* x, int h1)
     {
       return project(x);
     }

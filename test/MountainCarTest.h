@@ -29,7 +29,6 @@
 #include "Trace.h"
 #include "Projector.h"
 #include "ControlAlgorithm.h"
-#include "Representation.h"
 
 // From the simulation
 #include "MCar2D.h"

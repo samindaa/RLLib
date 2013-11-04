@@ -47,7 +47,7 @@ class LinearLearner: public ParameterizedFunction<T>
     }
     virtual double initialize() =0;
     virtual void reset() =0;
-    virtual const SparseVector<T>& weights() const =0;
+    virtual const Vector<T>* weights() const =0;
 };
 
 }  // namespace RLLib

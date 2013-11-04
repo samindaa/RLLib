@@ -63,7 +63,7 @@ class NoStateProblemProjector: public Projector<double, float>
     SparseVector<double>* vec;
   public:
     NoStateProblemProjector() :
-        vec(new SparseVector<double>(1, 1))
+        vec(new SVector<double>(1, 1))
     {
     }
 
@@ -72,16 +72,16 @@ class NoStateProblemProjector: public Projector<double, float>
       delete vec;
     }
 
-    const SparseVector<double>& project(const DenseVector<float>& x)
+    const Vector<double>* project(const Vector<float>* x)
     {
       vec->clear();
-      if (x.empty())
-        return *vec;
+      if (x->empty())
+        return vec;
       vec->setEntry(0, 1.0);
-      return *vec;
+      return vec;
     }
 
-    const SparseVector<double>& project(const DenseVector<float>& x, int h1)
+    const Vector<double>* project(const Vector<float>* x, int h1)
     {
       return project(x);
     }
@@ -117,27 +117,27 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double, float>
     }
 
   public:
-    const Representations<double>& stateActions(const DenseVector<float>& x)
+    const Representations<double>* stateActions(const Vector<float>* x)
     {
       assert(actions->dimension() == phis->dimension());
-      if (x.empty())
+      if (x->empty())
       {
         phis->clear();
-        return *phis;
+        return phis;
       }
       for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         if (actions->dimension() == 1)
-          phis->set(projector->project(x), **a); // projection from whole space
+          phis->set(projector->project(x), *a); // projection from whole space
         else
-          phis->set(projector->project(x, (*a)->id()), **a);
+          phis->set(projector->project(x, (*a)->id()), *a);
       }
-      return *phis;
+      return phis;
     }
 
-    const ActionList& getActionList() const
+    const ActionList* getActionList() const
     {
-      return *actions;
+      return actions;
     }
 
     double vectorNorm() const

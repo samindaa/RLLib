@@ -18,7 +18,7 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
   hashing = new MurmurHashing;
   projector = new TileCoderHashing<double, float>(1000000, 10, true, hashing);
   toStateAction = new StateActionTilings<double, float>(projector,
-      &behaviourEnvironment->getDiscreteActionList());
+      behaviourEnvironment->getDiscreteActionList());
 
   alpha_v = 0.1 / projector->vectorNorm();
   alpha_w = 0.0001 / projector->vectorNorm();
@@ -30,14 +30,14 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
   alpha_u = 0.001 / projector->vectorNorm();
 
   target = new BoltzmannDistribution<double>(projector->dimension(),
-      &behaviourEnvironment->getDiscreteActionList());
+      behaviourEnvironment->getDiscreteActionList());
 
   actore = new ATrace<double>(projector->dimension());
   actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target, actoreTraces);
 
-  behavior = new RandomPolicy<double>(&behaviourEnvironment->getDiscreteActionList());
+  behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActionList());
   control = new OffPAC<double, float>(behavior, critic, actor, toStateAction, projector, gamma);
 
   learningRunner = new Simulator<double, float>(control, behaviourEnvironment, 5000);
@@ -96,14 +96,14 @@ void ContinuousGridworldModel::doWork()
     }
     else
       emit signal_add(window->views[i->first],
-          Vec(i->second->getEnvironment()->getObservations().at(0),
-              i->second->getEnvironment()->getObservations().at(1)), Vec(0.0, 0.0, 0.0, 1.0));
+          Vec(i->second->getEnvironment()->getObservations()->at(0),
+              i->second->getEnvironment()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
   }
 
   // Value function
   if (evaluationRunner->isEndingOfEpisode() && window->vfuns.size() > 1)
   {
-    RLLib::DenseVector<float> x_t(2);
+    RLLib::PVector<float> x_t(2);
     double maxValue = 0, minValue = 0;
     float y = 0;
     for (int i = 0; i < valueFunction->rows(); i++)
@@ -113,7 +113,7 @@ void ContinuousGridworldModel::doWork()
       {
         x_t[0] = y;
         x_t[1] = x;
-        double v = control->computeValueFunction(x_t);
+        double v = control->computeValueFunction(&x_t);
         valueFunction->at(i, j) = v;
         if (v > maxValue)
           maxValue = v;

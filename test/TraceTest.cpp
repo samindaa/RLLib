@@ -28,13 +28,13 @@ void TraceTest::runTestOnOnMountainCar(Projector<double, float>* projector, Trac
   Environment<float>* problem = new MCar2D;
   problem->setResolution(9.0);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
   double alpha = 0.2 / projector->vectorNorm();
   double gamma = 0.99;
   double lambda = 0.3;
   double epsilon = 0.01;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, trace);
-  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, &problem->getDiscreteActionList(),
+  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActionList(),
       epsilon);
   OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
       toStateAction, sarsa);

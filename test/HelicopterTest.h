@@ -46,18 +46,20 @@ class HelicopterTest: public HelicopterTestBase
     void testCrash()
     {
       Helicopter helicopter;
-      assert(4 == helicopter.getContinuousActionList().at(0).dimension());
-      assert(12 == helicopter.getVars().dimension());
+      assert(4 == helicopter.getContinuousActionList()->at(0)->dimension());
+      assert(12 == helicopter.dimension());
 
       for (int nb = 0; nb < 100; nb++)
       {
         helicopter.initialize();
         while (!helicopter.endOfEpisode())
         {
-          helicopter.step(helicopter.getContinuousActionList().at(0));
+          helicopter.step(helicopter.getContinuousActionList()->at(0));
           assert(helicopter.r() <= 0);
-          for (int i = 0; i < helicopter.getVars().dimension(); i++)
-            assert(helicopter.heliDynamics.ObservationRanges[i].in(helicopter.getVars()[i]));
+          for (int i = 0; i < helicopter.dimension(); i++)
+            assert(
+                helicopter.heliDynamics.ObservationRanges[i].in(
+                    helicopter.getObservations()->getEntry(i)));
         }
       }
     }
@@ -65,11 +67,11 @@ class HelicopterTest: public HelicopterTestBase
     void testEndEpisode()
     {
       Helicopter helicopter(2);
-      assert(4 == helicopter.getContinuousActionList().at(0).dimension());
+      assert(4 == helicopter.getContinuousActionList()->at(0)->dimension());
       helicopter.initialize();
       while (!helicopter.endOfEpisode())
       {
-        helicopter.step(helicopter.getContinuousActionList().at(0));
+        helicopter.step(helicopter.getContinuousActionList()->at(0));
         assert(helicopter.r() <= 0);
       }
       assert(2 == helicopter.step_time);

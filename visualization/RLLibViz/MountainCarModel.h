@@ -15,7 +15,7 @@
 #include "Trace.h"
 #include "Projector.h"
 #include "ControlAlgorithm.h"
-#include "Representation.h"
+#include "StateToStateAction.h"
 #include "Matrix.h"
 
 // From the simulation

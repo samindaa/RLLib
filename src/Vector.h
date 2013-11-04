@@ -54,12 +54,44 @@ class Vector
     virtual ~Vector()
     {
     }
+
+    // Some operations
     virtual int dimension() const =0;
+    virtual bool empty() const =0;
     virtual double maxNorm() const =0;
     virtual double euclideanNorm() const =0;
-    virtual T* operator()() const =0; // return the data as an array
-    virtual bool empty() const =0;
+    virtual double sum() const =0;
 
+    // Return the data as an array
+    virtual T* getValues() =0;
+    virtual const T* getValues() const =0;
+
+    // Get elements
+    virtual T getEntry(const int& index) const =0;
+    // Dot product
+    virtual double dot(const Vector<T>* that) const =0;
+
+    // Mutable Vector<T>
+    virtual void clear() =0;
+    // Insert T(value) within the Vector<T> capacity
+    virtual void setEntry(const int& index, const T& value) =0;
+    virtual void insertLast(const T& value) =0;
+    // This method only set the value within the bounds of ||Vector<T>||
+    virtual void insertEntry(const int& index, const T& value) =0;
+    // This method only reset the value at index to T(0)
+    virtual void removeEntry(const int& index) =0;
+    virtual Vector<T>* addToSelf(const double& value) =0;
+    virtual Vector<T>* addToSelf(const double& factor, const Vector<T>* that) =0;
+    virtual Vector<T>* addToSelf(const Vector<T>* that) =0;
+    virtual Vector<T>* subtractToSelf(const Vector<T>* that) =0;
+    virtual Vector<T>* mapMultiplyToSelf(const double& factor) = 0;
+    virtual Vector<T>* ebeMultiplyToSelf(const Vector<T>* that) =0;
+    virtual Vector<T>* ebeDivideToSelf(const Vector<T>* that) =0;
+    virtual Vector<T>* set(const Vector<T>* that) =0;
+    virtual Vector<T>* set(const Vector<T>* that, const int& offset) =0;
+    virtual Vector<T>* set(const double& value) =0;
+
+    // Storage management
     virtual void persist(const std::string& f) const =0;
     virtual void resurrect(const std::string& f) =0;
 
@@ -115,47 +147,7 @@ class DenseVector: public Vector<T>
       return *this;
     }
 
-    // dot product
-    double operator*(const DenseVector<T>& that) const
-    {
-      assert(capacity == that.capacity);
-      double tmp = 0;
-      for (int i = 0; i < capacity; i++)
-        tmp += data[i] * that.data[i];
-      return tmp;
-    }
-    DenseVector<T>& operator*(const double& d)
-    {
-      for (T* i = data; i < data + capacity; ++i)
-        *i *= d;
-      return *this;
-    }
-    DenseVector<T>& operator+(const DenseVector<T>& that)
-    {
-      assert(capacity == that.capacity);
-      for (int i = 0; i < capacity; i++)
-        data[i] += that.data[i];
-      return *this;
-    }
-    DenseVector<T>& operator-(const DenseVector<T>& that)
-    {
-      assert(capacity == that.capacity);
-      for (int i = 0; i < capacity; i++)
-        data[i] -= that.data[i];
-      return *this;
-    }
-
-    T& operator[](const int& index) const
-    {
-      assert(index >= 0 && index < capacity);
-      return data[index];
-    }
-
-    T& at(const int& index) const
-    {
-      return (*this)[index];
-    }
-
+  public:
     int dimension() const
     {
       return capacity;
@@ -179,26 +171,116 @@ class DenseVector: public Vector<T>
       }
       return maxv;
     }
-    double euclideanNorm() const
+
+    double sum() const
     {
-      return sqrt((*this) * (*this));
+      return std::accumulate(data, data + capacity, 0.0f);
     }
 
-    T* operator()() const
+    // Return the data as an array
+    T* getValues()
     {
       return data;
     }
 
+    const T* getValues() const
+    {
+      return data;
+    }
+
+    // Get elements
+    T& operator[](const int& index)
+    {
+      assert(index >= 0 && index < capacity);
+      return data[index];
+    }
+
+    const T& operator[](const int& index) const
+    {
+      assert(index >= 0 && index < capacity);
+      return data[index];
+    }
+
+    T& at(const int& index)
+    {
+      return operator[](index);
+    }
+
+    const T& at(const int& index) const
+    {
+      return operator[](index);
+    }
+
+    T getEntry(const int& index) const
+    {
+      assert(index >= 0 && index < capacity);
+      return data[index];
+    }
+
+    // Mutable Vector<T>
     void clear()
     {
       std::fill(data, data + capacity, 0);
     }
 
-    void set(const DenseVector<T>& that)
+    void setEntry(const int& index, const T& value)
     {
-      assert(capacity == that.capacity);
+      this->at(index) = value;
+    }
+
+    void insertLast(const T& value)
+    {
+      setEntry(capacity - 1, value);
+    }
+
+    void insertEntry(const int& index, const T& value)
+    {
+      setEntry(index, value);
+    }
+
+    void removeEntry(const int& index)
+    {
+      this->at(index) = T(0);
+    }
+
+    Vector<T>* addToSelf(const double& value)
+    {
       for (int i = 0; i < capacity; i++)
-        data[i] = that.data[i];
+        data[i] += value;
+      return this;
+    }
+
+    Vector<T>* mapMultiplyToSelf(const double& d)
+    {
+      for (T* i = data; i < data + capacity; ++i)
+        *i *= d;
+      return this;
+    }
+
+    Vector<T>* ebeMultiplyToSelf(const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+      for (int i = 0; i < this->dimension(); i++)
+        data[i] *= that->getEntry(i);
+      return this;
+    }
+
+    Vector<T>* ebeDivideToSelf(const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+      for (int i = 0; i < this->dimension(); i++)
+      {
+        const T& thatValue = that->getEntry(i);
+        if (thatValue != 0)
+          data[i] /= thatValue;
+      }
+      return this;
+    }
+
+    Vector<T>* set(const double& value)
+    {
+      std::fill(data, data + capacity, value);
+      return this;
     }
 
     void persist(const std::string& f) const
@@ -322,7 +404,7 @@ class SparseVector: public Vector<T>
     }
 
     // bunch of helper methods
-  private:
+  protected:
     void updateEntry(const int& index, const T& value, const int& position)
     {
       values[position] = value;
@@ -409,13 +491,13 @@ class SparseVector: public Vector<T>
       appendEntry(index, value);
     }
 
-    const T getEntry(const int& index) const
+    T getEntry(const int& index) const
     {
       int position = indexesPosition[index];
       return position != -1 ? values[position] : T(0);
     }
 
-  private:
+  protected:
     void setNonZeroEntry(const int& index, const T& value)
     {
       int position = indexesPosition[index];
@@ -433,144 +515,12 @@ class SparseVector: public Vector<T>
       nbActive = 0;
     }
 
-    SparseVector<T>& addToSelf(const double& factor, const SparseVector<T>& that)
-    {
-      assert(dimension() == that.dimension());
-      for (int position = 0; position < that.nbActive; position++)
-      {
-        int index = that.activeIndexes[position];
-        setNonZeroEntry(index, getEntry(index) + factor * that.values[position]);
-      }
-      return *this;
-    }
-
-    SparseVector<T>& addToSelf(const SparseVector<T>& that)
-    {
-      return addToSelf(1.0, that);
-    }
-
-    SparseVector<T>& substractToSelf(const SparseVector<T>& that)
-    {
-      return addToSelf(-1.0, that);
-    }
-
-    SparseVector<T>& multiplyToSelf(const double& factor)
-    {
-      if (factor == 0)
-      {
-        clear();
-        return *this;
-      }
-
-      for (T* position = values; position < values + nbActive; ++position)
-        *position *= factor;
-      return *this;
-    }
-
-    SparseVector<T>& ebeMultiplyToSelf(const SparseVector<T>& that)
-    {
-      assert(dimension() == that.dimension());
-      int position = 0;
-      while (position < nbActive)
-      {
-        int index = activeIndexes[position];
-        T value = values[position] * that.getEntry(index);
-        if (value != 0)
-        {
-          values[position] = value;
-          ++position;
-        }
-        else
-          removeEntry(position, index);
-      }
-      return *this;
-    }
-
-    SparseVector<T>& ebeDivideToSelf(const SparseVector<T>& that)
-    {
-      for (int position = 0; position < nbActive; position++)
-      {
-        int index = activeIndexes[position];
-        values[position] /= that.getEntry(index); // prior check
-      }
-      return *this;
-    }
-
-    SparseVector<T>& ebeAddConstantToSelf(const double& value)
-    {
-      for (int index = 0; index < indexesPositionLength; index++)
-        setNonZeroEntry(index, value + getEntry(index));
-      return *this;
-    }
-
-  private:
-    double dot(const SparseVector<T>& _this, const SparseVector<T>& _that) const
-    {
-      double tmp = 0;
-      for (int position = 0; position < _this.nbActive; position++)
-        tmp += _that.getEntry(_this.activeIndexes[position]) * _this.values[position];
-      return tmp;
-    }
-
-  public:
-    // w'* phi
-    double dot(const SparseVector<T>& that) const
-    {
-      assert(dimension() == that.dimension());
-      if (nbActive < that.nbActive)
-        return dot(*this, that);
-      else
-        return dot(that, *this);
-    }
-
     double sum() const
     {
       return std::accumulate(values, values + nbActive, 0.0);
     }
 
-    // Shallow copy of that to this.
-    SparseVector<T>& set(const SparseVector<T>& that)
-    {
-      assert(dimension() == that.dimension());
-      clear();
-      for (int i = 0; i < that.nbActive; i++)
-        setNonZeroEntry(that.activeIndexes[i], that.values[i]);
-      return *this;
-    }
-
-    SparseVector<T>& set(const SparseVector<T>& that, const int& offset)
-    {
-      // Dimension check is relaxed.
-      clear();
-      for (int i = 0; i < that.nbActive; i++)
-        setNonZeroEntry(that.activeIndexes[i] + offset, that.values[i]);
-      return *this;
-    }
-
-    SparseVector<T>& set(const SparseVector<T>& that, const T& value)
-    {
-      assert(dimension() == that.dimension());
-      clear();
-      for (int i = 0; i < that.nbActive; i++)
-        setNonZeroEntry(that.activeIndexes[i], value);
-      return *this;
-    }
-
-    SparseVector<T>& set(const T& value)
-    {
-      // This will set 'value' to all the elements
-      clear();
-      for (int index = 0; index < indexesPositionLength; index++)
-        setNonZeroEntry(index, value);
-      return *this;
-    }
-
-    const T* getValues() const
-    {
-      return values;
-    }
-
-    const int* getActiveIndexes() const
+    const int* nonZeroIndexes() const
     {
       return activeIndexes;
     }
@@ -580,7 +530,7 @@ class SparseVector: public Vector<T>
       return indexesPosition;
     }
 
-    int nbActiveEntries() const
+    int nonZeroElements() const
     {
       return nbActive;
     }
@@ -608,14 +558,41 @@ class SparseVector: public Vector<T>
       }
       return maxv;
     }
-    double euclideanNorm() const
-    {
-      return sqrt(dot(*this));
-    }
 
-    T* operator()() const
+    T* getValues()
     {
       return values;
+    }
+
+    const T* getValues() const
+    {
+      return values;
+    }
+
+    double dotT(const T* data) const
+    {
+      double result = 0.0f;
+      for (int position = 0; position < nbActive; position++)
+        result += data[activeIndexes[position]] * values[position];
+      return result;
+    }
+
+    void addToSelfT(T* data) const
+    {
+      for (int position = 0; position < nbActive; position++)
+        data[activeIndexes[position]] += values[position];
+    }
+
+    void addToSelfT(const double& factor, T* data) const
+    {
+      for (int position = 0; position < nbActive; position++)
+        data[activeIndexes[position]] += factor * values[position];
+    }
+
+    void subtractToSelfT(T* data) const
+    {
+      for (int position = 0; position < nbActive; position++)
+        data[activeIndexes[position]] -= values[position];
     }
 
     void persist(const std::string& f) const
@@ -693,35 +670,373 @@ class SparseVector: public Vector<T>
         const SparseVector<O>& that);
 
     // Static
-    inline static void absToSelf(SparseVector<T>& that)
+    inline static void absToSelf(SparseVector<T>* that)
     {
-      for (T* position = that.values; position < that.values + that.nbActive; ++position)
+      for (T* position = that->values; position < that->values + that->nbActive; ++position)
         *position = fabs(*position);
     }
 
-    inline static void multiplySelfByExponential(SparseVector<T>& result, const double& factor,
-        const SparseVector<T>& other, const double& min)
+    inline static void multiplySelfByExponential(SparseVector<T>* result, const double& factor,
+        const SparseVector<T>* other, const double& min)
     {
-      const int* activeIndexes = other.getActiveIndexes();
-      for (int i = 0; i < other.nbActiveEntries(); i++)
+      const int* activeIndexes = other->nonZeroIndexes();
+      for (int i = 0; i < other->nonZeroElements(); i++)
       {
         int index = activeIndexes[i];
-        result.setEntry(index,
-            std::max(min, result.getEntry(index) * std::exp(factor * other.getEntry(index))));
+        result->setEntry(index,
+            std::max(min, result->getEntry(index) * std::exp(factor * other->getEntry(index))));
       }
     }
 
-    inline static void positiveMaxToSelf(SparseVector<T>& result, const SparseVector<T>& other)
+    inline static void positiveMaxToSelf(SparseVector<T>* result, const SparseVector<T>* other)
     {
-      const int* activeIndexes = other.getActiveIndexes();
-      for (int i = 0; i < other.nbActiveEntries(); i++)
+      const int* activeIndexes = other->nonZeroIndexes();
+      for (int i = 0; i < other->nonZeroElements(); i++)
       {
         int index = activeIndexes[i];
-        result.setEntry(index, std::max(result.getEntry(index), other.getEntry(index)));
+        result->setEntry(index, std::max(result->getEntry(index), other->getEntry(index)));
       }
     }
 };
 
+template<class T>
+class PVector: public DenseVector<T>
+{
+  private:
+    typedef DenseVector<T> super;
+  public:
+    PVector(const int& capacity = 1) :
+        DenseVector<T>(capacity)
+    {
+    }
+
+    PVector(const DenseVector<T>* that) :
+        DenseVector<T>(*that)
+    {
+    }
+
+    PVector(const PVector<T>& that) :
+        DenseVector<T>(that)
+    {
+    }
+
+    PVector<T>& operator=(const PVector<T>& that)
+    {
+      if (this != &that)
+        super::operator =(that);
+      return *this;
+    }
+
+    virtual ~PVector()
+    {
+    }
+
+    PVector<T>& operator*(const double& d)
+    {
+      for (T* i = super::data; i < super::data + this->dimension(); ++i)
+        *i *= d;
+      return *this;
+    }
+
+    // Dot product
+    double dot(const Vector<T>* that) const
+    {
+      assert(this->dimension() == that->dimension());
+
+      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
+      if (_that)
+        return _that->dotT(this->getValues());
+
+      double result = 0;
+      for (int i = 0; i < this->dimension(); i++)
+        result += super::data[i] * that->getEntry(i);
+      return result;
+    }
+
+    PVector<T>& operator-(const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+
+      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
+      if (_that)
+      {
+        _that->subtractToSelfT(this->getValues());
+        return *this;
+      }
+
+      for (int i = 0; i < this->dimension(); i++)
+        super::data[i] -= that->getEntry(i);
+      return *this;
+    }
+
+    PVector<T>& operator+(const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+
+      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
+      if (_that)
+      {
+        _that->addToSelfT(this->getValues());
+        return *this;
+      }
+
+      for (int i = 0; i < this->dimension(); i++)
+        super::data[i] += that->at(i);
+      return *this;
+    }
+
+    PVector<T>& operator/(const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+      for (int i = 0; i < this->dimension(); i++)
+      {
+        const T& thatValue = that->getEntry(i);
+        if (thatValue != 0)
+          super::data[i] /= thatValue;
+      }
+      return *this;
+    }
+
+    Vector<T>* addToSelf(const double& factor, const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+
+      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
+      if (_that)
+      {
+        _that->addToSelfT(factor, this->getValues());
+        return this;
+      }
+
+      for (int i = 0; i < this->dimension(); i++)
+        super::data[i] += factor * that->getEntry(i);
+      return this;
+    }
+
+    Vector<T>* addToSelf(const Vector<T>* that)
+    {
+      return addToSelf(1.0, that);
+    }
+
+    Vector<T>* subtractToSelf(const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+
+      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
+      if (_that)
+      {
+        _that->subtractToSelfT(this->getValues());
+        return this;
+      }
+
+      for (int i = 0; i < this->dimension(); i++)
+        super::data[i] -= that->getEntry(i);
+      return this;
+    }
+
+    Vector<T>* set(const Vector<T>* that, const int& offset)
+    { // FixMe:
+      //assert(this->dimension() == that->dimension());
+
+      const DenseVector<T>* _that = dynamic_cast<const DenseVector<T>*>(that);
+      if (_that)
+      {
+        std::copy(_that->getValues() + offset, _that->getValues() + this->dimension(),
+            this->getValues());
+        return this;
+      }
+
+      for (int i = 0; i < that->dimension(); i++)
+        super::data[i] = that->getEntry(i);
+      return this;
+    }
+
+    Vector<T>* set(const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+      return set(that, 0);
+    }
+
+    double euclideanNorm() const
+    {
+      return sqrt(this->dot(this));
+    }
+};
+
+// ================================================================================================
+template<class T>
+class SVector: public SparseVector<T>
+{
+  private:
+    typedef SparseVector<T> super;
+  public:
+    SVector(const int& capacity = 1, const int& activeIndexesLength = 10) :
+        SparseVector<T>(capacity, activeIndexesLength)
+    {
+    }
+
+    virtual ~SVector()
+    {
+    }
+
+    SVector(const SparseVector<T>* that) :
+        SparseVector<T>(*that)
+    {
+    }
+
+    SVector(const SVector<T>& that) :
+        SparseVector<T>(that)
+    {
+    }
+
+    SVector<T>& operator=(const SVector& that)
+    {
+      if (this != &that)
+        super::operator =(that);
+      return *this;
+    }
+
+    double dot(const Vector<T>* that) const
+    {
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other && other->nonZeroElements() < this->nonZeroElements())
+        return other->dot(this);
+
+      double result = 0.0;
+      for (int position = 0; position < super::nbActive; position++)
+        result += that->getEntry(super::activeIndexes[position]) * super::values[position];
+      return result;
+    }
+
+    Vector<T>* addToSelf(const double& value)
+    {
+      for (int index = 0; index < super::indexesPositionLength; index++)
+        this->setNonZeroEntry(index, value + this->getEntry(index));
+      return this;
+    }
+
+    Vector<T>* addToSelf(const double& factor, const Vector<T>* that)
+    {
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
+      {
+        for (int position = 0; position < other->nonZeroElements(); position++)
+        {
+          const int index = other->nonZeroIndexes()[position];
+          this->setNonZeroEntry(index,
+              this->getEntry(index) + factor * other->getValues()[position]);
+        }
+        return this;
+      }
+
+      for (int i = 0; i < that->dimension(); i++)
+        this->setEntry(i, this->getEntry(i) + factor * that->getEntry(i));
+      return this;
+    }
+
+    Vector<T>* addToSelf(const Vector<T>* that)
+    {
+      return addToSelf(1.0f, that);
+    }
+
+    Vector<T>* subtractToSelf(const Vector<T>* that)
+    {
+      return addToSelf(-1.0f, that);
+    }
+
+    Vector<T>* mapMultiplyToSelf(const double& factor)
+    {
+      if (factor == 0)
+      {
+        this->clear();
+        return this;
+      }
+
+      for (T* position = super::values; position < super::values + super::nbActive; ++position)
+        *position *= factor;
+      return this;
+    }
+
+    Vector<T>* ebeMultiplyToSelf(const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+      int position = 0;
+      while (position < super::nbActive)
+      {
+        int index = super::activeIndexes[position];
+        T value = super::values[position] * that->getEntry(index);
+        if (value != 0)
+        {
+          super::values[position] = value;
+          ++position;
+        }
+        else
+          this->removeEntry(position, index);
+      }
+      return this;
+    }
+
+    Vector<T>* ebeDivideToSelf(const Vector<T>* that)
+    {
+      for (int position = 0; position < super::nbActive; position++)
+      {
+        int index = super::activeIndexes[position];
+        super::values[position] /= that->getEntry(index); // prior check
+      }
+      return this;
+    }
+
+    Vector<T>* set(const Vector<T>* that)
+    {
+      assert(this->dimension() == that->dimension());
+      this->clear();
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
+      {
+        for (int i = 0; i < other->nonZeroElements(); i++)
+          this->setNonZeroEntry(other->nonZeroIndexes()[i], other->getValues()[i]);
+        return this;
+      }
+
+      for (int i = 0; i < that->dimension(); i++)
+        this->setEntry(i, that->getEntry(i));
+      return this;
+    }
+
+    Vector<T>* set(const Vector<T>* that, const int& start)
+    {
+      // Dimension check is relaxed.
+      this->clear();
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
+      {
+        for (int i = 0; i < other->nonZeroElements(); i++)
+          this->setNonZeroEntry(other->nonZeroIndexes()[i] + start, other->getValues()[i]);
+        return this;
+      }
+
+      for (int i = 0; i < that->dimension(); i++)
+        this->setEntry(start + i, that->getEntry(i));
+      return this;
+    }
+
+    Vector<T>* set(const double& value)
+    {
+      // This will set 'value' to all the elements
+      this->clear();
+      for (int index = 0; index < super::indexesPositionLength; index++)
+        this->setNonZeroEntry(index, value);
+      return this;
+    }
+
+    double euclideanNorm() const
+    {
+      return sqrt(this->dot(this));
+    }
+
+};
+
+// ================================================================================================
 template<class T>
 class SparseVectors
 {
@@ -796,10 +1111,10 @@ class SparseVectors
       return vectors->size();
     }
 
-    const SparseVector<T>& operator[](const unsigned index) const
+    const SparseVector<T>* operator[](const unsigned index) const
     {
       assert(index >= 0 && index < dimension());
-      return *vectors->at(index);
+      return vectors->at(index);
     }
 
     SparseVector<T>* at(const unsigned index) const
@@ -842,6 +1157,7 @@ class SparseVectors
 template<class T>
 std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that)
 {
+  out << "DenseVector ";
   for (T* i = that.data; i < that.data + that.capacity; ++i)
     out << *i << " ";
   return out;
@@ -850,7 +1166,7 @@ std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that)
 template<class T>
 std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that)
 {
-  out << "index=";
+  out << "SparseVector index=";
   for (int index = 0; index < that.indexesPositionLength; index++)
     out << that.indexesPosition[index] << " ";
   out << std::endl;

@@ -30,7 +30,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
   //Projector<double, float>* projector = new TileCoderHashing<double, float>(100000, 10, true);
   Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
@@ -40,7 +40,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, 0.4, criticeML);
   double alpha_u = 0.5 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
-      &problem->getDiscreteActionList());
+      problem->getDiscreteActionList());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
@@ -50,7 +50,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
       0.4, target, actoreTraces);
 
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
-      &problem->getDiscreteActionList(), 0.0f, 0.0f);
+      problem->getDiscreteActionList(), 0.0f, 0.0f);
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
@@ -81,7 +81,7 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
   Environment<float>* problem = new MCar3D;
   Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 2000);
   double alpha_v = 0.1 / projector->vectorNorm();
@@ -91,12 +91,12 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
   double lambda_t = 0.8;
   GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, eML);
   //double epsilon = 0.01;
-  Policy<double>* behavior = new EpsilonGreedy<double>(gq, &problem->getDiscreteActionList(), 0.1);
+  Policy<double>* behavior = new EpsilonGreedy<double>(gq, problem->getDiscreteActionList(), 0.1);
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getDiscreteActionList());*/
-  Policy<double>* target = new Greedy<double>(gq, &problem->getDiscreteActionList());
+  Policy<double>* target = new Greedy<double>(gq, problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
-      &problem->getDiscreteActionList(), toStateAction, gq);
+      problem->getDiscreteActionList(), toStateAction, gq);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
   sim->run();
@@ -128,7 +128,7 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
   Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
   //Projector<double, float>* projector = new TileCoderHashing<double, float>(100000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
 
   Trace<double>* e = new ATrace<double>(projector->dimension());
   //Trace<double>* e = new RTrace<double>(projector->dimension(), 0.01);
@@ -137,7 +137,7 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
   double lambda = 0.9;
   Sarsa<double>* sarsa = new SarsaAlphaBound<double>(gamma, lambda, eML);
   double epsilon = 0.1;
-  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, &problem->getDiscreteActionList(),
+  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActionList(),
       epsilon);
   OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
       toStateAction, sarsa);
@@ -164,7 +164,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
   Environment<float>* problem = new MCar3D;
   Projector<double, float>* projector = new TileCoderHashing<double, float>(100000, 10, true);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .001 / projector->vectorNorm();
@@ -174,7 +174,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, 0.1, criticeML);
   double alpha_u = 1.0 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
-      &problem->getDiscreteActionList());
+      problem->getDiscreteActionList());
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
@@ -183,7 +183,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
   ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
       0.1, target, actoreTraces);
 
-  Policy<double>* behavior = new RandomPolicy<double>(&problem->getDiscreteActionList());
+  Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
@@ -213,7 +213,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
   Environment<float>* problem = new Acrobot;
   Projector<double, float>* projector = new AcrobotTilesProjector<double, float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
@@ -224,7 +224,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, criticeML);
   double alpha_u = 0.001 / projector->vectorNorm();
   PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
-      &problem->getDiscreteActionList());
+      problem->getDiscreteActionList());
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
@@ -236,7 +236,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
   //Policy<double>* behavior = new RandomPolicy<double>(&problem->getDiscreteActionList());
   //Policy<double>* behavior = new RandomBiasPolicy<double>(&problem->getDiscreteActionList());
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
-      &problem->getDiscreteActionList(), 0.0f, 0.0f);
+      problem->getDiscreteActionList(), 0.0f, 0.0f);
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
       actor, toStateAction, projector, gamma);
 
@@ -268,7 +268,7 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
   Environment<float>* problem = new Acrobot;
   Projector<double, float>* projector = new AcrobotTilesProjector<double, float>();
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
-      projector, &problem->getDiscreteActionList());
+      projector, problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
   double alpha_v = 0.2 / projector->vectorNorm();
@@ -278,12 +278,12 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
   double lambda_t = 0.8;
   GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, eML);
   //double epsilon = 0.01;
-  Policy<double>* behavior = new EpsilonGreedy<double>(gq, &problem->getDiscreteActionList(), 0.1);
+  Policy<double>* behavior = new EpsilonGreedy<double>(gq, problem->getDiscreteActionList(), 0.1);
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getDiscreteActionList());*/
-  Policy<double>* target = new Greedy<double>(gq, &problem->getDiscreteActionList());
+  Policy<double>* target = new Greedy<double>(gq, problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
-      &problem->getDiscreteActionList(), toStateAction, gq);
+      problem->getDiscreteActionList(), toStateAction, gq);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 500, 1);
   sim->run();
@@ -311,7 +311,7 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
   VectorXd k(4);
   k << 10, 15, -90, -25;
 
-  ActionList& actions = poleBalancing.getContinuousActionList();
+  ActionList* actions = poleBalancing.getContinuousActionList();
 
   for (int r = 0; r < 1; r++)
   {
@@ -320,7 +320,7 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
     int round = 0;
     do
     {
-      const DenseVector<float>& vars = poleBalancing.getVars();
+      const DenseVector<float>& vars = *poleBalancing.getObservations();
       for (int i = 0; i < vars.dimension(); i++)
         x[i] = vars[i];
       cout << "x=" << x.transpose() << endl;
@@ -329,9 +329,9 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
       VectorXd noise(1);
       noise(0) = Probabilistic::nextNormalGaussian() * 0.1;
       VectorXd u = k.transpose() * x + noise;
-      actions.update(0, 0, (float) u(0));
+      actions->update(0, 0, (float) u(0));
 
-      poleBalancing.step(actions.at(0));
+      poleBalancing.step(actions->at(0));
       cout << "r=" << poleBalancing.r() << endl;
       ++round;
       cout << "round=" << round << endl;
@@ -342,23 +342,23 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
 void ExtendedProblemsTest::testPersistResurrect()
 {
   srand(time(0));
-  SparseVector<float> a(20);
+  SVector<float> a(20);
   for (int i = 0; i < 10; i++)
     a.insertEntry(i, Probabilistic::nextDouble());
   cout << a << endl;
   a.persist(string("testsv.dat"));
 
-  SparseVector<float> b(20);
+  SVector<float> b(20);
   b.resurrect(string("testsv.dat"));
   cout << b << endl;
 
-  DenseVector<float> d(20);
+  PVector<float> d(20);
   for (int i = 0; i < 10; i++)
     d[i] = Probabilistic::nextDouble();
   cout << d << endl;
   d.persist(string("testdv.dat"));
 
-  DenseVector<float> e(20);
+  PVector<float> e(20);
   e.resurrect(string("testdv.dat"));
   cout << e << endl;
 }

@@ -55,7 +55,7 @@ class ContinuousGridworld: public Environment<float>
           discreteActions->update(i, dimension, 1.0);
       }
 
-      for (int i = 0; i < getVars().dimension(); i++)
+      for (int i = 0; i < dimension(); i++)
         resolutions->at(i) = 10.0;
 
       // continuous actions are not setup for this problem
@@ -83,12 +83,12 @@ class ContinuousGridworld: public Environment<float>
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 
-    void step(const Action& action)
+    void step(const Action* action)
     {
       float noise = Probabilistic::nextFloat() * absoluteNoise - (absoluteNoise / 2.0);
       for (int i = 0; i < observations->dimension(); i++)
         observations->at(i) = observationRange->bound(
-            observations->at(i) + actionRange->bound(action.at(i) + noise));
+            observations->at(i) + actionRange->bound(action->at(i) + noise));
       updateRTStep();
     }
 

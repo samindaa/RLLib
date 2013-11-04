@@ -325,14 +325,14 @@ class HelicopterDynamics
       return observation;
     }
 
-    void step(const Action& agentAction)
+    void step(const Action* agentAction)
     {
       static double a[4];
       // saturate all the actions, b/c the actuators are limited:
       // [real helicopter's saturation is of course somewhat different, depends on
       // swash plate mixing etc ... ]
       for (int a_i = 0; a_i < 4; a_i++)
-        a[a_i] = ActionRanges[a_i].bound(agentAction.at(a_i));
+        a[a_i] = ActionRanges[a_i].bound(agentAction->at(a_i));
 
       static double noise_mult = 2.0;
       static double noise_std[] = { 0.1941, 0.2975, 0.6058, 0.1508, 0.2492, 0.0734 }; // u,
@@ -452,7 +452,7 @@ class Helicopter: public Environment<float>
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 
-    void step(const Action& action)
+    void step(const Action* action)
     {
       heliDynamics.step(action);
       ++step_time;

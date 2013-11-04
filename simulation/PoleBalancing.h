@@ -123,9 +123,9 @@ class PoleBalancing: public Environment<float>
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 
-    void step(const Action& action)
+    void step(const Action* action)
     {
-      u(0) = action.at(0);
+      u(0) = action->at(0);
       mu = A * x + b * u;
       mvnrnd(mu, SigmaT, x);
       updateRTStep();
