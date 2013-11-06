@@ -206,29 +206,24 @@ class VectorsTestsUtils
     template<class T>
     static bool checkConsistency(const Vector<T>* v)
     {
-      return checkSparseVectorConsistency(dynamic_cast<const SparseVector<T>*>(v));
+      const SparseVector<T>* vec = dynamic_cast<const SparseVector<T>*>(v);
+      if (!vec)
+        return true;
+      else
+        return checkSparseVectorConsistency(vec);
     }
 
     template<class T>
-    static bool checkVectorEquals(const Vector<T>* a, const Vector<T>* b, double margin)
-    {
-      if (a->dimension() != b->dimension())
-        return false;
-      for (int i = 0; i < a->dimension(); i++)
-      {
-        double diff = fabs(a->getEntry(i) - b->getEntry(i));
-        if (diff > margin)
-          return false;
-      }
-      return true;
-    }
-
-    template<class T>
-    static bool checkValue(const Vector<T>* x)
+    static bool checkValues(const Vector<T>* x)
     {
       const SparseVector<T>* v = dynamic_cast<const SparseVector<T>*>(x);
-      const double* values = v->getValues();
-      for (int position = 0; position < v->nonZeroElements(); position++)
+      const T* values = x->getValues();
+      int nbChecks = 0;
+      if (v)
+        nbChecks = v->nonZeroElements();
+      else
+        nbChecks = x->dimension();
+      for (int position = 0; position < nbChecks; position++)
       {
         if (!Boundedness::checkValue(values[position]))
           return false;
@@ -236,53 +231,99 @@ class VectorsTestsUtils
       return true;
     }
 
+    template<class T>
+    static bool checkVectorEquals(const Vector<T>* a, const Vector<T>* b, const double& margin)
+    {
+      if (!a || !b)
+        return false;
+      if (a == b) // pointer wise
+        return true;
+      if (a->dimension() != b->dimension())
+        return false;
+      for (int i = 0; i < a->dimension(); i++)
+      {
+        double diff = std::fabs(a->getEntry(i) - b->getEntry(i));
+        if (diff > margin)
+          return false;
+      }
+      return true;
+    }
+
+    template<class T>
+    static double diff(const Vector<T>* a, const Vector<T>* b)
+    {
+      double value = 0;
+      for (int i = 0; i < a->dimension(); ++i)
+        value = std::max(value, std::fabs(a->getEntry(i) - b->getEntry(i)));
+      return value;
+    }
+
+    template<class T>
+    static bool checkVectorEquals(const Vector<T>* a, const Vector<T>* b)
+    {
+      return checkVectorEquals(a, b, 0);
+    }
+
 };
 
 class Assert
 {
   public:
-    template <class T>
-    static void checkVectorEquals(const Vector<T>* a, const Vector<T>* b)
+    template<class T>
+    static void assertEquals(const Vector<T>* a, const Vector<T>* b)
     {
       assert(VectorsTestsUtils::checkConsistency(a));
       assert(VectorsTestsUtils::checkConsistency(b));
       assert(VectorsTestsUtils::checkVectorEquals(a, b, numeric_limits<float>::epsilon()));
     }
 
-    template <class T>
-    static void checkVectorEquals(const Vector<T>* a, const Vector<T>* b, double margin)
+    template<class T>
+    static void assertEquals(const Vector<T>* a, const Vector<T>* b, double margin)
     {
       assert(VectorsTestsUtils::checkConsistency(a));
       assert(VectorsTestsUtils::checkConsistency(b));
       assert(VectorsTestsUtils::checkVectorEquals(a, b, margin));
     }
 
-    template <class T>
+    template<class T>
     static void checkConsistency(const Vector<T>* v)
     {
       assert(VectorsTestsUtils::checkConsistency(v));
     }
 
-    template <class T>
-    static void checkValue(const Vector<T>* v)
+    template<class T>
+    static void checkValues(const Vector<T>* v)
     {
-      assert(VectorsTestsUtils::checkValue(v));
+      assert(VectorsTestsUtils::checkValues(v));
     }
 
-    static void pass(const bool& condition)
+    static void assertPasses(const bool& condition)
     {
       assert(condition);
     }
 
-    static void fail(const bool& condition)
+    static void assertFails(const bool& condition)
     {
       assert(!condition);
     }
 
     template<class T>
-    static void equals(const T& a, const T& b)
+    static void assertObjectEquals(const T& a, const T& b)
     {
       assert(a == b);
+    }
+
+    template<class T>
+    static void assertObjectEquals(const T& a, const T& b, const double& margin)
+    {
+      double tmp = std::fabs(a - b);
+      assert(tmp <= margin);
+    }
+
+    template<class T>
+    static void assertNotSame(const Vector<T>* a, const Vector<T>* b)
+    {
+      assert(a != b);
     }
 };
 

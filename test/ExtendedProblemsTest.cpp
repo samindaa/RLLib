@@ -52,7 +52,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
       problem->getDiscreteActionList(), 0.0f, 0.0f);
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 1);
   sim->run();
@@ -185,7 +185,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 1000, 1);
   sim->run();
@@ -238,7 +238,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
       problem->getDiscreteActionList(), 0.0f, 0.0f);
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
   sim->run();

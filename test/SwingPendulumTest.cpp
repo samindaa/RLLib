@@ -54,7 +54,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
   /*Policy<double>* behavior = new RandomBiasPolicy<double>(
    &problem->getDiscreteActionList());*/
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 200, 1);
   sim->setTestEpisodesAfterEachRun(true);
@@ -169,7 +169,7 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
   Policy<double>* behavior = new BoltzmannDistribution<double>(projector->dimension(),
       problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 200, 1);
   sim->setTestEpisodesAfterEachRun(true);
@@ -217,7 +217,7 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
       lambda, acting, actoreTraces);
 
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(acting, critic, actor,
-      toStateAction, projector, gamma);
+      toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 10, 5);
   sim->setTestEpisodesAfterEachRun(true);

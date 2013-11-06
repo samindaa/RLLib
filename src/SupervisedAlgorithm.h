@@ -137,7 +137,7 @@ class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
       deltaX->mapMultiplyToSelf(delta);
       deltaXh->set(deltaX);
       deltaXh->ebeMultiplyToSelf(h);
-      SparseVector<T>::multiplySelfByExponential(alpha, theta, deltaXh, minimumStepSize);
+      Vectors<T>::multiplySelfByExponential(alpha, theta, deltaXh, minimumStepSize);
       Vector<T>* alphaDeltaX = deltaX->ebeMultiplyToSelf(alpha);
       w->addToSelf(alphaDeltaX);
       alphaX2->set(x);
@@ -221,7 +221,7 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
       deltaX->mapMultiplyToSelf(delta);
       deltaXh->set(deltaX);
       deltaXh->ebeMultiplyToSelf(h);
-      SparseVector<T>::multiplySelfByExponential(alpha, theta, deltaXh, minimumStepSize);
+      Vectors<T>::multiplySelfByExponential(alpha, theta, deltaXh, minimumStepSize);
       Vector<T>* alphaDeltaX = deltaX->ebeMultiplyToSelf(alpha);
       w->addToSelf(alphaDeltaX);
       alphaX2YMinusOneMinusY->set(x);
@@ -301,12 +301,12 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
       deltaXh->set(deltaX);
       deltaXh->ebeMultiplyToSelf(h);
       absDeltaXh->set(deltaXh);
-      SparseVector<T>::absToSelf(absDeltaXh);
+      Vectors<T>::absToSelf(absDeltaXh);
       vUpdate->set(absDeltaXh);
       vUpdate->subtractToSelf(v)->ebeMultiplyToSelf(x2)->ebeMultiplyToSelf(alpha);
       v->addToSelf(1.0 / tau, vUpdate);
-      SparseVector<T>::positiveMaxToSelf(v, absDeltaXh);
-      SparseVector<T>::multiplySelfByExponential(alpha, 0.01,
+      Vectors<T>::positiveMaxToSelf(v, absDeltaXh);
+      Vectors<T>::multiplySelfByExponential(alpha, 0.01,
           (const SparseVector<T>*) deltaXh->ebeDivideToSelf(v), minimumStepSize);
       x2ByAlpha->set(x2);
       x2ByAlpha->ebeMultiplyToSelf(alpha);

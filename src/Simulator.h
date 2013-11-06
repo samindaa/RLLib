@@ -68,9 +68,9 @@ class Simulator
     Environment<O>* environment;
 
     const Action* a_t;
-    PVector<O>* x_0; // << this is the terminal state
-    PVector<O>* x_t;
-    PVector<O>* x_tp1;
+    Vector<O>* x_0; // << this is the terminal state
+    Vector<O>* x_t;
+    Vector<O>* x_tp1;
 
     int maxEpisodeTimeSteps;
     int nbEpisodes;
@@ -202,7 +202,7 @@ class Simulator
 
       }
 
-      if (endingOfEpisode/*The episode is just ended*/)
+      if (endingOfEpisode/*The episode is just ended*/|| (timeStep == maxEpisodeTimeSteps))
       {
         if (verbose)
         {

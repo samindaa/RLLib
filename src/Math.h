@@ -124,7 +124,7 @@ class Ranges
     Ranges(const Range<T>& that) :
         ranges(new std::vector<Range<T>*>())
     {
-      for (typename SparseVectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+      for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
         ranges->push_back(*iter);
     }
 
@@ -133,7 +133,7 @@ class Ranges
       if (this != that)
       {
         ranges->clear();
-        for (typename SparseVectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+        for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
           ranges->push_back(*iter);
       }
       return *this;

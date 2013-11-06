@@ -244,12 +244,14 @@ void MountainCarTest::testGreedyGQMountainCar()
 {
   Probabilistic::srand(0);
   Environment<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
+  Hashing* hashing = new MurmurHashing;
+  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true,
+      hashing);
   StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
       projector, problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha_v = 0.1 / projector->vectorNorm();
-  double alpha_w = .0001 / projector->vectorNorm();
+  double alpha_w = 0.0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
   double beta_tp1 = 1.0 - gamma_tp1;
   double lambda_t = 0.4;
@@ -268,6 +270,7 @@ void MountainCarTest::testGreedyGQMountainCar()
   sim->computeValueFunction();
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete e;
@@ -342,11 +345,11 @@ void MountainCarTest::testOffPACMountainCar()
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
 
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 10);
   sim->setTestEpisodesAfterEachRun(true);
-  sim->setVerbose(false);
+  //sim->setVerbose(false);
   sim->run();
   sim->computeValueFunction();
   control->persist("visualization/mcar_offpac.data");
@@ -399,7 +402,7 @@ void MountainCarTest::testOffPACOnPolicyMountainCar()
       lambda, target, actoreTraces);
 
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 1);
   sim->run();

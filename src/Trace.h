@@ -197,8 +197,8 @@ class MaxLengthTrace: public Trace<T>
 
   private:
     void controlLength()
-    {// FixMe:
-      const SparseVector<T>* v = (const SparseVector<T>*)trace->vect();
+    { // FixMe:
+      const SparseVector<T>* v = (const SparseVector<T>*) trace->vect();
       if (v->nonZeroElements() < maximumLength)
         return;
       while (v->nonZeroElements() > maximumLength)
@@ -251,74 +251,75 @@ template<class T>
 class Traces
 {
   protected:
-    typename std::vector<Trace<T>*>* traces;
+    typename std::vector<Trace<T>*> traces;
   public:
     typedef typename std::vector<Trace<T>*>::iterator iterator;
     typedef typename std::vector<Trace<T>*>::const_iterator const_iterator;
 
-    Traces() :
-        traces(new std::vector<Trace<T>*>())
+    Traces()
     {
     }
 
     ~Traces()
     {
-      traces->clear();
-      delete traces;
+      traces.clear();
     }
 
-    Traces(const Traces<T>& that) :
-        traces(new std::vector<Trace<T>*>())
+    Traces(const Traces<T>& that)
     {
       for (typename Traces<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
-        traces->push_back(*iter);
+        traces.push_back(*iter);
     }
 
     Traces<T>& operator=(const Traces<T>& that)
     {
       if (this != that)
       {
-        traces->clear();
+        traces.clear();
         for (typename Traces<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
-          traces->push_back(*iter);
+          traces.push_back(*iter);
       }
       return *this;
     }
 
     void push_back(Trace<T>* trace)
     {
-      traces->push_back(trace);
+      traces.push_back(trace);
     }
 
     iterator begin()
     {
-      return traces->begin();
+      return traces.begin();
     }
 
     const_iterator begin() const
     {
-      return traces->begin();
+      return traces.begin();
     }
 
     iterator end()
     {
-      return traces->end();
+      return traces.end();
     }
 
     const_iterator end() const
     {
-      return traces->end();
+      return traces.end();
     }
 
-    unsigned int dimension() const
+    int dimension() const
     {
-      return traces->size();
+      return traces.size();
     }
 
-    Trace<T>* at(const unsigned index) const
+    Trace<T>* at(const int& index)
     {
-      assert(index >= 0 && index < dimension());
-      return traces->at(index);
+      return traces.at(index);
+    }
+
+    const Trace<T>* at(const int& index) const
+    {
+      return traces.at(index);
     }
 
     void clear()

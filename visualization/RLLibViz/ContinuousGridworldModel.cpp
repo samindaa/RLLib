@@ -38,7 +38,7 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
   actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target, actoreTraces);
 
   behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActionList());
-  control = new OffPAC<double, float>(behavior, critic, actor, toStateAction, projector, gamma);
+  control = new OffPAC<double, float>(behavior, critic, actor, toStateAction, projector);
 
   learningRunner = new Simulator<double, float>(control, behaviourEnvironment, 5000);
   evaluationRunner = new Simulator<double, float>(control, evaluationEnvironment, 5000);

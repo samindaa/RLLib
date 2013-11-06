@@ -73,7 +73,7 @@ class ActorOffPolicy: public ParameterizedFunction<T>
     virtual void initialize() =0;
     virtual void reset() =0;
     virtual void update(const Representations<T>* phi_t, const Action* a_t, double const& rho_t,
-        double const& gamma_t, double delta_t) =0;
+        const double& delta_t) =0;
     virtual PolicyDistribution<T>* policy() const =0;
     virtual const Action* proposeAction(const Representations<T>* phi) =0;
     virtual double pi(const Action* a) const =0;

@@ -56,7 +56,7 @@ class OffPolicyTD: public Predictor<T>, public LinearLearner<T>
     {
     }
     virtual double update(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& rho_t,
-        const double& gamma_t, double r_tp1, double z_tp1) =0;
+        double r_tp1, double z_tp1) =0;
 
 };
 

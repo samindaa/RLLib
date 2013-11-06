@@ -43,7 +43,7 @@ void OnOffPolicyPredictionTest::testTD(FSGAgentState<double, double>* agentState
         break;
     }
     x_t->set(x_tp1);
-    Assert::checkValue(td->weights());
+    Assert::checkValues(td->weights());
   }
 
   double error = distanceToSolution(solution, td->weights());
@@ -79,7 +79,7 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState<double, double>* 
       double pi_t = targetPolicy->pi(stepData.a_t);
       double b_t = behaviorPolicy->pi(stepData.a_t);
       double rho_t = pi_t / b_t;
-      gtd->update(phi_t, phi_tp1, rho_t, problem->gamma(), stepData.r_tp1, 0.0);
+      gtd->update(phi_t, phi_tp1, rho_t, stepData.r_tp1, 0.0);
     }
     if (stepData.s_tp1->v()->empty())
     {
@@ -90,7 +90,7 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState<double, double>* 
         break;
     }
     phi_t->set(phi_tp1);
-    Assert::checkValue(gtd->weights());
+    Assert::checkValues(gtd->weights());
   }
 
   double error = distanceToSolution(solution, gtd->weights());

@@ -41,27 +41,27 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
     Policy<T>* acting;
     StateToStateAction<T, O>* toStateAction;
     Sarsa<T>* sarsa;
-    SparseVector<T>* xa_t;
+    Vector<T>* xa_t;
 
   public:
     SarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction, Sarsa<T>* sarsa) :
-        acting(acting), toStateAction(toStateAction), sarsa(sarsa), xa_t(
-            new SVector<T>(toStateAction->dimension()))
+        acting(acting), toStateAction(toStateAction), sarsa(sarsa), xa_t(0)
     {
     }
 
     virtual ~SarsaControl()
     {
-      delete xa_t;
+      if (xa_t)
+        delete xa_t;
     }
 
     const Action* initialize(const Vector<O>* x)
     {
       sarsa->initialize();
-      const Representations<T>* phi_t = toStateAction->stateActions(x);
-      const Action* a_t = Policies::sampleAction(acting, phi_t);
-      xa_t->set(phi_t->at(a_t));
-      return a_t;
+      const Representations<T>* phi = toStateAction->stateActions(x);
+      const Action* a = Policies::sampleAction(acting, phi);
+      Vectors<T>::bufferedCopy(phi->at(a), xa_t);
+      return a;
     }
 
     const Action* step(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
@@ -72,6 +72,7 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
       const Vector<T>* xa_tp1 = phi_tp1->at(a_tp1);
       sarsa->update(xa_t, xa_tp1, r_tp1);
       xa_t->set(xa_tp1);
+      Vectors<T>::bufferedCopy(xa_tp1, xa_t);
       return a_tp1;
     }
 
@@ -112,7 +113,7 @@ template<class T, class O>
 class ExpectedSarsaControl: public SarsaControl<T, O>
 {
   protected:
-    SparseVector<T>* phi_bar_tp1;
+    Vector<T>* phi_bar_tp1;
     ActionList* actions;
     typedef SarsaControl<T, O> super;
   public:
@@ -166,22 +167,23 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
 
     StateToStateAction<T, O>* toStateAction;
     GQ<T>* gq;
-    SparseVector<T>* phi_t;
-    SparseVector<T>* phi_bar_tp1;
+    Vector<T>* phi_t;
+    Vector<T>* phi_bar_tp1;
 
   public:
     GreedyGQ(Policy<T>* target, Policy<T>* behavior, ActionList* actions,
         StateToStateAction<T, O>* toStateAction, GQ<T>* gq) :
         rho_t(0), target(target), behavior(behavior), actions(actions), toStateAction(
-            toStateAction), gq(gq), phi_t(new SVector<T>(toStateAction->dimension())), phi_bar_tp1(
-            new SVector<T>(toStateAction->dimension()))
+            toStateAction), gq(gq), phi_t(0), phi_bar_tp1(0)
     {
     }
 
     virtual ~GreedyGQ()
     {
-      delete phi_t;
-      delete phi_bar_tp1;
+      if (phi_t)
+        delete phi_t;
+      if (phi_t)
+        delete phi_bar_tp1;
     }
 
     const Action* initialize(const Vector<O>* x)
@@ -189,9 +191,10 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       gq->initialize();
       const Representations<T>* phi = toStateAction->stateActions(x);
       target->update(phi);
-      const Action* a_t = Policies::sampleAction(behavior, phi);
-      phi_t->set(phi->at(a_t));
-      return a_t;
+      const Action* a = Policies::sampleAction(behavior, phi);
+      Vectors<T>::bufferedCopy(phi->at(a), phi_t);
+      Vectors<T>::bufferedCopy(phi_t, phi_bar_tp1);
+      return a;
     }
 
     virtual double computeRho(const Action* a_t)
@@ -202,7 +205,6 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
     const Action* step(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-
       rho_t = computeRho(a_t);
 
       const Representations<T>* xas_tp1 = toStateAction->stateActions(x_tp1);
@@ -279,7 +281,7 @@ class AbstractActorOffPolicy: public ActorOffPolicy<T, O>
   protected:
     bool initialized;
     PolicyDistribution<T>* targetPolicy;
-    SparseVectors<T>* u;
+    Vectors<T>* u;
   public:
     AbstractActorOffPolicy(PolicyDistribution<T>* targetPolicy) :
         initialized(false), targetPolicy(targetPolicy), u(targetPolicy->parameters())
@@ -332,14 +334,14 @@ template<class T, class O>
 class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T, O>
 {
   protected:
-    double alpha_u, gamma_t, lambda;
-    Traces<T>* e;
+    double alpha_u, gamma, lambda;
+    Traces<T>* e_u;
     typedef AbstractActorOffPolicy<T, O> super;
   public:
-    ActorLambdaOffPolicy(const double& alpha_u, const double& gamma_t, const double& lambda,
-        PolicyDistribution<T>* targetPolicy, Traces<T>* e) :
-        AbstractActorOffPolicy<T, O>(targetPolicy), alpha_u(alpha_u), gamma_t(gamma_t), lambda(
-            lambda), e(e)
+    ActorLambdaOffPolicy(const double& alpha_u, const double& gamma/*not used*/,
+        const double& lambda, PolicyDistribution<T>* targetPolicy, Traces<T>* e) :
+        AbstractActorOffPolicy<T, O>(targetPolicy), alpha_u(alpha_u), gamma(gamma), lambda(lambda), e_u(
+            e)
     {
     }
 
@@ -351,26 +353,26 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T, O>
     void initialize()
     {
       super::initialize();
-      e->clear();
+      e_u->clear();
     }
 
     void update(const Representations<T>* phi_t, const Action* a_t, double const& rho_t,
-        double const& gamma_t, double delta_t)
+        const double& delta_t)
     {
       assert(super::initialized);
-      const SparseVectors<T>& gradLog = super::targetPolicy->computeGradLog(phi_t, a_t);
-      for (unsigned int i = 0; i < e->dimension(); i++)
+      const Vectors<T>& gradLog = super::targetPolicy->computeGradLog(phi_t, a_t);
+      for (int i = 0; i < e_u->dimension(); i++)
       {
-        e->at(i)->update(gamma_t * lambda, gradLog[i]);
-        e->at(i)->multiplyToSelf(rho_t);
-        super::u->at(i)->addToSelf(alpha_u * delta_t, e->at(i)->vect());
+        e_u->at(i)->update(lambda, gradLog[i]);
+        e_u->at(i)->multiplyToSelf(rho_t);
+        super::u->at(i)->addToSelf(alpha_u * delta_t, e_u->at(i)->vect());
       }
     }
 
     void reset()
     {
       super::reset();
-      e->clear();
+      e_u->clear();
     }
 };
 
@@ -381,51 +383,50 @@ class OffPAC: public OffPolicyControlLearner<T, O>
     double rho_t, delta_t;
   protected:
     Policy<T>* behavior;
-    GTDLambda<T>* critic;
+    OffPolicyTD<T>* critic;
     ActorOffPolicy<T, O>* actor;
     StateToStateAction<T, O>* toStateAction;
     Projector<T, O>* projector;
-    double gamma_t;
-    SparseVector<T>* phi_t;
-    SparseVector<T>* phi_tp1;
+    Vector<T>* phi_t;
 
   public:
-    OffPAC(Policy<T>* behavior, GTDLambda<T>* critic, ActorOffPolicy<T, O>* actor,
-        StateToStateAction<T, O>* toStateAction, Projector<T, O>* projector, const double& gamma_t) :
+    OffPAC(Policy<T>* behavior, OffPolicyTD<T>* critic, ActorOffPolicy<T, O>* actor,
+        StateToStateAction<T, O>* toStateAction, Projector<T, O>* projector) :
         rho_t(0), delta_t(0), behavior(behavior), critic(critic), actor(actor), toStateAction(
-            toStateAction), projector(projector), gamma_t(gamma_t), phi_t(
-            new SVector<T>(projector->dimension())), phi_tp1(new SVector<T>(projector->dimension()))
+            toStateAction), projector(projector), phi_t(0)
     {
     }
 
     virtual ~OffPAC()
     {
-      delete phi_t;
-      delete phi_tp1;
+      if (phi_t)
+        delete phi_t;
     }
 
-    const Action* initialize(const Vector<O>* x_0)
+    const Action* initialize(const Vector<O>* x)
     {
       critic->initialize();
       actor->initialize();
-      return Policies::sampleAction(behavior, toStateAction->stateActions(x_0));
+      const Representations<T>* phi = toStateAction->stateActions(x);
+      const Action* a = Policies::sampleAction(behavior, phi);
+      Vectors<T>::bufferedCopy(phi->at(a), phi_t);
+      return a;
     }
 
     const Action* step(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-      phi_t->set(projector->project(x_t));
-      phi_tp1->set(projector->project(x_tp1));
-
       const Representations<T>* xas_t = toStateAction->stateActions(x_t);
       actor->policy()->update(xas_t);
       behavior->update(xas_t);
       rho_t = actor->pi(a_t) / behavior->pi(a_t);
-
       Boundedness::checkValue(rho_t);
-      delta_t = critic->update(phi_t, phi_tp1, rho_t, gamma_t, r_tp1, z_tp1);
+
+      phi_t->set(projector->project(x_t));
+      const Vector<T>* phi_tp1 = projector->project(x_tp1);
+      delta_t = critic->update(phi_t, phi_tp1, rho_t, r_tp1, z_tp1);
       Boundedness::checkValue(delta_t);
-      actor->update(xas_t, a_t, rho_t, gamma_t, delta_t);
+      actor->update(xas_t, a_t, rho_t, delta_t);
 
       return Policies::sampleAction(behavior, toStateAction->stateActions(x_tp1));
     }
@@ -474,7 +475,7 @@ class Actor: public ActorOnPolicy<T, O>
     bool initialized;
     double alpha_u;
     PolicyDistribution<T>* policyDistribution;
-    SparseVectors<T>* u;
+    Vectors<T>* u;
 
   public:
     Actor(const double& alpha_u, PolicyDistribution<T>* policyDistribution) :
@@ -497,8 +498,8 @@ class Actor: public ActorOnPolicy<T, O>
     void update(const Representations<T>* phi_t, const Action* a_t, double delta)
     {
       assert(initialized);
-      const SparseVectors<T>& gradLog = policyDistribution->computeGradLog(phi_t, a_t);
-      for (unsigned int i = 0; i < gradLog.dimension(); i++)
+      const Vectors<T>& gradLog = policyDistribution->computeGradLog(phi_t, a_t);
+      for (int i = 0; i < gradLog.dimension(); i++)
         u->at(i)->addToSelf(alpha_u * delta, gradLog[i]);
     }
 
@@ -555,8 +556,8 @@ class ActorLambda: public Actor<T, O>
     void update(const Representations<T>* phi_t, const Action* a_t, double delta)
     {
       assert(super::initialized);
-      const SparseVectors<T>& gradLog = super::policy()->computeGradLog(phi_t, a_t);
-      for (unsigned int i = 0; i < super::u->dimension(); i++)
+      const Vectors<T>& gradLog = super::policy()->computeGradLog(phi_t, a_t);
+      for (int i = 0; i < super::u->dimension(); i++)
       {
         e->at(i)->update(gamma * lambda, gradLog[i]);
         super::u->at(i)->addToSelf(super::alpha_u * delta, e->at(i)->vect());
@@ -569,20 +570,20 @@ class ActorNatural: public Actor<T, O>
 {
   protected:
     typedef Actor<T, O> super;
-    SparseVectors<T>* w;
+    Vectors<T>* w;
     double alpha_v;
   public:
     ActorNatural(const double& alpha_u, const double& alpha_v,
         PolicyDistribution<T>* policyDistribution) :
-        Actor<T, O>(alpha_u, policyDistribution), w(new SparseVectors<T>()), alpha_v(alpha_v)
+        Actor<T, O>(alpha_u, policyDistribution), w(new Vectors<T>()), alpha_v(alpha_v)
     {
-      for (unsigned int i = 0; i < super::u->dimension(); i++)
+      for (int i = 0; i < super::u->dimension(); i++)
         w->push_back(new SVector<T>(super::u->at(i)->dimension()));
     }
 
     virtual ~ActorNatural()
     {
-      for (typename SparseVectors<T>::iterator iter = w->begin(); iter != w->end(); ++iter)
+      for (typename Vectors<T>::iterator iter = w->begin(); iter != w->end(); ++iter)
         delete *iter;
       delete w;
     }
@@ -590,12 +591,12 @@ class ActorNatural: public Actor<T, O>
     void update(const Representations<T>* phi_t, const Action* a_t, double delta)
     {
       assert(super::initialized);
-      const SparseVectors<T>& gradLog = super::policy()->computeGradLog(phi_t, a_t);
+      const Vectors<T>& gradLog = super::policy()->computeGradLog(phi_t, a_t);
       double advantageValue = 0;
       // Calculate the advantage function
-      for (unsigned int i = 0; i < w->dimension(); i++)
+      for (int i = 0; i < w->dimension(); i++)
         advantageValue += gradLog[i]->dot(w->at(i));
-      for (unsigned int i = 0; i < w->dimension(); i++)
+      for (int i = 0; i < w->dimension(); i++)
       {
         // Update the weights of the advantage function
         w->at(i)->addToSelf(alpha_v * (delta - advantageValue), gradLog[i]);
@@ -711,8 +712,8 @@ class ActorCritic: public AbstractActorCritic<T, O>
 {
   protected:
     typedef AbstractActorCritic<T, O> super;
-    SparseVector<T>* phi_t;
-    SparseVector<T>* phi_tp1;
+    Vector<T>* phi_t;
+    Vector<T>* phi_tp1;
   public:
     ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor, Projector<T, O>* projector,
         StateToStateAction<T, O>* toStateAction) :

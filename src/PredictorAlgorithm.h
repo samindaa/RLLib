@@ -35,13 +35,14 @@ class TD: public OnPolicyTD<T>
 {
   protected:
     double delta_t;
+    double alpha_v;
+    double gamma;
+    Vector<T>* v;
     bool initialized;
-    double alpha_v, gamma;
-    SparseVector<T>* v;
   public:
     TD(const double& alpha_v, const double& gamma, const int& nbFeatures) :
-        delta_t(0), initialized(false), alpha_v(alpha_v), gamma(gamma), v(
-            new SVector<T>(nbFeatures))
+        delta_t(0), alpha_v(alpha_v), gamma(gamma), v(new PVector<T>(nbFeatures)), initialized(
+            false)
     {
     }
     virtual ~TD()
@@ -197,16 +198,16 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
     bool initialized;
     double alpha, gamma, lambda;
     Trace<T>* e;
-    SparseVector<T>* v;
+    Vector<T>* q;
   public:
     Sarsa(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
         v_t(0), v_tp1(0), delta(0), initialized(false), alpha(alpha), gamma(gamma), lambda(lambda), e(
-            e), v(new SVector<T>(e->vect()->dimension()))
+            e), q(new PVector<T>(e->vect()->dimension()))
     {
     }
     virtual ~Sarsa()
     {
-      delete v;
+      delete q;
     }
 
   public:
@@ -226,40 +227,40 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
     {
       assert(initialized);
 
-      v_t = v->dot(phi_t);
-      v_tp1 = v->dot(phi_tp1);
+      v_t = q->dot(phi_t);
+      v_tp1 = q->dot(phi_tp1);
       e->update(gamma * lambda, phi_t);
       updateAlpha(phi_t, phi_tp1, r_tp1);
       delta = r_tp1 + gamma * v_tp1 - v_t;
-      v->addToSelf(alpha * delta, e->vect());
+      q->addToSelf(alpha * delta, e->vect());
       return delta;
     }
 
     void reset()
     {
       e->clear();
-      v->clear();
+      q->clear();
       initialized = false;
     }
 
     double predict(const Vector<T>* phi_sa) const
     {
-      return v->dot(phi_sa);
+      return q->dot(phi_sa);
     }
 
     void persist(const std::string& f) const
     {
-      v->persist(f);
+      q->persist(f);
     }
 
     void resurrect(const std::string& f)
     {
-      v->resurrect(f);
+      q->resurrect(f);
     }
 
     const Vector<T>* weights() const
     {
-      return v;
+      return q;
     }
 };
 
@@ -268,16 +269,16 @@ class SarsaAlphaBound: public Sarsa<T>
 {
   private:
     typedef Sarsa<T> super;
-    SparseVector<T>* gammaPhi_tp1MinusPhi_t;
+    SparseVector<T>* gammaXtp1MinusX;
   public:
     SarsaAlphaBound(const double& gamma, const double& lambda, Trace<T>* e) :
-        Sarsa<T>(1.0f/*According to the paper*/, gamma, lambda, e), gammaPhi_tp1MinusPhi_t(
+        Sarsa<T>(1.0f/*According to the paper*/, gamma, lambda, e), gammaXtp1MinusX(
             new SVector<T>(e->vect()->dimension()))
     {
     }
     virtual ~SarsaAlphaBound()
     {
-      delete gammaPhi_tp1MinusPhi_t;
+      delete gammaXtp1MinusX;
     }
 
     void reset()
@@ -289,9 +290,9 @@ class SarsaAlphaBound: public Sarsa<T>
     void updateAlpha(const Vector<T>* phi_t, const Vector<T>* phi_tp1, double r_tp1)
     {
       // Update the adaptive step-size
-      double b = std::abs(
+      double b = std::fabs(
           super::e->vect()->dot(
-              gammaPhi_tp1MinusPhi_t->set(phi_tp1)->mapMultiplyToSelf(super::gamma)->subtractToSelf(
+              gammaXtp1MinusX->set(phi_tp1)->mapMultiplyToSelf(super::gamma)->subtractToSelf(
                   phi_t)));
       if (b > 0.0f)
         super::alpha = std::min(super::alpha, 1.0f / b);
@@ -310,15 +311,15 @@ class GQ: public Predictor<T>, public LinearLearner<T>
   protected:
     double alpha_v, alpha_w, beta_tp1, lambda_t;
     Trace<T>* e;
-    SparseVector<T>* v;
-    SparseVector<T>* w;
+    Vector<T>* v;
+    Vector<T>* w;
 
   public:
     GQ(const double& alpha_v, const double& alpha_w, const double& beta_tp1, const double& lambda_t,
         Trace<T>* e) :
         delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), beta_tp1(beta_tp1), lambda_t(
-            lambda_t), e(e), v(new SVector<T>(e->vect()->dimension())), w(
-            new SVector<T>(e->vect()->dimension()))
+            lambda_t), e(e), v(new PVector<T>(e->vect()->dimension())), w(
+            new PVector<T>(e->vect()->dimension()))
     {
     }
 
@@ -393,15 +394,15 @@ class GTDLambda: public OnPolicyTD<T>, public GVF<T>
   protected:
     double alpha_v, alpha_w, gamma_t, lambda_t;
     Trace<T>* e;
-    SparseVector<T>* v;
-    SparseVector<T>* w;
+    Vector<T>* v;
+    Vector<T>* w;
 
   public:
     GTDLambda(const double& alpha_v, const double& alpha_w, const double& gamma_t,
         const double& lambda_t, Trace<T>* e) :
         delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), gamma_t(gamma_t), lambda_t(
-            lambda_t), e(e), v(new SVector<T>(e->vect()->dimension())), w(
-            new SVector<T>(e->vect()->dimension()))
+            lambda_t), e(e), v(new PVector<T>(e->vect()->dimension())), w(
+            new PVector<T>(e->vect()->dimension()))
     {
     }
 
@@ -443,7 +444,7 @@ class GTDLambda: public OnPolicyTD<T>, public GVF<T>
     }
 
     double update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const double& rho_t,
-        const double& gamma_t, double r_tp1, double z_tp1)
+        double r_tp1, double z_tp1)
     {
       return update(phi_t, phi_tp1, gamma_t, lambda_t, rho_t, r_tp1, z_tp1);
     }

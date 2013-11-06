@@ -89,7 +89,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 2000, 5);
   sim->setTestEpisodesAfterEachRun(true);
@@ -146,7 +146,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 2000, 1);
   //sim->run(5, 5000, 3000);
@@ -203,7 +203,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
       problem->getDiscreteActionList(), 0.01f, 1.0f);
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 8000, 1);
   sim->run();
@@ -259,7 +259,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
-      actor, toStateAction, projector, gamma);
+      actor, toStateAction, projector);
 
   Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 5000, 1);
   sim->run();

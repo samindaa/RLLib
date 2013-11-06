@@ -59,6 +59,7 @@ class Vector
     virtual int dimension() const =0;
     virtual bool empty() const =0;
     virtual double maxNorm() const =0;
+    virtual double l1Norm() const =0;
     virtual double euclideanNorm() const =0;
     virtual double sum() const =0;
 
@@ -91,6 +92,9 @@ class Vector
     virtual Vector<T>* set(const Vector<T>* that, const int& offset) =0;
     virtual Vector<T>* set(const double& value) =0;
 
+    // This is a deep copy of Vector<T>.
+    // The copied object exists even after the parent object is deleted.
+    virtual Vector<T>* copy() const =0;
     // Storage management
     virtual void persist(const std::string& f) const =0;
     virtual void resurrect(const std::string& f) =0;
@@ -170,6 +174,14 @@ class DenseVector: public Vector<T>
         }
       }
       return maxv;
+    }
+
+    double l1Norm() const
+    {
+      double result = 0.0;
+      for (int i = 0; i < capacity; i++)
+        result += std::fabs(data[i]);
+      return result;
     }
 
     double sum() const
@@ -559,6 +571,14 @@ class SparseVector: public Vector<T>
       return maxv;
     }
 
+    double l1Norm() const
+    {
+      double result = 0.0;
+      for (int position = 0; position < nbActive; position++)
+        result += fabs(values[position]);
+      return result;
+    }
+
     T* getValues()
     {
       return values;
@@ -669,34 +689,6 @@ class SparseVector: public Vector<T>
     template<class O> friend std::ostream& operator<<(std::ostream& out,
         const SparseVector<O>& that);
 
-    // Static
-    inline static void absToSelf(SparseVector<T>* that)
-    {
-      for (T* position = that->values; position < that->values + that->nbActive; ++position)
-        *position = fabs(*position);
-    }
-
-    inline static void multiplySelfByExponential(SparseVector<T>* result, const double& factor,
-        const SparseVector<T>* other, const double& min)
-    {
-      const int* activeIndexes = other->nonZeroIndexes();
-      for (int i = 0; i < other->nonZeroElements(); i++)
-      {
-        int index = activeIndexes[i];
-        result->setEntry(index,
-            std::max(min, result->getEntry(index) * std::exp(factor * other->getEntry(index))));
-      }
-    }
-
-    inline static void positiveMaxToSelf(SparseVector<T>* result, const SparseVector<T>* other)
-    {
-      const int* activeIndexes = other->nonZeroIndexes();
-      for (int i = 0; i < other->nonZeroElements(); i++)
-      {
-        int index = activeIndexes[i];
-        result->setEntry(index, std::max(result->getEntry(index), other->getEntry(index)));
-      }
-    }
 };
 
 template<class T>
@@ -845,7 +837,7 @@ class PVector: public DenseVector<T>
             this->getValues());
         return this;
       }
-
+      // FixMe: This is very expensive for SVector<T>
       for (int i = 0; i < that->dimension(); i++)
         super::data[i] = that->getEntry(i);
       return this;
@@ -860,6 +852,11 @@ class PVector: public DenseVector<T>
     double euclideanNorm() const
     {
       return sqrt(this->dot(this));
+    }
+
+    Vector<T>* copy() const
+    {
+      return new PVector<T>(*this);
     }
 };
 
@@ -1034,99 +1031,109 @@ class SVector: public SparseVector<T>
       return sqrt(this->dot(this));
     }
 
+    Vector<T>* copy() const
+    {
+      return new SVector<T>(*this);
+    }
+
 };
 
 // ================================================================================================
 template<class T>
-class SparseVectors
+class Vectors
 {
   protected:
-    typename std::vector<SparseVector<T>*>* vectors;
+    typename std::vector<Vector<T>*> vectors;
   public:
-    typedef typename std::vector<SparseVector<T>*>::iterator iterator;
-    typedef typename std::vector<SparseVector<T>*>::const_iterator const_iterator;
+    typedef typename std::vector<Vector<T>*>::iterator iterator;
+    typedef typename std::vector<Vector<T>*>::const_iterator const_iterator;
 
-    SparseVectors() :
-        vectors(new std::vector<SparseVector<T>*>())
+    Vectors()
     {
     }
 
-    ~SparseVectors()
+    ~Vectors()
     {
-      vectors->clear();
-      delete vectors;
+      vectors.clear();
     }
 
-    SparseVectors(const SparseVectors<T>& that) :
-        vectors(new std::vector<SparseVector<T>*>())
+    Vectors(const Vectors<T>& that)
     {
-      for (typename SparseVectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
-        vectors->push_back(*iter);
+      for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+        vectors.push_back(*iter);
     }
 
-    SparseVectors<T>& operator=(const SparseVectors<T>& that)
+    Vectors<T>& operator=(const Vectors<T>& that)
     {
       if (this != that)
       {
-        vectors->clear();
-        for (typename SparseVectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
-          vectors->push_back(*iter);
+        vectors.clear();
+        for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+          vectors.push_back(*iter);
       }
       return *this;
     }
 
-    void push_back(SparseVector<T>* vector)
+    void push_back(Vector<T>* vector)
     {
-      vectors->push_back(vector);
+      vectors.push_back(vector);
     }
 
     iterator begin()
     {
-      return vectors->begin();
+      return vectors.begin();
     }
 
     const_iterator begin() const
     {
-      return vectors->begin();
+      return vectors.begin();
     }
 
     iterator end()
     {
-      return vectors->end();
+      return vectors.end();
     }
 
     const_iterator end() const
     {
-      return vectors->end();
+      return vectors.end();
     }
 
     void clear()
     {
-      for (typename SparseVectors<T>::iterator iter = begin(); iter != end(); ++iter)
+      for (typename Vectors<T>::iterator iter = begin(); iter != end(); ++iter)
         (*iter)->clear();
     }
 
-    unsigned int dimension() const
+    int dimension() const
     {
-      return vectors->size();
+      return vectors.size();
     }
 
-    const SparseVector<T>* operator[](const unsigned index) const
+    Vector<T>* operator[](const int& index)
     {
-      assert(index >= 0 && index < dimension());
-      return vectors->at(index);
+      return vectors.at(index);
     }
 
-    SparseVector<T>* at(const unsigned index) const
+    const Vector<T>* operator[](const int& index) const
     {
-      assert(index >= 0 && index < dimension());
-      return vectors->at(index);
+      return vectors.at(index);
+    }
+
+    Vector<T>* at(const int& index)
+    {
+      return vectors.at(index);
+    }
+
+    const Vector<T>* at(const int& index) const
+    {
+      return vectors.at(index);
     }
 
     void persist(std::string f) const
     {
       int i = 0;
-      for (typename SparseVectors<T>::const_iterator iter = begin(); iter != end(); ++iter)
+      for (typename Vectors<T>::const_iterator iter = begin(); iter != end(); ++iter)
       {
         std::string fi(f);
         std::stringstream ss;
@@ -1140,7 +1147,7 @@ class SparseVectors
     void resurrect(std::string f) const
     {
       int i = 0;
-      for (typename SparseVectors<T>::const_iterator iter = begin(); iter != end(); ++iter)
+      for (typename Vectors<T>::const_iterator iter = begin(); iter != end(); ++iter)
       {
         std::string fi(f);
         std::stringstream ss;
@@ -1151,6 +1158,104 @@ class SparseVectors
       }
     }
 
+    // Static
+    inline static Vector<T>* absToSelf(Vector<T>* other)
+    {
+      SparseVector<T>* that = dynamic_cast<SparseVector<T>*>(other);
+      if (that)
+      {
+        T* values = that->getValues();
+        for (T* position = values; position < values + that->nonZeroElements(); ++position)
+          *position = fabs(*position);
+      }
+      else
+      {
+        T* values = other->getValues();
+        for (T* position = values; position < values + other->dimension(); ++position)
+          *position = fabs(*position);
+      }
+      return other;
+    }
+
+    inline static void multiplySelfByExponential(SparseVector<T>* result, const double& factor,
+        const SparseVector<T>* other, const double& min)
+    {
+      const int* activeIndexes = other->nonZeroIndexes();
+      for (int i = 0; i < other->nonZeroElements(); i++)
+      {
+        int index = activeIndexes[i];
+        result->setEntry(index,
+            std::max(min, result->getEntry(index) * std::exp(factor * other->getEntry(index))));
+      }
+    }
+
+    inline static void positiveMaxToSelf(SparseVector<T>* result, const SparseVector<T>* other)
+    {
+      const int* activeIndexes = other->nonZeroIndexes();
+      for (int i = 0; i < other->nonZeroElements(); i++)
+      {
+        int index = activeIndexes[i];
+        result->setEntry(index, std::max(result->getEntry(index), other->getEntry(index)));
+      }
+    }
+
+    static void multiplySelfByExponential(DenseVector<T>* result, const double& factor,
+        const SparseVector<T>* other, const double& min)
+    {
+      const int* activeIndexes = other->nonZeroIndexes();
+      T* resultValues = result->getValues();
+      const T* otherValues = other->getValues();
+      for (int i = 0; i < other->nonZeroElements(); i++)
+      {
+        int index = activeIndexes[i];
+        resultValues[index] = std::max(min,
+            resultValues[index] * std::exp(factor * otherValues[i]));
+      }
+    }
+
+    static void multiplySelfByExponential(DenseVector<T>* result, const double& factor,
+        const Vector<T>* other, const double& min)
+    {
+      const SparseVector<T>* that = dynamic_cast<const SparseVector<T>*>(other);
+      if (that)
+        multiplySelfByExponential(result, factor, that, min);
+      else
+      {
+        T* resultValues = result->getValues();
+        for (int i = 0; i < result->dimension(); i++)
+          resultValues[i] = std::max(min, resultValues[i] * std::exp(factor * other->getEntry(i)));
+      }
+    }
+
+    static void multiplySelfByExponential(DenseVector<T>* result, const double& factor,
+        const Vector<T>* other)
+    {
+      multiplySelfByExponential(result, factor, other, 0);
+    }
+
+    static bool isNull(const Vector<T>* v)
+    {
+      if (!v)
+        return true;
+      const SparseVector<T>* that = dynamic_cast<const SparseVector<T>*>(v);
+      if (that)
+        return that->nonZeroElements() == 0;
+      const T* values = v->getValues();
+      for (int i = 0; i < v->dimension(); i++)
+      {
+        if (values[i] != 0)
+          return false;
+      }
+      return true;
+    }
+
+    static Vector<T>* bufferedCopy(const Vector<T>* source, Vector<T>*& target)
+    {
+      Vector<T>* result = target ? target : source->copy();
+      result->set(source);
+      target = result;
+      return target;
+    }
 };
 
 // Global implementations
@@ -1166,7 +1271,7 @@ std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that)
 template<class T>
 std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that)
 {
-  out << "SparseVector index=";
+  out << "SparseVector(" << that.nbActive << ") index=";
   for (int index = 0; index < that.indexesPositionLength; index++)
     out << that.indexesPosition[index] << " ";
   out << std::endl;

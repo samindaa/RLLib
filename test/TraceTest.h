@@ -103,17 +103,17 @@ class TraceTest: public TraceTestBase
     {
       trace.update(lambda, s01);
       SVector<double> a(s01);
-      Assert::checkVectorEquals(trace.vect(), &a);
+      Assert::assertEquals(trace.vect(), &a);
       for (int i = 0; i < 1000; i++)
       {
         trace.update(lambda, s02);
-        Assert::pass(VectorsTestsUtils::checkConsistency(trace.vect()));
+        Assert::assertPasses(VectorsTestsUtils::checkConsistency(trace.vect()));
       }
-      Assert::equals(s02->nonZeroElements(),
+      Assert::assertObjectEquals(s02->nonZeroElements(),
           ((const SparseVector<double>*) trace.vect())->nonZeroElements());
       SVector<double> expectedVec(trace.vect()->dimension());
       expectedVec.set(s02, expected);
-      Assert::checkVectorEquals(trace.vect(), &expectedVec, 0.00001);
+      Assert::assertEquals(trace.vect(), &expectedVec, 0.00001);
     }
 
     void testTrace(const double& lambda, TraceDoubleType& trace, const double& expected)
@@ -157,7 +157,7 @@ class TraceTest: public TraceTestBase
           {
             //std::cout << "[" << Simulator<T, O>::Event::episodeR << ","
             //    << Simulator<T, O>::Event::averageTimePerStep << "] ";
-            Assert::fail(Simulator<T, O>::Event::episodeR < minEpisodeReward);
+            Assert::assertFails(Simulator<T, O>::Event::episodeR < minEpisodeReward);
           }
         }
     };
