@@ -65,6 +65,11 @@ class Representations
       phis->at(action->id())->set(phi);
     }
 
+    Vector<T>* at(const Action* action)
+    {
+      return phis->at(action->id());
+    }
+
     const Vector<T>* at(const Action* action) const
     {
       return phis->at(action->id());

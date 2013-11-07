@@ -60,7 +60,7 @@ class ActorCriticOnPolicyOnStateTest: public ActorCriticOnPolicyOnStateTestBase
 class NoStateProblemProjector: public Projector<double, float>
 {
   protected:
-    SparseVector<double>* vec;
+    Vector<double>* vec;
   public:
     NoStateProblemProjector() :
         vec(new SVector<double>(1, 1))

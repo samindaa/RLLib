@@ -413,12 +413,13 @@ class RandomWalk: public FiniteStateGraph
 };
 
 template<class T = double, class O = double>
-class FSGAgentState: public Projector<T, O>
+class FSGAgentState: public StateToStateAction<T, O>
 {
   protected:
     FiniteStateGraph* graph;
-    SparseVector<T>* featureState;
+    Vector<T>* featureState;
     std::map<GraphState*, int>* stateIndexes;
+    Representations<T>* phis;
   public:
     FSGAgentState(FiniteStateGraph* graph) :
         graph(graph), featureState(0), stateIndexes(new std::map<GraphState*, int>)
@@ -429,30 +430,53 @@ class FSGAgentState: public Projector<T, O>
         if ((*iter)->hasNextState())
           stateIndexes->insert(std::make_pair(*iter, stateIndexes->size()));
       }
-      featureState = new SVector<T>(stateIndexes->size(), stateIndexes->size());
+      featureState = new PVector<T>(stateIndexes->size());
+      phis = new Representations<T>(stateIndexes->size() * graph->actions()->dimension(),
+          graph->actions());
     }
 
     ~FSGAgentState()
     {
       delete featureState;
       delete stateIndexes;
+      delete phis;
     }
 
-    const Vector<T>* project(const Vector<O>* x)
+    FiniteStateGraph::StepData step()
     {
+      FiniteStateGraph::StepData stepData = graph->step();
+      const Vector<double>* x = stepData.v_tp1();
       featureState->clear();
-      if (x->empty())
-        return featureState;
-      GraphState* sg = graph->state(x);
-      if (!sg->hasNextState())
-        return featureState;
-      featureState->setEntry(stateIndexes->at(sg), 1.0);
+      if (!x->empty())
+      {
+        GraphState* sg = graph->state(x);
+        if (sg->hasNextState())
+          featureState->setEntry(stateIndexes->at(sg), 1.0);
+      }
+      return stepData;
+    }
+
+    Vector<T>* currentFeatureState() const
+    {
       return featureState;
     }
 
-    const Vector<T>* project(const Vector<O>* x, int h1)
+    const Representations<T>* stateActions(const Vector<O>* x)
     {
-      return project(x);
+      phis->clear();
+      if (x->empty())
+        return phis;
+      GraphState* sg = graph->state(x);
+      for (ActionList::const_iterator a = graph->actions()->begin(); a != graph->actions()->end();
+          ++a)
+        phis->at(*a)->setEntry((*a)->id() * stateIndexes->size() + stateIndexes->at(sg), 1);
+      return phis;
+
+    }
+
+    const ActionList* getActionList() const
+    {
+      return graph->actions();
     }
 
     double vectorNorm() const
@@ -463,6 +487,11 @@ class FSGAgentState: public Projector<T, O>
     int dimension() const
     {
       return stateIndexes->size();
+    }
+
+    const std::map<GraphState*, int>* getStateIndexes() const
+    {
+      return stateIndexes;
     }
 };
 

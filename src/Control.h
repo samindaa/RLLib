@@ -26,6 +26,7 @@
 #include "Vector.h"
 #include "Function.h"
 #include "Policy.h"
+#include "Predictor.h"
 
 namespace RLLib
 {
@@ -43,6 +44,7 @@ class Control: public ParameterizedFunction<T>
     virtual const Action* step(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
         const double& r_tp1, const double& z_tp1) =0;
     virtual const double computeValueFunction(const Vector<O>* x) const =0;
+    virtual const Predictor<T>* predictor() const =0;
 };
 
 template<class T, class O>

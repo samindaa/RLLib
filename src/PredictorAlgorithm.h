@@ -424,7 +424,7 @@ class GTDLambda: public OnPolicyTD<T>, public GVF<T>
     {
       delta_t = r_tp1 + (1.0 - gamma_tp1) * z_tp1 + gamma_tp1 * v->dot(phi_tp1) - v->dot(phi_t);
       e->update(gamma_t * lambda_t, phi_t);
-      e->multiplyToSelf(rho_t);
+      e->vect()->mapMultiplyToSelf(rho_t);
 
       // v
       // part 1

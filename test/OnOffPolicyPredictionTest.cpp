@@ -21,15 +21,17 @@ void OnOffPolicyPredictionTest::testTD(FSGAgentState<double, double>* agentState
     FiniteStateGraph* graph, OnPolicyTD<double>* td, const int& nbEpisodeMax,
     const double& precision)
 {
+  Timer timer;
+  timer.start();
   int nbEpisode = 0;
   const Vector<double>* solution = graph->expectedDiscountedSolution();
-  Vector<double>* x_t = new SVector<double>(agentState->dimension());
-  Vector<double>* x_tp1 = new SVector<double>(agentState->dimension());
+  Vector<double>* x_t = new PVector<double>(agentState->dimension());
+  Vector<double>* x_tp1 = new PVector<double>(agentState->dimension());
   while (distanceToSolution(solution, td->weights()) > precision)
   {
-    FiniteStateGraph::StepData stepData = graph->step();
+    FiniteStateGraph::StepData stepData = agentState->step();
     //x_t->set(agentState->project(stepData.v_t()));
-    x_tp1->set(agentState->project(stepData.v_tp1()));
+    x_tp1->set(agentState->currentFeatureState());
     if (stepData.v_t()->empty())
       td->initialize();
     else
@@ -45,9 +47,11 @@ void OnOffPolicyPredictionTest::testTD(FSGAgentState<double, double>* agentState
     x_t->set(x_tp1);
     Assert::checkValues(td->weights());
   }
+  timer.stop();
 
   double error = distanceToSolution(solution, td->weights());
-  std::cout << "## nbEpisode=" << nbEpisode << " error=" << error << std::endl;
+  std::cout << "## nbEpisode=" << nbEpisode << " error=" << error << " elapsedTime(ms)="
+      << timer.getElapsedTimeInMilliSec() << std::endl;
 
   delete x_t;
   delete x_tp1;
@@ -57,6 +61,8 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState<double, double>* 
     RandomWalk* problem, OffPolicyTD<double>* gtd, const int& nbEpisodeMax, const double& precision,
     const double& targetLeftProbability, const double& behaviourLeftProbability)
 {
+  Timer timer;
+  timer.start();
   int nbEpisode = 0;
   DenseVector<double>* targetDistribution = new PVector<double>(problem->actions()->dimension());
   targetDistribution->at(0) = targetLeftProbability;
@@ -65,13 +71,13 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState<double, double>* 
   Policy<double>* targetPolicy = new ConstantPolicy<double>(problem->actions(), targetDistribution);
 
   const Vector<double>* solution = problem->expectedDiscountedSolution();
-  Vector<double>* phi_t = new SVector<double>(agentState->dimension());
-  Vector<double>* phi_tp1 = new SVector<double>(agentState->dimension());
+  Vector<double>* phi_t = new PVector<double>(agentState->dimension());
+  Vector<double>* phi_tp1 = new PVector<double>(agentState->dimension());
   while (distanceToSolution(solution, gtd->weights()) > precision)
   {
-    FiniteStateGraph::StepData stepData = problem->step();
+    FiniteStateGraph::StepData stepData = agentState->step();
     //phi_t->set(agentState->project(stepData.v_t()));
-    phi_tp1->set(agentState->project(stepData.v_tp1()));
+    phi_tp1->set(agentState->currentFeatureState());
     if (stepData.v_t()->empty())
       gtd->initialize();
     else
@@ -92,9 +98,11 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState<double, double>* 
     phi_t->set(phi_tp1);
     Assert::checkValues(gtd->weights());
   }
+  timer.stop();
 
   double error = distanceToSolution(solution, gtd->weights());
-  std::cout << "## nbEpisode=" << nbEpisode << " error=" << error << std::endl;
+  std::cout << "## nbEpisode=" << nbEpisode << " error=" << error << " elapsedTime(ms)="
+      << timer.getElapsedTimeInMilliSec() << std::endl;
 
   delete targetDistribution;
   delete phi_t;

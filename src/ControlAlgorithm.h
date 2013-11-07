@@ -98,6 +98,11 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
       return v_s;
     }
 
+    const Predictor<T>* predictor() const
+    {
+      return sarsa;
+    }
+
     void persist(const std::string& f) const
     {
       sarsa->persist(f);
@@ -247,10 +252,16 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       return v_s;
     }
 
+    const Predictor<T>* predictor() const
+    {
+      return gq;
+    }
+
     void persist(const std::string& f) const
     {
       gq->persist(f);
     }
+
     void resurrect(const std::string& f)
     {
       gq->resurrect(f);
@@ -364,7 +375,7 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T, O>
       for (int i = 0; i < e_u->dimension(); i++)
       {
         e_u->at(i)->update(lambda, gradLog[i]);
-        e_u->at(i)->multiplyToSelf(rho_t);
+        e_u->at(i)->vect()->mapMultiplyToSelf(rho_t);
         super::u->at(i)->addToSelf(alpha_u * delta_t, e_u->at(i)->vect());
       }
     }
@@ -445,6 +456,11 @@ class OffPAC: public OffPolicyControlLearner<T, O>
     const double computeValueFunction(const Vector<O>* x) const
     {
       return critic->predict(projector->project(x));
+    }
+
+    const Predictor<T>* predictor() const
+    {
+      return critic;
     }
 
     void persist(const std::string& f) const
@@ -683,6 +699,11 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
     const double computeValueFunction(const Vector<O>* x) const
     {
       return critic->predict(projector->project(x));
+    }
+
+    const Predictor<T>* predictor() const
+    {
+      return critic;
     }
 
     void persist(const std::string& f) const
