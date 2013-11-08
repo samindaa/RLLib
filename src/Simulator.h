@@ -190,7 +190,7 @@ class Simulator
         ++timeStep;
         episodeR += step->r_tp1;
         episodeZ += step->z_tp1;
-        endingOfEpisode = step->endOfEpisode || (timeStep == maxEpisodeTimeSteps);
+        endingOfEpisode = step->endOfEpisode;// || (timeStep == maxEpisodeTimeSteps);
         timer.start();
         a_t =
             evaluate ?
@@ -270,6 +270,7 @@ class Simulator
           testSimulator->run();
           delete testSimulator;
         }
+        Probabilistic::srand(0); //<< fixMe
       }
 
     }

@@ -114,7 +114,8 @@ void MountainCarTest::testSarsaMountainCar()
 {
   Probabilistic::srand(0);
   Environment<float>* problem = new MountainCar<float>;
-  Projector<float>* projector = new TileCoderHashing<float>(10000, 10, true);
+  Hashing* hashing = new UNH;
+  Projector<float>* projector = new TileCoderHashing<float>(10000, 10, true, hashing);
   StateToStateAction<float>* toStateAction = new StateActionTilings<float>(projector,
       problem->getDiscreteActionList());
   Trace<float>* e = new RTrace<float>(projector->dimension());
@@ -132,6 +133,7 @@ void MountainCarTest::testSarsaMountainCar()
   sim->computeValueFunction();
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete e;
@@ -612,21 +614,21 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
 
 void MountainCarTest::run()
 {
-  //testSarsaTabularActionMountainCar();
-  //testOnPolicyBoltzmannRTraceTabularActionCar();
+  testSarsaTabularActionMountainCar();
+  testOnPolicyBoltzmannRTraceTabularActionCar();
   testSarsaMountainCar();
 
-  //testSarsaAdaptiveMountainCar();
-  //testExpectedSarsaMountainCar();
-  //testGreedyGQOnPolicyMountainCar();
-  //testGreedyGQMountainCar();
-  //testSoftmaxGQOnMountainCar();
+  testSarsaAdaptiveMountainCar();
+  testExpectedSarsaMountainCar();
+  testGreedyGQOnPolicyMountainCar();
+  testGreedyGQMountainCar();
+  testSoftmaxGQOnMountainCar();
   testOffPACMountainCar();
-  //testOffPACOnPolicyMountainCar();
+  testOffPACOnPolicyMountainCar();
 
-  //testOnPolicyBoltzmannATraceCar();
-  //testOnPolicyBoltzmannRTraceCar();
-  //testOnPolicyContinousActionCar();
-  //testOnPolicyBoltzmannATraceNaturalActorCriticCar();
+  testOnPolicyBoltzmannATraceCar();
+  testOnPolicyBoltzmannRTraceCar();
+  testOnPolicyContinousActionCar();
+  testOnPolicyBoltzmannATraceNaturalActorCriticCar();
 }
 

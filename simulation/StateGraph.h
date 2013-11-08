@@ -72,8 +72,8 @@ class FiniteStateGraph
         double r_tp1;
         const Action<double>* a_tp1;
 
-        StepData(const int& stepTime, const GraphState* s_t, const Action<double>* a_t, GraphState* s_tp1,
-            const double& r_tp1, const Action<double>* a_tp1) :
+        StepData(const int& stepTime, const GraphState* s_t, const Action<double>* a_t,
+            GraphState* s_tp1, const double& r_tp1, const Action<double>* a_tp1) :
             stepTime(stepTime), s_t(s_t), a_t(a_t), s_tp1(s_tp1), r_tp1(r_tp1), a_tp1(a_tp1)
         {
         }
@@ -115,8 +115,8 @@ class FiniteStateGraph
   public:
     FiniteStateGraph() :
         O(new GraphState("NULL", std::numeric_limits<int>::min())), X(
-            new Action<double>(std::numeric_limits<int>::max())), stepTime(-1), s_0(0), a_t(0), s_t(0), acting(
-            0), graphStates(0)
+            new Action<double>(std::numeric_limits<int>::max())), stepTime(-1), s_0(0), a_t(0), s_t(
+            0), acting(0), graphStates(0)
     {
       O->setVectorRepresentation(new PVector<double>(0));
     }
@@ -460,17 +460,22 @@ class FSGAgentState: public StateToStateAction<double>
       return featureState;
     }
 
+    const Vector<double>* stateAction(const Vector<double>* x, const Action<double>* a)
+    {
+      GraphState* sg = graph->state(x);
+      phis->at(a)->setEntry(a->id() * stateIndexes->size() + stateIndexes->at(sg), 1);
+      return phis->at(a);
+    }
+
     const Representations<double>* stateActions(const Vector<double>* x)
     {
       phis->clear();
       if (x->empty())
         return phis;
-      GraphState* sg = graph->state(x);
-      for (ActionList<double>::const_iterator a = graph->actions()->begin(); a != graph->actions()->end();
-          ++a)
-        phis->at(*a)->setEntry((*a)->id() * stateIndexes->size() + stateIndexes->at(sg), 1);
+      for (ActionList<double>::const_iterator a = graph->actions()->begin();
+          a != graph->actions()->end(); ++a)
+        stateAction(x, *a);
       return phis;
-
     }
 
     const ActionList<double>* getActionList() const

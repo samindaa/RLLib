@@ -117,6 +117,14 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double>
     }
 
   public:
+    const Vector<double>* stateAction(const Vector<double>* x, const Action<double>* a)
+    {
+      if (actions->dimension() == 1)
+        return projector->project(x); // projection from whole space
+      else
+        return projector->project(x, a->id());
+    }
+
     const Representations<double>* stateActions(const Vector<double>* x)
     {
       assert(actions->dimension() == phis->dimension());
@@ -126,12 +134,7 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double>
         return phis;
       }
       for (ActionList<double>::const_iterator a = actions->begin(); a != actions->end(); ++a)
-      {
-        if (actions->dimension() == 1)
-          phis->set(projector->project(x), *a); // projection from whole space
-        else
-          phis->set(projector->project(x, (*a)->id()), *a);
-      }
+        phis->set(stateAction(x, *a), *a);
       return phis;
     }
 

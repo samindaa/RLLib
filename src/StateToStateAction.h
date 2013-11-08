@@ -111,12 +111,8 @@ class StateToStateAction
     virtual ~StateToStateAction()
     {
     }
+    virtual const Vector<T>* stateAction(const Vector<T>* x, const Action<T>* a) =0;
     virtual const Representations<T>* stateActions(const Vector<T>* x) =0;
-
-    virtual Vector<T>* stateAction(const Vector<T>* x, const Action<T>* a)
-    {
-      return 0; /*fixMe: */
-    }
     virtual const ActionList<T>* getActionList() const =0;
     virtual double vectorNorm() const =0;
     virtual int dimension() const =0;
@@ -142,6 +138,14 @@ class StateActionTilings: public StateToStateAction<T>
       delete phis;
     }
 
+    const Vector<T>* stateAction(const Vector<T>* x, const Action<T>* a)
+    {
+      if (actions->dimension() == 1)
+        return projector->project(x); // projection from whole space
+      else
+        return projector->project(x, a->id());
+    }
+
     const Representations<T>* stateActions(const Vector<T>* x)
     {
       assert(actions->dimension() == phis->dimension());
@@ -151,12 +155,7 @@ class StateActionTilings: public StateToStateAction<T>
         return phis;
       }
       for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
-      {
-        if (actions->dimension() == 1)
-          phis->set(projector->project(x), *a); // projection from whole space
-        else
-          phis->set(projector->project(x, (*a)->id()), *a);
-      }
+        phis->set(stateAction(x, *a), *a);
       return phis;
     }
 
@@ -183,7 +182,7 @@ class TabularAction: public StateToStateAction<T>
     Projector<T>* projector;
     ActionList<T>* actions;
     Representations<T>* phis;
-    SparseVector<T>* _phi;
+    Vector<T>* _phi;
     bool includeActiveFeature;
   public:
     TabularAction(Projector<T>* projector, ActionList<T>* actions, bool includeActiveFeature = true) :
@@ -206,17 +205,19 @@ class TabularAction: public StateToStateAction<T>
       delete _phi;
     }
 
+    const Vector<T>* stateAction(const Vector<T>* x, const Action<T>* a)
+    {
+      _phi->set(projector->project(x), projector->dimension() * a->id());
+      if (includeActiveFeature)
+        _phi->insertLast(1.0);
+      return _phi;
+    }
+
     const Representations<T>* stateActions(const Vector<T>* x)
     {
       assert(actions->dimension() == phis->dimension());
-      const Vector<T>* phi = projector->project(x);
       for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
-      {
-        _phi->set(phi, projector->dimension() * (*a)->id());
-        if (includeActiveFeature)
-          _phi->insertLast(1.0);
-        phis->set(_phi, *a);
-      }
+        phis->set(stateAction(x, *a), *a);
       return phis;
     }
 
