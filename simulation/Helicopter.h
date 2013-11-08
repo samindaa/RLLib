@@ -397,7 +397,7 @@ class HelicopterDynamics
     }
 };
 
-class Helicopter: public Environment<float>
+class Helicopter: public Environment<>
 {
   protected:
     double episodeLength;
@@ -407,7 +407,7 @@ class Helicopter: public Environment<float>
 
   public:
     Helicopter(const int episodeLength = 6000) :
-        Environment<float>(12, 1, 1), episodeLength(episodeLength), step_time(0)
+        Environment<>(12, 1, 1), episodeLength(episodeLength), step_time(0)
     {
       // Discrete actions are not setup for this problem.
       for (unsigned int i = 0; i < 4/*four values in the action*/; i++)
@@ -441,7 +441,7 @@ class Helicopter: public Environment<float>
 
     void updateRTStep()
     {
-      DenseVector<float>& vars = *output->o_tp1;
+      DenseVector<double>& vars = *output->o_tp1;
       const vector<double>& observation = heliDynamics.getObservation();
       for (unsigned int i = 0; i < observation.size(); i++)
       {

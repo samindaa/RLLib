@@ -15,7 +15,7 @@ GreedyGQFactory::GreedyGQFactory(const double& beta, const double& alpha_theta,
 
 GreedyGQFactory::~GreedyGQFactory()
 {
-  for (std::vector<OffPolicyControlLearner<double, double>*>::iterator iter =
+  for (std::vector<OffPolicyControlLearner<double>*>::iterator iter =
       offPolicyControlLearners.begin(); iter != offPolicyControlLearners.end(); ++iter)
     delete *iter;
   for (std::vector<Predictor<double>*>::iterator iter = predictors.begin();
@@ -25,15 +25,15 @@ GreedyGQFactory::~GreedyGQFactory()
     delete *iter;
 }
 
-OffPolicyControlLearner<double, double>* GreedyGQFactory::createLearner(ActionList* actions,
-    StateToStateAction<double, double>* toStateAction, Policy<double>* target,
+OffPolicyControlLearner<double>* GreedyGQFactory::createLearner(ActionList* actions,
+    StateToStateAction<double>* toStateAction, Policy<double>* target,
     Policy<double>* behavior)
 {
   Trace<double>* e = new ATrace<double>(toStateAction->dimension() * actions->dimension());
   traces.push_back(e);
   GQ<double>* gq = new GQ<double>(alpha_theta, alpha_w, beta, lambda, e);
   predictors.push_back(gq);
-  OffPolicyControlLearner<double, double>* controlGQ = new GreedyGQ<double, double>(target,
+  OffPolicyControlLearner<double>* controlGQ = new GreedyGQ<double>(target,
       behavior, actions, toStateAction, gq);
   offPolicyControlLearners.push_back(controlGQ);
   return controlGQ;
@@ -76,7 +76,7 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
   Policy<double>* behaviorPolicy = problem->getBehaviorPolicy(behaviourLeftProbability);
   Policy<double>* targetPolicy = new ConstantPolicy<double>(problem->actions(), targetDistribution);
   FSGAgentState<>* agentState = new FSGAgentState<>(problem);
-  OffPolicyControlLearner<double, double>* learner = learnerFactory->createLearner(
+  OffPolicyControlLearner<double>* learner = learnerFactory->createLearner(
       problem->actions(), agentState, targetPolicy, behaviorPolicy);
   Vector<double>* vFun = new PVector<double>(agentState->dimension());
 
@@ -110,7 +110,7 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
   delete vFun;
 }
 
-void GQTest::computeValueFunction(const OffPolicyControlLearner<double, double>* learner,
+void GQTest::computeValueFunction(const OffPolicyControlLearner<double>* learner,
     const FSGAgentState<>* agentState, Vector<double>* vFun)
 {
   const std::map<GraphState*, int>* stateIndexes = agentState->getStateIndexes();

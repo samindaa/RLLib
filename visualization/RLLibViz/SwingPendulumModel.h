@@ -33,10 +33,10 @@ class SwingPendulumModel: public ModelBase
   Q_OBJECT
 
   protected:
-    Environment<float>* problem;
+    Environment<>* problem;
     Hashing* hashing;
-    Projector<double, float>* projector;
-    StateToStateAction<double, float>* toStateAction;
+    Projector<double>* projector;
+    StateToStateAction<double>* toStateAction;
 
     double alpha_v;
     double alpha_u;
@@ -55,11 +55,11 @@ class SwingPendulumModel: public ModelBase
     Trace<double>* actore1;
     Trace<double>* actore2;
     Traces<double>* actoreTraces;
-    ActorOnPolicy<double, float>* actor;
+    ActorOnPolicy<double>* actor;
 
-    OnPolicyControlLearner<double, float>* control;
+    OnPolicyControlLearner<double>* control;
 
-    Simulator<double, float>* simulator;
+    Simulator<double>* simulator;
 
     RLLib::Matrix* valueFunction;
 

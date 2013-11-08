@@ -20,9 +20,9 @@ class ActorCriticOnPolicyOnStateTest: public ActorCriticOnPolicyOnStateTestBase
     double mu;
     double sigma;
 
-    Environment<float>* problem;
-    Projector<double, float>* projector;
-    StateToStateAction<double, float>* toStateAction;
+    Environment<>* problem;
+    Projector<double>* projector;
+    StateToStateAction<double>* toStateAction;
 
     double alpha_v;
     double alpha_u;
@@ -37,10 +37,10 @@ class ActorCriticOnPolicyOnStateTest: public ActorCriticOnPolicyOnStateTestBase
     Trace<double>* actorMuE;
     Trace<double>* actorSigmaE;
     Traces<double>* actorTraces;
-    ActorOnPolicy<double, float>* actor;
+    ActorOnPolicy<double>* actor;
 
-    OnPolicyControlLearner<double, float>* control;
-    Simulator<double, float>* sim;
+    OnPolicyControlLearner<double>* control;
+    Simulator<double>* sim;
 
   public:
     ActorCriticOnPolicyOnStateTest();
@@ -57,7 +57,7 @@ class ActorCriticOnPolicyOnStateTest: public ActorCriticOnPolicyOnStateTestBase
     void deleteObjects();
 };
 
-class NoStateProblemProjector: public Projector<double, float>
+class NoStateProblemProjector: public Projector<double>
 {
   protected:
     Vector<double>* vec;
@@ -72,7 +72,7 @@ class NoStateProblemProjector: public Projector<double, float>
       delete vec;
     }
 
-    const Vector<double>* project(const Vector<float>* x)
+    const Vector<double>* project(const Vector<double>* x)
     {
       vec->clear();
       if (x->empty())
@@ -81,7 +81,7 @@ class NoStateProblemProjector: public Projector<double, float>
       return vec;
     }
 
-    const Vector<double>* project(const Vector<float>* x, int h1)
+    const Vector<double>* project(const Vector<double>* x, int h1)
     {
       return project(x);
     }
@@ -97,15 +97,15 @@ class NoStateProblemProjector: public Projector<double, float>
     }
 };
 
-class NoStateProblemStateToStateAction: public StateToStateAction<double, float>
+class NoStateProblemStateToStateAction: public StateToStateAction<double>
 {
   protected:
-    Projector<double, float>* projector;
+    Projector<double>* projector;
     ActionList* actions;
     Representations<double>* phis;
 
   public:
-    NoStateProblemStateToStateAction(Projector<double, float>* projector, ActionList* actions) :
+    NoStateProblemStateToStateAction(Projector<double>* projector, ActionList* actions) :
         projector(projector), actions(actions), phis(
             new Representations<double>(projector->dimension(), actions))
     {
@@ -117,7 +117,7 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double, float>
     }
 
   public:
-    const Representations<double>* stateActions(const Vector<float>* x)
+    const Representations<double>* stateActions(const Vector<double>* x)
     {
       assert(actions->dimension() == phis->dimension());
       if (x->empty())

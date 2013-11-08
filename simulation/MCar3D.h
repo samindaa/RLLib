@@ -48,7 +48,7 @@
  ******************************************************************************
  */
 
-class MCar3D: public Environment<float>
+class MCar3D: public Environment<>
 {
   protected:
 
@@ -65,7 +65,7 @@ class MCar3D: public Environment<float>
 
   public:
     MCar3D() :
-        Environment<float>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(
+        Environment<>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(
             0), targetPosition(0.5), positionRange(new Range<float>(-1.2, 0.5)), velocityRange(
             new Range<float>(-0.07, 0.07))
     {
@@ -148,7 +148,7 @@ class MCar3D: public Environment<float>
 
     void updateRTStep()
     {
-      DenseVector<float>& vars = *output->o_tp1;
+      DenseVector<double>& vars = *output->o_tp1;
       vars[0] = (xposition - positionRange->min()) * resolutions->at(0) / positionRange->length();
       vars[1] = (yposition - positionRange->min()) * resolutions->at(1) / positionRange->length();
       vars[2] = (xvelocity - velocityRange->min()) * resolutions->at(2) / velocityRange->length();

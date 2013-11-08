@@ -26,7 +26,7 @@
 
 using namespace RLLib;
 
-class MCar2D: public Environment<float>
+class MCar2D: public Environment<>
 {
   protected:
     // Global variables:
@@ -42,7 +42,7 @@ class MCar2D: public Environment<float>
 
   public:
     MCar2D() :
-        Environment<float>(2, 3, 1), position(0), velocity(0), positionRange(
+        Environment<>(2, 3, 1), position(0), velocity(0), positionRange(
             new Range<float>(-1.2, 0.6)), velocityRange(new Range<float>(-0.07, 0.07)), actionRange(
             new Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(1.0)
     {
@@ -66,7 +66,7 @@ class MCar2D: public Environment<float>
 
     void updateRTStep()
     {
-      DenseVector<float>& vars = *output->o_tp1;
+      DenseVector<double>& vars = *output->o_tp1;
       vars[0] = (position - positionRange->min()) * resolutions->at(0) / positionRange->length();
       vars[1] = (velocity - velocityRange->min()) * resolutions->at(1) / velocityRange->length();
       output->updateRTStep(r(), z(), endOfEpisode());

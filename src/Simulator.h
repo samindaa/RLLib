@@ -36,7 +36,7 @@
 namespace RLLib
 {
 
-template<class T, class O>
+template<class T>
 class Simulator
 {
   public:
@@ -64,13 +64,13 @@ class Simulator
 
     };
   protected:
-    Control<T, O>* agent;
-    Environment<O>* environment;
+    Control<T>* agent;
+    Environment<T>* environment;
 
     const Action* a_t;
-    Vector<O>* x_0; // << this is the terminal state
-    Vector<O>* x_t;
-    Vector<O>* x_tp1;
+    Vector<T>* x_0; // << this is the terminal state
+    Vector<T>* x_t;
+    Vector<T>* x_tp1;
 
     int maxEpisodeTimeSteps;
     int nbEpisodes;
@@ -94,11 +94,11 @@ class Simulator
     double episodeZ;
     std::vector<Event*> onEpisodeEnd;
 
-    Simulator(Control<T, O>* agent, Environment<O>* environment, const int& maxEpisodeTimeSteps,
+    Simulator(Control<T>* agent, Environment<T>* environment, const int& maxEpisodeTimeSteps,
         const int nbEpisodes = -1, const int nbRuns = -1) :
-        agent(agent), environment(environment), a_t(0), x_0(new PVector<O>(0)), x_t(
-            new PVector<O>(environment->dimension())), x_tp1(
-            new PVector<O>(environment->dimension())), maxEpisodeTimeSteps(maxEpisodeTimeSteps), nbEpisodes(
+        agent(agent), environment(environment), a_t(0), x_0(new PVector<T>(0)), x_t(
+            new PVector<T>(environment->dimension())), x_tp1(
+            new PVector<T>(environment->dimension())), maxEpisodeTimeSteps(maxEpisodeTimeSteps), nbEpisodes(
             nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), endingOfEpisode(false), evaluate(false), verbose(
             true), totalTimeInMilliseconds(0), enableStatistics(false), enableTestEpisodesAfterEachRun(
             false), maxTestEpisodesAfterEachRun(20), timeStep(0), episodeR(0), episodeZ(0)
@@ -185,7 +185,7 @@ class Simulator
       }
       else
       {
-        const TRStep<O>* step = environment->getTRStep();
+        const TRStep<T>* step = environment->getTRStep();
         x_tp1->set(step->o_tp1);
         ++timeStep;
         episodeR += step->r_tp1;
@@ -264,8 +264,8 @@ class Simulator
           // test run
           std::cout << "## enableTestEpisodesAfterEachRun=" << enableTestEpisodesAfterEachRun
               << std::endl;
-          Simulator<T, O>* testSimulator = new Simulator<T, O>(agent, environment,
-              maxEpisodeTimeSteps, maxTestEpisodesAfterEachRun, 1);
+          Simulator<T>* testSimulator = new Simulator<T>(agent, environment, maxEpisodeTimeSteps,
+              maxTestEpisodesAfterEachRun, 1);
           testSimulator->setEvaluate(true);
           testSimulator->run();
           delete testSimulator;
@@ -284,7 +284,7 @@ class Simulator
       return endingOfEpisode;
     }
 
-    const Environment<O>* getEnvironment() const
+    const Environment<T>* getEnvironment() const
     {
       return environment;
     }
@@ -299,18 +299,17 @@ class Simulator
       if (environment->dimension() == 2) // only for two state variables
       {
         std::ofstream out(outFile);
-        DenseVector<float>* x_t = new PVector<float>(2);
+        PVector<T> x_t(2);
         for (float x = 0; x <= 10; x += 0.1)
         {
           for (float y = 0; y <= 10; y += 0.1)
           {
-            x_t->at(0) = x;
-            x_t->at(1) = y;
-            out << agent->computeValueFunction(x_t) << " ";
+            x_t.at(0) = x;
+            x_t.at(1) = y;
+            out << agent->computeValueFunction(&x_t) << " ";
           }
           out << std::endl;
         }
-        delete x_t;
         out.close();
       }
 

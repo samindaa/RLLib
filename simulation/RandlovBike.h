@@ -43,7 +43,7 @@
  * bib2html_rescat = "Applications, General RL",
  }
  */
-class RandlovBike: public Environment<float>
+class RandlovBike: public Environment<>
 {
   protected:
     /* position of goal */
@@ -61,7 +61,7 @@ class RandlovBike: public Environment<float>
 
   public:
     RandlovBike() :
-        Environment<float>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
+        Environment<>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
             false), omega(0), omega_dot(0), omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(
             0), yf(0), xb(0), yb(0), psi_goal(0), aux_state(0), R1(-1.0), R2(0.0), R3(+1.0),
         // +0.01
@@ -202,7 +202,7 @@ class RandlovBike: public Environment<float>
 
     void updateRTStep()
     {
-      DenseVector<float>& vars = *output->o_tp1;
+      DenseVector<double>& vars = *output->o_tp1;
       vars[0] = omega;
       vars[1] = omega_dot;
       vars[2] = omega_d_dot;

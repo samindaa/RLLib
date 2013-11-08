@@ -10,7 +10,7 @@
 
 #include "Environment.h"
 
-class NoStateProblem: public Environment<float>
+class NoStateProblem: public Environment<>
 {
   protected:
     double mu;
@@ -19,7 +19,7 @@ class NoStateProblem: public Environment<float>
     double currentA;
   public:
     NoStateProblem(const double& mu, const double& sigma, const Range<double>* range = 0) :
-        Environment<float>(1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
+        Environment<>(1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
     {
       discreteActions->push_back(0, 0);
       continuousActions->push_back(0, 0);

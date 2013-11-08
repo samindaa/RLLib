@@ -47,7 +47,7 @@ void mvnrnd(const MatrixBase<Derived1>& mu, const MatrixBase<Derived2>& Sigma,
   r = mu + R * r;
 }
 
-class PoleBalancing: public Environment<float>
+class PoleBalancing: public Environment<>
 {
   protected:
     double tau, veta, g;
@@ -65,7 +65,7 @@ class PoleBalancing: public Environment<float>
 
   public:
     PoleBalancing() :
-        Environment<float>(4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
+        Environment<>(4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
     {
       // No discrete actions
 
@@ -114,7 +114,7 @@ class PoleBalancing: public Environment<float>
 
     void updateRTStep()
     {
-      DenseVector<float>& vars = *output->o_tp1;
+      DenseVector<double>& vars = *output->o_tp1;
       for (int i = 0; i < vars.dimension(); i++)
       {
         observations->at(i) = x[i];

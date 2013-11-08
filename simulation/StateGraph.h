@@ -412,8 +412,8 @@ class RandomWalk: public FiniteStateGraph
     }
 };
 
-template<class T = double, class O = double>
-class FSGAgentState: public StateToStateAction<T, O>
+template<class T = double>
+class FSGAgentState: public StateToStateAction<T>
 {
   protected:
     FiniteStateGraph* graph;
@@ -461,7 +461,7 @@ class FSGAgentState: public StateToStateAction<T, O>
       return featureState;
     }
 
-    const Representations<T>* stateActions(const Vector<O>* x)
+    const Representations<T>* stateActions(const Vector<T>* x)
     {
       phis->clear();
       if (x->empty())

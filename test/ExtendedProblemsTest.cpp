@@ -26,10 +26,10 @@ RLLIB_TEST_MAKE(ExtendedProblemsTest)
 void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 {
   srand(time(0));
-  Environment<float>* problem = new MCar3D;
-  //Projector<double, float>* projector = new TileCoderHashing<double, float>(100000, 10, true);
-  Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar3D;
+  //Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
+  Projector<double>* projector = new MountainCar3DTilesProjector<double>();
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
@@ -46,15 +46,15 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
-  ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
       0.4, target, actoreTraces);
 
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
       problem->getDiscreteActionList(), 0.0f, 0.0f);
-  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
       actor, toStateAction, projector);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 100, 1);
   sim->run();
   sim->setEvaluate(true);
   sim->run();
@@ -78,9 +78,9 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 {
   srand(time(0));
-  Environment<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar3D;
+  Projector<double>* projector = new MountainCar3DTilesProjector<double>();
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 2000);
@@ -95,10 +95,10 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getDiscreteActionList());*/
   Policy<double>* target = new Greedy<double>(gq, problem->getDiscreteActionList());
-  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
+  OffPolicyControlLearner<double>* control = new GreedyGQ<double>(target, behavior,
       problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->run();
   //sim->computeValueFunction();
   control->persist("visualization/mcar3d_greedy_gq.data");
@@ -124,10 +124,10 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 void ExtendedProblemsTest::testSarsaMountainCar3D()
 {
   srand(time(0));
-  Environment<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new MountainCar3DTilesProjector<double, float>();
-  //Projector<double, float>* projector = new TileCoderHashing<double, float>(100000, 10, true);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar3D;
+  Projector<double>* projector = new MountainCar3DTilesProjector<double>();
+  //Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
 
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -139,10 +139,10 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
   double epsilon = 0.1;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActionList(),
       epsilon);
-  OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
+  OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting,
       toStateAction, sarsa);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->run();
   sim->setEvaluate(true);
   sim->run();
@@ -161,9 +161,9 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
 void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 {
   srand(time(0));
-  Environment<float>* problem = new MCar3D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(100000, 10, true);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar3D;
+  Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
@@ -180,14 +180,14 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
-  ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
       0.1, target, actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
-  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
       actor, toStateAction, projector);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 1000, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 1000, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -210,9 +210,9 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 void ExtendedProblemsTest::testOffPACAcrobot()
 {
   srand(time(0));
-  Environment<float>* problem = new Acrobot;
-  Projector<double, float>* projector = new AcrobotTilesProjector<double, float>();
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new Acrobot;
+  Projector<double>* projector = new AcrobotTilesProjector<double>();
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
@@ -230,17 +230,17 @@ void ExtendedProblemsTest::testOffPACAcrobot()
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
-  ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
       lambda, target, actoreTraces);
 
   //Policy<double>* behavior = new RandomPolicy<double>(&problem->getDiscreteActionList());
   //Policy<double>* behavior = new RandomBiasPolicy<double>(&problem->getDiscreteActionList());
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
       problem->getDiscreteActionList(), 0.0f, 0.0f);
-  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
       actor, toStateAction, projector);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->run();
   sim->setEvaluate(true);
   sim->run();
@@ -265,9 +265,9 @@ void ExtendedProblemsTest::testOffPACAcrobot()
 void ExtendedProblemsTest::testGreedyGQAcrobot()
 {
   srand(time(0));
-  Environment<float>* problem = new Acrobot;
-  Projector<double, float>* projector = new AcrobotTilesProjector<double, float>();
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new Acrobot;
+  Projector<double>* projector = new AcrobotTilesProjector<double>();
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
   Trace<double>* eML = new MaxLengthTrace<double>(e, 1000);
@@ -282,10 +282,10 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getDiscreteActionList());*/
   Policy<double>* target = new Greedy<double>(gq, problem->getDiscreteActionList());
-  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
+  OffPolicyControlLearner<double>* control = new GreedyGQ<double>(target, behavior,
       problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 500, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 500, 1);
   sim->run();
   sim->setEvaluate(true);
   sim->run();
@@ -320,7 +320,7 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
     int round = 0;
     do
     {
-      const DenseVector<float>& vars = *poleBalancing.getObservations();
+      const DenseVector<double>& vars = *poleBalancing.getObservations();
       for (int i = 0; i < vars.dimension(); i++)
         x[i] = vars[i];
       cout << "x=" << x.transpose() << endl;

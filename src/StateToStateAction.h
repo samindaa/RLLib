@@ -103,29 +103,29 @@ class Representations
     }
 };
 
-template<class T, class O>
+template<class T>
 class StateToStateAction
 {
   public:
     virtual ~StateToStateAction()
     {
     }
-    virtual const Representations<T>* stateActions(const Vector<O>* x) =0;
+    virtual const Representations<T>* stateActions(const Vector<T>* x) =0;
     virtual const ActionList* getActionList() const =0;
     virtual double vectorNorm() const =0;
     virtual int dimension() const =0;
 };
 
 // Tile coding base projector to state action
-template<class T, class O>
-class StateActionTilings: public StateToStateAction<T, O>
+template<class T>
+class StateActionTilings: public StateToStateAction<T>
 {
   protected:
-    Projector<T, O>* projector;
+    Projector<T>* projector;
     ActionList* actions;
     Representations<T>* phis;
   public:
-    StateActionTilings(Projector<T, O>* projector, ActionList* actions) :
+    StateActionTilings(Projector<T>* projector, ActionList* actions) :
         projector(projector), actions(actions), phis(
             new Representations<T>(projector->dimension(), actions))
     {
@@ -136,7 +136,7 @@ class StateActionTilings: public StateToStateAction<T, O>
       delete phis;
     }
 
-    const Representations<T>* stateActions(const Vector<O>* x)
+    const Representations<T>* stateActions(const Vector<T>* x)
     {
       assert(actions->dimension() == phis->dimension());
       if (x->empty())
@@ -170,17 +170,17 @@ class StateActionTilings: public StateToStateAction<T, O>
     }
 };
 
-template<class T, class O>
-class TabularAction: public StateToStateAction<T, O>
+template<class T>
+class TabularAction: public StateToStateAction<T>
 {
   protected:
-    Projector<T, O>* projector;
+    Projector<T>* projector;
     ActionList* actions;
     Representations<T>* phis;
     SparseVector<T>* _phi;
     bool includeActiveFeature;
   public:
-    TabularAction(Projector<T, O>* projector, ActionList* actions, bool includeActiveFeature = true) :
+    TabularAction(Projector<T>* projector, ActionList* actions, bool includeActiveFeature = true) :
         projector(projector), actions(actions), phis(
             new Representations<T>(
                 includeActiveFeature ?
@@ -200,7 +200,7 @@ class TabularAction: public StateToStateAction<T, O>
       delete _phi;
     }
 
-    const Representations<T>* stateActions(const Vector<O>* x)
+    const Representations<T>* stateActions(const Vector<T>* x)
     {
       assert(actions->dimension() == phis->dimension());
       const Vector<T>* phi = projector->project(x);

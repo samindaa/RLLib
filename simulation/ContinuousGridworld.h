@@ -26,7 +26,7 @@
 
 using namespace RLLib;
 
-class ContinuousGridworld: public Environment<float>
+class ContinuousGridworld: public Environment<>
 {
   protected:
     Range<float>* observationRange;
@@ -36,7 +36,7 @@ class ContinuousGridworld: public Environment<float>
 
   public:
     ContinuousGridworld() :
-        Environment<float>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)), actionRange(
+        Environment<>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)), actionRange(
             new Range<float>(-0.05, 0.05)), absoluteNoise(0.025)
     {
       // discrete actions

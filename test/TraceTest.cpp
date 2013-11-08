@@ -23,11 +23,11 @@
 
 RLLIB_TEST_MAKE(TraceTest)
 
-void TraceTest::runTestOnOnMountainCar(Projector<double, float>* projector, Trace<double>* trace)
+void TraceTest::runTestOnOnMountainCar(Projector<double>* projector, Trace<double>* trace)
 {
-  Environment<float>* problem = new MCar2D;
+  Environment<>* problem = new MCar2D;
   problem->setResolution(9.0);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
   double alpha = 0.2 / projector->vectorNorm();
   double gamma = 0.99;
@@ -36,11 +36,11 @@ void TraceTest::runTestOnOnMountainCar(Projector<double, float>* projector, Trac
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, trace);
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActionList(),
       epsilon);
-  OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
+  OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting,
       toStateAction, sarsa);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 500, 1);
-  Simulator<double, float>::Event* performanceVerifier = new PerformanceVerifier<double, float>();
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 500, 1);
+  Simulator<double>::Event* performanceVerifier = new PerformanceVerifier<double>();
   sim->onEpisodeEnd.push_back(performanceVerifier);
   sim->setVerbose(false);
   sim->run();
@@ -57,7 +57,7 @@ void TraceTest::runTestOnOnMountainCar(Projector<double, float>* projector, Trac
 void TraceTest::testSarsaOnMountainCarSVectorTraces()
 {
   Hashing* hashing = new MurmurHashing;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(30000, 10, false,
+  Projector<double>* projector = new TileCoderHashing<double>(30000, 10, false,
       hashing);
   Trace<double>* e = new ATrace<double>(projector->dimension());
   runTestOnOnMountainCar(projector, e);
@@ -79,7 +79,7 @@ void TraceTest::testSarsaOnMountainCarSVectorTraces()
 void TraceTest::testSarsaOnMountainCarMaxLengthTraces()
 {
   Hashing* hashing = new MurmurHashing;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, false,
+  Projector<double>* projector = new TileCoderHashing<double>(10000, 10, false,
       hashing);
   Trace<double>* e = new ATrace<double>(projector->dimension());
   Trace<double>* trace = new MaxLengthTrace<double>(e, 100);

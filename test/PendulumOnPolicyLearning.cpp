@@ -29,8 +29,8 @@ RLLIB_TEST_MAKE(ActorCriticOnPolicyControlLearnerPendulumTest)
 ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearnerPendulumTest()
 {
   problem = new SwingPendulum;
-  projector = new TileCoderHashing<double, float>(1000, 10, true);
-  toStateAction = new StateActionTilings<double, float>(projector,
+  projector = new TileCoderHashing<double>(1000, 10, true);
+  toStateAction = new StateActionTilings<double>(projector,
       problem->getContinuousActionList());
 
   alpha_v = alpha_u = alpha_r = gamma = lambda = 0;
@@ -93,10 +93,10 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
 {
   alpha_v = alpha_u = alpha_r = gamma = lambda = 0;
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
-  actor = new Actor<double, float>(alpha_u, policyDistribution);
-  control = new ActorCritic<double, float>(critic, actor, projector, toStateAction);
+  actor = new Actor<double>(alpha_u, policyDistribution);
+  control = new ActorCritic<double>(critic, actor, projector, toStateAction);
 
-  sim = new Simulator<double, float>(control, problem, 5000, 50, 1);
+  sim = new Simulator<double>(control, problem, 5000, 50, 1);
   sim->run();
 
   evaluate();
@@ -110,11 +110,11 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
   alpha_v = 0.5 / projector->vectorNorm();
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
   alpha_u = 0.05 / projector->vectorNorm();
-  actor = new Actor<double, float>(alpha_u, policyDistribution);
-  control = new AverageRewardActorCritic<double, float>(critic, actor, projector, toStateAction,
+  actor = new Actor<double>(alpha_u, policyDistribution);
+  control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction,
       0.01);
 
-  sim = new Simulator<double, float>(control, problem, 1, 5000, 50);
+  sim = new Simulator<double>(control, problem, 1, 5000, 50);
   sim->run();
   sim->computeValueFunction();
   evaluate();
@@ -128,11 +128,11 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblit
   alpha_v = 0.1 / projector->vectorNorm();
   critic = new TDLambda<double>(alpha_v, gamma, lambda, criticE);
   alpha_u = 0.05 / projector->vectorNorm();
-  actor = new ActorLambda<double, float>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
-  control = new AverageRewardActorCritic<double, float>(critic, actor, projector, toStateAction,
+  actor = new ActorLambda<double>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
+  control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction,
       0.01);
 
-  sim = new Simulator<double, float>(control, problem, 5000, 50, 1);
+  sim = new Simulator<double>(control, problem, 5000, 50, 1);
   sim->run();
   sim->computeValueFunction();
   evaluate();

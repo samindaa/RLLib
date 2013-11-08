@@ -32,9 +32,9 @@ RLLIB_TEST(ActorCriticOnPolicyControlLearnerPendulumTest)
 class ActorCriticOnPolicyControlLearnerPendulumTest: public ActorCriticOnPolicyControlLearnerPendulumTestBase
 {
   protected:
-    Environment<float>* problem;
-    Projector<double, float>* projector;
-    StateToStateAction<double, float>* toStateAction;
+    Environment<>* problem;
+    Projector<double>* projector;
+    StateToStateAction<double>* toStateAction;
 
     double alpha_v;
     double alpha_u;
@@ -50,10 +50,10 @@ class ActorCriticOnPolicyControlLearnerPendulumTest: public ActorCriticOnPolicyC
     Trace<double>* actorMuE;
     Trace<double>* actorSigmaE;
     Traces<double>* actorTraces;
-    ActorOnPolicy<double, float>* actor;
+    ActorOnPolicy<double>* actor;
 
-    OnPolicyControlLearner<double, float>* control;
-    Simulator<double, float>* sim;
+    OnPolicyControlLearner<double>* control;
+    Simulator<double>* sim;
 
   public:
     ActorCriticOnPolicyControlLearnerPendulumTest();

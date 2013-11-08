@@ -29,16 +29,16 @@
 namespace RLLib
 {
 
-template<class O>
+template<class T = double>
 class TRStep
 {
   public:
-    DenseVector<O>* o_tp1;
+    DenseVector<T>* o_tp1;
     double r_tp1;
     double z_tp1;
     bool endOfEpisode;
     TRStep(const int& nbVars) :
-        o_tp1(new PVector<O>(nbVars)), r_tp1(0.0f), z_tp1(0.0f), endOfEpisode(false)
+        o_tp1(new PVector<T>(nbVars)), r_tp1(0.0f), z_tp1(0.0f), endOfEpisode(false)
     {
     }
 
@@ -55,19 +55,19 @@ class TRStep
     }
 };
 
-template<class O>
+template<class T = double>
 class Environment
 {
   protected:
-    DenseVector<O>* observations;
-    DenseVector<O>* resolutions;
-    TRStep<O>* output;
+    DenseVector<T>* observations;
+    DenseVector<T>* resolutions;
+    TRStep<T>* output;
     ActionList* discreteActions;
     ActionList* continuousActions;
   public:
     Environment(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
-        observations(new PVector<float>(nbVars)), resolutions(new PVector<float>(nbVars)), output(
-            new TRStep<O>(nbVars)), discreteActions(new GeneralActionList(nbDiscreteActions)), continuousActions(
+        observations(new PVector<double>(nbVars)), resolutions(new PVector<double>(nbVars)), output(
+            new TRStep<T>(nbVars)), discreteActions(new GeneralActionList(nbDiscreteActions)), continuousActions(
             new GeneralActionList(nbContinuousActions))
     {
     }
@@ -103,17 +103,17 @@ class Environment
       return continuousActions;
     }
 
-    virtual const TRStep<O>* getTRStep() const
+    virtual const TRStep<T>* getTRStep() const
     {
       return output;
     }
 
-    virtual const DenseVector<O>* getObservations() const
+    virtual const DenseVector<T>* getObservations() const
     {
       return observations;
     }
 
-    virtual const DenseVector<O>* getResolutions() const
+    virtual const DenseVector<T>* getResolutions() const
     {
       return resolutions;
     }

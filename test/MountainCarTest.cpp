@@ -27,9 +27,9 @@ void MountainCarTest::testSarsaTabularActionMountainCar()
 {
   Probabilistic::srand(0);
   cout << "time=" << time(0) << endl;
-  Environment<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderNoHashing<double, float>(1000, 10, true);
-  StateToStateAction<double, float>* toStateAction = new TabularAction<double, float>(projector,
+  Environment<>* problem = new MCar2D;
+  Projector<double>* projector = new TileCoderNoHashing<double>(1000, 10, true);
+  StateToStateAction<double>* toStateAction = new TabularAction<double>(projector,
       problem->getDiscreteActionList(), true);
   Trace<double>* e = new RTrace<double>(toStateAction->dimension());
 
@@ -43,10 +43,10 @@ void MountainCarTest::testSarsaTabularActionMountainCar()
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActionList(),
       epsilon);
-  OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
+  OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting,
       toStateAction, sarsa);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -63,10 +63,10 @@ void MountainCarTest::testSarsaTabularActionMountainCar()
 void MountainCarTest::testOnPolicyBoltzmannRTraceTabularActionCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
+  Environment<>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, false);
-  StateToStateAction<double, float>* toStateAction = new TabularAction<double, float>(projector,
+  Projector<double>* projector = new TileCoderHashing<double>(1000, 10, false);
+  StateToStateAction<double>* toStateAction = new TabularAction<double>(projector,
       problem->getDiscreteActionList(), false);
 
   cout << "|x_t|=" << projector->dimension() << endl;
@@ -88,13 +88,13 @@ void MountainCarTest::testOnPolicyBoltzmannRTraceTabularActionCar()
   Trace<double>* actore = new RTrace<double>(toStateAction->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u, gamma, lambda,
+  ActorOnPolicy<double>* actor = new ActorLambda<double>(alpha_u, gamma, lambda,
       acting, actoreTraces);
 
-  OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
+  OnPolicyControlLearner<double>* control = new ActorCritic<double>(critic, actor,
       projector, toStateAction);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -114,9 +114,9 @@ void MountainCarTest::testOnPolicyBoltzmannRTraceTabularActionCar()
 void MountainCarTest::testSarsaMountainCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, true);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar2D;
+  Projector<double>* projector = new TileCoderHashing<double>(10000, 10, true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
   double alpha = 0.15 / projector->vectorNorm();
@@ -126,10 +126,10 @@ void MountainCarTest::testSarsaMountainCar()
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActionList(),
       epsilon);
-  OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
+  OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting,
       toStateAction, sarsa);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -146,9 +146,9 @@ void MountainCarTest::testSarsaMountainCar()
 void MountainCarTest::testSarsaAdaptiveMountainCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, true);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar2D;
+  Projector<double>* projector = new TileCoderHashing<double>(10000, 10, true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
   double gamma = 0.99;
@@ -157,10 +157,10 @@ void MountainCarTest::testSarsaAdaptiveMountainCar()
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsaAdaptive,
       problem->getDiscreteActionList(), epsilon);
-  OnPolicyControlLearner<double, float>* control = new SarsaControl<double, float>(acting,
+  OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting,
       toStateAction, sarsaAdaptive);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -177,9 +177,9 @@ void MountainCarTest::testSarsaAdaptiveMountainCar()
 
 void MountainCarTest::testExpectedSarsaMountainCar()
 {
-  Environment<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, true);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar2D;
+  Projector<double>* projector = new TileCoderHashing<double>(10000, 10, true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
   Trace<double>* e = new RTrace<double>(projector->dimension());
   double alpha = 0.2 / projector->vectorNorm();
@@ -189,10 +189,10 @@ void MountainCarTest::testExpectedSarsaMountainCar()
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActionList(),
       epsilon);
-  OnPolicyControlLearner<double, float>* control = new ExpectedSarsaControl<double, float>(acting,
+  OnPolicyControlLearner<double>* control = new ExpectedSarsaControl<double>(acting,
       toStateAction, sarsa, problem->getDiscreteActionList());
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 5);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 5);
   sim->run();
   sim->computeValueFunction();
 
@@ -209,9 +209,9 @@ void MountainCarTest::testExpectedSarsaMountainCar()
 void MountainCarTest::testGreedyGQOnPolicyMountainCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, true);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar2D;
+  Projector<double>* projector = new TileCoderHashing<double>(10000, 10, true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha_v = 0.05 / projector->vectorNorm();
@@ -223,10 +223,10 @@ void MountainCarTest::testGreedyGQOnPolicyMountainCar()
   //double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(gq, problem->getDiscreteActionList(), 0.01);
 
-  OffPolicyControlLearner<double, float>* control = new GQOnPolicyControl<double, float>(acting,
+  OffPolicyControlLearner<double>* control = new GQOnPolicyControl<double>(acting,
       problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -243,11 +243,11 @@ void MountainCarTest::testGreedyGQOnPolicyMountainCar()
 void MountainCarTest::testGreedyGQMountainCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
+  Environment<>* problem = new MCar2D;
   Hashing* hashing = new MurmurHashing;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true,
+  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true,
       hashing);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha_v = 0.1 / projector->vectorNorm();
@@ -261,10 +261,10 @@ void MountainCarTest::testGreedyGQMountainCar()
   //    problem->getActionList(), epsilon);
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   Policy<double>* target = new Greedy<double>(gq, problem->getDiscreteActionList());
-  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
+  OffPolicyControlLearner<double>* control = new GreedyGQ<double>(target, behavior,
       problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 10);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 100, 10);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -284,9 +284,9 @@ void MountainCarTest::testGreedyGQMountainCar()
 void MountainCarTest::testSoftmaxGQOnMountainCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar2D;
+  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha_v = 0.1 / projector->vectorNorm();
@@ -297,10 +297,10 @@ void MountainCarTest::testSoftmaxGQOnMountainCar()
   GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   Policy<double>* target = new SoftMax<double>(gq, problem->getDiscreteActionList(), 0.1);
-  OffPolicyControlLearner<double, float>* control = new GreedyGQ<double, float>(target, behavior,
+  OffPolicyControlLearner<double>* control = new GreedyGQ<double>(target, behavior,
       problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 10);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 100, 10);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -319,11 +319,11 @@ void MountainCarTest::testSoftmaxGQOnMountainCar()
 void MountainCarTest::testOffPACMountainCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
+  Environment<>* problem = new MCar2D;
   Hashing* hashing = new MurmurHashing;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000000, 10, true,
+  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true,
       hashing);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.05 / projector->vectorNorm();
@@ -339,15 +339,15 @@ void MountainCarTest::testOffPACMountainCar()
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
       lambda, target, actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
 
-  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
       actor, toStateAction, projector);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 10);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 100, 10);
   sim->setTestEpisodesAfterEachRun(true);
   //sim->setVerbose(false);
   sim->run();
@@ -379,9 +379,9 @@ void MountainCarTest::testOffPACMountainCar()
 void MountainCarTest::testOffPACOnPolicyMountainCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(1000, 10, true);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar2D;
+  Projector<double>* projector = new TileCoderHashing<double>(1000, 10, true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
@@ -398,13 +398,13 @@ void MountainCarTest::testOffPACOnPolicyMountainCar()
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOffPolicy<double, float>* actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma,
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
       lambda, target, actoreTraces);
 
-  OffPolicyControlLearner<double, float>* control = new OffPAC<double, float>(behavior, critic,
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
       actor, toStateAction, projector);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 100, 1);
   sim->run();
   sim->computeValueFunction();
   control->persist("visualization/mcar_offpac.data");
@@ -432,9 +432,9 @@ void MountainCarTest::testOnPolicyContinousActionCar(const int& nbMemory, const 
     const double& gamma, double alpha_v, double alpha_u)
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(nbMemory, 10, false);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Environment<>* problem = new MCar2D;
+  Projector<double>* projector = new TileCoderHashing<double>(nbMemory, 10, false);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getContinuousActionList());
 
   alpha_v /= projector->vectorNorm();
@@ -451,13 +451,13 @@ void MountainCarTest::testOnPolicyContinousActionCar(const int& nbMemory, const 
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore1);
   actoreTraces->push_back(actore2);
-  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u, gamma, lambda,
+  ActorOnPolicy<double>* actor = new ActorLambda<double>(alpha_u, gamma, lambda,
       acting, actoreTraces);
 
-  OnPolicyControlLearner<double, float>* control = new AverageRewardActorCritic<double, float>(
+  OnPolicyControlLearner<double>* control = new AverageRewardActorCritic<double>(
       critic, actor, projector, toStateAction, 0);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 200, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 200, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -479,10 +479,10 @@ void MountainCarTest::testOnPolicyContinousActionCar(const int& nbMemory, const 
 void MountainCarTest::testOnPolicyBoltzmannATraceCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
+  Environment<>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, false);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Projector<double>* projector = new TileCoderHashing<double>(10000, 10, false);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
@@ -499,13 +499,13 @@ void MountainCarTest::testOnPolicyBoltzmannATraceCar()
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u, gamma, lambda,
+  ActorOnPolicy<double>* actor = new ActorLambda<double>(alpha_u, gamma, lambda,
       acting, actoreTraces);
 
-  OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
+  OnPolicyControlLearner<double>* control = new ActorCritic<double>(critic, actor,
       projector, toStateAction);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -526,10 +526,10 @@ void MountainCarTest::testOnPolicyBoltzmannATraceCar()
 void MountainCarTest::testOnPolicyBoltzmannRTraceCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
+  Environment<>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, false);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Projector<double>* projector = new TileCoderHashing<double>(10000, 10, false);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
@@ -546,13 +546,13 @@ void MountainCarTest::testOnPolicyBoltzmannRTraceCar()
   Trace<double>* actore = new RTrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOnPolicy<double, float>* actor = new ActorLambda<double, float>(alpha_u, gamma, lambda,
+  ActorOnPolicy<double>* actor = new ActorLambda<double>(alpha_u, gamma, lambda,
       acting, actoreTraces);
 
-  OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
+  OnPolicyControlLearner<double>* control = new ActorCritic<double>(critic, actor,
       projector, toStateAction);
 
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 300, 1);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 300, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -578,10 +578,10 @@ void MountainCarTest::testOnPolicyContinousActionCar()
 void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
 {
   Probabilistic::srand(0);
-  Environment<float>* problem = new MCar2D;
+  Environment<>* problem = new MCar2D;
 
-  Projector<double, float>* projector = new TileCoderHashing<double, float>(10000, 10, false);
-  StateToStateAction<double, float>* toStateAction = new StateActionTilings<double, float>(
+  Projector<double>* projector = new TileCoderHashing<double>(10000, 10, false);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
@@ -595,10 +595,10 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
   PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(projector->dimension(),
       problem->getDiscreteActionList());
 
-  ActorOnPolicy<double, float>* actor = new ActorNatural<double, float>(alpha_u, alpha_v, acting);
-  OnPolicyControlLearner<double, float>* control = new ActorCritic<double, float>(critic, actor,
+  ActorOnPolicy<double>* actor = new ActorNatural<double>(alpha_u, alpha_v, acting);
+  OnPolicyControlLearner<double>* control = new ActorCritic<double>(critic, actor,
       projector, toStateAction);
-  Simulator<double, float>* sim = new Simulator<double, float>(control, problem, 5000, 100, 10);
+  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 100, 10);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -616,21 +616,21 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
 
 void MountainCarTest::run()
 {
-  //testSarsaTabularActionMountainCar();
-  //testOnPolicyBoltzmannRTraceTabularActionCar();
-  //testSarsaMountainCar();
+  testSarsaTabularActionMountainCar();
+  testOnPolicyBoltzmannRTraceTabularActionCar();
+  testSarsaMountainCar();
 
-  //testSarsaAdaptiveMountainCar();
-  //testExpectedSarsaMountainCar();
-  //testGreedyGQOnPolicyMountainCar();
-  //testGreedyGQMountainCar();
-  //testSoftmaxGQOnMountainCar();
+  testSarsaAdaptiveMountainCar();
+  testExpectedSarsaMountainCar();
+  testGreedyGQOnPolicyMountainCar();
+  testGreedyGQMountainCar();
+  testSoftmaxGQOnMountainCar();
   testOffPACMountainCar();
-  //testOffPACOnPolicyMountainCar();
+  testOffPACOnPolicyMountainCar();
 
-  //testOnPolicyBoltzmannATraceCar();
-  //testOnPolicyBoltzmannRTraceCar();
-  //testOnPolicyContinousActionCar();
-  //testOnPolicyBoltzmannATraceNaturalActorCriticCar();
+  testOnPolicyBoltzmannATraceCar();
+  testOnPolicyBoltzmannRTraceCar();
+  testOnPolicyContinousActionCar();
+  testOnPolicyBoltzmannATraceNaturalActorCriticCar();
 }
 

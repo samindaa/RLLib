@@ -138,8 +138,8 @@ class TraceTest: public TraceTestBase
       testTrace(0.9, *newTrace(AMaxTraceDouble), 5.0);
     }
 
-    template<class T, class O>
-    class PerformanceVerifier: public Simulator<T, O>::Event
+    template<class T>
+    class PerformanceVerifier: public Simulator<T>::Event
     {
       private:
         double minEpisodeReward;
@@ -151,18 +151,18 @@ class TraceTest: public TraceTestBase
 
         void update() const
         {
-          if (Simulator<T, O>::Event::nbEpisodeDone < 200)
+          if (Simulator<T>::Event::nbEpisodeDone < 200)
             return;
           else
           {
-            //std::cout << "[" << Simulator<T, O>::Event::episodeR << ","
+            //std::cout << "[" << Simulator<T>::Event::episodeR << ","
             //    << Simulator<T, O>::Event::averageTimePerStep << "] ";
-            Assert::assertFails(Simulator<T, O>::Event::episodeR < minEpisodeReward);
+            Assert::assertFails(Simulator<T>::Event::episodeR < minEpisodeReward);
           }
         }
     };
 
-    void runTestOnOnMountainCar(Projector<double, float>* projector, Trace<double>* trace);
+    void runTestOnOnMountainCar(Projector<double>* projector, Trace<double>* trace);
     void testSarsaOnMountainCarSVectorTraces();
     void testSarsaOnMountainCarMaxLengthTraces();
 

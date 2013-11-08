@@ -17,7 +17,7 @@ double OnOffPolicyPredictionTest::distanceToSolution(const Vector<double>* solut
   return maxValue;
 }
 
-void OnOffPolicyPredictionTest::testTD(FSGAgentState<double, double>* agentState,
+void OnOffPolicyPredictionTest::testTD(FSGAgentState<double>* agentState,
     FiniteStateGraph* graph, OnPolicyTD<double>* td, const int& nbEpisodeMax,
     const double& precision)
 {
@@ -57,7 +57,7 @@ void OnOffPolicyPredictionTest::testTD(FSGAgentState<double, double>* agentState
   delete x_tp1;
 }
 
-void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState<double, double>* agentState,
+void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState<double>* agentState,
     RandomWalk* problem, OffPolicyTD<double>* gtd, const int& nbEpisodeMax, const double& precision,
     const double& targetLeftProbability, const double& behaviourLeftProbability)
 {

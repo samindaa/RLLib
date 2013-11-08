@@ -16,8 +16,8 @@ MountainCarModel::MountainCarModel(QObject *parent) :
   behaviourEnvironment = new MCar2D;
   evaluationEnvironment = new MCar2D;
   hashing = new MurmurHashing;
-  projector = new TileCoderHashing<double, float>(1000000, 10, true, hashing);
-  toStateAction = new StateActionTilings<double, float>(projector,
+  projector = new TileCoderHashing<double>(1000000, 10, true, hashing);
+  toStateAction = new StateActionTilings<double>(projector,
       behaviourEnvironment->getDiscreteActionList());
 
   alpha_v = 0.05 / projector->vectorNorm();
@@ -35,13 +35,13 @@ MountainCarModel::MountainCarModel(QObject *parent) :
   actore = new ATrace<double>(projector->dimension());
   actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  actor = new ActorLambdaOffPolicy<double, float>(alpha_u, gamma, lambda, target, actoreTraces);
+  actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target, actoreTraces);
 
   behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActionList());
-  control = new OffPAC<double, float>(behavior, critic, actor, toStateAction, projector);
+  control = new OffPAC<double>(behavior, critic, actor, toStateAction, projector);
 
-  learningRunner = new Simulator<double, float>(control, behaviourEnvironment, 5000);
-  evaluationRunner = new Simulator<double, float>(control, evaluationEnvironment, 5000);
+  learningRunner = new Simulator<double>(control, behaviourEnvironment, 5000);
+  evaluationRunner = new Simulator<double>(control, evaluationEnvironment, 5000);
   learningRunner->setVerbose(false);
   evaluationRunner->setEvaluate(true);
   evaluationRunner->setVerbose(false);
@@ -80,11 +80,11 @@ void MountainCarModel::initialize()
 
 void MountainCarModel::doWork()
 {
-  for (std::tr1::unordered_map<int, Simulator<double, float>*>::iterator i = simulators.begin();
+  for (std::tr1::unordered_map<int, Simulator<double>*>::iterator i = simulators.begin();
       i != simulators.end(); ++i)
     i->second->step();
 
-  for (std::tr1::unordered_map<int, Simulator<double, float>*>::iterator i = simulators.begin();
+  for (std::tr1::unordered_map<int, Simulator<double>*>::iterator i = simulators.begin();
       i != simulators.end(); ++i)
   {
     if (i->second->isEndingOfEpisode())
@@ -103,7 +103,7 @@ void MountainCarModel::doWork()
   // Value function
   if (evaluationRunner->isEndingOfEpisode() && window->vfuns.size() > 1)
   {
-    RLLib::PVector<float> x_t(2);
+    RLLib::PVector<double> x_t(2);
     double maxValue = 0, minValue = 0;
     float y = 0;
     for (int i = 0; i < valueFunction->rows(); i++)

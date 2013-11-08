@@ -14,8 +14,8 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
 {
   problem = new SwingPendulum;
   hashing = new MurmurHashing;
-  projector = new TileCoderHashing<double, float>(1000, 10, false, hashing);
-  toStateAction = new StateActionTilings<double, float>(projector,
+  projector = new TileCoderHashing<double>(1000, 10, false, hashing);
+  toStateAction = new StateActionTilings<double>(projector,
       problem->getContinuousActionList());
 
   alpha_v = 0.1 / projector->vectorNorm();
@@ -39,12 +39,12 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
   actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore1);
   actoreTraces->push_back(actore2);
-  actor = new ActorLambda<double, float>(alpha_u, gamma, lambda, acting, actoreTraces);
+  actor = new ActorLambda<double>(alpha_u, gamma, lambda, acting, actoreTraces);
 
-  control = new AverageRewardActorCritic<double, float>(critic, actor, projector, toStateAction,
+  control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction,
       alpha_r);
 
-  simulator = new Simulator<double, float>(control, problem, 5000);
+  simulator = new Simulator<double>(control, problem, 5000);
   simulator->setVerbose(false);
   valueFunction = new Matrix(100, 100); // << Fixed for 0:0.1:10
 
@@ -93,7 +93,7 @@ void SwingPendulumModel::doWork()
   // Value function
   if (simulator->isEndingOfEpisode() && window->vfuns.size() > 0)
   {
-    RLLib::PVector<float> x_t(2);
+    RLLib::PVector<double> x_t(2);
     double maxValue = 0, minValue = 0;
     float y = 0;
     for (int i = 0; i < valueFunction->rows(); i++)

@@ -120,17 +120,17 @@ class CombinationGenerator
 };
 
 // ====================== Advanced projector ===================================
-template<class T, class O>
-class AdvancedTilesProjector: public Projector<T, O>
+template<class T>
+class AdvancedTilesProjector: public Projector<T>
 {
   protected:
     SparseVector<double>* vector;
     int* activeTiles;
-    Tiles* tiles;
+    Tiles<T>* tiles;
 
   public:
     AdvancedTilesProjector() :
-        vector(new SVector<T>(1000000 + 1)), activeTiles(new int[48]), tiles(new Tiles)
+        vector(new SVector<T>(1000000 + 1)), activeTiles(new int[48]), tiles(new Tiles<T>)
     {
     }
 
@@ -142,20 +142,20 @@ class AdvancedTilesProjector: public Projector<T, O>
     }
 
   public:
-    const Vector<T>* project(const Vector<O>* xin, int h2)
+    const Vector<T>* project(const Vector<T>* xin, int h2)
     {
       vector->clear();
       if (xin->empty())
         return vector;
       int h1 = 0;
-      const PVector<O>& x = *(const PVector<O>*) xin; // FixMe
+      const PVector<T>& x = *(const PVector<T>*) xin; // FixMe
       // all 4
       tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x.getValues(), x.dimension(), h1++,
           h2);
       // 3 of 4
       static CombinationGenerator cg43(4, 3, 4); // We know x.dimension() == 4
       static CombinationGenerator::Combinations& c43 = cg43.getCombinations();
-      static PVector<O> x3(3);
+      static PVector<T> x3(3);
       for (int i = 0; i < (int) c43.size(); i++)
       {
         for (int j = 0; j < (int) c43[i].size(); j++)
@@ -166,7 +166,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       // 2 of 6
       static CombinationGenerator cg42(4, 2, 4);
       static CombinationGenerator::Combinations& c42 = cg42.getCombinations();
-      static PVector<O> x2(2);
+      static PVector<T> x2(2);
       for (int i = 0; i < (int) c42.size(); i++)
       {
         for (int j = 0; j < (int) c42[i].size(); j++)
@@ -178,7 +178,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       // 1 of 4
       static CombinationGenerator cg41(4, 1, 4);
       static CombinationGenerator::Combinations& c41 = cg41.getCombinations();
-      static PVector<O> x1(1);
+      static PVector<T> x1(1);
       for (int i = 0; i < (int) c41.size(); i++)
       {
         x1[0] = x[c41[i][0]]; // there is only a single element
@@ -194,19 +194,19 @@ class AdvancedTilesProjector: public Projector<T, O>
       return vector;
     }
 
-    const Vector<T>* project(const Vector<O>* xin)
+    const Vector<T>* project(const Vector<T>* xin)
     {
 
       vector->clear();
       if (xin->empty())
         return vector;
-      const PVector<O>& x = *(const PVector<O>*) xin; // FixMe
+      const PVector<T>& x = *(const PVector<T>*) xin; // FixMe
       // all 4
       tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x.getValues(), x.dimension());
       // 3 of 4
       static CombinationGenerator cg43(4, 3, 4); // We know x.dimension() == 4
       static CombinationGenerator::Combinations& c43 = cg43.getCombinations();
-      static PVector<O> x3(3);
+      static PVector<T> x3(3);
       for (int i = 0; i < (int) c43.size(); i++)
       {
         for (int j = 0; j < (int) c43[i].size(); j++)
@@ -216,7 +216,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       // 2 of 6
       static CombinationGenerator cg42(4, 2, 4);
       static CombinationGenerator::Combinations& c42 = cg42.getCombinations();
-      static PVector<O> x2(2);
+      static PVector<T> x2(2);
       for (int i = 0; i < (int) c42.size(); i++)
       {
         for (int j = 0; j < (int) c42[i].size(); j++)
@@ -227,7 +227,7 @@ class AdvancedTilesProjector: public Projector<T, O>
       // 1 of 4
       static CombinationGenerator cg41(4, 1, 4);
       static CombinationGenerator::Combinations& c41 = cg41.getCombinations();
-      static PVector<O> x1(1);
+      static PVector<T> x1(1);
       for (int i = 0; i < (int) c41.size(); i++)
       {
         x1[0] = x[c41[i][0]]; // there is only a single element
@@ -254,16 +254,16 @@ class AdvancedTilesProjector: public Projector<T, O>
 
 // ====================== Mountain Car 3D =====================================
 // Mountain Car 3D projector
-template<class T, class O>
-class MountainCar3DTilesProjector: public AdvancedTilesProjector<T, O>
+template<class T>
+class MountainCar3DTilesProjector: public AdvancedTilesProjector<T>
 {
   public:
 };
 
 // ====================== Acrobot projector ===================================
 
-template<class T, class O>
-class AcrobotTilesProjector: public AdvancedTilesProjector<T, O>
+template<class T>
+class AcrobotTilesProjector: public AdvancedTilesProjector<T>
 {
   public:
 };

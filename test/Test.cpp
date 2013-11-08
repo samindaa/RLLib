@@ -57,15 +57,24 @@ int main(int argc, char** argv)
 {
   RLLibTestRegistry* registry = RLLibTestRegistry::getInstance();
   cout << "*** number of registered test cases = " << registry->dimension() << endl;
-  set<string> activeTestSet;
+  set<string> activeTestSet, onlyTestSet;
   ifstream inf("test/test.cfg");
   if (inf.is_open())
   {
     string str;
     while (getline(inf, str))
     {
-      if (str.length() && (str.at(0) != '#'))
+      if (str.length() && (str.at(0) == '@'))
+      {
+        string tstr = str.substr(1);
+        onlyTestSet.insert(tstr);
+        activeTestSet.insert(tstr);
+      }
+      else if (str.length() && (str.at(0) != '#'))
         activeTestSet.insert(str);
+      else
+      {/*Not defined yet*/
+      }
     }
   }
   else
@@ -73,7 +82,8 @@ int main(int argc, char** argv)
     cerr << "ERROR! test/test.cfg is not found!" << endl;
     exit(EXIT_FAILURE);
   }
-  cout << "*** number of active test cases = " << activeTestSet.size() << endl;
+  cout << "*** Number of active test cases = " << activeTestSet.size() << endl;
+  cout << "*** Number of only   test cases = " << onlyTestSet.size() << endl;
   for (set<string>::const_iterator iter = activeTestSet.begin(); iter != activeTestSet.end();
       ++iter)
   {
@@ -84,7 +94,8 @@ int main(int argc, char** argv)
       exit(EXIT_FAILURE);
     }
   }
-  for (set<string>::const_iterator iter = activeTestSet.begin(); iter != activeTestSet.end();
+  set<string>* running = !onlyTestSet.empty() ? &onlyTestSet : &activeTestSet;
+  for (set<string>::const_iterator iter = running->begin(); iter != running->end();
       ++iter)
   {
     RLLibTestRegistry::iterator iter2 = registry->find(*iter);

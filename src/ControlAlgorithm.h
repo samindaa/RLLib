@@ -34,17 +34,17 @@ namespace RLLib
 {
 
 // Simple control algorithm
-template<class T, class O>
-class SarsaControl: public OnPolicyControlLearner<T, O>
+template<class T>
+class SarsaControl: public OnPolicyControlLearner<T>
 {
   protected:
     Policy<T>* acting;
-    StateToStateAction<T, O>* toStateAction;
+    StateToStateAction<T>* toStateAction;
     Sarsa<T>* sarsa;
     Vector<T>* xa_t;
 
   public:
-    SarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction, Sarsa<T>* sarsa) :
+    SarsaControl(Policy<T>* acting, StateToStateAction<T>* toStateAction, Sarsa<T>* sarsa) :
         acting(acting), toStateAction(toStateAction), sarsa(sarsa), xa_t(0)
     {
     }
@@ -55,7 +55,7 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
         delete xa_t;
     }
 
-    const Action* initialize(const Vector<O>* x)
+    const Action* initialize(const Vector<T>* x)
     {
       sarsa->initialize();
       const Representations<T>* phi = toStateAction->stateActions(x);
@@ -64,7 +64,7 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
       return a;
     }
 
-    const Action* step(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
+    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       const Representations<T>* phi_tp1 = toStateAction->stateActions(x_tp1);
@@ -81,12 +81,12 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
       sarsa->reset();
     }
 
-    const Action* proposeAction(const Vector<O>* x)
+    const Action* proposeAction(const Vector<T>* x)
     {
       return Policies::sampleBestAction(acting, toStateAction->stateActions(x));
     }
 
-    const double computeValueFunction(const Vector<O>* x) const
+    const double computeValueFunction(const Vector<T>* x) const
     {
       const Representations<T>* phis = toStateAction->stateActions(x);
       acting->update(phis);
@@ -114,18 +114,18 @@ class SarsaControl: public OnPolicyControlLearner<T, O>
 
 };
 
-template<class T, class O>
-class ExpectedSarsaControl: public SarsaControl<T, O>
+template<class T>
+class ExpectedSarsaControl: public SarsaControl<T>
 {
   protected:
     Vector<T>* phi_bar_tp1;
     ActionList* actions;
-    typedef SarsaControl<T, O> super;
+    typedef SarsaControl<T> super;
   public:
 
-    ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T, O>* toStateAction,
+    ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T>* toStateAction,
         Sarsa<T>* sarsa, ActionList* actions) :
-        SarsaControl<T, O>(acting, toStateAction, sarsa), phi_bar_tp1(
+        SarsaControl<T>(acting, toStateAction, sarsa), phi_bar_tp1(
             new SVector<T>(toStateAction->dimension())), actions(actions)
     {
     }
@@ -134,7 +134,7 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
       delete phi_bar_tp1;
     }
 
-    const Action* step(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
+    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       phi_bar_tp1->clear();
@@ -152,7 +152,7 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
       }
 
       const Vector<T>* xa_tp1 = phi_tp1->at(a_tp1);
-      super::sarsa->update(SarsaControl<T, O>::xa_t, phi_bar_tp1, r_tp1);
+      super::sarsa->update(SarsaControl<T>::xa_t, phi_bar_tp1, r_tp1);
       super::xa_t->set(xa_tp1);
       return a_tp1;
     }
@@ -160,8 +160,8 @@ class ExpectedSarsaControl: public SarsaControl<T, O>
 };
 
 // Gradient decent control
-template<class T, class O>
-class GreedyGQ: public OffPolicyControlLearner<T, O>
+template<class T>
+class GreedyGQ: public OffPolicyControlLearner<T>
 {
   private:
     double rho_t;
@@ -170,14 +170,14 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
     Policy<T>* behavior;
     ActionList* actions;
 
-    StateToStateAction<T, O>* toStateAction;
+    StateToStateAction<T>* toStateAction;
     GQ<T>* gq;
     Vector<T>* phi_t;
     Vector<T>* phi_bar_tp1;
 
   public:
     GreedyGQ(Policy<T>* target, Policy<T>* behavior, ActionList* actions,
-        StateToStateAction<T, O>* toStateAction, GQ<T>* gq) :
+        StateToStateAction<T>* toStateAction, GQ<T>* gq) :
         rho_t(0), target(target), behavior(behavior), actions(actions), toStateAction(
             toStateAction), gq(gq), phi_t(0), phi_bar_tp1(0)
     {
@@ -191,7 +191,7 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
         delete phi_bar_tp1;
     }
 
-    const Action* initialize(const Vector<O>* x)
+    const Action* initialize(const Vector<T>* x)
     {
       gq->initialize();
       const Representations<T>* phi = toStateAction->stateActions(x);
@@ -207,7 +207,7 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       return target->pi(a_t) / behavior->pi(a_t);
     }
 
-    const Action* step(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
+    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       rho_t = computeRho(a_t);
@@ -236,12 +236,12 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
       gq->reset();
     }
 
-    const Action* proposeAction(const Vector<O>* x)
+    const Action* proposeAction(const Vector<T>* x)
     {
       return Policies::sampleBestAction(target, toStateAction->stateActions(x));
     }
 
-    const double computeValueFunction(const Vector<O>* x) const
+    const double computeValueFunction(const Vector<T>* x) const
     {
       const Representations<T>* phis = toStateAction->stateActions(x);
       target->update(phis);
@@ -268,13 +268,13 @@ class GreedyGQ: public OffPolicyControlLearner<T, O>
     }
 };
 
-template<class T, class O>
-class GQOnPolicyControl: public GreedyGQ<T, O>
+template<class T>
+class GQOnPolicyControl: public GreedyGQ<T>
 {
   public:
     GQOnPolicyControl(Policy<T>* acting, ActionList* actions,
-        StateToStateAction<T, O>* toStateAction, GQ<T>* gq) :
-        GreedyGQ<T, O>(acting, acting, actions, toStateAction, gq)
+        StateToStateAction<T>* toStateAction, GQ<T>* gq) :
+        GreedyGQ<T>(acting, acting, actions, toStateAction, gq)
     {
     }
     virtual ~GQOnPolicyControl()
@@ -286,8 +286,8 @@ class GQOnPolicyControl: public GreedyGQ<T, O>
     }
 };
 
-template<class T, class O>
-class AbstractActorOffPolicy: public ActorOffPolicy<T, O>
+template<class T>
+class AbstractActorOffPolicy: public ActorOffPolicy<T>
 {
   protected:
     bool initialized;
@@ -341,17 +341,17 @@ class AbstractActorOffPolicy: public ActorOffPolicy<T, O>
 
 };
 
-template<class T, class O>
-class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T, O>
+template<class T>
+class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T>
 {
   protected:
     double alpha_u, gamma, lambda;
     Traces<T>* e_u;
-    typedef AbstractActorOffPolicy<T, O> super;
+    typedef AbstractActorOffPolicy<T> super;
   public:
     ActorLambdaOffPolicy(const double& alpha_u, const double& gamma/*not used*/,
         const double& lambda, PolicyDistribution<T>* targetPolicy, Traces<T>* e) :
-        AbstractActorOffPolicy<T, O>(targetPolicy), alpha_u(alpha_u), gamma(gamma), lambda(lambda), e_u(
+        AbstractActorOffPolicy<T>(targetPolicy), alpha_u(alpha_u), gamma(gamma), lambda(lambda), e_u(
             e)
     {
     }
@@ -387,22 +387,22 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T, O>
     }
 };
 
-template<class T, class O>
-class OffPAC: public OffPolicyControlLearner<T, O>
+template<class T>
+class OffPAC: public OffPolicyControlLearner<T>
 {
   private:
     double rho_t, delta_t;
   protected:
     Policy<T>* behavior;
     OffPolicyTD<T>* critic;
-    ActorOffPolicy<T, O>* actor;
-    StateToStateAction<T, O>* toStateAction;
-    Projector<T, O>* projector;
+    ActorOffPolicy<T>* actor;
+    StateToStateAction<T>* toStateAction;
+    Projector<T>* projector;
     Vector<T>* phi_t;
 
   public:
-    OffPAC(Policy<T>* behavior, OffPolicyTD<T>* critic, ActorOffPolicy<T, O>* actor,
-        StateToStateAction<T, O>* toStateAction, Projector<T, O>* projector) :
+    OffPAC(Policy<T>* behavior, OffPolicyTD<T>* critic, ActorOffPolicy<T>* actor,
+        StateToStateAction<T>* toStateAction, Projector<T>* projector) :
         rho_t(0), delta_t(0), behavior(behavior), critic(critic), actor(actor), toStateAction(
             toStateAction), projector(projector), phi_t(0)
     {
@@ -414,7 +414,7 @@ class OffPAC: public OffPolicyControlLearner<T, O>
         delete phi_t;
     }
 
-    const Action* initialize(const Vector<O>* x)
+    const Action* initialize(const Vector<T>* x)
     {
       critic->initialize();
       actor->initialize();
@@ -424,7 +424,7 @@ class OffPAC: public OffPolicyControlLearner<T, O>
       return a;
     }
 
-    const Action* step(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
+    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       const Representations<T>* xas_t = toStateAction->stateActions(x_t);
@@ -448,12 +448,12 @@ class OffPAC: public OffPolicyControlLearner<T, O>
       actor->reset();
     }
 
-    const Action* proposeAction(const Vector<O>* x)
+    const Action* proposeAction(const Vector<T>* x)
     {
       return actor->proposeAction(toStateAction->stateActions(x));
     }
 
-    const double computeValueFunction(const Vector<O>* x) const
+    const double computeValueFunction(const Vector<T>* x) const
     {
       return critic->predict(projector->project(x));
     }
@@ -484,8 +484,8 @@ class OffPAC: public OffPolicyControlLearner<T, O>
     }
 };
 
-template<class T, class O>
-class Actor: public ActorOnPolicy<T, O>
+template<class T>
+class Actor: public ActorOnPolicy<T>
 {
   protected:
     bool initialized;
@@ -541,18 +541,18 @@ class Actor: public ActorOnPolicy<T, O>
 
 };
 
-template<class T, class O>
-class ActorLambda: public Actor<T, O>
+template<class T>
+class ActorLambda: public Actor<T>
 {
   protected:
-    typedef Actor<T, O> super;
+    typedef Actor<T> super;
     double gamma, lambda;
     Traces<T>* e;
 
   public:
     ActorLambda(const double& alpha_u, const double& gamma, const double& lambda,
         PolicyDistribution<T>* policyDistribution, Traces<T>* e) :
-        Actor<T, O>(alpha_u, policyDistribution), gamma(gamma), lambda(lambda), e(e)
+        Actor<T>(alpha_u, policyDistribution), gamma(gamma), lambda(lambda), e(e)
     {
       assert(e->dimension() == super::u->dimension());
     }
@@ -581,17 +581,17 @@ class ActorLambda: public Actor<T, O>
     }
 };
 
-template<class T, class O>
-class ActorNatural: public Actor<T, O>
+template<class T>
+class ActorNatural: public Actor<T>
 {
   protected:
-    typedef Actor<T, O> super;
+    typedef Actor<T> super;
     Vectors<T>* w;
     double alpha_v;
   public:
     ActorNatural(const double& alpha_u, const double& alpha_v,
         PolicyDistribution<T>* policyDistribution) :
-        Actor<T, O>(alpha_u, policyDistribution), w(new Vectors<T>()), alpha_v(alpha_v)
+        Actor<T>(alpha_u, policyDistribution), w(new Vectors<T>()), alpha_v(alpha_v)
     {
       for (int i = 0; i < super::u->dimension(); i++)
         w->push_back(new SVector<T>(super::u->at(i)->dimension()));
@@ -629,18 +629,18 @@ class ActorNatural: public Actor<T, O>
 
 };
 
-template<class T, class O>
-class AbstractActorCritic: public OnPolicyControlLearner<T, O>
+template<class T>
+class AbstractActorCritic: public OnPolicyControlLearner<T>
 {
   protected:
     OnPolicyTD<T>* critic;
-    ActorOnPolicy<T, O>* actor;
-    Projector<T, O>* projector;
-    StateToStateAction<T, O>* toStateAction;
+    ActorOnPolicy<T>* actor;
+    Projector<T>* projector;
+    StateToStateAction<T>* toStateAction;
 
   public:
-    AbstractActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor,
-        Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction) :
+    AbstractActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor,
+        Projector<T>* projector, StateToStateAction<T>* toStateAction) :
         critic(critic), actor(actor), projector(projector), toStateAction(toStateAction)
     {
     }
@@ -651,10 +651,10 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
     }
 
   protected:
-    virtual double updateCritic(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
+    virtual double updateCritic(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1) =0;
 
-    void updateActor(const Vector<O>* x_t, const Action* a_t, const double& actorDelta)
+    void updateActor(const Vector<T>* x_t, const Action* a_t, const double& actorDelta)
     {
       const Representations<T>* phi_t = toStateAction->stateActions(x_t);
       policy()->update(phi_t);
@@ -672,7 +672,7 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
       critic->reset();
       actor->reset();
     }
-    const Action* initialize(const Vector<O>* x_0)
+    const Action* initialize(const Vector<T>* x_0)
     {
       critic->initialize();
       actor->initialize();
@@ -680,12 +680,12 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
       return policy()->sampleAction();
     }
 
-    const Action* proposeAction(const Vector<O>* x)
+    const Action* proposeAction(const Vector<T>* x)
     {
       return actor->proposeAction(toStateAction->stateActions(x));
     }
 
-    const Action* step(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
+    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       // Update critic
@@ -696,7 +696,7 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
       return policy()->sampleAction();
     }
 
-    const double computeValueFunction(const Vector<O>* x) const
+    const double computeValueFunction(const Vector<T>* x) const
     {
       return critic->predict(projector->project(x));
     }
@@ -728,17 +728,17 @@ class AbstractActorCritic: public OnPolicyControlLearner<T, O>
 
 };
 
-template<class T, class O>
-class ActorCritic: public AbstractActorCritic<T, O>
+template<class T>
+class ActorCritic: public AbstractActorCritic<T>
 {
   protected:
-    typedef AbstractActorCritic<T, O> super;
+    typedef AbstractActorCritic<T> super;
     Vector<T>* phi_t;
     Vector<T>* phi_tp1;
   public:
-    ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor, Projector<T, O>* projector,
-        StateToStateAction<T, O>* toStateAction) :
-        AbstractActorCritic<T, O>(critic, actor, projector, toStateAction), phi_t(
+    ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor, Projector<T>* projector,
+        StateToStateAction<T>* toStateAction) :
+        AbstractActorCritic<T>(critic, actor, projector, toStateAction), phi_t(
             new SVector<T>(projector->dimension())), phi_tp1(new SVector<T>(projector->dimension()))
     {
     }
@@ -749,7 +749,7 @@ class ActorCritic: public AbstractActorCritic<T, O>
       delete phi_tp1;
     }
 
-    double updateCritic(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
+    double updateCritic(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       phi_t->set(super::projector->project(x_t));
@@ -759,19 +759,19 @@ class ActorCritic: public AbstractActorCritic<T, O>
     }
 };
 
-template<class T, class O>
-class AverageRewardActorCritic: public AbstractActorCritic<T, O>
+template<class T>
+class AverageRewardActorCritic: public AbstractActorCritic<T>
 {
   protected:
-    typedef AbstractActorCritic<T, O> super;
+    typedef AbstractActorCritic<T> super;
     double alpha_r, averageReward;
     SparseVector<T>* phi_t;
     SparseVector<T>* phi_tp1;
 
   public:
-    AverageRewardActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T, O>* actor,
-        Projector<T, O>* projector, StateToStateAction<T, O>* toStateAction, double alpha_r) :
-        AbstractActorCritic<T, O>(critic, actor, projector, toStateAction), alpha_r(alpha_r), averageReward(
+    AverageRewardActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor,
+        Projector<T>* projector, StateToStateAction<T>* toStateAction, double alpha_r) :
+        AbstractActorCritic<T>(critic, actor, projector, toStateAction), alpha_r(alpha_r), averageReward(
             0), phi_t(new SVector<T>(projector->dimension())), phi_tp1(
             new SVector<T>(projector->dimension()))
     {
@@ -783,7 +783,7 @@ class AverageRewardActorCritic: public AbstractActorCritic<T, O>
       delete phi_tp1;
     }
 
-    double updateCritic(const Vector<O>* x_t, const Action* a_t, const Vector<O>* x_tp1,
+    double updateCritic(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       phi_t->set(super::projector->project(x_t));

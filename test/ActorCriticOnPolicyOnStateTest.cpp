@@ -72,10 +72,10 @@ void ActorCriticOnPolicyOnStateTest::checkDistribution(
   alpha_u = 0.01 / projector->vectorNorm();
 
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
-  actor = new Actor<double, float>(alpha_u, policyDistribution);
-  control = new ActorCritic<double, float>(critic, actor, projector, toStateAction);
+  actor = new Actor<double>(alpha_u, policyDistribution);
+  control = new ActorCritic<double>(critic, actor, projector, toStateAction);
 
-  sim = new Simulator<double, float>(control, problem, 10000, 1, 1);
+  sim = new Simulator<double>(control, problem, 10000, 1, 1);
   sim->run();
   double discReward = sim->episodeR / sim->timeStep;
   std::cout << discReward << std::endl;
@@ -116,10 +116,10 @@ void ActorCriticOnPolicyOnStateTest::testNormalDistributionWithEligibility()
   policyDistribution = new NormalDistribution<double>(0.5, 1.0, projector->dimension(),
       problem->getContinuousActionList());
 
-  actor = new ActorLambda<double, float>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
-  control = new ActorCritic<double, float>(critic, actor, projector, toStateAction);
+  actor = new ActorLambda<double>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
+  control = new ActorCritic<double>(critic, actor, projector, toStateAction);
 
-  sim = new Simulator<double, float>(control, problem, 1000, 1, 1);
+  sim = new Simulator<double>(control, problem, 1000, 1, 1);
   sim->run();
   double discReward = sim->episodeR / sim->timeStep;
   std::cout << discReward << std::endl;

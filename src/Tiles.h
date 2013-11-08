@@ -306,6 +306,7 @@ class CollisionTable
 };
 
 // ============================================================================
+template<class T>
 class Tiles
 {
   protected:
@@ -315,7 +316,7 @@ class Tiles
     int coordinates[Hashing::MAX_NUM_VARS * 2 + 1]; /* one interval number per relevant dimension */
 
     int i_tmp_arr[Hashing::MAX_NUM_VARS];
-    float f_tmp_arr[Hashing::MAX_NUM_VARS];
+    T f_tmp_arr[Hashing::MAX_NUM_VARS];
 
     Hashing* hashing; /*The has function*/
     Hashing* hashUNH;
@@ -384,7 +385,7 @@ class Tiles
     void tiles(int the_tiles[],             // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
         int memory_size,           // total number of possible tiles
-        const float floats[],            // array of floating point variables
+        const T floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int ints[],                   // array of integer variables
         int num_ints)              // number of integer variables
@@ -434,7 +435,7 @@ class Tiles
     void tiles(int the_tiles[],             // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
         CollisionTable *ctable,    // total number of possible tiles
-        const float floats[],            // array of floating point variables
+        const T floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int ints[],                   // array of integer variables
         int num_ints)              // number of integer variables
@@ -482,38 +483,38 @@ class Tiles
     }
 
 // No ints
-    void tiles(int the_tiles[], int nt, int memory, const float floats[], int nf)
+    void tiles(int the_tiles[], int nt, int memory, const T floats[], int nf)
     {
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 0);
     }
 
-    void tiles(int the_tiles[], int nt, CollisionTable *ct, const float floats[], int nf)
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, const T floats[], int nf)
     {
       tiles(the_tiles, nt, ct, floats, nf, i_tmp_arr, 0);
     }
 
 //one int
-    void tiles(int the_tiles[], int nt, int memory, const float floats[], int nf, int h1)
+    void tiles(int the_tiles[], int nt, int memory, const T floats[], int nf, int h1)
     {
       i_tmp_arr[0] = h1;
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 1);
     }
 
-    void tiles(int the_tiles[], int nt, CollisionTable *ct, const float floats[], int nf, int h1)
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, const T floats[], int nf, int h1)
     {
       i_tmp_arr[0] = h1;
       tiles(the_tiles, nt, ct, floats, nf, i_tmp_arr, 1);
     }
 
 // two ints
-    void tiles(int the_tiles[], int nt, int memory, const float floats[], int nf, int h1, int h2)
+    void tiles(int the_tiles[], int nt, int memory, const T floats[], int nf, int h1, int h2)
     {
       i_tmp_arr[0] = h1;
       i_tmp_arr[1] = h2;
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 2);
     }
 
-    void tiles(int the_tiles[], int nt, CollisionTable *ct, const float floats[], int nf, int h1,
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, const T floats[], int nf, int h1,
         int h2)
     {
       i_tmp_arr[0] = h1;
@@ -522,7 +523,7 @@ class Tiles
     }
 
 // three ints
-    void tiles(int the_tiles[], int nt, int memory, const float floats[], int nf, int h1, int h2,
+    void tiles(int the_tiles[], int nt, int memory, const T floats[], int nf, int h1, int h2,
         int h3)
     {
       i_tmp_arr[0] = h1;
@@ -531,7 +532,7 @@ class Tiles
       tiles(the_tiles, nt, memory, floats, nf, i_tmp_arr, 3);
     }
 
-    void tiles(int the_tiles[], int nt, CollisionTable *ct, const float floats[], int nf, int h1,
+    void tiles(int the_tiles[], int nt, CollisionTable *ct, const T floats[], int nf, int h1,
         int h2, int h3)
     {
       i_tmp_arr[0] = h1;
@@ -680,7 +681,7 @@ class Tiles
     void tileswrap(int the_tiles[],         // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
         int memory_size,           // total number of possible tiles
-        const float floats[],            // array of floating point variables
+        const T floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int wrap_widths[],         // array of widths (length and units as in floats)
         int ints[],                  // array of integer variables
@@ -739,7 +740,7 @@ class Tiles
     void tileswrap(int the_tiles[],         // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
         CollisionTable *ctable,   // total number of possible tiles
-        const float floats[],            // array of floating point variables
+        const T floats[],            // array of floating point variables
         int num_floats,            // number of floating point variables
         int wrap_widths[],         // array of widths (length and units as in floats)
         int ints[],                  // array of integer variables

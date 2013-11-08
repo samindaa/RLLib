@@ -40,11 +40,11 @@ class MountainCarModel: public ModelBase
 
   protected:
     // RLLib
-    Environment<float>* behaviourEnvironment;
-    Environment<float>* evaluationEnvironment;
+    Environment<>* behaviourEnvironment;
+    Environment<>* evaluationEnvironment;
     Hashing* hashing;
-    Projector<double, float>* projector;
-    StateToStateAction<double, float>* toStateAction;
+    Projector<double>* projector;
+    StateToStateAction<double>* toStateAction;
 
     double alpha_v;
     double alpha_w;
@@ -60,15 +60,15 @@ class MountainCarModel: public ModelBase
 
     Trace<double>* actore;
     Traces<double>* actoreTraces;
-    ActorOffPolicy<double, float>* actor;
+    ActorOffPolicy<double>* actor;
 
     Policy<double>* behavior;
-    OffPolicyControlLearner<double, float>* control;
+    OffPolicyControlLearner<double>* control;
 
-    Simulator<double, float>* learningRunner;
-    Simulator<double, float>* evaluationRunner;
+    Simulator<double>* learningRunner;
+    Simulator<double>* evaluationRunner;
 
-    std::tr1::unordered_map<int, Simulator<double, float>*> simulators;
+    std::tr1::unordered_map<int, Simulator<double>*> simulators;
 
     RLLib::Matrix* valueFunction;
 

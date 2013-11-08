@@ -24,7 +24,7 @@
 
 #include "Environment.h"
 
-class Acrobot: public Environment<float>
+class Acrobot: public Environment<>
 {
   protected:
     Range<float>* thetaRange;
@@ -38,7 +38,7 @@ class Acrobot: public Environment<float>
 
   public:
     Acrobot() :
-        Environment<float>(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
+        Environment<>(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
             new Range<float>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
             new Range<float>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(new Range<float>(-1.0, 1.0)), m1(
             1.0), m2(1.0), l1(1.0), l2(1.0), lc1(0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), targetPosition(
@@ -81,7 +81,7 @@ class Acrobot: public Environment<float>
 
     void updateRTStep()
     {
-      DenseVector<float>& vars = *output->o_tp1;
+      DenseVector<double>& vars = *output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * resolutions->at(0);
       vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * resolutions->at(1);

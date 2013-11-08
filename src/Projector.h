@@ -33,15 +33,15 @@ namespace RLLib
  * @class T feature type
  * @class O observation type
  */
-template<class T, class O>
+template<class T>
 class Projector
 {
   public:
     virtual ~Projector()
     {
     }
-    virtual const Vector<T>* project(const Vector<O>* x, int h1) =0;
-    virtual const Vector<T>* project(const Vector<O>* x) =0;
+    virtual const Vector<T>* project(const Vector<T>* x, int h1) =0;
+    virtual const Vector<T>* project(const Vector<T>* x) =0;
     virtual double vectorNorm() const =0;
     virtual int dimension() const =0;
 };
@@ -51,8 +51,8 @@ class Projector
  * http://incompleteideas.net/rlai.cs.ualberta.ca/RLAI/RLtoolkit/tiles.html
  */
 
-template<class T, class O>
-class TileCoder: public Projector<T, O>
+template<class T>
+class TileCoder: public Projector<T>
 {
   protected:
     bool includeActiveFeature;
@@ -73,11 +73,11 @@ class TileCoder: public Projector<T, O>
       delete tileIndices;
     }
 
-    virtual void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory) =0;
-    virtual void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory,
+    virtual void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory) =0;
+    virtual void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory,
         const int& h1) =0;
 
-    const Vector<T>* project(const Vector<O>* x, int h1)
+    const Vector<T>* project(const Vector<T>* x, int h1)
     {
       vector->clear();
       if (x->empty())
@@ -95,7 +95,7 @@ class TileCoder: public Projector<T, O>
       return vector;
     }
 
-    const Vector<T>* project(const Vector<O>* x)
+    const Vector<T>* project(const Vector<T>* x)
     {
       vector->clear();
       if (x->empty())
@@ -126,15 +126,15 @@ class TileCoder: public Projector<T, O>
 
 };
 
-template<class T, class O>
-class TileCoderHashing: public TileCoder<T, O>
+template<class T>
+class TileCoderHashing: public TileCoder<T>
 {
   private:
-    Tiles* tiles;
+    Tiles<T>* tiles;
   public:
     TileCoderHashing(const int& memorySize, const int& numTiling, bool includeActiveFeature = true,
         Hashing* hashing = 0) :
-        TileCoder<T, O>(memorySize, numTiling, includeActiveFeature), tiles(new Tiles(hashing))
+        TileCoder<T>(memorySize, numTiling, includeActiveFeature), tiles(new Tiles<T>(hashing))
     {
     }
 
@@ -143,13 +143,13 @@ class TileCoderHashing: public TileCoder<T, O>
       delete tiles;
     }
 
-    void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory)
+    void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory)
     {
       tiles->tiles(theTiles->getValues(), theTiles->dimension(), memory, x->getValues(),
           x->dimension());
     }
 
-    void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory, const int& h1)
+    void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory, const int& h1)
     {
       tiles->tiles(theTiles->getValues(), theTiles->dimension(), memory, x->getValues(),
           x->dimension(), h1);
@@ -157,20 +157,20 @@ class TileCoderHashing: public TileCoder<T, O>
 
 };
 
-template<class T, class O>
-class TileCoderNoHashing: public TileCoder<T, O>
+template<class T>
+class TileCoderNoHashing: public TileCoder<T>
 {
   protected:
-    Tiles* tiles;
+    Tiles<T>* tiles;
     CollisionTable* ct;
   public:
     TileCoderNoHashing(const int& memorySize, const int& numTiling,
         bool includeActiveFeature = true) :
-        TileCoder<T, O>(memorySize, numTiling, includeActiveFeature), tiles(new Tiles)
+        TileCoder<T>(memorySize, numTiling, includeActiveFeature), tiles(new Tiles<T>)
     {
       // http://graphics.stanford.edu/~seander/bithacks.html
       // Compute the next highest power of 2 of 32-bit v
-      unsigned int v = TileCoder<T, O>::vector->dimension();
+      unsigned int v = TileCoder<T>::vector->dimension();
       v--;
       v |= v >> 1;
       v |= v >> 2;
@@ -180,8 +180,8 @@ class TileCoderNoHashing: public TileCoder<T, O>
       v++;
 
       // The vector needs to reflect the correct memory size
-      delete TileCoder<T, O>::vector;
-      TileCoder<T, O>::vector = new SVector<T>(includeActiveFeature ? v + 1 : v);
+      delete TileCoder<T>::vector;
+      TileCoder<T>::vector = new SVector<T>(includeActiveFeature ? v + 1 : v);
       ct = new CollisionTable(v, 1);
     }
 
@@ -191,22 +191,17 @@ class TileCoderNoHashing: public TileCoder<T, O>
       delete ct;
     }
 
-    void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory)
+    void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory)
     {
       tiles->tiles(theTiles->getValues(), theTiles->dimension(), ct, x->getValues(),
           x->dimension());
     }
 
-    void coder(Vector<int>* theTiles, const Vector<O>* x, const int& memory, const int& h1)
+    void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory, const int& h1)
     {
       tiles->tiles(theTiles->getValues(), theTiles->dimension(), ct, x->getValues(), x->dimension(),
           h1);
     }
-};
-
-// @@>>TODO: Yet to implement
-class IndependentTilings
-{
 };
 
 } // namespace RLLib
