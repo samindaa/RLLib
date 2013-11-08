@@ -25,16 +25,15 @@ GreedyGQFactory::~GreedyGQFactory()
     delete *iter;
 }
 
-OffPolicyControlLearner<double>* GreedyGQFactory::createLearner(ActionList* actions,
-    StateToStateAction<double>* toStateAction, Policy<double>* target,
-    Policy<double>* behavior)
+OffPolicyControlLearner<double>* GreedyGQFactory::createLearner(ActionList<double>* actions,
+    StateToStateAction<double>* toStateAction, Policy<double>* target, Policy<double>* behavior)
 {
   Trace<double>* e = new ATrace<double>(toStateAction->dimension() * actions->dimension());
   traces.push_back(e);
   GQ<double>* gq = new GQ<double>(alpha_theta, alpha_w, beta, lambda, e);
   predictors.push_back(gq);
-  OffPolicyControlLearner<double>* controlGQ = new GreedyGQ<double>(target,
-      behavior, actions, toStateAction, gq);
+  OffPolicyControlLearner<double>* controlGQ = new GreedyGQ<double>(target, behavior, actions,
+      toStateAction, gq);
   offPolicyControlLearners.push_back(controlGQ);
   return controlGQ;
 }
@@ -75,9 +74,9 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
   targetDistribution->at(1) = 1.0 - targetLeftProbability;
   Policy<double>* behaviorPolicy = problem->getBehaviorPolicy(behaviourLeftProbability);
   Policy<double>* targetPolicy = new ConstantPolicy<double>(problem->actions(), targetDistribution);
-  FSGAgentState<>* agentState = new FSGAgentState<>(problem);
-  OffPolicyControlLearner<double>* learner = learnerFactory->createLearner(
-      problem->actions(), agentState, targetPolicy, behaviorPolicy);
+  FSGAgentState* agentState = new FSGAgentState(problem);
+  OffPolicyControlLearner<double>* learner = learnerFactory->createLearner(problem->actions(),
+      agentState, targetPolicy, behaviorPolicy);
   Vector<double>* vFun = new PVector<double>(agentState->dimension());
 
   int nbEpisode = 0;
@@ -111,7 +110,7 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
 }
 
 void GQTest::computeValueFunction(const OffPolicyControlLearner<double>* learner,
-    const FSGAgentState<>* agentState, Vector<double>* vFun)
+    const FSGAgentState* agentState, Vector<double>* vFun)
 {
   const std::map<GraphState*, int>* stateIndexes = agentState->getStateIndexes();
   for (std::map<GraphState*, int>::const_iterator iter = stateIndexes->begin();

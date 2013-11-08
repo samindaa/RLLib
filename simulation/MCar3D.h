@@ -105,7 +105,7 @@ class MCar3D: public Environment<>
       yvelocity = 0.;
     }
 
-    void update_velocity(const Action* act)
+    void update_velocity(const Action<double>* act)
     {
 
       switch (act->id())
@@ -170,7 +170,7 @@ class MCar3D: public Environment<>
       updateRTStep();
     }
 
-    void step(const Action* a)
+    void step(const Action<double>* a)
     {
       update_velocity(a);
       update_position();

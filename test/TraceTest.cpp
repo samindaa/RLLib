@@ -25,7 +25,7 @@ RLLIB_TEST_MAKE(TraceTest)
 
 void TraceTest::runTestOnOnMountainCar(Projector<double>* projector, Trace<double>* trace)
 {
-  Environment<>* problem = new MCar2D;
+  Environment<double>* problem = new MountainCar<double>;
   problem->setResolution(9.0);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
       projector, problem->getDiscreteActionList());

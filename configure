@@ -19,7 +19,7 @@ ignore="visualization"
 
 #compiler and linker flags
 cxx="g++"
-optional_cflags="-I. -I./src -I./test -I./simulation -Wall -Werror -O3 -Wno-deprecated -fPIC"
+optional_cflags="-I. -I./src -I./test -I./simulation -Wall -Werror  -m32 -O3 -Wno-deprecated -fPIC"
 optional_lflags=""
 
 builddir="./build"

@@ -101,11 +101,11 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double>
 {
   protected:
     Projector<double>* projector;
-    ActionList* actions;
+    ActionList<double>* actions;
     Representations<double>* phis;
 
   public:
-    NoStateProblemStateToStateAction(Projector<double>* projector, ActionList* actions) :
+    NoStateProblemStateToStateAction(Projector<double>* projector, ActionList<double>* actions) :
         projector(projector), actions(actions), phis(
             new Representations<double>(projector->dimension(), actions))
     {
@@ -125,7 +125,7 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double>
         phis->clear();
         return phis;
       }
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (ActionList<double>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         if (actions->dimension() == 1)
           phis->set(projector->project(x), *a); // projection from whole space
@@ -135,7 +135,7 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double>
       return phis;
     }
 
-    const ActionList* getActionList() const
+    const ActionList<double>* getActionList() const
     {
       return actions;
     }

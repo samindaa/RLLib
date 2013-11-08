@@ -95,7 +95,7 @@ class Acrobot: public Environment<>
       observations->at(3) = theta2Dot;
     }
 
-    void step(const Action* action)
+    void step(const Action<double>* action)
     {
       float torque = actionRange->bound(action->at(0));
       float d1, d2, phi2, phi1, theta2ddot, theta1ddot;

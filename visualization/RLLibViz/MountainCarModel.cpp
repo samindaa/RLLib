@@ -13,8 +13,8 @@ MountainCarModel::MountainCarModel(QObject *parent) :
     ModelBase(parent)
 {
   // RLLib:
-  behaviourEnvironment = new MCar2D;
-  evaluationEnvironment = new MCar2D;
+  behaviourEnvironment = new MountainCar<double>;
+  evaluationEnvironment = new MountainCar<double>;
   hashing = new MurmurHashing;
   projector = new TileCoderHashing<double>(1000000, 10, true, hashing);
   toStateAction = new StateActionTilings<double>(projector,

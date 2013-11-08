@@ -28,39 +28,45 @@
 namespace RLLib
 {
 
+template<class T>
 class Action
 {
   private:
     int actionID;
-    std::vector<double> values;
+    std::vector<T> values;
   public:
     explicit Action(const int& actionID) :
         actionID(actionID)
     {
     }
 
-    void push_back(const double& value)
+    void push_back(const T& value)
     {
       values.push_back(value);
     }
 
-    const double at(const int& i = 0 /*default to a single action*/) const
+    T at(const int& i = 0 /*default to a single action*/)
     {
       return values.at(i);
     }
 
-    void update(const unsigned int& i, const double& value)
+    const T at(const int& i = 0 /*default to a single action*/) const
     {
-      assert(values.size() != 0 && (i >= 0 && i < values.size()));
+      return values.at(i);
+    }
+
+    void update(const int& i, const T& value)
+    {
+      assert(values.size() != 0 && (i >= 0 && i < (int )values.size()));
       values[i] = value;
     }
 
-    const bool operator==(const Action& that) const
+    const bool operator==(const Action<T>& that) const
     {
       return actionID == that.actionID;
     }
 
-    const bool operator!=(const Action& that) const
+    const bool operator!=(const Action<T>& that) const
     {
       return actionID != that.actionID;
     }
@@ -78,25 +84,25 @@ class Action
 
 };
 
+template<class T>
 class ActionList
 {
   protected:
-    std::vector<Action*> actions;
+    std::vector<Action<T>*> actions;
   public:
     virtual ~ActionList()
     {
     }
 
     virtual const int dimension() const =0;
-    virtual const Action* operator[](const int& index) const =0;
-    virtual const Action* at(const int& index) const =0;
-    virtual void push_back(const int& index, const double& value) =0;
+    virtual const Action<T>* operator[](const int& index) const =0;
+    virtual const Action<T>* at(const int& index) const =0;
+    virtual void push_back(const int& index, const T& value) =0;
     virtual void erase(const int& index) =0;
-    virtual void update(const int& actionIndex, const unsigned int& vectorIndex,
-        const double& value) =0;
+    virtual void update(const int& actionIndex, const int& vectorIndex, const T& value) =0;
 
-    typedef std::vector<Action*>::iterator iterator;
-    typedef std::vector<Action*>::const_iterator const_iterator;
+    typedef typename std::vector<Action<T>*>::iterator iterator;
+    typedef typename std::vector<Action<T>*>::const_iterator const_iterator;
 
     iterator begin()
     {
@@ -120,44 +126,48 @@ class ActionList
 
 };
 
-class GeneralActionList: public ActionList
+template<class T>
+class GeneralActionList: public ActionList<T>
 {
+  private:
+    typedef ActionList<T> Base;
   public:
     GeneralActionList(const int& numActions)
     {
       for (int i = 0; i < numActions; i++)
-        actions.push_back(new Action(i));
+        Base::actions.push_back(new Action<T>(i));
     }
     virtual ~GeneralActionList()
     {
-      for (std::vector<Action*>::iterator iter = actions.begin(); iter != actions.end(); ++iter)
+      for (typename std::vector<Action<T>*>::iterator iter = Base::actions.begin();
+          iter != Base::actions.end(); ++iter)
         delete *iter;
-      actions.clear();
+      Base::actions.clear();
     }
 
-    const Action* operator[](const int& index) const
+    const Action<T>* operator[](const int& index) const
     {
-      return actions.at(index);
+      return Base::actions.at(index);
     }
 
-    const Action* at(const int& index) const
+    const Action<T>* at(const int& index) const
     {
-      return actions.at(index);
+      return Base::actions.at(index);
     }
 
-    void push_back(const int& index, const double& value)
+    void push_back(const int& index, const T& value)
     {
-      actions.at(index)->push_back(value);
+      Base::actions.at(index)->push_back(value);
     }
 
     void erase(const int& index)
     {
-      std::vector<Action*>::iterator iter = actions.begin();
-      while (iter != actions.end())
+      typename std::vector<Action<T>*>::iterator iter = Base::actions.begin();
+      while (iter != Base::actions.end())
       {
         if ((*iter)->id() == index)
         {
-          actions.erase(iter);
+          Base::actions.erase(iter);
           break;
         }
         else
@@ -165,14 +175,14 @@ class GeneralActionList: public ActionList
       }
     }
 
-    void update(const int& actionIndex, const unsigned int& vectorIndex, const double& value)
+    void update(const int& actionIndex, const int& vectorIndex, const T& value)
     {
-      actions.at(actionIndex)->update(vectorIndex, value);
+      Base::actions.at(actionIndex)->update(vectorIndex, value);
     }
 
     const int dimension() const
     {
-      return actions.size();
+      return Base::actions.size();
     }
 };
 

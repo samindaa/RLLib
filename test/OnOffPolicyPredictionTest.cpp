@@ -17,9 +17,8 @@ double OnOffPolicyPredictionTest::distanceToSolution(const Vector<double>* solut
   return maxValue;
 }
 
-void OnOffPolicyPredictionTest::testTD(FSGAgentState<double>* agentState,
-    FiniteStateGraph* graph, OnPolicyTD<double>* td, const int& nbEpisodeMax,
-    const double& precision)
+void OnOffPolicyPredictionTest::testTD(FSGAgentState* agentState, FiniteStateGraph* graph,
+    OnPolicyTD<double>* td, const int& nbEpisodeMax, const double& precision)
 {
   Timer timer;
   timer.start();
@@ -57,8 +56,8 @@ void OnOffPolicyPredictionTest::testTD(FSGAgentState<double>* agentState,
   delete x_tp1;
 }
 
-void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState<double>* agentState,
-    RandomWalk* problem, OffPolicyTD<double>* gtd, const int& nbEpisodeMax, const double& precision,
+void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState* agentState, RandomWalk* problem,
+    OffPolicyTD<double>* gtd, const int& nbEpisodeMax, const double& precision,
     const double& targetLeftProbability, const double& behaviourLeftProbability)
 {
   Timer timer;
@@ -113,7 +112,7 @@ void OnOffPolicyPredictionTest::testOnLineProblem()
 {
   {
     FiniteStateGraph* graph = new LineProblem;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     OnPolicyTD<double>* td = new TD<double>(0.01 / agentState->vectorNorm(), graph->gamma(),
         agentState->dimension());
     testTD(agentState, graph, td, 100000, 0.01);
@@ -125,7 +124,7 @@ void OnOffPolicyPredictionTest::testOnLineProblem()
 
   {
     FiniteStateGraph* graph = new LineProblem;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new ATrace<double>(agentState->dimension());
     OnPolicyTD<double>* td = new TDLambda<double>(0.01 / agentState->vectorNorm(), graph->gamma(),
         0.5, e);
@@ -138,7 +137,7 @@ void OnOffPolicyPredictionTest::testOnLineProblem()
 
   {
     FiniteStateGraph* graph = new LineProblem;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new ATrace<double>(agentState->dimension());
     OnPolicyTD<double>* td = new TDLambda<double>(0.01 / agentState->vectorNorm(), graph->gamma(),
         1.0, e);
@@ -151,7 +150,7 @@ void OnOffPolicyPredictionTest::testOnLineProblem()
 
   {
     FiniteStateGraph* graph = new LineProblem;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OnPolicyTD<double>* td = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.1, e);
@@ -164,7 +163,7 @@ void OnOffPolicyPredictionTest::testOnLineProblem()
 
   {
     FiniteStateGraph* graph = new LineProblem;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OnPolicyTD<double>* td = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.2, e);
@@ -181,7 +180,7 @@ void OnOffPolicyPredictionTest::testOnRandomWalkProblem()
   //srand(0); // For consistency
   {
     FiniteStateGraph* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     OnPolicyTD<double>* td = new TD<double>(0.01 / agentState->vectorNorm(), graph->gamma(),
         agentState->dimension());
     testTD(agentState, graph, td, 100000, 0.01);
@@ -193,7 +192,7 @@ void OnOffPolicyPredictionTest::testOnRandomWalkProblem()
 
   {
     FiniteStateGraph* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new ATrace<double>(agentState->dimension());
     OnPolicyTD<double>* td = new TDLambda<double>(0.01 / agentState->vectorNorm(), graph->gamma(),
         0.5, e);
@@ -206,7 +205,7 @@ void OnOffPolicyPredictionTest::testOnRandomWalkProblem()
 
   {
     FiniteStateGraph* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new ATrace<double>(agentState->dimension());
     OnPolicyTD<double>* td = new TDLambda<double>(0.01 / agentState->vectorNorm(), graph->gamma(),
         1.0, e);
@@ -219,7 +218,7 @@ void OnOffPolicyPredictionTest::testOnRandomWalkProblem()
 
   {
     FiniteStateGraph* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OnPolicyTD<double>* td = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.1, e);
@@ -232,7 +231,7 @@ void OnOffPolicyPredictionTest::testOnRandomWalkProblem()
 
   {
     FiniteStateGraph* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OnPolicyTD<double>* td = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.2, e);
@@ -249,7 +248,7 @@ void OnOffPolicyPredictionTest::testOffPolicy()
 
   {
     RandomWalk* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OffPolicyTD<double>* gtd = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.0, e);
@@ -262,7 +261,7 @@ void OnOffPolicyPredictionTest::testOffPolicy()
 
   {
     RandomWalk* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OffPolicyTD<double>* gtd = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.0, e);
@@ -279,7 +278,7 @@ void OnOffPolicyPredictionTest::testOffPolicyWithLambda()
 {
   {
     RandomWalk* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OffPolicyTD<double>* gtd = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.1, e);
@@ -292,7 +291,7 @@ void OnOffPolicyPredictionTest::testOffPolicyWithLambda()
 
   {
     RandomWalk* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OffPolicyTD<double>* gtd = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.1, e);
@@ -305,7 +304,7 @@ void OnOffPolicyPredictionTest::testOffPolicyWithLambda()
 
   {
     RandomWalk* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OffPolicyTD<double>* gtd = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.2, e);
@@ -318,7 +317,7 @@ void OnOffPolicyPredictionTest::testOffPolicyWithLambda()
 
   {
     RandomWalk* graph = new RandomWalk;
-    FSGAgentState<>* agentState = new FSGAgentState<>(graph);
+    FSGAgentState* agentState = new FSGAgentState(graph);
     Trace<double>* e = new AMaxTrace<double>(agentState->dimension());
     OffPolicyTD<double>* gtd = new GTDLambda<double>(0.01 / agentState->vectorNorm(),
         0.5 / agentState->vectorNorm(), graph->gamma(), 0.2, e);

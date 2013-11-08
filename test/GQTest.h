@@ -16,7 +16,7 @@ class OffPolicyLearnerFactory
     virtual ~OffPolicyLearnerFactory()
     {
     }
-    virtual OffPolicyControlLearner<double>* createLearner(ActionList* actions,
+    virtual OffPolicyControlLearner<double>* createLearner(ActionList<double>* actions,
         StateToStateAction<double>* toStateAction, Policy<double>* target,
         Policy<double>* behavior) =0;
 
@@ -41,7 +41,7 @@ class GreedyGQFactory: public OffPolicyLearnerFactory
         const double& lambda);
     ~GreedyGQFactory();
 
-    OffPolicyControlLearner<double>* createLearner(ActionList* actions,
+    OffPolicyControlLearner<double>* createLearner(ActionList<double>* actions,
         StateToStateAction<double>* toStateAction, Policy<double>* target,
         Policy<double>* behavior);
     double getBeta() const;
@@ -59,7 +59,7 @@ class GQTest: public GQTestBase
     void testGQOnRandomWalk(const double& targetLeftProbability,
         const double& behaviourLeftProbability, OffPolicyLearnerFactory* learnerFactory);
     void computeValueFunction(const OffPolicyControlLearner<double>* learner,
-        const FSGAgentState<>* agentState, Vector<double>* vFun);
+        const FSGAgentState* agentState, Vector<double>* vFun);
 
 };
 

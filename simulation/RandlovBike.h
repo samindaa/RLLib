@@ -393,7 +393,7 @@ class RandlovBike: public Environment<>
       updateRTStep();
     }
 
-    void step(const Action& action)
+    void step(const Action<double>& action)
     {
       bike(execute_action, action.id());
       updateRTStep();

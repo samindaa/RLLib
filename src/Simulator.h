@@ -67,7 +67,7 @@ class Simulator
     Control<T>* agent;
     Environment<T>* environment;
 
-    const Action* a_t;
+    const Action<T>* a_t;
     Vector<T>* x_0; // << this is the terminal state
     Vector<T>* x_t;
     Vector<T>* x_tp1;

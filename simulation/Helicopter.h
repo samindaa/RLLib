@@ -325,7 +325,7 @@ class HelicopterDynamics
       return observation;
     }
 
-    void step(const Action* agentAction)
+    void step(const Action<double>* agentAction)
     {
       static double a[4];
       // saturate all the actions, b/c the actuators are limited:
@@ -452,7 +452,7 @@ class Helicopter: public Environment<>
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 
-    void step(const Action* action)
+    void step(const Action<double>* action)
     {
       heliDynamics.step(action);
       ++step_time;

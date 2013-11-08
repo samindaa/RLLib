@@ -42,7 +42,7 @@
 #include "Projector.h"
 #include "ControlAlgorithm.h"
 #include "StateToStateAction.h"
-#include "MCar2D.h"
+#include "MountainCar.h"
 #include "NoStateProblem.h"
 #include "Simulator.h"
 #include "StateGraph.h"

@@ -24,16 +24,6 @@
 
 #include "HeaderTest.h"
 
-// From the RLLib
-#include "Vector.h"
-#include "Trace.h"
-#include "Projector.h"
-#include "ControlAlgorithm.h"
-
-// From the simulation
-#include "MCar2D.h"
-#include "Simulator.h"
-
 RLLIB_TEST(MountainCarTest)
 
 class MountainCarTest: public MountainCarTestBase

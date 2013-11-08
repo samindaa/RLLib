@@ -47,23 +47,23 @@ class Policy
     {
     }
     virtual void update(const Representations<T>* phis) =0;
-    virtual double pi(const Action* a) =0;
-    virtual const Action* sampleAction() =0;
-    virtual const Action* sampleBestAction() =0;
+    virtual double pi(const Action<T>* a) =0;
+    virtual const Action<T>* sampleAction() =0;
+    virtual const Action<T>* sampleBestAction() =0;
 };
 
 class Policies
 {
   public:
     template<class T>
-    static const Action* sampleAction(Policy<T>* policy, const Representations<T>* phis)
+    static const Action<T>* sampleAction(Policy<T>* policy, const Representations<T>* phis)
     {
       policy->update(phis);
       return policy->sampleAction();
     }
 
     template<class T>
-    static const Action* sampleBestAction(Policy<T>* policy, const Representations<T>* phis)
+    static const Action<T>* sampleBestAction(Policy<T>* policy, const Representations<T>* phis)
     {
       policy->update(phis);
       return policy->sampleBestAction();
@@ -88,7 +88,7 @@ class PolicyDistribution: public virtual Policy<T>
     {
     }
     virtual const Vectors<T>& computeGradLog(const Representations<T>* phis,
-        const Action* action) =0;
+        const Action<T>* action) =0;
     virtual Vectors<T>* parameters() const =0;
 };
 
@@ -103,14 +103,14 @@ class NormalDistribution: public PolicyDistribution<T>
     Vector<T>* gradMean;
     Vector<T>* gradStddev;
     Vector<T>* x;
-    ActionList* actions;
+    ActionList<T>* actions;
     Vectors<T>* multiu;
     Vectors<T>* multigrad;
     const int defaultAction;
   public:
 
     NormalDistribution(const double& initialMean, const double& initialStddev,
-        const int& nbFeatures, ActionList* actions) :
+        const int& nbFeatures, ActionList<T>* actions) :
         initialMean(initialMean), initialStddev(initialStddev), sigma2(0), mean(0), stddev(0), meanStep(
             0), stddevStep(0), u_mean(new PVector<T>(nbFeatures)), u_stddev(
             new PVector<T>(nbFeatures)), gradMean(new SVector<T>(u_mean->dimension())), gradStddev(
@@ -145,33 +145,33 @@ class NormalDistribution: public PolicyDistribution<T>
       sigma2 = stddev * stddev;
     }
 
-    double pi(const Action* a)
+    double pi(const Action<T>* a)
     {
       return Probabilistic::gaussianProbability(a->at(defaultAction), mean, stddev);
     }
 
   public:
 
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       actions->update(defaultAction, defaultAction,
           Probabilistic::nextNormalGaussian() * stddev + mean);
       return actions->at(defaultAction);
     }
 
-    const Action* sampleBestAction()
+    const Action<T>* sampleBestAction()
     {
       return sampleAction();
     }
 
-    virtual void updateStep(const Action* action)
+    virtual void updateStep(const Action<T>* action)
     {
       double a = action->at(defaultAction);
       meanStep = (a - mean) / sigma2;
       stddevStep = (a - mean) * (a - mean) / sigma2 - 1.0;
     }
 
-    const Vectors<T>& computeGradLog(const Representations<T>* phi, const Action* action)
+    const Vectors<T>& computeGradLog(const Representations<T>* phi, const Action<T>* action)
     {
       assert((phi->dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
@@ -195,7 +195,7 @@ class NormalDistributionScaled: public NormalDistribution<T>
     typedef NormalDistribution<T> super;
 
     NormalDistributionScaled(const double& initialMean, const double& initialStddev,
-        const int& nbFeatures, ActionList* actions) :
+        const int& nbFeatures, ActionList<T>* actions) :
         NormalDistribution<T>(initialMean, initialStddev, nbFeatures, actions)
     {
     }
@@ -204,7 +204,7 @@ class NormalDistributionScaled: public NormalDistribution<T>
     {
     }
 
-    virtual void updateStep(const Action* action)
+    virtual void updateStep(const Action<T>* action)
     {
       double a = action->at(super::defaultAction);
       super::meanStep = (a - super::mean);
@@ -221,7 +221,7 @@ class NormalDistributionSkewed: public NormalDistribution<T>
     typedef NormalDistribution<T> super;
 
     NormalDistributionSkewed(const double& initialMean, const double& initialStddev,
-        const int& nbFeatures, ActionList* actions) :
+        const int& nbFeatures, ActionList<T>* actions) :
         NormalDistribution<T>(initialMean, initialStddev, nbFeatures, actions)
     {
     }
@@ -230,7 +230,7 @@ class NormalDistributionSkewed: public NormalDistribution<T>
     {
     }
 
-    virtual void updateStep(const Action* action)
+    virtual void updateStep(const Action<T>* action)
     {
       double a = action->at(super::defaultAction);
       super::meanStep = (a - super::mean);
@@ -243,17 +243,17 @@ template<class T>
 class ScaledPolicyDistribution: public PolicyDistribution<T>
 {
   protected:
-    ActionList* actions;
+    ActionList<T>* actions;
     PolicyDistribution<T>* policy;
     Range<T>* policyRange;
     Range<T>* problemRange;
-    Action* a_t;
+    Action<T>* a_t;
 
   public:
-    ScaledPolicyDistribution(ActionList* actions, PolicyDistribution<T>* policy,
+    ScaledPolicyDistribution(ActionList<T>* actions, PolicyDistribution<T>* policy,
         Range<T>* policyRange, Range<T>* problemRange) :
         actions(actions), policy(policy), policyRange(policyRange), problemRange(problemRange), a_t(
-            new Action(0))
+            new Action<T>(0))
     {
       a_t->push_back(0.0);
     }
@@ -276,7 +276,7 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
       return (a * range->length() / 2.0) + range->center();
     }
 
-    const Action* problemToPolicy(const double& problemAction)
+    const Action<T>* problemToPolicy(const double& problemAction)
     {
       double normalizedAction = normalize(problemRange, problemAction);
       double scaledAction = scale(policyRange, normalizedAction);
@@ -284,7 +284,7 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
       return a_t;
     }
 
-    const Action* policyToProblem(const double& policyAction)
+    const Action<T>* policyToProblem(const double& policyAction)
     {
       double normalizedAction = normalize(policyRange, policyAction);
       double scaledAction = scale(problemRange, normalizedAction);
@@ -298,23 +298,23 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
       policy->update(phis);
     }
 
-    double pi(const Action* a)
+    double pi(const Action<T>* a)
     {
       return policy->pi(problemToPolicy(a->at(0)));
     }
 
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       actions->update(0, 0, policyToProblem(policy->sampleAction()->at(0))->at(0));
       return actions->at(0);
     }
 
-    const Action* sampleBestAction()
+    const Action<T>* sampleBestAction()
     {
       return sampleAction();
     }
 
-    const Vectors<T>& computeGradLog(const Representations<T>* phis, const Action* action)
+    const Vectors<T>& computeGradLog(const Representations<T>* phis, const Action<T>* action)
     {
       return policy->computeGradLog(phis, problemToPolicy(action->at(0)));
     }
@@ -329,15 +329,15 @@ template<class T>
 class StochasticPolicy: public virtual DiscreteActionPolicy<T>
 {
   protected:
-    ActionList* actions;
+    ActionList<T>* actions;
     PVector<double>* distribution;
   public:
-    StochasticPolicy(ActionList* actions) :
+    StochasticPolicy(ActionList<T>* actions) :
         actions(actions), distribution(new PVector<double>(actions->dimension()))
     {
     }
 
-    StochasticPolicy(ActionList* actions, DenseVector<double>* distribution) :
+    StochasticPolicy(ActionList<T>* actions, DenseVector<double>* distribution) :
         actions(actions), distribution(new PVector<double>(actions->dimension()))
     {
       assert((int )actions->dimension() == distribution->dimension());
@@ -350,17 +350,17 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
       delete distribution;
     }
 
-    double pi(const Action* action)
+    double pi(const Action<T>* action)
     {
       return distribution->at(action->id());
     }
 
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       Boundedness::checkDistribution(*distribution);
       double random = Probabilistic::nextDouble();
       double sum = 0;
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         sum += distribution->at((*a)->id());
         if (sum >= random)
@@ -369,7 +369,7 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
       return actions->at(actions->dimension() - 1);
     }
 
-    const Action* sampleBestAction()
+    const Action<T>* sampleBestAction()
     {
       return sampleAction();
     }
@@ -386,7 +386,7 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
     Vectors<T>* multigrad;
     typedef StochasticPolicy<T> super;
   public:
-    BoltzmannDistribution(const int& numFeatures, ActionList* actions) :
+    BoltzmannDistribution(const int& numFeatures, ActionList<T>* actions) :
         StochasticPolicy<T>(actions), avg(new SVector<T>(numFeatures)), grad(
             new SVector<T>(numFeatures)), u(new PVector<T>(numFeatures)), multiu(new Vectors<T>()), multigrad(
             new Vectors<T>())
@@ -415,14 +415,16 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       // Therefore, we multiply top and bottom of the hypothesis by the same
       // constant without changing the output.
       double maxValue = 0;
-      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = super::actions->begin();
+          a != super::actions->end(); ++a)
       {
         double tmp = u->dot(phi->at(*a));
         if (tmp > maxValue)
           maxValue = tmp;
       }
 
-      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = super::actions->begin();
+          a != super::actions->end(); ++a)
       {
         const int id = (*a)->id();
         super::distribution->at(id) = exp(u->dot(phi->at(*a)) - maxValue);
@@ -431,7 +433,8 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
         avg->addToSelf(super::distribution->at(id), phi->at(*a));
       }
 
-      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = super::actions->begin();
+          a != super::actions->end(); ++a)
       {
         const int id = (*a)->id();
         super::distribution->at(id) /= sum;
@@ -440,7 +443,7 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       avg->mapMultiplyToSelf(1.0 / sum);
     }
 
-    const Vectors<T>& computeGradLog(const Representations<T>* phi, const Action* action)
+    const Vectors<T>& computeGradLog(const Representations<T>* phi, const Action<T>* action)
     {
       grad->set(phi->at(action));
       grad->subtractToSelf(avg);
@@ -452,17 +455,17 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       return multiu;
     }
 
-    double pi(const Action* action)
+    double pi(const Action<T>* action)
     {
       return super::pi(action);
     }
 
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       return super::sampleAction();
     }
 
-    const Action* sampleBestAction()
+    const Action<T>* sampleBestAction()
     {
       return super::sampleBestAction();
     }
@@ -476,7 +479,7 @@ class SoftMax: public StochasticPolicy<T>
     double temperature;
     typedef StochasticPolicy<T> super;
   public:
-    SoftMax(Predictor<T>* predictor, ActionList* actions, const double temperature = 1.0) :
+    SoftMax(Predictor<T>* predictor, ActionList<T>* actions, const double temperature = 1.0) :
         StochasticPolicy<T>(actions), predictor(predictor), temperature(temperature)
     {
     }
@@ -494,14 +497,16 @@ class SoftMax: public StochasticPolicy<T>
       // Therefore, we multiply top and bottom of the hypothesis by the same
       // constant without changing the output.
       double maxValue = 0;
-      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = super::actions->begin();
+          a != super::actions->end(); ++a)
       {
         double tmp = predictor->predict(phi->at(*a));
         if (tmp > maxValue)
           maxValue = tmp;
       }
 
-      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = super::actions->begin();
+          a != super::actions->end(); ++a)
       {
         const int id = (*a)->id();
         super::distribution->at(id) = exp(
@@ -510,7 +515,8 @@ class SoftMax: public StochasticPolicy<T>
         sum += super::distribution->at(id);
       }
 
-      for (ActionList::const_iterator a = super::actions->begin(); a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = super::actions->begin();
+          a != super::actions->end(); ++a)
       {
         const int id = (*a)->id();
         super::distribution->at(id) /= sum;
@@ -523,9 +529,9 @@ template<class T>
 class RandomPolicy: public Policy<T>
 {
   protected:
-    ActionList* actions;
+    ActionList<T>* actions;
   public:
-    RandomPolicy(ActionList* actions) :
+    RandomPolicy(ActionList<T>* actions) :
         actions(actions)
     {
     }
@@ -537,15 +543,15 @@ class RandomPolicy: public Policy<T>
     void update(const Representations<T>* phi)
     {
     }
-    double pi(const Action* a)
+    double pi(const Action<T>* a)
     {
       return 1.0 / actions->dimension();
     }
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       return actions->at(rand() % actions->dimension());
     }
-    const Action* sampleBestAction()
+    const Action<T>* sampleBestAction()
     {
       assert(false);
       return actions->at(0);
@@ -556,11 +562,11 @@ template<class T>
 class RandomBiasPolicy: public Policy<T>
 {
   protected:
-    ActionList* actions;
-    const Action* prev;
+    ActionList<T>* actions;
+    const Action<T>* prev;
     PVector<double>* distribution;
   public:
-    RandomBiasPolicy(ActionList* actions) :
+    RandomBiasPolicy(ActionList<T>* actions) :
         actions(actions), prev(&actions->at(0)), distribution(
             new PVector<double>(actions->dimension()))
     {
@@ -579,7 +585,7 @@ class RandomBiasPolicy: public Policy<T>
         distribution->at(0) = 1.0;
       else
       {
-        for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+        for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
         {
           const int id = (*a)->id();
           if (id == prev->id())
@@ -591,7 +597,7 @@ class RandomBiasPolicy: public Policy<T>
       // chose an action
       double random = Probabilistic::nextDouble();
       double sum = 0;
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         sum += distribution->at((*a)->id());
         if (sum >= random)
@@ -603,16 +609,16 @@ class RandomBiasPolicy: public Policy<T>
       prev = &actions->at(actions->dimension() - 1);
     }
 
-    double pi(const Action* action)
+    double pi(const Action<T>* action)
     {
       return distribution->at(action->id());
     }
 
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       return *prev;
     }
-    const Action* sampleBestAction()
+    const Action<T>* sampleBestAction()
     {
       assert(false);
       return actions->at(0);
@@ -624,12 +630,12 @@ class Greedy: public DiscreteActionPolicy<T>
 {
   protected:
     Predictor<T>* predictor;
-    ActionList* actions;
+    ActionList<T>* actions;
     double* actionValues;
-    const Action* bestAction;
+    const Action<T>* bestAction;
 
   public:
-    Greedy(Predictor<T>* predictor, ActionList* actions) :
+    Greedy(Predictor<T>* predictor, ActionList<T>* actions) :
         predictor(predictor), actions(actions), actionValues(new double[actions->dimension()]), bestAction(
             0)
     {
@@ -644,7 +650,8 @@ class Greedy: public DiscreteActionPolicy<T>
 
     void updateActionValues(const Representations<T>* phi_tp1)
     {
-      for (ActionList::const_iterator iter = actions->begin(); iter != actions->end(); ++iter)
+      for (typename ActionList<T>::const_iterator iter = actions->begin(); iter != actions->end();
+          ++iter)
       {
         const int id = (*iter)->id();
         actionValues[id] = predictor->predict(phi_tp1->at(*iter));
@@ -669,17 +676,17 @@ class Greedy: public DiscreteActionPolicy<T>
       findBestAction();
     }
 
-    double pi(const Action* a)
+    double pi(const Action<T>* a)
     {
       return (bestAction->id() == a->id()) ? 1.0f : 0.0f;
     }
 
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       return bestAction;
     }
 
-    const Action* sampleBestAction()
+    const Action<T>* sampleBestAction()
     {
       return bestAction;
     }
@@ -692,12 +699,12 @@ class EpsilonGreedy: public Greedy<T>
   protected:
     double epsilon;
   public:
-    EpsilonGreedy(Predictor<T>* predictor, ActionList* actions, const double& epsilon) :
+    EpsilonGreedy(Predictor<T>* predictor, ActionList<T>* actions, const double& epsilon) :
         Greedy<T>(predictor, actions), epsilon(epsilon)
     {
     }
 
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       if (Probabilistic::nextDouble() < epsilon)
         return Greedy<T>::actions->at(Probabilistic::nextInt(Greedy<T>::actions->dimension()));
@@ -705,7 +712,7 @@ class EpsilonGreedy: public Greedy<T>
         return Greedy<T>::bestAction;
     }
 
-    double pi(const Action* a)
+    double pi(const Action<T>* a)
     {
       double probability = (a->id() == Greedy<T>::bestAction->id()) ? 1.0 - epsilon : 0.0;
       return probability + epsilon / Greedy<T>::actions->dimension();
@@ -719,12 +726,12 @@ class BoltzmannDistributionPerturbed: public Policy<T>
 {
   protected:
     Vector<T>* u;
-    ActionList* actions;
+    ActionList<T>* actions;
     PVector<double>* distribution;
     double epsilon;
     double perturbation;
   public:
-    BoltzmannDistributionPerturbed(Vector<T>* u, ActionList* actions, const double& epsilon,
+    BoltzmannDistributionPerturbed(Vector<T>* u, ActionList<T>* actions, const double& epsilon,
         const double& perturbation) :
         u(u), actions(actions), distribution(new PVector<double>(actions->dimension())), epsilon(
             epsilon), perturbation(perturbation)
@@ -745,14 +752,14 @@ class BoltzmannDistributionPerturbed: public Policy<T>
       // Therefore, we multiply top and bottom of the hypothesis by the same
       // constant without changing the output.
       double maxValue = 0;
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         double tmp = u->dot(phis->at(*a));
         if (tmp > maxValue)
           maxValue = tmp;
       }
 
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         const int id = (*a)->id();
         double perturb = Probabilistic::nextDouble() < epsilon ? perturbation : 0.0f;
@@ -761,7 +768,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
         sum += distribution->at(id);
       }
 
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         const int id = (*a)->id();
         distribution->at(id) /= sum;
@@ -770,16 +777,16 @@ class BoltzmannDistributionPerturbed: public Policy<T>
 
     }
 
-    double pi(const Action* action)
+    double pi(const Action<T>* action)
     {
       return distribution->at(action->id());
     }
 
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       double random = Probabilistic::nextDouble();
       double sum = 0;
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         sum += distribution->at((*a)->id());
         if (sum >= random)
@@ -788,7 +795,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
       return actions->at(actions->dimension() - 1);
     }
 
-    const Action* sampleBestAction()
+    const Action<T>* sampleBestAction()
     {
       return sampleAction();
     }
@@ -799,9 +806,9 @@ template<class T>
 class SingleActionPolicy: public Policy<T>
 {
   private:
-    ActionList* actions;
+    ActionList<T>* actions;
   public:
-    SingleActionPolicy(ActionList* actions) :
+    SingleActionPolicy(ActionList<T>* actions) :
         actions(actions)
     {
       assert(actions->dimension() == 1);
@@ -811,17 +818,17 @@ class SingleActionPolicy: public Policy<T>
     {
     }
 
-    double pi(const Action* a)
+    double pi(const Action<T>* a)
     {
       return a->id() == actions->at(0)->id() ? 1.0 : 0.0;
     }
 
-    const Action* sampleAction()
+    const Action<T>* sampleAction()
     {
       return actions->at(0);
     }
 
-    const Action* sampleBestAction()
+    const Action<T>* sampleBestAction()
     {
       return sampleAction();
     }
@@ -831,7 +838,7 @@ template<class T>
 class ConstantPolicy: public StochasticPolicy<T>
 {
   public:
-    ConstantPolicy(ActionList* actions, DenseVector<double>* distribution) :
+    ConstantPolicy(ActionList<T>* actions, DenseVector<double>* distribution) :
         StochasticPolicy<T>(actions, distribution)
     {
     }

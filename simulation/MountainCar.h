@@ -1,4 +1,14 @@
 /*
+ * MountainCar.h
+ *
+ *  Created on: Nov 8, 2013
+ *      Author: sam
+ */
+
+#ifndef MOUNTAINCAR_H_
+#define MOUNTAINCAR_H_
+
+/*
  * Copyright 2013 Saminda Abeyruwan (saminda@cs.miami.edu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,8 +36,11 @@
 
 using namespace RLLib;
 
-class MCar2D: public Environment<>
+template<class T>
+class MountainCar: public Environment<T>
 {
+  private:
+    typedef Environment<T> Base;
   protected:
     // Global variables:
     float position;
@@ -41,23 +54,23 @@ class MCar2D: public Environment<>
     float throttleFactor;
 
   public:
-    MCar2D() :
-        Environment<>(2, 3, 1), position(0), velocity(0), positionRange(
+    MountainCar() :
+        Environment<T>(2, 3, 1), position(0), velocity(0), positionRange(
             new Range<float>(-1.2, 0.6)), velocityRange(new Range<float>(-0.07, 0.07)), actionRange(
             new Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(1.0)
     {
-      discreteActions->push_back(0, actionRange->min());
-      discreteActions->push_back(1, 0.0);
-      discreteActions->push_back(2, actionRange->max());
+      Base::discreteActions->push_back(0, actionRange->min());
+      Base::discreteActions->push_back(1, 0.0);
+      Base::discreteActions->push_back(2, actionRange->max());
 
       // subject to change
-      continuousActions->push_back(0, 0.0);
+      Base::continuousActions->push_back(0, 0.0);
 
-      for (int i = 0; i < resolutions->dimension(); i++)
-        resolutions->at(i) = 10.0;
+      for (int i = 0; i < Base::resolutions->dimension(); i++)
+        Base::resolutions->at(i) = 10.0;
     }
 
-    virtual ~MCar2D()
+    virtual ~MountainCar()
     {
       delete positionRange;
       delete velocityRange;
@@ -66,13 +79,15 @@ class MCar2D: public Environment<>
 
     void updateRTStep()
     {
-      DenseVector<double>& vars = *output->o_tp1;
-      vars[0] = (position - positionRange->min()) * resolutions->at(0) / positionRange->length();
-      vars[1] = (velocity - velocityRange->min()) * resolutions->at(1) / velocityRange->length();
-      output->updateRTStep(r(), z(), endOfEpisode());
+      DenseVector<T>& vars = *Base::output->o_tp1;
+      vars[0] = (position - positionRange->min()) * Base::resolutions->at(0)
+          / positionRange->length();
+      vars[1] = (velocity - velocityRange->min()) * Base::resolutions->at(1)
+          / velocityRange->length();
+      Base::output->updateRTStep(r(), z(), endOfEpisode());
 
-      observations->at(0) = position;
-      observations->at(1) = velocity;
+      Base::observations->at(0) = position;
+      Base::observations->at(1) = velocity;
 
     }
 
@@ -84,7 +99,7 @@ class MCar2D: public Environment<>
       updateRTStep();
     }
 
-    void step(const Action* a)
+    void step(const Action<T>* a)
     {
       float throttle = actionRange->bound(a->at()) * throttleFactor;
       velocity = velocityRange->bound(
@@ -114,3 +129,5 @@ class MCar2D: public Environment<>
 };
 
 #endif /* MCAR2D_H_ */
+
+#endif /* MOUNTAINCAR_H_ */

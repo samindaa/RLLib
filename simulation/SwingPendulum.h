@@ -103,7 +103,7 @@ class SwingPendulum: public Environment<>
       updateRTStep();
     }
 
-    void step(const Action* a)
+    void step(const Action<double>* a)
     {
       //std::cout << a.at() << std::endl;
       float torque = actionRange->bound(a->at(0));

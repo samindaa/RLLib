@@ -30,7 +30,7 @@ class NoStateProblem: public Environment<>
       updateRTStep();
     }
 
-    void step(const Action* action)
+    void step(const Action<double>* action)
     {
       currentA = action->at(0);
       if (range != 0)

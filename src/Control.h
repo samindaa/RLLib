@@ -38,10 +38,10 @@ class Control: public ParameterizedFunction<T>
     virtual ~Control()
     {
     }
-    virtual const Action* initialize(const Vector<T>* x_0) =0;
+    virtual const Action<T>* initialize(const Vector<T>* x_0) =0;
     virtual void reset() =0;
-    virtual const Action* proposeAction(const Vector<T>* x) =0;
-    virtual const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
+    virtual const Action<T>* proposeAction(const Vector<T>* x) =0;
+    virtual const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1) =0;
     virtual const double computeValueFunction(const Vector<T>* x) const =0;
     virtual const Predictor<T>* predictor() const =0;
@@ -74,11 +74,11 @@ class ActorOffPolicy: public ParameterizedFunction<T>
     }
     virtual void initialize() =0;
     virtual void reset() =0;
-    virtual void update(const Representations<T>* phi_t, const Action* a_t, double const& rho_t,
+    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, double const& rho_t,
         const double& delta_t) =0;
     virtual PolicyDistribution<T>* policy() const =0;
-    virtual const Action* proposeAction(const Representations<T>* phi) =0;
-    virtual double pi(const Action* a) const =0;
+    virtual const Action<T>* proposeAction(const Representations<T>* phi) =0;
+    virtual double pi(const Action<T>* a) const =0;
 };
 
 template<class T>
@@ -90,9 +90,9 @@ class ActorOnPolicy: public ParameterizedFunction<T>
     }
     virtual void initialize() =0;
     virtual void reset() =0;
-    virtual void update(const Representations<T>* phi_t, const Action* a_t, double delta) =0;
+    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, double delta) =0;
     virtual PolicyDistribution<T>* policy() const =0;
-    virtual const Action* proposeAction(const Representations<T>* phi) =0;
+    virtual const Action<T>* proposeAction(const Representations<T>* phi) =0;
 };
 
 } // namespace RLLib

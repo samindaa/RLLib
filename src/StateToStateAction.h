@@ -40,10 +40,11 @@ class Representations
   protected:
     std::map<int, Vector<T>*>* phis;
   public:
-    Representations(const int& numFeatures, const ActionList* actions) :
+    Representations(const int& numFeatures, const ActionList<T>* actions) :
         phis(new std::map<int, Vector<T>*>())
     {
-      for (ActionList::const_iterator iter = actions->begin(); iter != actions->end(); ++iter)
+      for (typename ActionList<T>::const_iterator iter = actions->begin(); iter != actions->end();
+          ++iter)
         phis->insert(std::make_pair((*iter)->id(), new SVector<T>(numFeatures)));
     }
     ~Representations()
@@ -60,17 +61,17 @@ class Representations
       return phis->size();
     }
 
-    void set(const Vector<T>* phi, const Action* action)
+    void set(const Vector<T>* phi, const Action<T>* action)
     {
       phis->at(action->id())->set(phi);
     }
 
-    Vector<T>* at(const Action* action)
+    Vector<T>* at(const Action<T>* action)
     {
       return phis->at(action->id());
     }
 
-    const Vector<T>* at(const Action* action) const
+    const Vector<T>* at(const Action<T>* action) const
     {
       return phis->at(action->id());
     }
@@ -111,7 +112,12 @@ class StateToStateAction
     {
     }
     virtual const Representations<T>* stateActions(const Vector<T>* x) =0;
-    virtual const ActionList* getActionList() const =0;
+
+    virtual Vector<T>* stateAction(const Vector<T>* x, const Action<T>* a)
+    {
+      return 0; /*fixMe: */
+    }
+    virtual const ActionList<T>* getActionList() const =0;
     virtual double vectorNorm() const =0;
     virtual int dimension() const =0;
 };
@@ -122,10 +128,10 @@ class StateActionTilings: public StateToStateAction<T>
 {
   protected:
     Projector<T>* projector;
-    ActionList* actions;
+    ActionList<T>* actions;
     Representations<T>* phis;
   public:
-    StateActionTilings(Projector<T>* projector, ActionList* actions) :
+    StateActionTilings(Projector<T>* projector, ActionList<T>* actions) :
         projector(projector), actions(actions), phis(
             new Representations<T>(projector->dimension(), actions))
     {
@@ -144,7 +150,7 @@ class StateActionTilings: public StateToStateAction<T>
         phis->clear();
         return phis;
       }
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         if (actions->dimension() == 1)
           phis->set(projector->project(x), *a); // projection from whole space
@@ -154,7 +160,7 @@ class StateActionTilings: public StateToStateAction<T>
       return phis;
     }
 
-    const ActionList* getActionList() const
+    const ActionList<T>* getActionList() const
     {
       return actions;
     }
@@ -175,12 +181,12 @@ class TabularAction: public StateToStateAction<T>
 {
   protected:
     Projector<T>* projector;
-    ActionList* actions;
+    ActionList<T>* actions;
     Representations<T>* phis;
     SparseVector<T>* _phi;
     bool includeActiveFeature;
   public:
-    TabularAction(Projector<T>* projector, ActionList* actions, bool includeActiveFeature = true) :
+    TabularAction(Projector<T>* projector, ActionList<T>* actions, bool includeActiveFeature = true) :
         projector(projector), actions(actions), phis(
             new Representations<T>(
                 includeActiveFeature ?
@@ -204,7 +210,7 @@ class TabularAction: public StateToStateAction<T>
     {
       assert(actions->dimension() == phis->dimension());
       const Vector<T>* phi = projector->project(x);
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         _phi->set(phi, projector->dimension() * (*a)->id());
         if (includeActiveFeature)
@@ -214,7 +220,7 @@ class TabularAction: public StateToStateAction<T>
       return phis;
     }
 
-    const ActionList* getActionList() const
+    const ActionList<T>* getActionList() const
     {
       return actions;
     }

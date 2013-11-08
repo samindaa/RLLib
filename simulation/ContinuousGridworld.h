@@ -83,7 +83,7 @@ class ContinuousGridworld: public Environment<>
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 
-    void step(const Action* action)
+    void step(const Action<double>* action)
     {
       float noise = Probabilistic::nextFloat() * absoluteNoise - (absoluteNoise / 2.0);
       for (int i = 0; i < observations->dimension(); i++)

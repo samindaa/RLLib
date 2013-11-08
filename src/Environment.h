@@ -62,13 +62,13 @@ class Environment
     DenseVector<T>* observations;
     DenseVector<T>* resolutions;
     TRStep<T>* output;
-    ActionList* discreteActions;
-    ActionList* continuousActions;
+    ActionList<T>* discreteActions;
+    ActionList<T>* continuousActions;
   public:
     Environment(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
-        observations(new PVector<double>(nbVars)), resolutions(new PVector<double>(nbVars)), output(
-            new TRStep<T>(nbVars)), discreteActions(new GeneralActionList(nbDiscreteActions)), continuousActions(
-            new GeneralActionList(nbContinuousActions))
+        observations(new PVector<T>(nbVars)), resolutions(new PVector<T>(nbVars)), output(
+            new TRStep<T>(nbVars)), discreteActions(new GeneralActionList<T>(nbDiscreteActions)), continuousActions(
+            new GeneralActionList<T>(nbContinuousActions))
     {
     }
 
@@ -83,7 +83,7 @@ class Environment
 
   public:
     virtual void initialize() =0;
-    virtual void step(const Action* action) =0;
+    virtual void step(const Action<T>* action) =0;
     virtual void updateRTStep() =0;
     virtual bool endOfEpisode() const =0;
     virtual float r() const =0;
@@ -93,12 +93,12 @@ class Environment
     {/*To output useful information*/
     }
 
-    virtual ActionList* getDiscreteActionList() const
+    virtual ActionList<T>* getDiscreteActionList() const
     {
       return discreteActions;
     }
 
-    virtual ActionList* getContinuousActionList() const
+    virtual ActionList<T>* getContinuousActionList() const
     {
       return continuousActions;
     }

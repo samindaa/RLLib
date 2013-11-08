@@ -55,20 +55,20 @@ class SarsaControl: public OnPolicyControlLearner<T>
         delete xa_t;
     }
 
-    const Action* initialize(const Vector<T>* x)
+    const Action<T>* initialize(const Vector<T>* x)
     {
       sarsa->initialize();
       const Representations<T>* phi = toStateAction->stateActions(x);
-      const Action* a = Policies::sampleAction(acting, phi);
+      const Action<T>* a = Policies::sampleAction(acting, phi);
       Vectors<T>::bufferedCopy(phi->at(a), xa_t);
       return a;
     }
 
-    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
+    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       const Representations<T>* phi_tp1 = toStateAction->stateActions(x_tp1);
-      const Action* a_tp1 = Policies::sampleAction(acting, phi_tp1);
+      const Action<T>* a_tp1 = Policies::sampleAction(acting, phi_tp1);
       const Vector<T>* xa_tp1 = phi_tp1->at(a_tp1);
       sarsa->update(xa_t, xa_tp1, r_tp1);
       xa_t->set(xa_tp1);
@@ -81,7 +81,7 @@ class SarsaControl: public OnPolicyControlLearner<T>
       sarsa->reset();
     }
 
-    const Action* proposeAction(const Vector<T>* x)
+    const Action<T>* proposeAction(const Vector<T>* x)
     {
       return Policies::sampleBestAction(acting, toStateAction->stateActions(x));
     }
@@ -92,7 +92,7 @@ class SarsaControl: public OnPolicyControlLearner<T>
       acting->update(phis);
       double v_s = 0;
       // V(s) = \sum_{a \in A} \pi(s,a) * Q(s,a)
-      for (ActionList::const_iterator a = toStateAction->getActionList()->begin();
+      for (typename ActionList<T>::const_iterator a = toStateAction->getActionList()->begin();
           a != toStateAction->getActionList()->end(); ++a)
         v_s += acting->pi(*a) * sarsa->predict(phis->at(*a));
       return v_s;
@@ -119,12 +119,12 @@ class ExpectedSarsaControl: public SarsaControl<T>
 {
   protected:
     Vector<T>* phi_bar_tp1;
-    ActionList* actions;
+    ActionList<T>* actions;
     typedef SarsaControl<T> super;
   public:
 
-    ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T>* toStateAction,
-        Sarsa<T>* sarsa, ActionList* actions) :
+    ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T>* toStateAction, Sarsa<T>* sarsa,
+        ActionList<T>* actions) :
         SarsaControl<T>(acting, toStateAction, sarsa), phi_bar_tp1(
             new SVector<T>(toStateAction->dimension())), actions(actions)
     {
@@ -134,13 +134,13 @@ class ExpectedSarsaControl: public SarsaControl<T>
       delete phi_bar_tp1;
     }
 
-    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
+    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       phi_bar_tp1->clear();
       const Representations<T>* phi_tp1 = super::toStateAction->stateActions(x_tp1);
-      const Action* a_tp1 = Policies::sampleAction(super::acting, phi_tp1);
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      const Action<T>* a_tp1 = Policies::sampleAction(super::acting, phi_tp1);
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         double pi = super::acting->pi(*a);
         if (pi == 0)
@@ -168,7 +168,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
   protected:
     Policy<T>* target;
     Policy<T>* behavior;
-    ActionList* actions;
+    ActionList<T>* actions;
 
     StateToStateAction<T>* toStateAction;
     GQ<T>* gq;
@@ -176,7 +176,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
     Vector<T>* phi_bar_tp1;
 
   public:
-    GreedyGQ(Policy<T>* target, Policy<T>* behavior, ActionList* actions,
+    GreedyGQ(Policy<T>* target, Policy<T>* behavior, ActionList<T>* actions,
         StateToStateAction<T>* toStateAction, GQ<T>* gq) :
         rho_t(0), target(target), behavior(behavior), actions(actions), toStateAction(
             toStateAction), gq(gq), phi_t(0), phi_bar_tp1(0)
@@ -191,23 +191,23 @@ class GreedyGQ: public OffPolicyControlLearner<T>
         delete phi_bar_tp1;
     }
 
-    const Action* initialize(const Vector<T>* x)
+    const Action<T>* initialize(const Vector<T>* x)
     {
       gq->initialize();
       const Representations<T>* phi = toStateAction->stateActions(x);
       target->update(phi);
-      const Action* a = Policies::sampleAction(behavior, phi);
+      const Action<T>* a = Policies::sampleAction(behavior, phi);
       Vectors<T>::bufferedCopy(phi->at(a), phi_t);
       Vectors<T>::bufferedCopy(phi_t, phi_bar_tp1);
       return a;
     }
 
-    virtual double computeRho(const Action* a_t)
+    virtual double computeRho(const Action<T>* a_t)
     {
       return target->pi(a_t) / behavior->pi(a_t);
     }
 
-    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
+    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       rho_t = computeRho(a_t);
@@ -215,7 +215,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       const Representations<T>* xas_tp1 = toStateAction->stateActions(x_tp1);
       target->update(xas_tp1);
       phi_bar_tp1->clear();
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         double pi = target->pi(*a);
         if (pi == 0)
@@ -226,7 +226,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       gq->update(phi_t, phi_bar_tp1, rho_t, r_tp1, z_tp1);
       // Next cycle update the target policy
       target->update(xas_tp1);
-      const Action* a_tp1 = Policies::sampleAction(behavior, xas_tp1);
+      const Action<T>* a_tp1 = Policies::sampleAction(behavior, xas_tp1);
       phi_t->set(xas_tp1->at(a_tp1));
       return a_tp1;
     }
@@ -236,7 +236,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       gq->reset();
     }
 
-    const Action* proposeAction(const Vector<T>* x)
+    const Action<T>* proposeAction(const Vector<T>* x)
     {
       return Policies::sampleBestAction(target, toStateAction->stateActions(x));
     }
@@ -247,7 +247,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       target->update(phis);
       double v_s = 0;
       // V(s) = \sum_{a \in A} \pi(s,a) * Q(s,a)
-      for (ActionList::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
         v_s += target->pi(*a) * gq->predict(phis->at(*a));
       return v_s;
     }
@@ -272,7 +272,7 @@ template<class T>
 class GQOnPolicyControl: public GreedyGQ<T>
 {
   public:
-    GQOnPolicyControl(Policy<T>* acting, ActionList* actions,
+    GQOnPolicyControl(Policy<T>* acting, ActionList<T>* actions,
         StateToStateAction<T>* toStateAction, GQ<T>* gq) :
         GreedyGQ<T>(acting, acting, actions, toStateAction, gq)
     {
@@ -280,7 +280,7 @@ class GQOnPolicyControl: public GreedyGQ<T>
     virtual ~GQOnPolicyControl()
     {
     }
-    virtual double computeRho(const Action* a_t)
+    virtual double computeRho(const Action<T>* a_t)
     {
       return 1.0;
     }
@@ -314,7 +314,7 @@ class AbstractActorOffPolicy: public ActorOffPolicy<T>
       return targetPolicy;
     }
 
-    const Action* proposeAction(const Representations<T>* phi)
+    const Action<T>* proposeAction(const Representations<T>* phi)
     {
       return Policies::sampleBestAction(targetPolicy, phi);
     }
@@ -325,7 +325,7 @@ class AbstractActorOffPolicy: public ActorOffPolicy<T>
       initialized = false;
     }
 
-    double pi(const Action* a) const
+    double pi(const Action<T>* a) const
     {
       return targetPolicy->pi(a);
     }
@@ -367,7 +367,7 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T>
       e_u->clear();
     }
 
-    void update(const Representations<T>* phi_t, const Action* a_t, double const& rho_t,
+    void update(const Representations<T>* phi_t, const Action<T>* a_t, double const& rho_t,
         const double& delta_t)
     {
       assert(super::initialized);
@@ -414,17 +414,17 @@ class OffPAC: public OffPolicyControlLearner<T>
         delete phi_t;
     }
 
-    const Action* initialize(const Vector<T>* x)
+    const Action<T>* initialize(const Vector<T>* x)
     {
       critic->initialize();
       actor->initialize();
       const Representations<T>* phi = toStateAction->stateActions(x);
-      const Action* a = Policies::sampleAction(behavior, phi);
+      const Action<T>* a = Policies::sampleAction(behavior, phi);
       Vectors<T>::bufferedCopy(phi->at(a), phi_t);
       return a;
     }
 
-    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
+    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       const Representations<T>* xas_t = toStateAction->stateActions(x_t);
@@ -433,7 +433,7 @@ class OffPAC: public OffPolicyControlLearner<T>
       rho_t = actor->pi(a_t) / behavior->pi(a_t);
       Boundedness::checkValue(rho_t);
 
-      phi_t->set(projector->project(x_t));
+      Vectors<T>::bufferedCopy(projector->project(x_t), phi_t);
       const Vector<T>* phi_tp1 = projector->project(x_tp1);
       delta_t = critic->update(phi_t, phi_tp1, rho_t, r_tp1, z_tp1);
       Boundedness::checkValue(delta_t);
@@ -448,7 +448,7 @@ class OffPAC: public OffPolicyControlLearner<T>
       actor->reset();
     }
 
-    const Action* proposeAction(const Vector<T>* x)
+    const Action<T>* proposeAction(const Vector<T>* x)
     {
       return actor->proposeAction(toStateAction->stateActions(x));
     }
@@ -511,7 +511,7 @@ class Actor: public ActorOnPolicy<T>
       initialized = false;
     }
 
-    void update(const Representations<T>* phi_t, const Action* a_t, double delta)
+    void update(const Representations<T>* phi_t, const Action<T>* a_t, double delta)
     {
       assert(initialized);
       const Vectors<T>& gradLog = policyDistribution->computeGradLog(phi_t, a_t);
@@ -524,7 +524,7 @@ class Actor: public ActorOnPolicy<T>
       return policyDistribution;
     }
 
-    const Action* proposeAction(const Representations<T>* phi)
+    const Action<T>* proposeAction(const Representations<T>* phi)
     {
       policy()->update(phi);
       return policyDistribution->sampleBestAction();
@@ -569,7 +569,7 @@ class ActorLambda: public Actor<T>
       e->clear();
     }
 
-    void update(const Representations<T>* phi_t, const Action* a_t, double delta)
+    void update(const Representations<T>* phi_t, const Action<T>* a_t, double delta)
     {
       assert(super::initialized);
       const Vectors<T>& gradLog = super::policy()->computeGradLog(phi_t, a_t);
@@ -604,7 +604,7 @@ class ActorNatural: public Actor<T>
       delete w;
     }
 
-    void update(const Representations<T>* phi_t, const Action* a_t, double delta)
+    void update(const Representations<T>* phi_t, const Action<T>* a_t, double delta)
     {
       assert(super::initialized);
       const Vectors<T>& gradLog = super::policy()->computeGradLog(phi_t, a_t);
@@ -639,8 +639,8 @@ class AbstractActorCritic: public OnPolicyControlLearner<T>
     StateToStateAction<T>* toStateAction;
 
   public:
-    AbstractActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor,
-        Projector<T>* projector, StateToStateAction<T>* toStateAction) :
+    AbstractActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor, Projector<T>* projector,
+        StateToStateAction<T>* toStateAction) :
         critic(critic), actor(actor), projector(projector), toStateAction(toStateAction)
     {
     }
@@ -651,10 +651,10 @@ class AbstractActorCritic: public OnPolicyControlLearner<T>
     }
 
   protected:
-    virtual double updateCritic(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
+    virtual double updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1) =0;
 
-    void updateActor(const Vector<T>* x_t, const Action* a_t, const double& actorDelta)
+    void updateActor(const Vector<T>* x_t, const Action<T>* a_t, const double& actorDelta)
     {
       const Representations<T>* phi_t = toStateAction->stateActions(x_t);
       policy()->update(phi_t);
@@ -672,20 +672,20 @@ class AbstractActorCritic: public OnPolicyControlLearner<T>
       critic->reset();
       actor->reset();
     }
-    const Action* initialize(const Vector<T>* x_0)
+    const Action<T>* initialize(const Vector<T>* x)
     {
       critic->initialize();
       actor->initialize();
-      policy()->update(toStateAction->stateActions(x_0));
+      policy()->update(toStateAction->stateActions(x));
       return policy()->sampleAction();
     }
 
-    const Action* proposeAction(const Vector<T>* x)
+    const Action<T>* proposeAction(const Vector<T>* x)
     {
       return actor->proposeAction(toStateAction->stateActions(x));
     }
 
-    const Action* step(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
+    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       // Update critic
@@ -734,28 +734,28 @@ class ActorCritic: public AbstractActorCritic<T>
   protected:
     typedef AbstractActorCritic<T> super;
     Vector<T>* phi_t;
-    Vector<T>* phi_tp1;
   public:
     ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor, Projector<T>* projector,
         StateToStateAction<T>* toStateAction) :
-        AbstractActorCritic<T>(critic, actor, projector, toStateAction), phi_t(
-            new SVector<T>(projector->dimension())), phi_tp1(new SVector<T>(projector->dimension()))
+        AbstractActorCritic<T>(critic, actor, projector, toStateAction), phi_t(0)
     {
     }
 
     virtual ~ActorCritic()
     {
-      delete phi_t;
-      delete phi_tp1;
+      if (phi_t)
+        delete phi_t;
     }
 
-    double updateCritic(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
+    double updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-      phi_t->set(super::projector->project(x_t));
-      phi_tp1->set(super::projector->project(x_tp1));
+      Vectors<T>::bufferedCopy(super::projector->project(x_t), phi_t);
+      const Vector<T>* phi_tp1 = super::projector->project(x_tp1);
       // Update critic
-      return super::critic->update(phi_t, phi_tp1, r_tp1);
+      double delta_t = super::critic->update(phi_t, phi_tp1, r_tp1);
+      Vectors<T>::bufferedCopy(phi_tp1, phi_t);
+      return delta_t;
     }
 };
 
@@ -765,32 +765,31 @@ class AverageRewardActorCritic: public AbstractActorCritic<T>
   protected:
     typedef AbstractActorCritic<T> super;
     double alpha_r, averageReward;
-    SparseVector<T>* phi_t;
-    SparseVector<T>* phi_tp1;
+    Vector<T>* phi_t;
 
   public:
     AverageRewardActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor,
         Projector<T>* projector, StateToStateAction<T>* toStateAction, double alpha_r) :
         AbstractActorCritic<T>(critic, actor, projector, toStateAction), alpha_r(alpha_r), averageReward(
-            0), phi_t(new SVector<T>(projector->dimension())), phi_tp1(
-            new SVector<T>(projector->dimension()))
+            0), phi_t(0)
     {
     }
 
     virtual ~AverageRewardActorCritic()
     {
-      delete phi_t;
-      delete phi_tp1;
+      if (phi_t)
+        delete phi_t;
     }
 
-    double updateCritic(const Vector<T>* x_t, const Action* a_t, const Vector<T>* x_tp1,
+    double updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-      phi_t->set(super::projector->project(x_t));
-      phi_tp1->set(super::projector->project(x_tp1));
+      Vectors<T>::bufferedCopy(super::projector->project(x_t), phi_t);
+      const Vector<T>* phi_tp1 = super::projector->project(x_tp1);
       // Update critic
       double delta_t = super::critic->update(phi_t, phi_tp1, r_tp1 - averageReward);
       averageReward += alpha_r * delta_t;
+      Vectors<T>::bufferedCopy(phi_tp1, phi_t);
       return delta_t;
     }
 };

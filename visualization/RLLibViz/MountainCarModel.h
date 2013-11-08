@@ -19,10 +19,11 @@
 #include "Matrix.h"
 
 // From the simulation
-#include "MCar2D.h"
+#include "MountainCarModel.h"
 #include "Simulator.h"
 
 // View
+#include "MountainCar.h"
 #include "MountainCarView.h"
 
 //
@@ -40,8 +41,8 @@ class MountainCarModel: public ModelBase
 
   protected:
     // RLLib
-    Environment<>* behaviourEnvironment;
-    Environment<>* evaluationEnvironment;
+    Environment<double>* behaviourEnvironment;
+    Environment<double>* evaluationEnvironment;
     Hashing* hashing;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;
