@@ -695,7 +695,7 @@ template<class T>
 class PVector: public DenseVector<T>
 {
   private:
-    typedef DenseVector<T> super;
+    typedef DenseVector<T> Base;
   public:
     PVector(const int& capacity = 1) :
         DenseVector<T>(capacity)
@@ -715,7 +715,7 @@ class PVector: public DenseVector<T>
     PVector<T>& operator=(const PVector<T>& that)
     {
       if (this != &that)
-        super::operator =(that);
+        Base::operator =(that);
       return *this;
     }
 
@@ -725,7 +725,7 @@ class PVector: public DenseVector<T>
 
     PVector<T>& operator*(const double& d)
     {
-      for (T* i = super::data; i < super::data + this->dimension(); ++i)
+      for (T* i = Base::data; i < Base::data + this->dimension(); ++i)
         *i *= d;
       return *this;
     }
@@ -741,7 +741,7 @@ class PVector: public DenseVector<T>
 
       double result = 0;
       for (int i = 0; i < this->dimension(); i++)
-        result += super::data[i] * that->getEntry(i);
+        result += Base::data[i] * that->getEntry(i);
       return result;
     }
 
@@ -757,7 +757,7 @@ class PVector: public DenseVector<T>
       }
 
       for (int i = 0; i < this->dimension(); i++)
-        super::data[i] -= that->getEntry(i);
+        Base::data[i] -= that->getEntry(i);
       return *this;
     }
 
@@ -773,7 +773,7 @@ class PVector: public DenseVector<T>
       }
 
       for (int i = 0; i < this->dimension(); i++)
-        super::data[i] += that->at(i);
+        Base::data[i] += that->at(i);
       return *this;
     }
 
@@ -784,7 +784,7 @@ class PVector: public DenseVector<T>
       {
         const T& thatValue = that->getEntry(i);
         if (thatValue != 0)
-          super::data[i] /= thatValue;
+          Base::data[i] /= thatValue;
       }
       return *this;
     }
@@ -801,7 +801,7 @@ class PVector: public DenseVector<T>
       }
 
       for (int i = 0; i < this->dimension(); i++)
-        super::data[i] += factor * that->getEntry(i);
+        Base::data[i] += factor * that->getEntry(i);
       return this;
     }
 
@@ -822,7 +822,7 @@ class PVector: public DenseVector<T>
       }
 
       for (int i = 0; i < this->dimension(); i++)
-        super::data[i] -= that->getEntry(i);
+        Base::data[i] -= that->getEntry(i);
       return this;
     }
 
@@ -839,7 +839,7 @@ class PVector: public DenseVector<T>
       }
       // FixMe: This is very expensive for SVector<T>
       for (int i = 0; i < that->dimension(); i++)
-        super::data[i] = that->getEntry(i);
+        Base::data[i] = that->getEntry(i);
       return this;
     }
 
@@ -865,7 +865,7 @@ template<class T>
 class SVector: public SparseVector<T>
 {
   private:
-    typedef SparseVector<T> super;
+    typedef SparseVector<T> Base;
   public:
     SVector(const int& capacity = 1, const int& activeIndexesLength = 10) :
         SparseVector<T>(capacity, activeIndexesLength)
@@ -889,7 +889,7 @@ class SVector: public SparseVector<T>
     SVector<T>& operator=(const SVector& that)
     {
       if (this != &that)
-        super::operator =(that);
+        Base::operator =(that);
       return *this;
     }
 
@@ -900,14 +900,14 @@ class SVector: public SparseVector<T>
         return other->dot(this);
 
       double result = 0.0;
-      for (int position = 0; position < super::nbActive; position++)
-        result += that->getEntry(super::activeIndexes[position]) * super::values[position];
+      for (int position = 0; position < Base::nbActive; position++)
+        result += that->getEntry(Base::activeIndexes[position]) * Base::values[position];
       return result;
     }
 
     Vector<T>* addToSelf(const double& value)
     {
-      for (int index = 0; index < super::indexesPositionLength; index++)
+      for (int index = 0; index < Base::indexesPositionLength; index++)
         this->setNonZeroEntry(index, value + this->getEntry(index));
       return this;
     }
@@ -949,7 +949,7 @@ class SVector: public SparseVector<T>
         return this;
       }
 
-      for (T* position = super::values; position < super::values + super::nbActive; ++position)
+      for (T* position = Base::values; position < Base::values + Base::nbActive; ++position)
         *position *= factor;
       return this;
     }
@@ -958,13 +958,13 @@ class SVector: public SparseVector<T>
     {
       assert(this->dimension() == that->dimension());
       int position = 0;
-      while (position < super::nbActive)
+      while (position < Base::nbActive)
       {
-        int index = super::activeIndexes[position];
-        T value = super::values[position] * that->getEntry(index);
+        int index = Base::activeIndexes[position];
+        T value = Base::values[position] * that->getEntry(index);
         if (value != 0)
         {
-          super::values[position] = value;
+          Base::values[position] = value;
           ++position;
         }
         else
@@ -975,10 +975,10 @@ class SVector: public SparseVector<T>
 
     Vector<T>* ebeDivideToSelf(const Vector<T>* that)
     {
-      for (int position = 0; position < super::nbActive; position++)
+      for (int position = 0; position < Base::nbActive; position++)
       {
-        int index = super::activeIndexes[position];
-        super::values[position] /= that->getEntry(index); // prior check
+        int index = Base::activeIndexes[position];
+        Base::values[position] /= that->getEntry(index); // prior check
       }
       return this;
     }
@@ -1021,7 +1021,7 @@ class SVector: public SparseVector<T>
     {
       // This will set 'value' to all the elements
       this->clear();
-      for (int index = 0; index < super::indexesPositionLength; index++)
+      for (int index = 0; index < Base::indexesPositionLength; index++)
         this->setNonZeroEntry(index, value);
       return this;
     }

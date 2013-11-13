@@ -120,7 +120,7 @@ class ExpectedSarsaControl: public SarsaControl<T>
   protected:
     Vector<T>* phi_bar_tp1;
     ActionList<T>* actions;
-    typedef SarsaControl<T> super;
+    typedef SarsaControl<T> Base;
   public:
 
     ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T>* toStateAction, Sarsa<T>* sarsa,
@@ -138,11 +138,11 @@ class ExpectedSarsaControl: public SarsaControl<T>
         const double& r_tp1, const double& z_tp1)
     {
       phi_bar_tp1->clear();
-      const Representations<T>* phi_tp1 = super::toStateAction->stateActions(x_tp1);
-      const Action<T>* a_tp1 = Policies::sampleAction(super::acting, phi_tp1);
+      const Representations<T>* phi_tp1 = Base::toStateAction->stateActions(x_tp1);
+      const Action<T>* a_tp1 = Policies::sampleAction(Base::acting, phi_tp1);
       for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
-        double pi = super::acting->pi(*a);
+        double pi = Base::acting->pi(*a);
         if (pi == 0)
         {
           assert((*a)->id() != a_tp1->id());
@@ -152,8 +152,8 @@ class ExpectedSarsaControl: public SarsaControl<T>
       }
 
       const Vector<T>* xa_tp1 = phi_tp1->at(a_tp1);
-      super::sarsa->update(SarsaControl<T>::xa_t, phi_bar_tp1, r_tp1);
-      super::xa_t->set(xa_tp1);
+      Base::sarsa->update(SarsaControl<T>::xa_t, phi_bar_tp1, r_tp1);
+      Base::xa_t->set(xa_tp1);
       return a_tp1;
     }
 
@@ -370,7 +370,7 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T>
   protected:
     double alpha_u, gamma, lambda;
     Traces<T>* e_u;
-    typedef AbstractActorOffPolicy<T> super;
+    typedef AbstractActorOffPolicy<T> Base;
   public:
     ActorLambdaOffPolicy(const double& alpha_u, const double& gamma/*not used*/,
         const double& lambda, PolicyDistribution<T>* targetPolicy, Traces<T>* e) :
@@ -386,26 +386,26 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T>
   public:
     void initialize()
     {
-      super::initialize();
+      Base::initialize();
       e_u->clear();
     }
 
     void update(const Representations<T>* phi_t, const Action<T>* a_t, double const& rho_t,
         const double& delta_t)
     {
-      assert(super::initialized);
-      const Vectors<T>& gradLog = super::targetPolicy->computeGradLog(phi_t, a_t);
+      assert(Base::initialized);
+      const Vectors<T>& gradLog = Base::targetPolicy->computeGradLog(phi_t, a_t);
       for (int i = 0; i < e_u->dimension(); i++)
       {
         e_u->at(i)->update(lambda, gradLog[i]);
         e_u->at(i)->vect()->mapMultiplyToSelf(rho_t);
-        super::u->at(i)->addToSelf(alpha_u * delta_t, e_u->at(i)->vect());
+        Base::u->at(i)->addToSelf(alpha_u * delta_t, e_u->at(i)->vect());
       }
     }
 
     void reset()
     {
-      super::reset();
+      Base::reset();
       e_u->clear();
     }
 };
@@ -574,7 +574,7 @@ template<class T>
 class ActorLambda: public Actor<T>
 {
   protected:
-    typedef Actor<T> super;
+    typedef Actor<T> Base;
     double gamma, lambda;
     Traces<T>* e;
 
@@ -583,29 +583,29 @@ class ActorLambda: public Actor<T>
         PolicyDistribution<T>* policyDistribution, Traces<T>* e) :
         Actor<T>(alpha_u, policyDistribution), gamma(gamma), lambda(lambda), e(e)
     {
-      assert(e->dimension() == super::u->dimension());
+      assert(e->dimension() == Base::u->dimension());
     }
 
     void initialize()
     {
-      super::initialize();
+      Base::initialize();
       e->clear();
     }
 
     void reset()
     {
-      super::reset();
+      Base::reset();
       e->clear();
     }
 
     void update(const Representations<T>* phi_t, const Action<T>* a_t, double delta)
     {
-      assert(super::initialized);
-      const Vectors<T>& gradLog = super::policy()->computeGradLog(phi_t, a_t);
-      for (int i = 0; i < super::u->dimension(); i++)
+      assert(Base::initialized);
+      const Vectors<T>& gradLog = Base::policy()->computeGradLog(phi_t, a_t);
+      for (int i = 0; i < Base::u->dimension(); i++)
       {
         e->at(i)->update(gamma * lambda, gradLog[i]);
-        super::u->at(i)->addToSelf(super::alpha_u * delta, e->at(i)->vect());
+        Base::u->at(i)->addToSelf(Base::alpha_u * delta, e->at(i)->vect());
       }
     }
 };
@@ -614,7 +614,7 @@ template<class T>
 class ActorNatural: public Actor<T>
 {
   protected:
-    typedef Actor<T> super;
+    typedef Actor<T> Base;
     Vectors<T>* w;
     double alpha_v;
   public:
@@ -622,8 +622,8 @@ class ActorNatural: public Actor<T>
         PolicyDistribution<T>* policyDistribution) :
         Actor<T>(alpha_u, policyDistribution), w(new Vectors<T>()), alpha_v(alpha_v)
     {
-      for (int i = 0; i < super::u->dimension(); i++)
-        w->push_back(new SVector<T>(super::u->at(i)->dimension()));
+      for (int i = 0; i < Base::u->dimension(); i++)
+        w->push_back(new SVector<T>(Base::u->at(i)->dimension()));
     }
 
     virtual ~ActorNatural()
@@ -635,8 +635,8 @@ class ActorNatural: public Actor<T>
 
     void update(const Representations<T>* phi_t, const Action<T>* a_t, double delta)
     {
-      assert(super::initialized);
-      const Vectors<T>& gradLog = super::policy()->computeGradLog(phi_t, a_t);
+      assert(Base::initialized);
+      const Vectors<T>& gradLog = Base::policy()->computeGradLog(phi_t, a_t);
       double advantageValue = 0;
       // Calculate the advantage function
       for (int i = 0; i < w->dimension(); i++)
@@ -646,13 +646,13 @@ class ActorNatural: public Actor<T>
         // Update the weights of the advantage function
         w->at(i)->addToSelf(alpha_v * (delta - advantageValue), gradLog[i]);
         // Update the policy parameters
-        super::u->at(i)->addToSelf(super::alpha_u, w->at(i));
+        Base::u->at(i)->addToSelf(Base::alpha_u, w->at(i));
       }
     }
 
     void reset()
     {
-      super::reset();
+      Base::reset();
       w->clear();
     }
 
@@ -761,7 +761,7 @@ template<class T>
 class ActorCritic: public AbstractActorCritic<T>
 {
   protected:
-    typedef AbstractActorCritic<T> super;
+    typedef AbstractActorCritic<T> Base;
     Vector<T>* phi_t;
   public:
     ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor, Projector<T>* projector,
@@ -779,10 +779,10 @@ class ActorCritic: public AbstractActorCritic<T>
     double updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-      Vectors<T>::bufferedCopy(super::projector->project(x_t), phi_t);
-      const Vector<T>* phi_tp1 = super::projector->project(x_tp1);
+      Vectors<T>::bufferedCopy(Base::projector->project(x_t), phi_t);
+      const Vector<T>* phi_tp1 = Base::projector->project(x_tp1);
       // Update critic
-      double delta_t = super::critic->update(phi_t, phi_tp1, r_tp1);
+      double delta_t = Base::critic->update(phi_t, phi_tp1, r_tp1);
       Vectors<T>::bufferedCopy(phi_tp1, phi_t);
       return delta_t;
     }
@@ -792,7 +792,7 @@ template<class T>
 class AverageRewardActorCritic: public AbstractActorCritic<T>
 {
   protected:
-    typedef AbstractActorCritic<T> super;
+    typedef AbstractActorCritic<T> Base;
     double alpha_r, averageReward;
     Vector<T>* phi_t;
 
@@ -813,10 +813,10 @@ class AverageRewardActorCritic: public AbstractActorCritic<T>
     double updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-      Vectors<T>::bufferedCopy(super::projector->project(x_t), phi_t);
-      const Vector<T>* phi_tp1 = super::projector->project(x_tp1);
+      Vectors<T>::bufferedCopy(Base::projector->project(x_t), phi_t);
+      const Vector<T>* phi_tp1 = Base::projector->project(x_tp1);
       // Update critic
-      double delta_t = super::critic->update(phi_t, phi_tp1, r_tp1 - averageReward);
+      double delta_t = Base::critic->update(phi_t, phi_tp1, r_tp1 - averageReward);
       averageReward += alpha_r * delta_t;
       Vectors<T>::bufferedCopy(phi_tp1, phi_t);
       return delta_t;

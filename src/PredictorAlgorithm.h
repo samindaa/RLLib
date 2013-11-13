@@ -105,7 +105,7 @@ template<class T>
 class TDLambda: public TD<T>
 {
   protected:
-    typedef TD<T> super;
+    typedef TD<T> Base;
     double lambda, gamma_t;
     Trace<T>* e;
   public:
@@ -121,10 +121,10 @@ class TDLambda: public TD<T>
 
     double initialize()
     {
-      super::initialize();
+      Base::initialize();
       e->clear();
-      gamma_t = super::gamma;
-      return super::delta_t;
+      gamma_t = Base::gamma;
+      return Base::delta_t;
     }
 
     virtual void updateAlpha(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& r_tp1,
@@ -135,20 +135,20 @@ class TDLambda: public TD<T>
     virtual double update(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& r_tp1,
         const double& gamma_tp1)
     {
-      assert(super::initialized);
+      assert(Base::initialized);
 
-      super::delta_t = r_tp1 + gamma_tp1 * super::v->dot(x_tp1) - super::v->dot(x_t);
+      Base::delta_t = r_tp1 + gamma_tp1 * Base::v->dot(x_tp1) - Base::v->dot(x_t);
       e->update(lambda * gamma_t, x_t);
       updateAlpha(x_t, x_tp1, r_tp1, gamma_tp1);
-      super::v->addToSelf(super::alpha_v * super::delta_t, e->vect());
+      Base::v->addToSelf(Base::alpha_v * Base::delta_t, e->vect());
       gamma_t = gamma_tp1;
-      return super::delta_t;
+      return Base::delta_t;
     }
 
     void reset()
     {
-      super::reset();
-      gamma_t = super::gamma;
+      Base::reset();
+      gamma_t = Base::gamma;
       e->clear();
     }
 };
@@ -157,7 +157,7 @@ template<class T>
 class TDLambdaAlphaBound: public TDLambda<T>
 {
   private:
-    typedef TDLambda<T> super;
+    typedef TDLambda<T> Base;
     SparseVector<T>* gammaX_tp1MinusX_t;
   public:
     TDLambdaAlphaBound(const double& gamma, const double& lambda, Trace<T>* e) :
@@ -173,7 +173,7 @@ class TDLambdaAlphaBound: public TDLambda<T>
 
     void reset()
     {
-      super::reset();
+      Base::reset();
       TD<T>::alpha_v = 1.0f;
     }
 
@@ -182,7 +182,7 @@ class TDLambdaAlphaBound: public TDLambda<T>
     {
       // Update the adaptive step-size
       double b = std::abs(
-          super::e->vect().dot(
+          Base::e->vect().dot(
               gammaX_tp1MinusX_t->set(x_tp1).multiplyToSelf(gamma_tp1).substractToSelf(x_t)));
       if (b > 0.0f)
         TD<T>::alpha_v = std::min(TD<T>::alpha_v, 1.0f / b);
@@ -268,7 +268,7 @@ template<class T>
 class SarsaAlphaBound: public Sarsa<T>
 {
   private:
-    typedef Sarsa<T> super;
+    typedef Sarsa<T> Base;
     SparseVector<T>* gammaXtp1MinusX;
   public:
     SarsaAlphaBound(const double& gamma, const double& lambda, Trace<T>* e) :
@@ -283,19 +283,19 @@ class SarsaAlphaBound: public Sarsa<T>
 
     void reset()
     {
-      super::reset();
-      super::alpha = 1.0f;
+      Base::reset();
+      Base::alpha = 1.0f;
     }
 
     void updateAlpha(const Vector<T>* phi_t, const Vector<T>* phi_tp1, double r_tp1)
     {
       // Update the adaptive step-size
       double b = std::fabs(
-          super::e->vect()->dot(
-              gammaXtp1MinusX->set(phi_tp1)->mapMultiplyToSelf(super::gamma)->subtractToSelf(
+          Base::e->vect()->dot(
+              gammaXtp1MinusX->set(phi_tp1)->mapMultiplyToSelf(Base::gamma)->subtractToSelf(
                   phi_t)));
       if (b > 0.0f)
-        super::alpha = std::min(super::alpha, 1.0f / b);
+        Base::alpha = std::min(Base::alpha, 1.0f / b);
     }
 
 };
