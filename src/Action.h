@@ -132,11 +132,12 @@ class GeneralActionList: public ActionList<T>
   private:
     typedef ActionList<T> Base;
   public:
-    GeneralActionList(const int& numActions)
+    GeneralActionList(const int& nbActions)
     {
-      for (int i = 0; i < numActions; i++)
+      for (int i = 0; i < nbActions; i++)
         Base::actions.push_back(new Action<T>(i));
     }
+
     virtual ~GeneralActionList()
     {
       for (typename std::vector<Action<T>*>::iterator iter = Base::actions.begin();

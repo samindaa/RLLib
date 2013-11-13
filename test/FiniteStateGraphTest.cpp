@@ -42,11 +42,26 @@ void FiniteStateGraphTest::testRandomWalkLeftTrajectory()
   Assert::assertObjectEquals(FiniteStateGraph::StepData(5, sp.C, sp.Left, sp.B, 0.0, sp.Left), sp.step());
 }
 
+void FiniteStateGraphTest::testComputeSolution()
+{
+  RandomWalk sp;
+  FSGAgentState state(&sp);
+  const PVector<double> solution = state.computeSolution(sp.policy(), 0.9, 0.0);
+  Assert::assertEquals(sp.expectedDiscountedSolution(), &solution, 0.1);
+  const double solution2ExpectedValues[] = { 1.0 / 6.0, 2.0 / 6.0, 3.0 / 6.0, 4.0 / 6.0, 5.0 / 6.0 };
+  PVector<double> solution2Expected(Arrays::length (solution2ExpectedValues));
+  for (int i = 0; i < solution2Expected.dimension(); i++)
+    solution2Expected[i] = solution2ExpectedValues[i];
+  const PVector<double> solution2 = state.computeSolution(sp.policy(), 1.0, 0.5);
+  Assert::assertEquals(&solution2Expected, &solution2, 0.1);
+}
+
 void FiniteStateGraphTest::run()
 {
   testSimpleProblemTrajectory();
   testRandomWalkRightTrajectory();
   testRandomWalkLeftTrajectory();
+  testComputeSolution();
 }
 
 RLLIB_TEST_MAKE(FiniteStateGraphTest)

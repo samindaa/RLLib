@@ -66,27 +66,30 @@ void GQTest::testOffPolicyGQ()
 void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
     const double& behaviourLeftProbability, OffPolicyLearnerFactory* learnerFactory)
 {
+  Timer timer;
+  timer.start();
   Probabilistic::srand(0);
   RandomWalk* problem = new RandomWalk;
 
-  DenseVector<double>* targetDistribution = new PVector<double>(problem->actions()->dimension());
-  targetDistribution->at(0) = targetLeftProbability;
-  targetDistribution->at(1) = 1.0 - targetLeftProbability;
-  Policy<double>* behaviorPolicy = problem->getBehaviorPolicy(behaviourLeftProbability);
-  Policy<double>* targetPolicy = new ConstantPolicy<double>(problem->actions(), targetDistribution);
+  Policy<double>* behaviorPolicy = RandomWalk::newPolicy(problem->actions(),
+      behaviourLeftProbability);
+  Policy<double>* targetPolicy = RandomWalk::newPolicy(problem->actions(), targetLeftProbability);
+  problem->setPolicy(behaviorPolicy);
   FSGAgentState* agentState = new FSGAgentState(problem);
   OffPolicyControlLearner<double>* learner = learnerFactory->createLearner(problem->actions(),
       agentState, targetPolicy, behaviorPolicy);
   Vector<double>* vFun = new PVector<double>(agentState->dimension());
 
   int nbEpisode = 0;
-  while (nbEpisode < 1000/*FixMe: using the computed value*/)
+  const PVector<double> solution = agentState->computeSolution(targetPolicy,
+      1.0 - learnerFactory->getBeta(), learnerFactory->getLambda());
+  while (FiniteStateGraph::distanceToSolution(&solution, vFun) > 0.05)
   {
     FiniteStateGraph::StepData stepData = agentState->step();
     if (stepData.v_t()->empty())
-      learner->initialize(stepData.v_t());
+      learner->initialize(stepData.v_tp1());
     else
-      learner->step(stepData.v_t(), stepData.a_t, stepData.v_tp1(), stepData.r_tp1, 0);
+      learner->learn(stepData.v_t(), stepData.a_t, stepData.v_tp1(), stepData.r_tp1, 0);
     if (stepData.s_tp1->v()->empty())
     {
       ++nbEpisode;
@@ -94,14 +97,22 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
       //std::cout << "nbEpisode=" << nbEpisode << " error=" << error << std::endl;
       Assert::assertPasses(nbEpisode < 100000);
     }
-    const Predictor<double>* predictor = learner->predictor();
-    const LinearLearner<double>* gqLearner = dynamic_cast<const LinearLearner<double>*>(predictor);
-    const Vector<double>* v = gqLearner->weights();
-    Assert::checkValues(v);
-
     computeValueFunction(learner, agentState, vFun);
   }
-  delete targetDistribution;
+  timer.stop();
+  Assert::assertPasses(nbEpisode > 100);
+
+  const Predictor<double>* predictor = learner->predictor();
+  const LinearLearner<double>* gqLearner = dynamic_cast<const LinearLearner<double>*>(predictor);
+  const Vector<double>* v = gqLearner->weights();
+  Assert::checkValues(v);
+
+  double error = FiniteStateGraph::distanceToSolution(&solution, vFun);
+  std::cout << "## nbEpisode=" << nbEpisode << " ||v||=" << v->dimension() << " error=" << error
+      << " elapsedTime(ms)=" << timer.getElapsedTimeInMilliSec() << std::endl;
+  printVector(vFun);
+  printVector(v);
+
   delete targetPolicy;
   delete agentState;
   delete problem;

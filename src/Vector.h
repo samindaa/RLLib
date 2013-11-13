@@ -1282,6 +1282,33 @@ std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that)
   return out;
 }
 
+template<class T>
+static void printVector(const Vector<T>* other)
+{
+  const SparseVector<T>* that = dynamic_cast<const SparseVector<T>*>(other);
+  if (that)
+  {
+    std::cout << "SparseVector(" << that->nonZeroElements() << ") index=";
+    for (int index = 0; index < that->dimension(); index++)
+      std::cout << that->getIndexesPosition()[index] << " ";
+    std::cout << std::endl;
+
+    for (int position = 0; position < that->nonZeroElements(); position++)
+      std::cout << "[p=" << position << " i=" << that->nonZeroIndexes()[position] << " v="
+          << that->getEntry(that->nonZeroIndexes()[position]) << "] ";
+    std::cout << std::endl;
+  }
+
+  const DenseVector<T>* theOther = dynamic_cast<const DenseVector<T>*>(other);
+  if (theOther)
+  {
+    std::cout << "DenseVector(" << theOther->dimension() << ") ";
+    for (const T* i = theOther->getValues(); i < theOther->getValues() + theOther->dimension(); ++i)
+      std::cout << *i << " ";
+    std::cout << std::endl;
+  }
+}
+
 } // namespace RLLib
 
 #endif /* VECTOR_H_ */

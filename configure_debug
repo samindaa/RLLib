@@ -1,0 +1,261 @@
+#!/bin/bash
+#----------------------------------------
+# RLLib configure
+# configure file is derived from the 
+# RoboCanes configuration.
+# Modified by: Sam Abeyruwan
+#----------------------------------------
+
+#makefile target for this configuration
+targetname="RLLibTestDebug"
+
+#list of needed libraries
+lib_list=""
+#list of needed external tools
+tool_list=""
+
+#regular expression to ignore files
+ignore="visualization"
+
+#compiler and linker flags
+cxx="g++"
+optional_cflags="-I. -I./src -I./test -I./simulation -Wall -Werror  -g -Wno-deprecated -fPIC"
+optional_lflags=""
+
+builddir="./build"
+bin="./RLLibTest"
+
+# -- hide warnings
+hideWarningsFilelist=""
+
+#----------------------------------------
+#command line arguments
+#loop for all arguments
+for arg in "$@"
+do
+  argname=`echo $arg | sed 's/\([^=]*\)=.*/\1/g'`
+  argvalue=`echo $arg | sed 's/.*=\([^=]*\)/\1/g'`
+  if [ "$argname" == "target" ]; then targetname=$argvalue; fi
+  if [ "$argname" == "cxx" ]; then cxx=$argvalue; fi
+  if [ "$argname" == "cflags" ]; then optional_cflags=$argvalue; fi
+  if [ "$argname" == "lflags" ]; then optional_lflags=$argvalue; fi
+  if [ "$argname" == "builddir" ]; then builddir=$argvalue; fi
+  if [ "$argname" == "bin" ]; then bin=$argvalue; fi
+  if [ "$argname" == "lib_list" ]; then lib_list=$argvalue; fi
+  if [ "$argname" == "ignore" ]; then ignore="$ignore|$argvalue"; fi
+done
+
+#----------------------------------------
+#----------------------------------------
+# DO NOT MODIFY ANYTHING BELOW :)
+#----------------------------------------
+#----------------------------------------
+#check libraries
+
+libflags_compiler=""
+libflags_linker=""
+missing_libs=0
+for lib in $lib_list
+do
+  echo -n "Checking library $lib... "
+  tmp=`pkg-config --cflags $lib 2> /dev/null`
+  if [ "$?" == "0" ]
+  then
+    libflags_compiler="$libflags_compiler $tmp"
+    libflags_linker="$libflags_linker `pkg-config --libs $lib`"
+    echo ok
+  else
+    echo NOT FOUND
+    missing_libs=$((missing_libs+1))
+  fi
+done
+
+#check external tools
+missing_tools=0
+for tool in $tool_list
+do
+  echo -n "Checking $tool... "
+  tmp=`which $tool`
+  if [ "$?" == "0" ]
+  then
+    echo ok
+  else
+    echo NOT FOUND
+    missing_tools=$((missing_tools+1))
+  fi
+done
+
+#if something is missing, stop here
+if [ "$missing_libs" != "0" ]; then
+  echo $missing_libs libraries missing!; fi
+if [ "$missing_tools" != "0" ]; then
+  echo $missing_tools external tools missing!; fi
+if [ "$missing_libs$missing_tools" != "00" ]; then
+  exit; fi
+
+#----------------------------------------
+#write Makefile
+
+src_list=$builddir/src_list
+dep_list=$builddir/dep_list
+
+cflags="$libflags_compiler -I. -Wall $optional_cflags"
+lflags="$libflags_linker $optional_lflags"
+
+
+echo Creating Makefile...
+
+{ # BEGIN printing Makefile
+# create new default target
+cat << EOC
+default: $targetname
+# --- BEGIN TARGETS
+# --- BEGIN $targetname
+$targetname: CXX=$cxx
+$targetname: CFLAGS=$cflags
+$targetname: LFLAGS=$lflags
+$targetname: BIN=$bin
+$targetname: BUILDDIR=$builddir
+-include $src_list
+-include $dep_list
+$targetname: \$(GENERATED_$targetname) \$(OBJ_$targetname) link_$targetname
+	@echo $targetname compiled.
+link_$targetname: \$(OBJ_$targetname)
+	@echo \$(YEL)Linking...\$(NOR)
+	@\$(CXX) \$(CFLAGS) -o $bin \$(OBJ_$targetname) \$(LFLAGS)
+# --- END $targetname
+EOC
+#append all existing other targets
+if [ -e Makefile ]
+then
+  cat Makefile | sed "1,/BEGIN TARGETS/d;/END TARGETS/,\$d"    \
+               | sed "/BEGIN $targetname\$/,/END $targetname\$/d"  \
+               | grep -E -v "^default:"
+else
+  echo "ALLTARGETS=" 
+  echo "ALLOBJ="
+fi
+echo "# --- END TARGETS"
+# add some static stuff (coloring, targets all and clean)
+cat << 'EOC'
+
+# Some Coloring
+OS_TYPE=$(shell uname)
+ifeq ($(OS_TYPE),Darwin)
+ECHOEN=echo -en
+else
+ECHOEN=echo
+endif
+ESC=`$(ECHOEN) "\033"`
+RED="$(ESC)[1;31m"
+GRN="$(ESC)[1;32m"
+YEL="$(ESC)[1;33m"
+BLU="$(ESC)[1;34m"
+VIO="$(ESC)[1;35m"
+TUQ="$(ESC)[1;36m"
+WHT="$(ESC)[1;37m"
+NOR="$(ESC)[m"
+
+# --- compile all
+all: 
+	$(foreach target,$(ALLTARGETS),$(MAKE) $(MAKEFILE) $(target);)
+
+clean:
+	@rm -f $(ALLOBJ)
+	@echo All object files deleted.
+
+EOC
+} > Makefile.tmp  #END printing Makefile
+mv Makefile.tmp Makefile
+
+if ! grep -q -E "^ALLTARGETS=.* $targetname .*\$" Makefile
+then
+  sed -i -e "s/^\(ALLTARGETS=.*\)\$/\1 $targetname /g" Makefile  
+fi
+if ! grep -q -E "^ALLOBJ=.* \\\$\(OBJ_$targetname\) .*\$" Makefile
+then
+  sed -i -e "s/^\(ALLOBJ=.*\)\$/\1 \$(OBJ_$targetname) /g" Makefile  
+fi
+
+#----------------------------------------
+#create build directory
+
+#create subdirectories
+echo Creating build directory...
+allcpp=`find -L . -name \*.cpp | cut -c3- | grep -E -v "$ignore" | xargs`
+if [ ! -d "$builddir" ]
+then
+  mkdir -p $builddir
+fi
+for cppfile in $allcpp
+do
+  d=$builddir/`dirname $cppfile`
+  if [ ! -d "$d" ]
+  then
+    mkdir -p $d
+  fi
+done
+
+
+#create object list
+allobj=""
+allsrc="$generatedfiles $allcpp"
+for srcfile in $allsrc
+do
+  object="$builddir/`dirname $srcfile`/`basename $srcfile | sed 's/\.[^\.]*$//'`.o"
+  allobj="$allobj $object"
+done
+echo "OBJ_$targetname = $allobj" >> $builddir/src_list
+
+
+#create dep files and dep_list
+echo Init dependency files...
+olddeps=`find $builddir -name \*.dep | xargs`
+if [ "$olddeps" != "" ]
+then
+  rm $olddeps
+fi
+echo > $dep_list
+filenamenew="_new"
+jobs=0
+for srcfile in $allsrc
+do
+ let jobs+=1
+ {
+  #get path and filenames
+  objpath="$builddir/"${srcfile%/*}
+  basefilename=${srcfile%.*}
+  objfile="$builddir/$basefilename.o"
+  depfile="$builddir/$basefilename.dep"
+
+  #check if file is on the no-warnings-list
+  extraflags=""
+  for pattern in $hideWarningsFilelist
+  do
+    case "$srcfile" in
+      $pattern)
+       extraflags="-fpermissive -w"
+    esac
+  done
+  
+  #write dep file
+  {
+  echo -n "$objpath/" 
+  $cxx $cflags -M $srcfile
+  cat << EOC
+	@echo \$(BLU)[\$(CXX)]\$(NOR) $srcfile
+	@\$(CXX) \$(CFLAGS) $extraflags -c $srcfile -o $objfile
+	@echo -n "$objpath/" > $depfile$filenamenew
+	@\$(CXX) \$(CFLAGS) -M $srcfile >> $depfile$filenamenew
+	@tail -n6 $depfile >> $depfile$filenamenew
+	@mv $depfile$filenamenew $depfile
+EOC
+  } > $depfile
+  #add dep file to dep_list
+  echo "-include $depfile" >> $dep_list
+ } &
+ [[ $jobs -eq 8 ]] && wait && jobs=0
+done
+wait
+
+echo Done.

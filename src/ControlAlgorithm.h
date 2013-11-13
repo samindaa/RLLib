@@ -231,6 +231,29 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       return a_tp1;
     }
 
+    void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
+        const double& r_tp1, const double& z_tp1)
+    {
+      const Representations<T>* xas_t = toStateAction->stateActions(x_t);
+      target->update(xas_t);
+      behavior->update(xas_t);
+      rho_t = computeRho(a_t);
+      Vectors<T>::bufferedCopy(xas_t->at(a_t), phi_t);
+
+      const Representations<T>* xas_tp1 = toStateAction->stateActions(x_tp1);
+      target->update(xas_tp1);
+      phi_bar_tp1->clear();
+      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      {
+        double pi = target->pi(*a);
+        if (pi == 0)
+          continue;
+        phi_bar_tp1->addToSelf(pi, xas_tp1->at(*a));
+      }
+
+      gq->update(phi_t, phi_bar_tp1, rho_t, r_tp1, z_tp1);
+    }
+
     void reset()
     {
       gq->reset();
@@ -440,6 +463,12 @@ class OffPAC: public OffPolicyControlLearner<T>
       actor->update(xas_t, a_t, rho_t, delta_t);
 
       return Policies::sampleAction(behavior, toStateAction->stateActions(x_tp1));
+    }
+
+    void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
+        const double& r_tp1, const double& z_tp1)
+    {
+      step(x_t, a_t, x_tp1, r_tp1, z_tp1);
     }
 
     void reset()

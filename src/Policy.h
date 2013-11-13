@@ -192,7 +192,7 @@ class NormalDistributionScaled: public NormalDistribution<T>
 {
   public:
 
-    typedef NormalDistribution<T> super;
+    typedef NormalDistribution<T> Base;
 
     NormalDistributionScaled(const double& initialMean, const double& initialStddev,
         const int& nbFeatures, ActionList<T>* actions) :
@@ -206,9 +206,9 @@ class NormalDistributionScaled: public NormalDistribution<T>
 
     virtual void updateStep(const Action<T>* action)
     {
-      double a = action->at(super::defaultAction);
-      super::meanStep = (a - super::mean);
-      super::stddevStep = (a - super::mean) * (a - super::mean) - super::sigma2;
+      double a = action->at(Base::defaultAction);
+      Base::meanStep = (a - Base::mean);
+      Base::stddevStep = (a - Base::mean) * (a - Base::mean) - Base::sigma2;
     }
 
 };
@@ -218,7 +218,7 @@ class NormalDistributionSkewed: public NormalDistribution<T>
 {
   public:
 
-    typedef NormalDistribution<T> super;
+    typedef NormalDistribution<T> Base;
 
     NormalDistributionSkewed(const double& initialMean, const double& initialStddev,
         const int& nbFeatures, ActionList<T>* actions) :
@@ -232,9 +232,9 @@ class NormalDistributionSkewed: public NormalDistribution<T>
 
     virtual void updateStep(const Action<T>* action)
     {
-      double a = action->at(super::defaultAction);
-      super::meanStep = (a - super::mean);
-      super::stddevStep = (a - super::mean) * (a - super::mean) / super::sigma2 - 1.0;
+      double a = action->at(Base::defaultAction);
+      Base::meanStep = (a - Base::mean);
+      Base::stddevStep = (a - Base::mean) * (a - Base::mean) / Base::sigma2 - 1.0;
     }
 
 };
@@ -337,14 +337,6 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
     {
     }
 
-    StochasticPolicy(ActionList<T>* actions, DenseVector<double>* distribution) :
-        actions(actions), distribution(new PVector<double>(actions->dimension()))
-    {
-      assert((int )actions->dimension() == distribution->dimension());
-      for (int i = 0; i < distribution->dimension(); i++)
-        this->distribution->at(i) = distribution->at(i);
-    }
-
     virtual ~StochasticPolicy()
     {
       delete distribution;
@@ -384,7 +376,7 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
     Vector<T>* u;
     Vectors<T>* multiu;
     Vectors<T>* multigrad;
-    typedef StochasticPolicy<T> super;
+    typedef StochasticPolicy<T> Base;
   public:
     BoltzmannDistribution(const int& numFeatures, ActionList<T>* actions) :
         StochasticPolicy<T>(actions), avg(new SVector<T>(numFeatures)), grad(
@@ -407,38 +399,38 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
 
     void update(const Representations<T>* phi)
     {
-      assert(super::actions->dimension() == phi->dimension());
-      super::distribution->clear();
+      assert(Base::actions->dimension() == phi->dimension());
+      Base::distribution->clear();
       avg->clear();
       double sum = 0;
       // The exponential function may become very large and overflow.
       // Therefore, we multiply top and bottom of the hypothesis by the same
       // constant without changing the output.
       double maxValue = 0;
-      for (typename ActionList<T>::const_iterator a = super::actions->begin();
-          a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = Base::actions->begin();
+          a != Base::actions->end(); ++a)
       {
         double tmp = u->dot(phi->at(*a));
         if (tmp > maxValue)
           maxValue = tmp;
       }
 
-      for (typename ActionList<T>::const_iterator a = super::actions->begin();
-          a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = Base::actions->begin();
+          a != Base::actions->end(); ++a)
       {
         const int id = (*a)->id();
-        super::distribution->at(id) = exp(u->dot(phi->at(*a)) - maxValue);
-        Boundedness::checkValue(super::distribution->at(id));
-        sum += super::distribution->at(id);
-        avg->addToSelf(super::distribution->at(id), phi->at(*a));
+        Base::distribution->at(id) = exp(u->dot(phi->at(*a)) - maxValue);
+        Boundedness::checkValue(Base::distribution->at(id));
+        sum += Base::distribution->at(id);
+        avg->addToSelf(Base::distribution->at(id), phi->at(*a));
       }
 
-      for (typename ActionList<T>::const_iterator a = super::actions->begin();
-          a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = Base::actions->begin();
+          a != Base::actions->end(); ++a)
       {
         const int id = (*a)->id();
-        super::distribution->at(id) /= sum;
-        Boundedness::checkValue(super::distribution->at(id));
+        Base::distribution->at(id) /= sum;
+        Boundedness::checkValue(Base::distribution->at(id));
       }
       avg->mapMultiplyToSelf(1.0 / sum);
     }
@@ -457,17 +449,17 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
 
     double pi(const Action<T>* action)
     {
-      return super::pi(action);
+      return Base::pi(action);
     }
 
     const Action<T>* sampleAction()
     {
-      return super::sampleAction();
+      return Base::sampleAction();
     }
 
     const Action<T>* sampleBestAction()
     {
-      return super::sampleBestAction();
+      return Base::sampleBestAction();
     }
 };
 
@@ -477,7 +469,7 @@ class SoftMax: public StochasticPolicy<T>
   protected:
     Predictor<T>* predictor;
     double temperature;
-    typedef StochasticPolicy<T> super;
+    typedef StochasticPolicy<T> Base;
   public:
     SoftMax(Predictor<T>* predictor, ActionList<T>* actions, const double temperature = 1.0) :
         StochasticPolicy<T>(actions), predictor(predictor), temperature(temperature)
@@ -490,37 +482,37 @@ class SoftMax: public StochasticPolicy<T>
 
     void update(const Representations<T>* phi)
     {
-      assert(super::actions->dimension() == phi->dimension());
-      super::distribution->clear();
+      assert(Base::actions->dimension() == phi->dimension());
+      Base::distribution->clear();
       double sum = 0;
       // The exponential function may become very large and overflow.
       // Therefore, we multiply top and bottom of the hypothesis by the same
       // constant without changing the output.
       double maxValue = 0;
-      for (typename ActionList<T>::const_iterator a = super::actions->begin();
-          a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = Base::actions->begin();
+          a != Base::actions->end(); ++a)
       {
         double tmp = predictor->predict(phi->at(*a));
         if (tmp > maxValue)
           maxValue = tmp;
       }
 
-      for (typename ActionList<T>::const_iterator a = super::actions->begin();
-          a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = Base::actions->begin();
+          a != Base::actions->end(); ++a)
       {
         const int id = (*a)->id();
-        super::distribution->at(id) = exp(
+        Base::distribution->at(id) = exp(
             (predictor->predict(phi->at(*a)) - maxValue) / temperature);
-        Boundedness::checkValue(super::distribution->at(id));
-        sum += super::distribution->at(id);
+        Boundedness::checkValue(Base::distribution->at(id));
+        sum += Base::distribution->at(id);
       }
 
-      for (typename ActionList<T>::const_iterator a = super::actions->begin();
-          a != super::actions->end(); ++a)
+      for (typename ActionList<T>::const_iterator a = Base::actions->begin();
+          a != Base::actions->end(); ++a)
       {
         const int id = (*a)->id();
-        super::distribution->at(id) /= sum;
-        Boundedness::checkValue(super::distribution->at(id));
+        Base::distribution->at(id) /= sum;
+        Boundedness::checkValue(Base::distribution->at(id));
       }
     }
 };
@@ -837,10 +829,15 @@ class SingleActionPolicy: public Policy<T>
 template<class T>
 class ConstantPolicy: public StochasticPolicy<T>
 {
+  private:
+    typedef StochasticPolicy<T> Base;
   public:
-    ConstantPolicy(ActionList<T>* actions, DenseVector<double>* distribution) :
-        StochasticPolicy<T>(actions, distribution)
+    ConstantPolicy(ActionList<T>* actions, const Vector<T>* distribution) :
+        StochasticPolicy<T>(actions)
     {
+      assert(actions->dimension() == distribution->dimension());
+      for (int i = 0; i < distribution->dimension(); i++)
+        Base::distribution->at(i) = distribution->getEntry(i);
     }
 
     virtual ~ConstantPolicy()
@@ -848,8 +845,24 @@ class ConstantPolicy: public StochasticPolicy<T>
     }
 
     void update(const Representations<T>* phi)
-    {
+    {/*Empty*/
     }
+
+    double pi(const Action<T>* action)
+    {
+      return Base::pi(action);
+    }
+
+    const Action<T>* sampleAction()
+    {
+      return Base::sampleAction();
+    }
+
+    const Action<T>* sampleBestAction()
+    {
+      return Base::sampleBestAction();
+    }
+
 };
 
 } // namespace RLLib

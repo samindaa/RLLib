@@ -11,6 +11,11 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
+
+// Matrix
+#include "util/Eigen/Dense"
+using Eigen::MatrixXd;
 
 #include "Action.h"
 #include "Vector.h"
@@ -38,9 +43,10 @@ class GraphState
       transitions.insert(std::make_pair(action->id(), state));
     }
 
-    GraphState* nextState(const Action<double>& action)
+    GraphState* nextState(const Action<double>* action)
     {
-      return transitions[action.id()];
+      std::map<int, GraphState*>::iterator iter = transitions.find(action->id());
+      return iter != transitions.end() ? iter->second : 0;
     }
 
     bool hasNextState() const
@@ -135,6 +141,11 @@ class FiniteStateGraph
       this->s_0 = s_0;
     }
 
+    GraphState* initialState() const
+    {
+      return s_0;
+    }
+
     void setPolicy(Policy<double>* acting)
     {
       this->acting = acting;
@@ -145,14 +156,19 @@ class FiniteStateGraph
       this->graphStates = graphStates;
     }
 
-    std::vector<GraphState*>& states() const
+    std::vector<GraphState*>* states() const
     {
-      return *graphStates;
+      return graphStates;
     }
 
     GraphState* state(const Vector<double>* s)
     {
       return graphStates->at(s->getEntry(0));
+    }
+
+    Policy<double>* policy() const
+    {
+      return acting;
     }
 
     StepData/*small object*/step()
@@ -167,7 +183,7 @@ class FiniteStateGraph
       else
       {
         a_tm1 = a_t;
-        s_t = s_tm1->nextState(*a_tm1);
+        s_t = s_tm1->nextState(a_tm1);
         if (s_t == 0)
           s_t = O;
       }
@@ -185,6 +201,15 @@ class FiniteStateGraph
     virtual double gamma() const=0;
     virtual const Vector<double>* expectedDiscountedSolution() const=0;
     virtual ActionList<double>* actions() const =0;
+
+    static double distanceToSolution(const Vector<double>* solution, const Vector<double>* theta)
+    {
+      assert(solution->dimension() == theta->dimension());
+      double maxValue = 0;
+      for (int i = 0; i < solution->dimension(); i++)
+        maxValue = std::max(maxValue, std::fabs(solution->getEntry(i) - theta->getEntry(i)));
+      return maxValue;
+    }
 };
 
 class LineProblem: public FiniteStateGraph
@@ -288,7 +313,6 @@ class RandomWalk: public FiniteStateGraph
     GraphState* E;
     GraphState* TR;
 
-    DenseVector<double>* distribution;
     Policy<double>* acting;
 
     RandomWalk() :
@@ -312,11 +336,11 @@ class RandomWalk: public FiniteStateGraph
       states->push_back(E);
       states->push_back(TR);
 
-      distribution = new PVector<double>(actionList->dimension());
-      for (int i = 0; i < distribution->dimension(); i++)
-        distribution->at(i) = 1.0 / actionList->dimension();
+      PVector<double> distribution(actionList->dimension());
+      for (int i = 0; i < distribution.dimension(); i++)
+        distribution[i] = 1.0 / actionList->dimension();
 
-      acting = new ConstantPolicy<double>(actionList, distribution);
+      acting = new ConstantPolicy<double>(actionList, &distribution);
 
       int stateIndex = 0;
       for (std::vector<GraphState*>::iterator i = states->begin(); i != states->end(); ++i)
@@ -356,14 +380,14 @@ class RandomWalk: public FiniteStateGraph
     virtual ~RandomWalk()
     {
       delete actionList;
-      delete distribution;
-      delete acting;
+      //delete acting; // FixMe
       for (std::vector<GraphState*>::iterator i = states->begin(); i != states->end(); ++i)
       {
         GraphState* state = *i;
         delete state->v();
         delete state;
       }
+      states->clear();
       delete states;
       delete solution;
     }
@@ -385,30 +409,26 @@ class RandomWalk: public FiniteStateGraph
 
     void enableOnlyLeftPolicy()
     {
+      actionList->erase(Right->id());
       if (acting)
         delete acting;
-      actionList->erase(Right->id());
       acting = new SingleActionPolicy<double>(actionList);
-      setPolicy(acting);
     }
 
     void enableOnlyRightPolicy()
     {
+      actionList->erase(Left->id());
       if (acting)
         delete acting;
-      actionList->erase(Left->id());
       acting = new SingleActionPolicy<double>(actionList);
-      setPolicy(acting);
     }
 
-    Policy<double>* getBehaviorPolicy(const double& behaviourLeftProbability)
+    static Policy<double>* newPolicy(ActionList<double>* actionList, const double& leftProbability)
     {
-      if (acting)
-        delete acting;
-      distribution->at(0) = behaviourLeftProbability;
-      distribution->at(1) = 1.0 - behaviourLeftProbability;
-      acting = new ConstantPolicy<double>(actionList, distribution);
-      return acting;
+      PVector<double> distribution(actionList->dimension());
+      distribution[0] = leftProbability;
+      distribution[1] = 1.0f - leftProbability;
+      return new ConstantPolicy<double>(actionList, &distribution);
     }
 };
 
@@ -419,12 +439,13 @@ class FSGAgentState: public StateToStateAction<double>
     Vector<double>* featureState;
     std::map<GraphState*, int>* stateIndexes;
     Representations<double>* phis;
+
   public:
     FSGAgentState(FiniteStateGraph* graph) :
         graph(graph), featureState(0), stateIndexes(new std::map<GraphState*, int>)
     {
-      std::vector<GraphState*>& states = graph->states();
-      for (std::vector<GraphState*>::iterator iter = states.begin(); iter != states.end(); ++iter)
+      std::vector<GraphState*>* states = graph->states();
+      for (std::vector<GraphState*>::iterator iter = states->begin(); iter != states->end(); ++iter)
       {
         if ((*iter)->hasNextState())
           stateIndexes->insert(std::make_pair(*iter, stateIndexes->size()));
@@ -463,7 +484,8 @@ class FSGAgentState: public StateToStateAction<double>
     const Vector<double>* stateAction(const Vector<double>* x, const Action<double>* a)
     {
       GraphState* sg = graph->state(x);
-      phis->at(a)->setEntry(a->id() * stateIndexes->size() + stateIndexes->at(sg), 1);
+      if (sg->hasNextState())
+        phis->at(a)->setEntry(a->id() * stateIndexes->size() + stateIndexes->at(sg), 1);
       return phis->at(a);
     }
 
@@ -496,6 +518,208 @@ class FSGAgentState: public StateToStateAction<double>
     const std::map<GraphState*, int>* getStateIndexes() const
     {
       return stateIndexes;
+    }
+
+  private:
+    std::vector<GraphState*>* states() const
+    {
+      return graph->states();
+    }
+
+    int nbStates() const
+    {
+      return states()->size();
+    }
+
+    int nbNonAbsorbingState() const
+    {
+      return stateIndexes->size();
+    }
+
+    MatrixXd createPhi() const
+    {
+      MatrixXd result = MatrixXd::Zero(nbStates(), nbNonAbsorbingState());
+      for (int i = 0; i < result.rows(); i++)
+      {
+        GraphState* sg = states()->at(i);
+        if (sg->hasNextState())
+          result(i, stateIndexes->at(sg)) = 1.0f;
+      }
+      return result;
+    }
+
+    void absorbingStatesSet(std::set<int>& endStates)
+    {
+      for (int i = 0; i < nbStates(); i++)
+      {
+        if (!states()->at(i)->hasNextState())
+          endStates.insert(i);
+      }
+    }
+
+    MatrixXd createTransitionProbablityMatrix(Policy<double>* policy)
+    {
+      MatrixXd p = MatrixXd::Zero(nbStates(), nbStates());
+      for (int si = 0; si < nbStates(); si++)
+      {
+        GraphState* s_t = states()->at(si);
+        policy->update(stateActions(s_t->v()));
+        for (ActionList<double>::const_iterator a = graph->actions()->begin();
+            a != graph->actions()->end(); ++a)
+        {
+          double pa = policy->pi(*a);
+          GraphState* s_tp1 = s_t->nextState(*a);
+          if (s_tp1)
+          {
+            for (int sj = 0; sj < nbStates(); sj++)
+            {
+              if (states()->at(sj) == s_tp1)
+              {
+                p(si, sj) = pa;
+                break;
+              }
+            }
+          }
+        }
+      }
+      std::set<int> endStates;
+      absorbingStatesSet(endStates);
+      for (std::set<int>::iterator absorbingState = endStates.begin();
+          absorbingState != endStates.end(); ++absorbingState)
+        p(*absorbingState, *absorbingState) = 1.0;
+
+      return p;
+    }
+
+    MatrixXd removeColumnAndRow(const MatrixXd& m, const std::set<int>& absorbingState)
+    {
+      MatrixXd result = MatrixXd::Zero(nbNonAbsorbingState(), nbNonAbsorbingState());
+      int ci = 0;
+      for (int i = 0; i < m.rows(); i++)
+      {
+        if (absorbingState.find(i) != absorbingState.end())
+          continue;
+        int cj = 0;
+        for (int j = 0; j < m.cols(); j++)
+        {
+          if (absorbingState.find(j) != absorbingState.end())
+            continue;
+          result(ci, cj) = m(i, j);
+          ++cj;
+        }
+        ++ci;
+      }
+      return result;
+    }
+
+    MatrixXd createInitialStateDistribution()
+    {
+      MatrixXd result = MatrixXd::Zero(1, nbNonAbsorbingState());
+      int ci = 0;
+      for (int i = 0; i < nbStates(); i++)
+      {
+        GraphState* s = states()->at(i);
+        if (!s->hasNextState())
+          continue;
+        if (s != graph->initialState())
+          result(0, ci) = 0.0f;
+        else
+          result(0, ci) = 1.0f;
+        ++ci;
+      }
+      return result;
+    }
+
+    MatrixXd createStateDistribution(const MatrixXd& p)
+    {
+      std::set<int> absorbingState;
+      absorbingStatesSet(absorbingState);
+      MatrixXd p_copy = removeColumnAndRow(p, absorbingState);
+      MatrixXd id = MatrixXd::Identity(p_copy.rows(), p_copy.cols());
+      MatrixXd inv = (id - p_copy).inverse();
+      MatrixXd mu = createInitialStateDistribution();
+      MatrixXd visits = mu * inv;
+      double sum = 0.0f;
+      for (int i = 0; i < visits.cols(); i++)
+        sum += visits(0, i);
+      visits = visits / sum;
+      return visits.transpose();
+    }
+
+    MatrixXd createStateDistributionMatrix(const MatrixXd& d)
+    {
+      MatrixXd d_pi = MatrixXd::Zero(nbStates(), nbStates());
+      int ci = 0;
+      for (int i = 0; i < nbStates(); i++)
+      {
+        GraphState* s = states()->at(i);
+        if (!s->hasNextState())
+          continue;
+        d_pi(i, i) = d(ci, 0);
+        ++ci;
+      }
+      return d_pi;
+    }
+
+    MatrixXd computeIdMinusGammaLambdaP(const MatrixXd& p, const double& gamma,
+        const double& lambda)
+    {
+      return (MatrixXd::Identity(p.cols(), p.cols()) - (p * (gamma * lambda))).inverse();
+    }
+
+    MatrixXd computePLambda(const MatrixXd& p, const double& gamma, const double& lambda)
+    {
+      MatrixXd inv = computeIdMinusGammaLambdaP(p, gamma, lambda);
+      return (inv * p * (1.0f - lambda));
+    }
+
+    MatrixXd computeAverageReward(const MatrixXd& p)
+    {
+      MatrixXd result = MatrixXd::Zero(1, p.cols());
+      for (int i = 0; i < nbStates(); i++)
+      {
+        if (!states()->at(i)->hasNextState())
+          continue;
+        double sum = 0.0f;
+        for (int j = 0; j < nbStates(); j++)
+          sum += p(i, j) * states()->at(j)->reward;
+        result(0, i) = sum;
+      }
+      return result.transpose();
+    }
+
+    MatrixXd computeA(const MatrixXd& phi, const MatrixXd& d_pi, const double& gamma,
+        const MatrixXd& pLambda)
+    {
+      return phi.transpose()
+          * (d_pi * ((pLambda * gamma - MatrixXd::Identity(phi.rows(), phi.rows())) * phi));
+    }
+
+    MatrixXd computeB(const MatrixXd& phi, const MatrixXd& d_pi, const MatrixXd& p,
+        const MatrixXd& r_bar, const double& gamma, const double& lambda)
+    {
+      MatrixXd inv = computeIdMinusGammaLambdaP(p, gamma, lambda);
+      return phi.transpose() * (d_pi * (inv * r_bar));
+    }
+
+  public:
+    const PVector<double> computeSolution(Policy<double>* policy, const double& gamma,
+        const double& lambda)
+    {
+      MatrixXd phi = createPhi();
+      MatrixXd p = createTransitionProbablityMatrix(policy);
+      MatrixXd d = createStateDistribution(p);
+      MatrixXd d_pi = createStateDistributionMatrix(d);
+      MatrixXd p_lambda = computePLambda(p, gamma, lambda);
+      MatrixXd r_bar = computeAverageReward(p);
+      MatrixXd A = computeA(phi, d_pi, gamma, p_lambda);
+      MatrixXd b = computeB(phi, d_pi, p, r_bar, gamma, lambda);
+      MatrixXd minusAInverse = A.inverse() * -1.0f;
+      MatrixXd result = minusAInverse * b;
+      PVector<double> solution(result.rows());
+      for (int i = 0; i < result.rows(); i++)
+        solution[i] = result(i, 0);
+      return solution;
     }
 };
 

@@ -17,7 +17,8 @@ class FiniteStateGraphTest: public FiniteStateGraphTestBase
   protected:
     void testSimpleProblemTrajectory();
     void testRandomWalkRightTrajectory();
-    void testRandomWalkLeftTrajectory() ;
+    void testRandomWalkLeftTrajectory();
+    void testComputeSolution();
 
   public:
     void run();
