@@ -24,7 +24,6 @@
 
 #include "ControlAlgorithm.h"
 #include "SwingPendulum.h"
-#include "Simulator.h"
 #include "HeaderTest.h"
 
 RLLIB_TEST(ActorCriticOnPolicyControlLearnerPendulumTest)
@@ -32,7 +31,7 @@ RLLIB_TEST(ActorCriticOnPolicyControlLearnerPendulumTest)
 class ActorCriticOnPolicyControlLearnerPendulumTest: public ActorCriticOnPolicyControlLearnerPendulumTestBase
 {
   protected:
-    Environment<>* problem;
+    RLProblem<>* problem;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;
 
@@ -53,6 +52,7 @@ class ActorCriticOnPolicyControlLearnerPendulumTest: public ActorCriticOnPolicyC
     ActorOnPolicy<double>* actor;
 
     OnPolicyControlLearner<double>* control;
+    RLAgent<double>* agent;
     Simulator<double>* sim;
 
   public:

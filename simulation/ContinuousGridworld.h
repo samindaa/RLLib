@@ -22,12 +22,14 @@
 #ifndef CONTINUOUSGRIDWORLD_H_
 #define CONTINUOUSGRIDWORLD_H_
 
-#include "Environment.h"
+#include "RL.h"
 
 using namespace RLLib;
 
-class ContinuousGridworld: public Environment<>
+template<class T>
+class ContinuousGridworld: public RLProblem<T>
 {
+    typedef RLProblem<T> Base;
   protected:
     Range<float>* observationRange;
     Range<float>* actionRange;
@@ -36,27 +38,27 @@ class ContinuousGridworld: public Environment<>
 
   public:
     ContinuousGridworld() :
-        Environment<>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)), actionRange(
+        RLProblem<T>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)), actionRange(
             new Range<float>(-0.05, 0.05)), absoluteNoise(0.025)
     {
       // discrete actions
-      for (int i = 0; i < discreteActions->dimension(); i++)
+      for (int i = 0; i < Base::discreteActions->dimension(); i++)
       {
         for (int k = 0; k < 2; k++)
-          discreteActions->push_back(i, 0);
+          Base::discreteActions->push_back(i, 0);
       }
-      for (int i = 0; i < discreteActions->dimension() - 1; i++)
+      for (int i = 0; i < Base::discreteActions->dimension() - 1; i++)
       {
         int dimension = i / 2;
         int dimensionAction = i % 2;
         if (dimensionAction == 0)
-          discreteActions->update(i, dimension, -1.0);
+          Base::discreteActions->update(i, dimension, -1.0);
         else
-          discreteActions->update(i, dimension, 1.0);
+          Base::discreteActions->update(i, dimension, 1.0);
       }
 
-      for (int i = 0; i < dimension(); i++)
-        resolutions->at(i) = 10.0;
+      for (int i = 0; i < this->dimension(); i++)
+        Base::resolutions->at(i) = 10.0;
 
       // continuous actions are not setup for this problem
     }
@@ -69,26 +71,26 @@ class ContinuousGridworld: public Environment<>
 
     void initialize()
     {
-      observations->at(0) = 0.2;
-      observations->at(1) = 0.4;
+      Base::observations->at(0) = 0.2;
+      Base::observations->at(1) = 0.4;
       updateRTStep();
     }
 
     void updateRTStep()
     { // nothing
       // unit generalization
-      for (int i = 0; i < output->o_tp1->dimension(); i++)
-        output->o_tp1->at(i) = observations->at(i) * resolutions->at(i);
+      for (int i = 0; i < Base::output->o_tp1->dimension(); i++)
+        Base::output->o_tp1->at(i) = Base::observations->at(i) * Base::resolutions->at(i);
       //std::cout << __vars->at(0) << " " << __vars->at(1) << " || ";
-      output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateRTStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action<double>* action)
     {
       float noise = Probabilistic::nextFloat() * absoluteNoise - (absoluteNoise / 2.0);
-      for (int i = 0; i < observations->dimension(); i++)
-        observations->at(i) = observationRange->bound(
-            observations->at(i) + actionRange->bound(action->at(i) + noise));
+      for (int i = 0; i < Base::observations->dimension(); i++)
+        Base::observations->at(i) = observationRange->bound(
+            Base::observations->at(i) + actionRange->bound(action->at(i) + noise));
       updateRTStep();
     }
 
@@ -96,8 +98,8 @@ class ContinuousGridworld: public Environment<>
     {
       // L1-norm
       float distance = 0;
-      for (int i = 0; i < observations->dimension(); i++)
-        distance += fabs(1.0 - observations->at(i));
+      for (int i = 0; i < Base::observations->dimension(); i++)
+        distance += fabs(1.0 - Base::observations->at(i));
       return distance < 0.1;
     }
 
@@ -108,8 +110,8 @@ class ContinuousGridworld: public Environment<>
 
     float r() const
     {
-      float px = observations->at(0);
-      float py = observations->at(1);
+      float px = Base::observations->at(0);
+      float py = Base::observations->at(1);
       return -1.0
           - 2.0
               * (N(px, 0.3, 0.1) * N(py, 0.6, 0.03) + N(px, 0.4, 0.03) * N(py, 0.5, 0.1)

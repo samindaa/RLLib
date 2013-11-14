@@ -32,7 +32,6 @@
 
 // From the simulation
 #include "ContinuousGridworld.h"
-#include "Simulator.h"
 
 RLLIB_TEST(ContinuousGridworldTest)
 

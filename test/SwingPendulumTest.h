@@ -32,7 +32,6 @@
 
 // From the simulation
 #include "SwingPendulum.h"
-#include "Simulator.h"
 
 RLLIB_TEST(SwingPendulumTest)
 

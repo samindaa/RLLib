@@ -22,7 +22,7 @@
 #ifndef RANDLOVBIKE_H_
 #define RANDLOVBIKE_H_
 
-#include "Environment.h"
+#include "RL.h"
 #include "Math.h"
 #include <iostream>
 #include <cmath>
@@ -43,7 +43,7 @@
  * bib2html_rescat = "Applications, General RL",
  }
  */
-class RandlovBike: public Environment<>
+class RandlovBike: public RLProblem<>
 {
   protected:
     /* position of goal */
@@ -61,7 +61,7 @@ class RandlovBike: public Environment<>
 
   public:
     RandlovBike() :
-        Environment<>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
+        RLProblem<>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
             false), omega(0), omega_dot(0), omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(
             0), yf(0), xb(0), yb(0), psi_goal(0), aux_state(0), R1(-1.0), R2(0.0), R3(+1.0),
         // +0.01

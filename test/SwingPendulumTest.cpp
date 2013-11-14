@@ -25,13 +25,12 @@ RLLIB_TEST_MAKE(SwingPendulumTest)
 
 void SwingPendulumTest::testOffPACSwingPendulum()
 {
-  srand(time(0));
-  Environment<>* problem = new SwingPendulum;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing;
-  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true,
-      hashing);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getDiscreteActionList());
+  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true, hashing);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
@@ -47,16 +46,17 @@ void SwingPendulumTest::testOffPACSwingPendulum()
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
-      lambda, target, actoreTraces);
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target,
+      actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
   /*Policy<double>* behavior = new RandomBiasPolicy<double>(
    &problem->getDiscreteActionList());*/
-  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
-      actor, toStateAction, projector);
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic, actor,
+      toStateAction, projector);
 
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 200, 1);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 200, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -73,18 +73,18 @@ void SwingPendulumTest::testOffPACSwingPendulum()
   delete behavior;
   delete target;
   delete control;
+  delete agent;
   delete sim;
 }
 
 void SwingPendulumTest::testOnPolicySwingPendulum()
 {
-  srand(time(0));
-  Environment<>* problem = new SwingPendulum;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing;
-  Projector<double>* projector = new TileCoderHashing<double>(1000, 10, false,
-      hashing);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getContinuousActionList());
+  Projector<double>* projector = new TileCoderHashing<double>(1000, 10, false, hashing);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getContinuousActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_u = 0.001 / projector->vectorNorm();
@@ -107,20 +107,18 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore1);
   actoreTraces->push_back(actore2);
-  ActorOnPolicy<double>* actor = new ActorLambda<double>(alpha_u, gamma, lambda,
-      acting, actoreTraces);
+  ActorOnPolicy<double>* actor = new ActorLambda<double>(alpha_u, gamma, lambda, acting,
+      actoreTraces);
 
-  OnPolicyControlLearner<double>* control = new AverageRewardActorCritic<double>(
-      critic, actor, projector, toStateAction, alpha_r);
+  OnPolicyControlLearner<double>* control = new AverageRewardActorCritic<double>(critic, actor,
+      projector, toStateAction, alpha_r);
 
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 100, 1);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 1);
   sim->setVerbose(true);
   sim->run();
 
-  sim->setEvaluate(true);
-  sim->setEpisodes(100);
-  sim->run();
-
+  sim->runEvaluate(100);
   sim->computeValueFunction();
 
   delete problem;
@@ -136,16 +134,17 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
   delete policyDistribution;
   delete acting;
   delete control;
+  delete agent;
   delete sim;
 }
 
 void SwingPendulumTest::testOffPACSwingPendulum2()
 {
-  srand(time(0));
-  Environment<>* problem = new SwingPendulum;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new SwingPendulum<double>;
   Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getDiscreteActionList());
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .005 / projector->vectorNorm();
@@ -161,17 +160,18 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
-  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
-      0.4, target, actoreTraces);
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, 0.4, target,
+      actoreTraces);
 
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getActionList());*/
   Policy<double>* behavior = new BoltzmannDistribution<double>(projector->dimension(),
       problem->getDiscreteActionList());
-  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
-      actor, toStateAction, projector);
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic, actor,
+      toStateAction, projector);
 
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 200, 1);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 200, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
 
@@ -188,16 +188,17 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
   delete behavior;
   delete target;
   delete control;
+  delete agent;
   delete sim;
 }
 
 void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
 {
-  srand(time(0));
-  Environment<>* problem = new SwingPendulum;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new SwingPendulum<double>;
   Projector<double>* projector = new TileCoderHashing<double>(1000, 10, true);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getDiscreteActionList());
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
@@ -213,13 +214,14 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
-      lambda, acting, actoreTraces);
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, acting,
+      actoreTraces);
 
   OffPolicyControlLearner<double>* control = new OffPAC<double>(acting, critic, actor,
       toStateAction, projector);
 
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 10, 5);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 10, 5);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -234,18 +236,18 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
   delete actor;
   delete acting;
   delete control;
+  delete agent;
   delete sim;
 }
 
 void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum()
 {
-  srand(time(0));
-  Environment<>* problem = new SwingPendulum;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing;
-  Projector<double>* projector = new TileCoderHashing<double>(1000, 10, true,
-      hashing);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getDiscreteActionList());
+  Projector<double>* projector = new TileCoderHashing<double>(1000, 10, true, hashing);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_u = 0.001 / projector->vectorNorm();
@@ -259,9 +261,10 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
       problem->getDiscreteActionList());
 
   ActorOnPolicy<double>* actor = new ActorNatural<double>(alpha_u, alpha_v, acting);
-  OnPolicyControlLearner<double>* control = new ActorCritic<double>(critic, actor,
-      projector, toStateAction);
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 50, 10);
+  OnPolicyControlLearner<double>* control = new ActorCritic<double>(critic, actor, projector,
+      toStateAction);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 50, 10);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -275,6 +278,7 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
   delete actor;
   delete acting;
   delete control;
+  delete agent;
   delete sim;
 }
 

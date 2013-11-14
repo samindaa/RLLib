@@ -22,7 +22,7 @@
 #ifndef MCAR3D_H_
 #define MCAR3D_H_
 
-#include "Environment.h"
+#include "RL.h"
 /******************************************************************************
  *  Author: Sam Abeyruwan
  *
@@ -48,10 +48,11 @@
  ******************************************************************************
  */
 
-class MCar3D: public Environment<>
+template<class T>
+class MCar3D: public RLProblem<T>
 {
+    typedef RLProblem<T> Base;
   protected:
-
     float xposition;
     float yposition;
     float xvelocity;
@@ -65,18 +66,18 @@ class MCar3D: public Environment<>
 
   public:
     MCar3D() :
-        Environment<>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(
-            0), targetPosition(0.5), positionRange(new Range<float>(-1.2, 0.5)), velocityRange(
+        RLProblem<T>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(0), targetPosition(
+            0.5), positionRange(new Range<float>(-1.2, 0.5)), velocityRange(
             new Range<float>(-0.07, 0.07))
     {
 
-      for (int a = 0; a < discreteActions->dimension(); a++)
-        discreteActions->push_back(a, a);
+      for (int a = 0; a < Base::discreteActions->dimension(); a++)
+        Base::discreteActions->push_back(a, a);
       // not used
-      continuousActions->push_back(0, 0.0);
+      Base::continuousActions->push_back(0, 0.0);
 
-      for (int i = 0; i < dimension(); i++)
-        resolutions->at(i) = 6.0;
+      for (int i = 0; i < this->dimension(); i++)
+        Base::resolutions->at(i) = 6.0;
     }
 
     virtual ~MCar3D()
@@ -148,18 +149,18 @@ class MCar3D: public Environment<>
 
     void updateRTStep()
     {
-      DenseVector<double>& vars = *output->o_tp1;
-      vars[0] = (xposition - positionRange->min()) * resolutions->at(0) / positionRange->length();
-      vars[1] = (yposition - positionRange->min()) * resolutions->at(1) / positionRange->length();
-      vars[2] = (xvelocity - velocityRange->min()) * resolutions->at(2) / velocityRange->length();
-      vars[3] = (yvelocity - velocityRange->min()) * resolutions->at(3) / velocityRange->length();
+      DenseVector<T>& vars = *Base::output->o_tp1;
+      vars[0] = (xposition - positionRange->min()) * Base::resolutions->at(0) / positionRange->length();
+      vars[1] = (yposition - positionRange->min()) * Base::resolutions->at(1) / positionRange->length();
+      vars[2] = (xvelocity - velocityRange->min()) * Base::resolutions->at(2) / velocityRange->length();
+      vars[3] = (yvelocity - velocityRange->min()) * Base::resolutions->at(3) / velocityRange->length();
 
-      observations->at(0) = xposition;
-      observations->at(1) = yposition;
-      observations->at(2) = xvelocity;
-      observations->at(3) = yvelocity;
+      Base::observations->at(0) = xposition;
+      Base::observations->at(1) = yposition;
+      Base::observations->at(2) = xvelocity;
+      Base::observations->at(3) = yvelocity;
 
-      output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateRTStep(r(), z(), endOfEpisode());
     }
 
   public:

@@ -321,8 +321,6 @@ class GQ: public Predictor<T>, public LinearLearner<T>
             lambda_t), e(e), v(new PVector<T>(e->vect()->dimension())), w(
             new PVector<T>(e->vect()->dimension()))
     {
-      std::cout << "alpha_v=" << alpha_v << " alpha_w=" << alpha_w << " beta=" << beta_tp1
-          << " lambda=" << lambda_t << std::endl;
     }
 
     virtual ~GQ()
@@ -335,7 +333,6 @@ class GQ: public Predictor<T>, public LinearLearner<T>
     {
       e->clear();
       initialized = true;
-      //std::cout << "GQ::initialize() " << std::endl;
       return 0.0;
     }
 
@@ -345,13 +342,6 @@ class GQ: public Predictor<T>, public LinearLearner<T>
       assert(initialized);
       delta_t = r_tp1 + beta_tp1 * z_tp1 + (1.0 - beta_tp1) * v->dot(phi_bar_tp1) - v->dot(phi_t);
       e->update((1.0 - beta_tp1) * lambda_t * rho_t, phi_t); // paper says beta_t ?
-
-      //printVector(phi_t);
-      //printVector(e->vect());
-      //printVector(phi_bar_tp1);
-      //std::cout << "r_tp1=" << r_tp1 << std::endl;
-      //std::cout << "rho_t" << rho_t << std::endl;
-      //std::cout << "++++++++++++++++" << std::endl;
       // v
       // part 1
       v->addToSelf(alpha_v * delta_t, e->vect());

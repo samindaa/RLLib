@@ -37,7 +37,6 @@
 #include "RandlovBike.h"
 #include "PoleBalancing.h"
 #include "TorquedPendulum.h"
-#include "Simulator.h"
 
 #include "util/Spline.h"
 using namespace std;

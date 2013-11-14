@@ -44,8 +44,8 @@
 #include "StateToStateAction.h"
 #include "MountainCar.h"
 #include "NoStateProblem.h"
-#include "Simulator.h"
 #include "StateGraph.h"
+#include "RL.h"
 
 using namespace std;
 using namespace RLLib;

@@ -8,9 +8,9 @@
 #ifndef NOSTATEPROBLEM_H_
 #define NOSTATEPROBLEM_H_
 
-#include "Environment.h"
+#include "RL.h"
 
-class NoStateProblem: public Environment<>
+class NoStateProblem: public RLProblem<>
 {
   protected:
     double mu;
@@ -19,7 +19,7 @@ class NoStateProblem: public Environment<>
     double currentA;
   public:
     NoStateProblem(const double& mu, const double& sigma, const Range<double>* range = 0) :
-        Environment<>(1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
+        RLProblem<>(1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
     {
       discreteActions->push_back(0, 0);
       continuousActions->push_back(0, 0);

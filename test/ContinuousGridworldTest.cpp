@@ -25,11 +25,11 @@ RLLIB_TEST_MAKE(ContinuousGridworldTest)
 
 void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
 {
-  srand(time(0));
-  Environment<>* problem = new ContinuousGridworld;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new ContinuousGridworld<double>;
   Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, false);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getDiscreteActionList());
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActionList());
   Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
@@ -45,7 +45,8 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
   OffPolicyControlLearner<double>* control = new GreedyGQ<double>(target, behavior,
       problem->getDiscreteActionList(), toStateAction, gq);
 
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 50001, 1);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 50001, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -58,18 +59,18 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
   delete behavior;
   delete target;
   delete control;
+  delete agent;
   delete sim;
 }
 
 void ContinuousGridworldTest::testOffPACContinuousGridworld()
 {
-  srand(time(0));
-  Environment<>* problem = new ContinuousGridworld;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing;
-  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true,
-      hashing);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getDiscreteActionList());
+  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true, hashing);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = 0.0001 / projector->vectorNorm();
@@ -84,14 +85,15 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
-      lambda, target, actoreTraces);
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target,
+      actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
-  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
-      actor, toStateAction, projector);
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic, actor,
+      toStateAction, projector);
 
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 2000, 5);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 2000, 5);
   sim->setTestEpisodesAfterEachRun(true);
   //sim->setVerbose(false);
   sim->run();
@@ -101,9 +103,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
 
   control->reset();
   control->resurrect("visualization/cgw_offpac.data");
-  sim->setEpisodes(100);
-  sim->setEvaluate(true);
-  sim->run();
+  sim->runEvaluate(100);
 
   delete problem;
   delete hashing;
@@ -117,16 +117,17 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
   delete behavior;
   delete target;
   delete control;
+  delete agent;
   delete sim;
 }
 
 void ContinuousGridworldTest::testOffPACContinuousGridworld2()
 {
-  srand(time(0));
-  Environment<>* problem = new ContinuousGridworld;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new ContinuousGridworld<double>;
   Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getDiscreteActionList());
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = 0.0001 / projector->vectorNorm();
@@ -141,14 +142,15 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
-      lambda, target, actoreTraces);
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target,
+      actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
-  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
-      actor, toStateAction, projector);
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic, actor,
+      toStateAction, projector);
 
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 2000, 1);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 2000, 1);
   //sim->run(5, 5000, 3000);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
@@ -171,16 +173,17 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
   delete behavior;
   delete target;
   delete control;
+  delete agent;
   delete sim;
 }
 
 void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
 {
-  srand(time(0));
-  Environment<>* problem = new ContinuousGridworld;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new ContinuousGridworld<double>;
   Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getDiscreteActionList());
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActionList());
 
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = 0.0001 / projector->vectorNorm();
@@ -197,15 +200,16 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
   Trace<double>* actore = new RTrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
-  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
-      lambda_actor, target, actoreTraces);
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda_actor,
+      target, actoreTraces);
 
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(target->parameters()->at(0),
       problem->getDiscreteActionList(), 0.01f, 1.0f);
-  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
-      actor, toStateAction, projector);
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic, actor,
+      toStateAction, projector);
 
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 8000, 1);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 8000, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -213,9 +217,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
 
   control->reset();
   control->resurrect("visualization/cgw_offpac.data");
-  sim->setEpisodes(100);
-  sim->setEvaluate(true);
-  sim->run();
+  sim->runEvaluate(100);
 
   delete problem;
   delete projector;
@@ -228,16 +230,17 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
   delete target;
   delete behavior;
   delete control;
+  delete agent;
   delete sim;
 }
 
 void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
 {
-  srand(time(0));
-  Environment<>* problem = new ContinuousGridworld;
+  Probabilistic::srand(0);
+  RLProblem<double>* problem = new ContinuousGridworld<double>;
   Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true);
-  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(
-      projector, problem->getDiscreteActionList());
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActionList());
 
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = 0.0001 / projector->vectorNorm();
@@ -254,14 +257,15 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
   Traces<double>* actoreTraces = new Traces<double>();
   actoreTraces->push_back(actoreML);
-  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma,
-      lambda, target, actoreTraces);
+  ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target,
+      actoreTraces);
 
   Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActionList());
-  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic,
-      actor, toStateAction, projector);
+  OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic, actor,
+      toStateAction, projector);
 
-  Simulator<double>* sim = new Simulator<double>(control, problem, 5000, 5000, 1);
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 5000, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -269,9 +273,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
 
   control->reset();
   control->resurrect("visualization/cgw_offpac.data");
-  sim->setEpisodes(100);
-  sim->setEvaluate(true);
-  sim->run();
+  sim->runEvaluate(100);
 
   delete problem;
   delete projector;
@@ -286,6 +288,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
   delete behavior;
   delete target;
   delete control;
+  delete agent;
   delete sim;
 }
 

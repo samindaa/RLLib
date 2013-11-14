@@ -22,12 +22,14 @@
 #ifndef SWINGPENDULUM_H_
 #define SWINGPENDULUM_H_
 
-#include "Environment.h"
+#include "RL.h"
 
 using namespace RLLib;
 
-class SwingPendulum: public Environment<>
+template<class T>
+class SwingPendulum: public RLProblem<T>
 {
+    typedef RLProblem<T> Base;
   protected:
     float uMax, stepTime, theta, velocity, maxVelocity;
 
@@ -41,23 +43,22 @@ class SwingPendulum: public Environment<>
     std::ofstream outfile;
   public:
     SwingPendulum() :
-        Environment<>(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(
-            0), maxVelocity(
+        RLProblem<T>(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(0), maxVelocity(
         M_PI_4 / stepTime), actionRange(new Range<float>(-uMax, uMax)), thetaRange(
             new Range<float>(-M_PI, M_PI)), velocityRange(
             new Range<float>(-maxVelocity, maxVelocity)), mass(1.0), length(1.0), g(9.8), requiredUpTime(
             10.0 /*seconds*/), upRange(M_PI_4 /*seconds*/), upTime(0)
     {
 
-      discreteActions->push_back(0, actionRange->min());
-      discreteActions->push_back(1, 0.0);
-      discreteActions->push_back(2, actionRange->max());
+      Base::discreteActions->push_back(0, actionRange->min());
+      Base::discreteActions->push_back(1, 0.0);
+      Base::discreteActions->push_back(2, actionRange->max());
 
       // subject to change
-      continuousActions->push_back(0, 0.0);
+      Base::continuousActions->push_back(0, 0.0);
 
-      for (int i = 0; i < dimension(); i++)
-        resolutions->at(i) = 10.0;
+      for (int i = 0; i < this->dimension(); i++)
+        Base::resolutions->at(i) = 10.0;
 
     }
 
@@ -80,15 +81,15 @@ class SwingPendulum: public Environment<>
   public:
     void updateRTStep()
     {
-      DenseVector<double>& vars = *output->o_tp1;
+      DenseVector<T>& vars = *Base::output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
-      vars[0] = (theta - thetaRange->min()) * resolutions->at(0) / thetaRange->length();
-      vars[1] = (velocity - velocityRange->min()) * resolutions->at(1) / velocityRange->length();
+      vars[0] = (theta - thetaRange->min()) * Base::resolutions->at(0) / thetaRange->length();
+      vars[1] = (velocity - velocityRange->min()) * Base::resolutions->at(1) / velocityRange->length();
 
-      observations->at(0) = theta;
-      observations->at(1) = velocity;
+      Base::observations->at(0) = theta;
+      Base::observations->at(1) = velocity;
 
-      output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateRTStep(r(), z(), endOfEpisode());
     }
     void initialize()
     {

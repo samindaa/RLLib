@@ -32,15 +32,15 @@
 #ifndef MCAR2D_H_
 #define MCAR2D_H_
 
-#include "Environment.h"
+#include "RL.h"
 
 using namespace RLLib;
 
 template<class T>
-class MountainCar: public Environment<T>
+class MountainCar: public RLProblem<T>
 {
   private:
-    typedef Environment<T> Base;
+    typedef RLProblem<T> Base;
   protected:
     // Global variables:
     float position;
@@ -55,9 +55,9 @@ class MountainCar: public Environment<T>
 
   public:
     MountainCar() :
-        Environment<T>(2, 3, 1), position(0), velocity(0), positionRange(
-            new Range<float>(-1.2, 0.6)), velocityRange(new Range<float>(-0.07, 0.07)), actionRange(
-            new Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(1.0)
+        RLProblem<T>(2, 3, 1), position(0), velocity(0), positionRange(new Range<float>(-1.2, 0.6)), velocityRange(
+            new Range<float>(-0.07, 0.07)), actionRange(new Range<float>(-1.0, 1.0)), targetPosition(
+            positionRange->max()), throttleFactor(1.0)
     {
       Base::discreteActions->push_back(0, actionRange->min());
       Base::discreteActions->push_back(1, 0.0);

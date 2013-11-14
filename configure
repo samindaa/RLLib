@@ -19,7 +19,7 @@ ignore="visualization"
 
 #compiler and linker flags
 cxx="g++"
-optional_cflags="-I. -I./src -I./test -I./simulation -Wall -Werror  -m32 -O3 -Wno-deprecated -fPIC"
+optional_cflags="-I. -I./src -I./test -I./simulation -Wall -Werror  -O3 -Wno-deprecated -fPIC"
 optional_lflags=""
 
 builddir="./build"
@@ -116,8 +116,6 @@ $targetname: CFLAGS=$cflags
 $targetname: LFLAGS=$lflags
 $targetname: BIN=$bin
 $targetname: BUILDDIR=$builddir
-$targetname: BISON=`which bison`
-$targetname: FLEX=`which flex`
 -include $src_list
 -include $dep_list
 $targetname: \$(GENERATED_$targetname) \$(OBJ_$targetname) link_$targetname

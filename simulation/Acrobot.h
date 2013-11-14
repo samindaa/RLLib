@@ -22,10 +22,12 @@
 #ifndef ACROBOT_H_
 #define ACROBOT_H_
 
-#include "Environment.h"
+#include "RL.h"
 
-class Acrobot: public Environment<>
+template<class T>
+class Acrobot: public RLProblem<T>
 {
+    typedef RLProblem<T> Base;
   protected:
     Range<float>* thetaRange;
     Range<float>* theta1DotRange;
@@ -38,21 +40,21 @@ class Acrobot: public Environment<>
 
   public:
     Acrobot() :
-        Environment<>(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
+        RLProblem<T>(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
             new Range<float>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
             new Range<float>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(new Range<float>(-1.0, 1.0)), m1(
             1.0), m2(1.0), l1(1.0), l2(1.0), lc1(0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), targetPosition(
             1.0), theta1(0), theta2(0), theta1Dot(0), theta2Dot(0), transitionNoise(0)
     {
-      discreteActions->push_back(0, actionRange->min());
-      discreteActions->push_back(1, 0.0);
-      discreteActions->push_back(2, actionRange->max());
+      Base::discreteActions->push_back(0, actionRange->min());
+      Base::discreteActions->push_back(1, 0.0);
+      Base::discreteActions->push_back(2, actionRange->max());
 
       // subject to change
-      continuousActions->push_back(0, 0.0);
+      Base::continuousActions->push_back(0, 0.0);
 
-      for (int i = 0; i < dimension(); i++)
-        resolutions->at(i) = 6.0;
+      for (int i = 0; i < this->dimension(); i++)
+        Base::resolutions->at(i) = 6.0;
     }
     ~Acrobot()
     {
@@ -81,18 +83,20 @@ class Acrobot: public Environment<>
 
     void updateRTStep()
     {
-      DenseVector<double>& vars = *output->o_tp1;
+      DenseVector<T>& vars = *Base::output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
-      vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * resolutions->at(0);
-      vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * resolutions->at(1);
-      vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length()) * resolutions->at(2);
-      vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length()) * resolutions->at(3);
-      output->updateRTStep(r(), z(), endOfEpisode());
+      vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * Base::resolutions->at(0);
+      vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * Base::resolutions->at(1);
+      vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length())
+          * Base::resolutions->at(2);
+      vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length())
+          * Base::resolutions->at(3);
+      Base::output->updateRTStep(r(), z(), endOfEpisode());
 
-      observations->at(0) = theta1;
-      observations->at(1) = theta2;
-      observations->at(2) = theta1Dot;
-      observations->at(3) = theta2Dot;
+      Base::observations->at(0) = theta1;
+      Base::observations->at(1) = theta2;
+      Base::observations->at(2) = theta1Dot;
+      Base::observations->at(3) = theta2Dot;
     }
 
     void step(const Action<double>* action)

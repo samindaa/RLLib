@@ -310,7 +310,8 @@ class DenseVector: public Vector<T>
         for (int j = 0; j < capacity; j++)
           Vector<T>::write(of, data[j]);
         of.close();
-        std::cout << "## DenseVector persisted=" << f << std::endl;
+        std::cout << "## DenseVector (" << sum() << ", " << l1Norm() << ", " << maxNorm()
+            << ") persisted=" << f << std::endl;
       }
       else
         std::cerr << "ERROR! (persist) file=" << f << std::endl;
@@ -330,16 +331,18 @@ class DenseVector: public Vector<T>
         int rcapacity;
         Vector<T>::read(ifs, rcapacity);
         assert(capacity == rcapacity);
+        clear();
         printf("vectorType=%i rcapacity=%i \n", vectorType, rcapacity);
         // Read data
         for (int j = 0; j < capacity; j++)
           Vector<T>::read(ifs, data[j]);
         ifs.close();
-        std::cout << "## DenseVector persist=" << f << std::endl;
+        std::cout << "## DenseVector (" << sum() << ", " << l1Norm() << ", " << maxNorm()
+            << ") resurrected=" << f << std::endl;
       }
       else
       {
-        std::cerr << "ERROR! (resurrected) file=" << f << std::endl;
+        std::cerr << "ERROR! (resurrect) file=" << f << std::endl;
         exit(-1);
       }
     }
@@ -638,7 +641,8 @@ class SparseVector: public Vector<T>
         for (int position = 0; position < nbActive; position++)
           Vector<T>::write(of, values[position]);
         of.close();
-        std::cout << "## SparseVector persisted=" << f << std::endl;
+        std::cout << "## SparseVector (" << sum() << ", " << l1Norm() << ", " << maxNorm()
+            << ") persisted=" << f << std::endl;
       }
       else
         std::cerr << "ERROR! (persist) file=" << f << std::endl;
@@ -661,6 +665,7 @@ class SparseVector: public Vector<T>
         int rnbActive;
         Vector<T>::read(ifs, rnbActive);
         assert(indexesPositionLength == rcapacity);
+        clear();
         // Verbose
         printf("vectorType=%i rcapacity=%i rnbActive=%i\n", vectorType, rcapacity, rnbActive);
         // Read active indexes
@@ -677,7 +682,8 @@ class SparseVector: public Vector<T>
         ifs.close();
 
         delete[] ractiveIndexes;
-        std::cout << "## SparseVector resurrected=" << f << std::endl;
+        std::cout << "## SparseVector (" << sum() << ", " << l1Norm() << ", " << maxNorm()
+            << ") resurrected=" << f << std::endl;
       }
       else
       {

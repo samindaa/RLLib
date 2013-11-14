@@ -20,7 +20,7 @@ class ActorCriticOnPolicyOnStateTest: public ActorCriticOnPolicyOnStateTestBase
     double mu;
     double sigma;
 
-    Environment<>* problem;
+    RLProblem<double>* problem;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;
 
@@ -40,6 +40,7 @@ class ActorCriticOnPolicyOnStateTest: public ActorCriticOnPolicyOnStateTestBase
     ActorOnPolicy<double>* actor;
 
     OnPolicyControlLearner<double>* control;
+    RLAgent<double>* agent;
     Simulator<double>* sim;
 
   public:

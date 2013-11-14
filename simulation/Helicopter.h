@@ -22,7 +22,7 @@
 #ifndef HELICOPTER_H_
 #define HELICOPTER_H_
 
-#include "Environment.h"
+#include "RL.h"
 
 // ============================================================================
 
@@ -397,8 +397,10 @@ class HelicopterDynamics
     }
 };
 
-class Helicopter: public Environment<>
+template<class T>
+class Helicopter: public RLProblem<T>
 {
+    typedef RLProblem<T> Base;
   protected:
     double episodeLength;
   public:
@@ -407,11 +409,11 @@ class Helicopter: public Environment<>
 
   public:
     Helicopter(const int episodeLength = 6000) :
-        Environment<>(12, 1, 1), episodeLength(episodeLength), step_time(0)
+        RLProblem<T>(12, 1, 1), episodeLength(episodeLength), step_time(0)
     {
       // Discrete actions are not setup for this problem.
       for (unsigned int i = 0; i < 4/*four values in the action*/; i++)
-        continuousActions->push_back(0, 0);
+        Base::continuousActions->push_back(0, 0);
     }
 
     virtual ~Helicopter()
@@ -441,7 +443,7 @@ class Helicopter: public Environment<>
 
     void updateRTStep()
     {
-      DenseVector<double>& vars = *output->o_tp1;
+      DenseVector<T>& vars = *Base::output->o_tp1;
       const vector<double>& observation = heliDynamics.getObservation();
       for (unsigned int i = 0; i < observation.size(); i++)
       {
@@ -449,7 +451,7 @@ class Helicopter: public Environment<>
         vars[i] = observation[i];
         // TODO: scaling?
       }
-      output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateRTStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action<double>* action)

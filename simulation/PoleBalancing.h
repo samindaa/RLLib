@@ -22,7 +22,7 @@
 #ifndef POLEBALANCING_H_
 #define POLEBALANCING_H_
 
-#include "Environment.h"
+#include "RL.h"
 #include "util/Eigen/Dense"
 #include "util/Eigen/Eigenvalues"
 #include "Math.h"
@@ -47,7 +47,7 @@ void mvnrnd(const MatrixBase<Derived1>& mu, const MatrixBase<Derived2>& Sigma,
   r = mu + R * r;
 }
 
-class PoleBalancing: public Environment<>
+class PoleBalancing: public RLProblem<>
 {
   protected:
     double tau, veta, g;
@@ -65,7 +65,7 @@ class PoleBalancing: public Environment<>
 
   public:
     PoleBalancing() :
-        Environment<>(4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
+        RLProblem<>(4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
     {
       // No discrete actions
 

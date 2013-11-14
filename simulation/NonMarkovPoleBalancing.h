@@ -8,7 +8,7 @@
 #ifndef NONMARKOVPOLEBALANCING_H_
 #define NONMARKOVPOLEBALANCING_H_
 
-#include "Environment.h"
+#include "RL.h"
 
 using namespace RLLib;
 /**
@@ -16,7 +16,9 @@ using namespace RLLib;
  * Faustino Gomez and Risto Miikkulainen, 1996
  *
  */
-class NonMarkovPoleBalancing: public Environment<float>
+
+template<class T>
+class NonMarkovPoleBalancing: public RLProblem<T>
 {
   protected:
     int nbUnjointedPoles;
@@ -43,13 +45,13 @@ class NonMarkovPoleBalancing: public Environment<float>
 
   public:
     NonMarkovPoleBalancing(const int& nbUnjointedPoles = 1) :
-        Environment<float>(1 + nbUnjointedPoles, 3, 1), nbUnjointedPoles(nbUnjointedPoles), stepTime(
+        RLProblem<T>(1 + nbUnjointedPoles, 3, 1), nbUnjointedPoles(nbUnjointedPoles), stepTime(
             0.01), x(0), xDot(0), g(-9.81), M(1.0), muc(0), xRange(new Range<float>(-2.4f, 2.4f)), actionRange(
-            new Range<float>(-10.0f, 10.0f)), theta(new DenseVector<float>(nbUnjointedPoles)), thetaDot(
-            new DenseVector<float>(nbUnjointedPoles)), thetaDotDot(
-            new DenseVector<float>(nbUnjointedPoles)), l(new DenseVector<float>(nbUnjointedPoles)), f(
-            new DenseVector<float>(nbUnjointedPoles)), m(new DenseVector<float>(nbUnjointedPoles)), mm(
-            new DenseVector<float>(nbUnjointedPoles)), mup(new DenseVector<float>(nbUnjointedPoles))
+            new Range<float>(-10.0f, 10.0f)), theta(new PVector<float>(nbUnjointedPoles)), thetaDot(
+            new PVector<float>(nbUnjointedPoles)), thetaDotDot(
+            new PVector<float>(nbUnjointedPoles)), l(new PVector<float>(nbUnjointedPoles)), f(
+            new PVector<float>(nbUnjointedPoles)), m(new PVector<float>(nbUnjointedPoles)), mm(
+            new PVector<float>(nbUnjointedPoles)), mup(new PVector<float>(nbUnjointedPoles))
     {
       if (nbUnjointedPoles == 2)
       {
@@ -110,7 +112,7 @@ class NonMarkovPoleBalancing: public Environment<float>
   public:
     void updateRTStep()
     {
-      DenseVector<float>& vars = *output->o_tp1;
+      DenseVector<T>& vars = *output->o_tp1;
       vars[0] = (x - xRange->min()) * resolutions->at(0) / xRange->length();
       observations->at(0) = x;
       for (int i = 0; i < nbUnjointedPoles; i++)
@@ -131,7 +133,7 @@ class NonMarkovPoleBalancing: public Environment<float>
       updateRTStep();
     }
 
-    void step(const Action& a)
+    void step(const Action<T>& a)
     {
       float totalEffectiveForce = 0;
       float totalEffectiveMass = 0;

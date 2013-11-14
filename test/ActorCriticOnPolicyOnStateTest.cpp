@@ -25,6 +25,7 @@ ActorCriticOnPolicyOnStateTest::ActorCriticOnPolicyOnStateTest() :
   actorTraces = 0;
   actor = 0;
   control = 0;
+  agent = 0;
   sim = 0;
 }
 
@@ -60,6 +61,9 @@ void ActorCriticOnPolicyOnStateTest::deleteObjects()
   if (control)
     delete control;
   control = 0;
+  if (agent)
+    delete agent;
+  agent = 0;
   if (sim)
     delete sim;
   sim = 0;
@@ -75,7 +79,8 @@ void ActorCriticOnPolicyOnStateTest::checkDistribution(
   actor = new Actor<double>(alpha_u, policyDistribution);
   control = new ActorCritic<double>(critic, actor, projector, toStateAction);
 
-  sim = new Simulator<double>(control, problem, 10000, 1, 1);
+  agent = new LearnerAgent<double>(control);
+  sim = new Simulator<double>(agent, problem, 10000, 1, 1);
   sim->run();
   double discReward = sim->episodeR / sim->timeStep;
   std::cout << discReward << std::endl;
@@ -119,7 +124,8 @@ void ActorCriticOnPolicyOnStateTest::testNormalDistributionWithEligibility()
   actor = new ActorLambda<double>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
   control = new ActorCritic<double>(critic, actor, projector, toStateAction);
 
-  sim = new Simulator<double>(control, problem, 1000, 1, 1);
+  agent = new LearnerAgent<double>(control);
+  sim = new Simulator<double>(agent, problem, 1000, 1, 1);
   sim->run();
   double discReward = sim->episodeR / sim->timeStep;
   std::cout << discReward << std::endl;
