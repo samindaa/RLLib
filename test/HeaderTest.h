@@ -43,6 +43,7 @@
 #include "ControlAlgorithm.h"
 #include "StateToStateAction.h"
 #include "MountainCar.h"
+#include "SwingPendulum.h"
 #include "NoStateProblem.h"
 #include "StateGraph.h"
 #include "RL.h"
@@ -53,6 +54,8 @@ using namespace RLLib;
 // Testing framework
 class RLLibTestCase
 {
+  protected:
+    std::vector<std::string> argv;
   public:
     RLLibTestCase()
     {
@@ -62,6 +65,7 @@ class RLLibTestCase
     }
     virtual void run() =0;
     virtual const char* getName() const =0;
+    virtual void setArgv(const std::vector<std::string>& argv) {this->argv = argv;}
 };
 
 /** Test macro **/

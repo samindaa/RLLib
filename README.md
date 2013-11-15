@@ -115,10 +115,19 @@ Test Configuration
 
 The test cases are executed using:
    
-    ./configure
+* 64-bit machines:
+    ./configure_m64
     make
     ./RLLibTest
-
+* 32-bit machines:
+    ./configure_m32
+    make
+    ./RLLibTest
+* Debugging:
+    ./configure_debug
+    make
+    ./RLLibTest
+	
 Documentation
 ------------- 
    

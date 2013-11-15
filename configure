@@ -6,50 +6,63 @@
 # Modified by: Sam Abeyruwan
 #----------------------------------------
 
-#makefile target for this configuration
-targetname="RLLibTest"
+# Settings:
 
-#list of needed libraries
+targetname=""
+depends_on=""
+
+builddir="build"
+bin="RLLibTest"
+
 lib_list=""
-#list of needed external tools
 tool_list=""
-
-#regular expression to ignore files
-ignore="visualization"
-
-#compiler and linker flags
 cxx="g++"
-optional_cflags="-I. -I./src -I./test -I./simulation -Wall -Werror  -O3 -Wno-deprecated -fPIC"
+optional_cflags=""
 optional_lflags=""
 
-builddir="./build"
-bin="./RLLibTest"
+sourcedirs="."
 
-# -- hide warnings
-hideWarningsFilelist=""
+# Use single quotes around pattern with * to avoid early glob expansion. 
+ignore=""
+hideWarnings=""
 
-#----------------------------------------
-#command line arguments
-#loop for all arguments
+includedMakefiles=""
+generatedFiles=""
+
+#-------------------------------------------------------------------------------
+# Settings can be overidden by command line arguments
+
 for arg in "$@"
 do
   argname=`echo $arg | sed 's/\([^=]*\)=.*/\1/g'`
   argvalue=`echo $arg | sed 's/.*=\([^=]*\)/\1/g'`
   if [ "$argname" == "target" ]; then targetname=$argvalue; fi
-  if [ "$argname" == "cxx" ]; then cxx=$argvalue; fi
-  if [ "$argname" == "cflags" ]; then optional_cflags=$argvalue; fi
-  if [ "$argname" == "lflags" ]; then optional_lflags=$argvalue; fi
+  if [ "$argname" == "depends_on" ]; then depends_on="$argvalue"; fi
   if [ "$argname" == "builddir" ]; then builddir=$argvalue; fi
   if [ "$argname" == "bin" ]; then bin=$argvalue; fi
   if [ "$argname" == "lib_list" ]; then lib_list=$argvalue; fi
-  if [ "$argname" == "ignore" ]; then ignore="$ignore|$argvalue"; fi
+  if [ "$argname" == "tool_list" ]; then tool_list=$argvalue; fi
+  if [ "$argname" == "cxx" ]; then cxx=$argvalue; fi
+  if [ "$argname" == "cflags" ]; then optional_cflags=$argvalue; fi
+  if [ "$argname" == "lflags" ]; then optional_lflags=$argvalue; fi
+  if [ "$argname" == "sourcedirs" ]; then sourcedirs=$argvalue; fi
+  if [ "$argname" == "ignore" ]; then ignore="$ignore $argvalue"; fi
+  if [ "$argname" == "hideWarnings" ]; then hideWarnings="$hideWarnings $argvalue"; fi
 done
 
-#----------------------------------------
-#----------------------------------------
+# always append target name to build dir
+builddir="$builddir/$targetname"
+
+if [ "$targetname" == "" ]; then
+  echo no target defined;
+  exit 1
+fi
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # DO NOT MODIFY ANYTHING BELOW :)
-#----------------------------------------
-#----------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #check libraries
 
 libflags_compiler=""
@@ -96,19 +109,27 @@ if [ "$missing_libs$missing_tools" != "00" ]; then
 #----------------------------------------
 #write Makefile
 
+echo Creating Makefile...
+
 src_list=$builddir/src_list
 dep_list=$builddir/dep_list
-
 cflags="$libflags_compiler -I. -Wall $optional_cflags"
 lflags="$libflags_linker $optional_lflags"
 
-
-echo Creating Makefile...
+#set link command, if binary has extension .a use ar to create static library
+linkCommand="\$(CXX) \$(CFLAGS) -o $bin \$(OBJ_$targetname) \$(LFLAGS)"
+if [[ `basename $bin` == *.so ]]; then
+  cflags="$cflags -fPIC -shared"
+elif [[ `basename $bin` == *.a ]]; then
+  linkCommand="rm $bin; ar csr $bin \$(OBJ_$targetname)"
+fi
 
 { # BEGIN printing Makefile
 # create new default target
 cat << EOC
 default: $targetname
+TARGETNAME=$targetname
+OBJ=\$(OBJ_$targetname)
 # --- BEGIN TARGETS
 # --- BEGIN $targetname
 $targetname: CXX=$cxx
@@ -118,11 +139,12 @@ $targetname: BIN=$bin
 $targetname: BUILDDIR=$builddir
 -include $src_list
 -include $dep_list
-$targetname: \$(GENERATED_$targetname) \$(OBJ_$targetname) link_$targetname
+$targetname: $depends_on \$(OBJ_$targetname) $builddir/linked
 	@echo $targetname compiled.
-link_$targetname: \$(OBJ_$targetname)
+$builddir/linked: $depends_on \$(OBJ_$targetname) $bin
 	@echo \$(YEL)Linking...\$(NOR)
-	@\$(CXX) \$(CFLAGS) -o $bin \$(OBJ_$targetname) \$(LFLAGS)
+	@$linkCommand
+	@touch \$@
 # --- END $targetname
 EOC
 #append all existing other targets
@@ -133,9 +155,14 @@ then
                | grep -E -v "^default:"
 else
   echo "ALLTARGETS=" 
+  echo "ALLBIN=" 
   echo "ALLOBJ="
 fi
 echo "# --- END TARGETS"
+for file in $includedMakefiles
+do
+  echo "-include $file"
+done
 # add some static stuff (coloring, targets all and clean)
 cat << 'EOC'
 
@@ -156,11 +183,16 @@ TUQ="$(ESC)[1;36m"
 WHT="$(ESC)[1;37m"
 NOR="$(ESC)[m"
 
-# --- compile all
-all: 
-	$(foreach target,$(ALLTARGETS),$(MAKE) $(MAKEFILE) $(target);)
+all: $(ALLTARGETS)
+
+$(ALLBIN):
+	@touch $@
 
 clean:
+	@rm -f $(OBJ)
+	@echo $(TARGETNAME) object files deleted.
+
+clean_all:
 	@rm -f $(ALLOBJ)
 	@echo All object files deleted.
 
@@ -172,6 +204,10 @@ if ! grep -q -E "^ALLTARGETS=.* $targetname .*\$" Makefile
 then
   sed -i -e "s/^\(ALLTARGETS=.*\)\$/\1 $targetname /g" Makefile  
 fi
+if ! grep -q -E "^ALLBIN=.* $bin .*\$" Makefile
+then
+  sed -i -e "s@^\(ALLBIN=.*\)\$@\1 $bin @g" Makefile  
+fi
 if ! grep -q -E "^ALLOBJ=.* \\\$\(OBJ_$targetname\) .*\$" Makefile
 then
   sed -i -e "s/^\(ALLOBJ=.*\)\$/\1 \$(OBJ_$targetname) /g" Makefile  
@@ -180,33 +216,43 @@ fi
 #----------------------------------------
 #create build directory
 
-#create subdirectories
 echo Creating build directory...
-allcpp=`find -L . -name \*.cpp | cut -c3- | grep -E -v "$ignore" | xargs`
-if [ ! -d "$builddir" ]
-then
-  mkdir -p $builddir
-fi
-for cppfile in $allcpp
+
+#create list with all src files
+allsrc=""
+for file in `find -L $sourcedirs -name \*.cpp -or -name \*.c | sed 's@^\./@@' | xargs` 
 do
-  d=$builddir/`dirname $cppfile`
-  if [ ! -d "$d" ]
-  then
-    mkdir -p $d
-  fi
+  fileIgnored=0
+  for pattern in $ignore
+  do
+    pattern=${pattern//\'/}
+    if [[ $file == $pattern ]]; then
+      fileIgnored=1
+    fi
+  done
+  [ "$fileIgnored" == "0" ] && allsrc="$allsrc $file"
+done
+for file in $generatedFiles
+do
+  [[ $allsrc != *$file* ]] && [[ $file == *.cpp ]] && allsrc="$allsrc $file"
+  [[ $allsrc != *$file* ]] && [[ $file == *.c   ]] && allsrc="$allsrc $file"
 done
 
+#create builddir and all subdirectories
+mkdir -p $builddir
+for file in $allsrc
+do
+  mkdir -p $builddir/`dirname $file`
+done
 
 #create object list
 allobj=""
-allsrc="$generatedfiles $allcpp"
 for srcfile in $allsrc
 do
-  object="$builddir/`dirname $srcfile`/`basename $srcfile | sed 's/\.[^\.]*$//'`.o"
+  object="$builddir/${srcfile%.*}.o"
   allobj="$allobj $object"
 done
-echo "OBJ_$targetname = $allobj" >> $builddir/src_list
-
+echo "OBJ_$targetname = $allobj" > $builddir/src_list
 
 #create dep files and dep_list
 echo Init dependency files...
@@ -215,7 +261,7 @@ if [ "$olddeps" != "" ]
 then
   rm $olddeps
 fi
-echo > $dep_list
+echo > $dep_list  #clear dep list
 filenamenew="_new"
 jobs=0
 for srcfile in $allsrc
@@ -224,29 +270,49 @@ do
  {
   #get path and filenames
   objpath="$builddir/"${srcfile%/*}
+  [[ "$srcfile" != */* ]] && objpath="$builddir"
   basefilename=${srcfile%.*}
   objfile="$builddir/$basefilename.o"
   depfile="$builddir/$basefilename.dep"
 
   #check if file is on the no-warnings-list
   extraflags=""
-  for pattern in $hideWarningsFilelist
+  for pattern in $hideWarnings
   do
-    case "$srcfile" in
-      $pattern)
-       extraflags="-fpermissive -w"
-    esac
+    pattern=${pattern//\'/}
+    [[ $srcfile == $pattern ]] && extraflags="-fpermissive -w"
   done
   
   #write dep file
   {
-  echo -n "$objpath/" 
-  $cxx $cflags -M $srcfile
-  cat << EOC
+    if [ -f $srcfile ]  #if src file exists
+    then
+      echo -n "$objpath/"
+      $cxx $cflags -MM $srcfile 2> /dev/null
+      #if there was an error, try again using -MG and add full path for files in generatedFiles
+      if [ ! $? -eq 0 ]
+      then
+        $cxx $cflags -MM -MG $srcfile | while read -r line
+        do
+          for dependency in $line
+          do
+            if [[ $generatedFiles == *$dependency* ]]
+            then
+              longDependency=`echo $generatedFiles | grep -oE "\b[^ ]*$dependency[^ ]*\b"`
+              line=`echo $line | sed "s@$dependency@$longDependency@"`
+            fi
+          done
+          echo "$line"
+        done
+      fi
+    else # if src file does not exist
+      echo "$objfile: $srcfile"
+    fi
+    cat << EOC
 	@echo \$(BLU)[\$(CXX)]\$(NOR) $srcfile
 	@\$(CXX) \$(CFLAGS) $extraflags -c $srcfile -o $objfile
 	@echo -n "$objpath/" > $depfile$filenamenew
-	@\$(CXX) \$(CFLAGS) -M $srcfile >> $depfile$filenamenew
+	@\$(CXX) \$(CFLAGS) -MM $srcfile >> $depfile$filenamenew
 	@tail -n6 $depfile >> $depfile$filenamenew
 	@mv $depfile$filenamenew $depfile
 EOC
@@ -257,5 +323,6 @@ EOC
  [[ $jobs -eq 8 ]] && wait && jobs=0
 done
 wait
+
 
 echo Done.

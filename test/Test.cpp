@@ -55,6 +55,7 @@ void RLLibTestRegistry::registerInstance(RLLibTestCase* testCase)
 
 int main(int argc, char** argv)
 {
+  std::vector<std::string> params(argv, argv + argc);
   RLLibTestRegistry* registry = RLLibTestRegistry::getInstance();
   cout << "*** number of registered test cases = " << registry->dimension() << endl;
   set<string> activeTestSet, onlyTestSet;
@@ -101,6 +102,7 @@ int main(int argc, char** argv)
     RLLibTestRegistry::iterator iter2 = registry->find(*iter);
     RLLibTestCase* testCase = iter2->second;
     cout << "*** starts " << testCase->getName() << endl;
+    testCase->setArgv(params);
     testCase->run();
     cout << "*** ends   " << testCase->getName() << endl;
   }

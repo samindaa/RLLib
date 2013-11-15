@@ -1,0 +1,7 @@
+#!/bin/bash
+
+./configure target="RLLibTestM64" \
+               cflags="-I. -I./src -I./test -I./simulation -Wall -Werror  -m64 -O3 -Wno-deprecated -fPIC" \
+               lflags="" \
+               ignore="'visualization/*'" \
+               bin="RLLibTest"
