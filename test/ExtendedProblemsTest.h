@@ -123,7 +123,7 @@ template<class T>
 class AdvancedTilesProjector: public Projector<T>
 {
   protected:
-    SparseVector<double>* vector;
+    Vector<double>* vector;
     int* activeTiles;
     Tiles<T>* tiles;
 
@@ -186,9 +186,9 @@ class AdvancedTilesProjector: public Projector<T>
       }
 
       // bias
-      vector->insertLast(1.0);
+      vector->setEntry(vector->dimension() - 1, 1.0);
       for (int* i = activeTiles; i < activeTiles + 48; ++i)
-        vector->insertEntry(*i, 1.0);
+        vector->setEntry(*i, 1.0);
 
       return vector;
     }
@@ -234,9 +234,9 @@ class AdvancedTilesProjector: public Projector<T>
       }
 
       // bias
-      vector->insertLast(1.0);
+      vector->setEntry(vector->dimension() - 1, 1.0);
       for (int* i = activeTiles; i < activeTiles + 48; ++i)
-        vector->insertEntry(*i, 1.0);
+        vector->setEntry(*i, 1.0);
 
       return vector;
     }

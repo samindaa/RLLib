@@ -209,7 +209,7 @@ class TabularAction: public StateToStateAction<T>
     {
       _phi->set(projector->project(x), projector->dimension() * a->id());
       if (includeActiveFeature)
-        _phi->insertLast(1.0);
+        _phi->setEntry(_phi->dimension() - 1, 1.0);
       return _phi;
     }
 

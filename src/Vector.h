@@ -76,9 +76,6 @@ class Vector
     virtual void clear() =0;
     // Insert T(value) within the Vector<T> capacity
     virtual void setEntry(const int& index, const T& value) =0;
-    virtual void insertLast(const T& value) =0;
-    // This method only set the value within the bounds of ||Vector<T>||
-    virtual void insertEntry(const int& index, const T& value) =0;
     // This method only reset the value at index to T(0)
     virtual void removeEntry(const int& index) =0;
     virtual Vector<T>* addToSelf(const double& value) =0;
@@ -238,16 +235,6 @@ class DenseVector: public Vector<T>
     void setEntry(const int& index, const T& value)
     {
       this->at(index) = value;
-    }
-
-    void insertLast(const T& value)
-    {
-      setEntry(capacity - 1, value);
-    }
-
-    void insertEntry(const int& index, const T& value)
-    {
-      setEntry(index, value);
     }
 
     void removeEntry(const int& index)
@@ -496,11 +483,6 @@ class SparseVector: public Vector<T>
     }
 
   public:
-    void insertLast(const T& value)
-    {
-      appendEntry(indexesPositionLength - 1, value);
-    }
-
     void insertEntry(const int& index, const T& value)
     {
       appendEntry(index, value);
@@ -1295,9 +1277,9 @@ static void printVector(const Vector<T>* other)
   if (that)
   {
     std::cout << "SparseVector(" << that->nonZeroElements() << ") index=";
-    for (int index = 0; index < that->dimension(); index++)
-      std::cout << that->getIndexesPosition()[index] << " ";
-    std::cout << std::endl;
+    //for (int index = 0; index < that->dimension(); index++)
+    //  std::cout << that->getIndexesPosition()[index] << " ";
+    //std::cout << std::endl;
 
     for (int position = 0; position < that->nonZeroElements(); position++)
       std::cout << "[p=" << position << " i=" << that->nonZeroIndexes()[position] << " v="

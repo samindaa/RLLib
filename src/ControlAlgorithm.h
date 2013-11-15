@@ -227,7 +227,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       // Next cycle update the target policy
       target->update(xas_tp1);
       const Action<T>* a_tp1 = Policies::sampleAction(behavior, xas_tp1);
-      phi_t->set(xas_tp1->at(a_tp1));
+      Vectors<T>::bufferedCopy(xas_tp1->at(a_tp1), phi_t);
       return a_tp1;
     }
 
@@ -443,7 +443,7 @@ class OffPAC: public OffPolicyControlLearner<T>
       actor->initialize();
       const Representations<T>* phi = toStateAction->stateActions(x);
       const Action<T>* a = Policies::sampleAction(behavior, phi);
-      Vectors<T>::bufferedCopy(phi->at(a), phi_t);
+      Vectors<T>::bufferedCopy(projector->project(x), phi_t);
       return a;
     }
 
@@ -456,9 +456,9 @@ class OffPAC: public OffPolicyControlLearner<T>
       rho_t = actor->pi(a_t) / behavior->pi(a_t);
       Boundedness::checkValue(rho_t);
 
-      Vectors<T>::bufferedCopy(projector->project(x_t), phi_t);
       const Vector<T>* phi_tp1 = projector->project(x_tp1);
       delta_t = critic->update(phi_t, phi_tp1, rho_t, r_tp1, z_tp1);
+      Vectors<T>::bufferedCopy(phi_tp1, phi_t);
       Boundedness::checkValue(delta_t);
       actor->update(xas_t, a_t, rho_t, delta_t);
 
@@ -666,17 +666,19 @@ class AbstractActorCritic: public OnPolicyControlLearner<T>
     ActorOnPolicy<T>* actor;
     Projector<T>* projector;
     StateToStateAction<T>* toStateAction;
+    Vector<T>* phi_t;
 
   public:
     AbstractActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor, Projector<T>* projector,
         StateToStateAction<T>* toStateAction) :
-        critic(critic), actor(actor), projector(projector), toStateAction(toStateAction)
+        critic(critic), actor(actor), projector(projector), toStateAction(toStateAction), phi_t(0)
     {
     }
 
     virtual ~AbstractActorCritic()
     {
-
+      if (phi_t)
+        delete phi_t;
     }
 
   protected:
@@ -706,6 +708,7 @@ class AbstractActorCritic: public OnPolicyControlLearner<T>
       critic->initialize();
       actor->initialize();
       policy()->update(toStateAction->stateActions(x));
+      Vectors<T>::bufferedCopy(projector->project(x), phi_t);
       return policy()->sampleAction();
     }
 
@@ -762,30 +765,25 @@ class ActorCritic: public AbstractActorCritic<T>
 {
   protected:
     typedef AbstractActorCritic<T> Base;
-    Vector<T>* phi_t;
-    Vector<T>* phi_tp1;
   public:
     ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor, Projector<T>* projector,
         StateToStateAction<T>* toStateAction) :
-        AbstractActorCritic<T>(critic, actor, projector, toStateAction), phi_t(0), phi_tp1(0)
+        AbstractActorCritic<T>(critic, actor, projector, toStateAction)
     {
     }
 
     virtual ~ActorCritic()
     {
-      if (phi_t)
-        delete phi_t;
-      if (phi_tp1)
-        delete phi_tp1;
     }
 
     double updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-      Vectors<T>::bufferedCopy(Base::projector->project(x_t), phi_t);
-      Vectors<T>::bufferedCopy(Base::projector->project(x_tp1), phi_tp1);
+      const Vector<T>* phi_tp1 = Base::projector->project(x_tp1);
       // Update critic
-      return Base::critic->update(phi_t, phi_tp1, r_tp1);
+      double delta_t = Base::critic->update(Base::phi_t, phi_tp1, r_tp1);
+      Vectors<T>::bufferedCopy(phi_tp1, Base::phi_t);
+      return delta_t;
     }
 };
 
@@ -795,34 +793,27 @@ class AverageRewardActorCritic: public AbstractActorCritic<T>
   protected:
     typedef AbstractActorCritic<T> Base;
     double alpha_r, averageReward;
-    Vector<T>* phi_t;
-    Vector<T>* phi_tp1;
 
   public:
     AverageRewardActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor,
         Projector<T>* projector, StateToStateAction<T>* toStateAction, double alpha_r) :
         AbstractActorCritic<T>(critic, actor, projector, toStateAction), alpha_r(alpha_r), averageReward(
-            0), phi_t(0), phi_tp1(0)
+            0)
     {
     }
 
     virtual ~AverageRewardActorCritic()
     {
-      if (phi_t)
-        delete phi_t;
-      if (phi_tp1)
-        delete phi_tp1;
     }
 
     double updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-      Vectors<T>::bufferedCopy(Base::projector->project(x_t), phi_t);
-      Vectors<T>::bufferedCopy(Base::projector->project(x_tp1), phi_tp1);
-
+      const Vector<T>* phi_tp1 = Base::projector->project(x_tp1);
       // Update critic
-      double delta_t = Base::critic->update(phi_t, phi_tp1, r_tp1 - averageReward);
+      double delta_t = Base::critic->update(Base::phi_t, phi_tp1, r_tp1 - averageReward);
       averageReward += alpha_r * delta_t;
+      Vectors<T>::bufferedCopy(phi_tp1, Base::phi_t);
       return delta_t;
     }
 };

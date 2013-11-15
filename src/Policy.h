@@ -142,7 +142,9 @@ class NormalDistribution: public PolicyDistribution<T>
       x->set(phi->at(actions->at(defaultAction)));
       mean = u_mean->dot(x) + initialMean;
       stddev = exp(u_stddev->dot(x)) * initialStddev + 10e-8;
+      Boundedness::checkValue(stddev);
       sigma2 = stddev * stddev;
+      Boundedness::checkValue(sigma2);
     }
 
     double pi(const Action<T>* a)

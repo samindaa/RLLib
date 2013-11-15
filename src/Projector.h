@@ -85,13 +85,13 @@ class TileCoder: public Projector<T>
       if (includeActiveFeature)
       {
         coder(tileIndices, x, vector->dimension() - 1, h1);
-        vector->insertLast(1.0);
+        vector->setEntry(vector->dimension() - 1, 1.0);
       }
       else
         coder(tileIndices, x, vector->dimension(), h1);
 
       for (int i = 0; i < tileIndices->dimension(); i++)
-        vector->insertEntry(tileIndices->at(i), 1.0);
+        vector->setEntry(tileIndices->at(i), 1.0);
       return vector;
     }
 
@@ -103,13 +103,13 @@ class TileCoder: public Projector<T>
       if (includeActiveFeature)
       {
         coder(tileIndices, x, vector->dimension() - 1);
-        vector->insertLast(1.0);
+        vector->setEntry(vector->dimension() - 1, 1.0);
       }
       else
         coder(tileIndices, x, vector->dimension());
 
       for (int i = 0; i < tileIndices->dimension(); i++)
-        vector->insertEntry(tileIndices->at(i), 1.0);
+        vector->setEntry(tileIndices->at(i), 1.0);
       return vector;
 
     }
