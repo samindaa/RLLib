@@ -65,12 +65,15 @@ ActorCriticOnPolicyControlLearnerPendulumTest::~ActorCriticOnPolicyControlLearne
   deleteObjects();
 }
 
-void ActorCriticOnPolicyControlLearnerPendulumTest::evaluate()
+double ActorCriticOnPolicyControlLearnerPendulumTest::evaluate()
 {
   if (sim)
   {
-    cout << sim->episodeR << " " << sim->timeStep << " " << (sim->episodeR / sim->timeStep) << endl;
+    cout << "\n@@ Evaluate=" << sim->episodeR << " " << sim->timeStep << " "
+        << (sim->episodeR / sim->timeStep) << endl;
+    return sim->episodeR / sim->timeStep;
   }
+  return -1.0;
 }
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::deleteObjects()
@@ -94,21 +97,22 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::deleteObjects()
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
 {
+  Probabilistic::srand(time(0));
   alpha_v = alpha_u = alpha_r = gamma = lambda = 0;
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
   actor = new Actor<double>(alpha_u, policyDistribution);
   control = new ActorCritic<double>(critic, actor, projector, toStateAction);
   agent = new LearnerAgent<double>(control);
-  sim = new Simulator<double>(agent, problem, 5000, 50, 1);
+  sim = new Simulator<double>(agent, problem, 5000, 50, 5);
   sim->run();
 
-  evaluate();
+  assert(evaluate() < 0.0);
   deleteObjects();
 }
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
 {
-
+  Probabilistic::srand(time(0));
   gamma = 1.0;
   alpha_v = 0.5 / projector->vectorNorm();
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
@@ -116,15 +120,16 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
   actor = new Actor<double>(alpha_u, policyDistribution);
   control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction, 0.01);
   agent = new LearnerAgent<double>(control);
-  sim = new Simulator<double>(agent, problem, 1, 5000, 50);
+  sim = new Simulator<double>(agent, problem, 5000, 50, 5);
   sim->run();
   sim->computeValueFunction();
-  evaluate();
+  assert(evaluate() > 0.75);
   deleteObjects();
 }
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblity()
 {
+  Probabilistic::srand(time(0));
   gamma = 1.0;
   lambda = 0.5;
   alpha_v = 0.1 / projector->vectorNorm();
@@ -133,10 +138,10 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblit
   actor = new ActorLambda<double>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
   control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction, 0.01);
   agent = new LearnerAgent<double>(control);
-  sim = new Simulator<double>(agent, problem, 5000, 50, 1);
+  sim = new Simulator<double>(agent, problem, 5000, 50, 5);
   sim->run();
   sim->computeValueFunction();
-  evaluate();
+  assert(evaluate() > 0.75);
   deleteObjects();
 }
 

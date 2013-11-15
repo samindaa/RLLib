@@ -113,8 +113,8 @@ class LearnerAgent: public RLAgent<T>
     {
       const Action<T>* a_tp1 = Base::control->step(x_t, a_t,
           (step->endOfEpisode ? absorbingState : step->o_tp1), step->r_tp1, step->z_tp1);
-      Vectors<T>::bufferedCopy(step->o_tp1, x_t);
       a_t = a_tp1;
+      Vectors<T>::bufferedCopy(step->o_tp1, x_t);
       return a_t;
     }
 
@@ -368,7 +368,6 @@ class Simulator
         episodeR += step->r_tp1;
         episodeZ += step->z_tp1;
         endingOfEpisode = step->endOfEpisode || (timeStep == maxEpisodeTimeSteps);
-        step->setForcedEndOfEpisode(endingOfEpisode);
         timer.start();
         agentAction = agent->getAtp1(step);
         timer.stop();

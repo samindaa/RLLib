@@ -20,7 +20,7 @@
 
 // From the simulation
 #include "MountainCarModel.h"
-#include "Simulator.h"
+#include "RL.h"
 
 // View
 #include "MountainCar.h"
@@ -37,12 +37,12 @@ namespace RLLibViz
 
 class MountainCarModel: public ModelBase
 {
-  Q_OBJECT
+    Q_OBJECT
 
   protected:
     // RLLib
-    Environment<double>* behaviourEnvironment;
-    Environment<double>* evaluationEnvironment;
+    RLProblem<double>* behaviourEnvironment;
+    RLProblem<double>* evaluationEnvironment;
     Hashing* hashing;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;
@@ -65,6 +65,9 @@ class MountainCarModel: public ModelBase
 
     Policy<double>* behavior;
     OffPolicyControlLearner<double>* control;
+
+    RLAgent<double>* learningAgent;
+    RLAgent<double>* evaluationAgent;
 
     Simulator<double>* learningRunner;
     Simulator<double>* evaluationRunner;

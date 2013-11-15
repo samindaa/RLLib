@@ -66,7 +66,7 @@ class ActorCriticOnPolicyControlLearnerPendulumTest: public ActorCriticOnPolicyC
     void testActorCritic();
     void testActorCriticWithEligiblity();
 
-    void evaluate();
+    double evaluate();
     void deleteObjects();
 };
 

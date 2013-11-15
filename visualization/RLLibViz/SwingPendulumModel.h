@@ -19,7 +19,7 @@
 
 // From the simulation
 #include "SwingPendulum.h"
-#include "Simulator.h"
+#include "RL.h"
 
 #include <unistd.h>
 
@@ -30,10 +30,10 @@ namespace RLLibViz
 
 class SwingPendulumModel: public ModelBase
 {
-  Q_OBJECT
+    Q_OBJECT
 
   protected:
-    Environment<>* problem;
+    RLProblem<double>* problem;
     Hashing* hashing;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;
@@ -58,6 +58,7 @@ class SwingPendulumModel: public ModelBase
     ActorOnPolicy<double>* actor;
 
     OnPolicyControlLearner<double>* control;
+    RLAgent<double>* agent;
 
     Simulator<double>* simulator;
 

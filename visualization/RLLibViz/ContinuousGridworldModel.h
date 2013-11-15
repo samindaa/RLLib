@@ -20,7 +20,7 @@
 
 // From the simulation
 #include "ContinuousGridworld.h"
-#include "Simulator.h"
+#include "RL.h"
 
 // View
 #include "ContinuousGridworldView.h"
@@ -39,8 +39,8 @@ class ContinuousGridworldModel: public ModelBase
 
   protected:
 // RLLib
-    Environment<>* behaviourEnvironment;
-    Environment<>* evaluationEnvironment;
+    RLProblem<double>* behaviourEnvironment;
+    RLProblem<double>* evaluationEnvironment;
     Hashing* hashing;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;
@@ -63,6 +63,9 @@ class ContinuousGridworldModel: public ModelBase
 
     Policy<double>* behavior;
     OffPolicyControlLearner<double>* control;
+
+    RLAgent<double>* learningAgent;
+    RLAgent<double>* evaluationAgent;
 
     Simulator<double>* learningRunner;
     Simulator<double>* evaluationRunner;

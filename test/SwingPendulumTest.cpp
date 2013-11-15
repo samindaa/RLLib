@@ -114,7 +114,7 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
       projector, toStateAction, alpha_r);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 1);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 10);
   sim->setVerbose(true);
   sim->run();
 

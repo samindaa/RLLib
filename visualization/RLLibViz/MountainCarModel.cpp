@@ -40,10 +40,12 @@ MountainCarModel::MountainCarModel(QObject *parent) :
   behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActionList());
   control = new OffPAC<double>(behavior, critic, actor, toStateAction, projector);
 
-  learningRunner = new Simulator<double>(control, behaviourEnvironment, 5000);
-  evaluationRunner = new Simulator<double>(control, evaluationEnvironment, 5000);
+  learningAgent = new LearnerAgent<double>(control);
+  evaluationAgent = new ControlAgent<double>(control);
+
+  learningRunner = new Simulator<double>(learningAgent, behaviourEnvironment, 5000);
+  evaluationRunner = new Simulator<double>(evaluationAgent, evaluationEnvironment, 5000);
   learningRunner->setVerbose(false);
-  evaluationRunner->setEvaluate(true);
   evaluationRunner->setVerbose(false);
 
   simulators.insert(std::make_pair(simulators.size(), learningRunner));
@@ -68,6 +70,8 @@ MountainCarModel::~MountainCarModel()
   delete behavior;
   delete target;
   delete control;
+  delete learningAgent;
+  delete evaluationAgent;
   delete learningRunner;
   delete evaluationRunner;
   delete valueFunction;
@@ -96,8 +100,8 @@ void MountainCarModel::doWork()
     }
     else
       emit signal_add(window->views[i->first],
-          Vec(i->second->getEnvironment()->getObservations()->at(0),
-              i->second->getEnvironment()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
+          Vec(i->second->getRLProblem()->getObservations()->at(0),
+              i->second->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
   }
 
   // Value function

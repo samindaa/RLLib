@@ -763,10 +763,11 @@ class ActorCritic: public AbstractActorCritic<T>
   protected:
     typedef AbstractActorCritic<T> Base;
     Vector<T>* phi_t;
+    Vector<T>* phi_tp1;
   public:
     ActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor, Projector<T>* projector,
         StateToStateAction<T>* toStateAction) :
-        AbstractActorCritic<T>(critic, actor, projector, toStateAction), phi_t(0)
+        AbstractActorCritic<T>(critic, actor, projector, toStateAction), phi_t(0), phi_tp1(0)
     {
     }
 
@@ -774,17 +775,17 @@ class ActorCritic: public AbstractActorCritic<T>
     {
       if (phi_t)
         delete phi_t;
+      if (phi_tp1)
+        delete phi_tp1;
     }
 
     double updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       Vectors<T>::bufferedCopy(Base::projector->project(x_t), phi_t);
-      const Vector<T>* phi_tp1 = Base::projector->project(x_tp1);
+      Vectors<T>::bufferedCopy(Base::projector->project(x_tp1), phi_tp1);
       // Update critic
-      double delta_t = Base::critic->update(phi_t, phi_tp1, r_tp1);
-      Vectors<T>::bufferedCopy(phi_tp1, phi_t);
-      return delta_t;
+      return Base::critic->update(phi_t, phi_tp1, r_tp1);
     }
 };
 
@@ -795,12 +796,13 @@ class AverageRewardActorCritic: public AbstractActorCritic<T>
     typedef AbstractActorCritic<T> Base;
     double alpha_r, averageReward;
     Vector<T>* phi_t;
+    Vector<T>* phi_tp1;
 
   public:
     AverageRewardActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor,
         Projector<T>* projector, StateToStateAction<T>* toStateAction, double alpha_r) :
         AbstractActorCritic<T>(critic, actor, projector, toStateAction), alpha_r(alpha_r), averageReward(
-            0), phi_t(0)
+            0), phi_t(0), phi_tp1(0)
     {
     }
 
@@ -808,17 +810,19 @@ class AverageRewardActorCritic: public AbstractActorCritic<T>
     {
       if (phi_t)
         delete phi_t;
+      if (phi_tp1)
+        delete phi_tp1;
     }
 
     double updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       Vectors<T>::bufferedCopy(Base::projector->project(x_t), phi_t);
-      const Vector<T>* phi_tp1 = Base::projector->project(x_tp1);
+      Vectors<T>::bufferedCopy(Base::projector->project(x_tp1), phi_tp1);
+
       // Update critic
       double delta_t = Base::critic->update(phi_t, phi_tp1, r_tp1 - averageReward);
       averageReward += alpha_r * delta_t;
-      Vectors<T>::bufferedCopy(phi_tp1, phi_t);
       return delta_t;
     }
 };

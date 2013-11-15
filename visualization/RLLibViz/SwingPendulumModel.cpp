@@ -12,11 +12,11 @@ using namespace RLLibViz;
 SwingPendulumModel::SwingPendulumModel(QObject *parent) :
     ModelBase(parent)
 {
-  problem = new SwingPendulum;
+  Probabilistic::srand(0);
+  problem = new SwingPendulum<double>;
   hashing = new MurmurHashing;
   projector = new TileCoderHashing<double>(1000, 10, false, hashing);
-  toStateAction = new StateActionTilings<double>(projector,
-      problem->getContinuousActionList());
+  toStateAction = new StateActionTilings<double>(projector, problem->getContinuousActionList());
 
   alpha_v = 0.1 / projector->vectorNorm();
   alpha_u = 0.001 / projector->vectorNorm();
@@ -41,10 +41,9 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
   actoreTraces->push_back(actore2);
   actor = new ActorLambda<double>(alpha_u, gamma, lambda, acting, actoreTraces);
 
-  control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction,
-      alpha_r);
-
-  simulator = new Simulator<double>(control, problem, 5000);
+  control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction, alpha_r);
+  agent = new LearnerAgent<double>(control);
+  simulator = new Simulator<double>(agent, problem, 5000);
   simulator->setVerbose(false);
   valueFunction = new Matrix(100, 100); // << Fixed for 0:0.1:10
 
@@ -67,6 +66,7 @@ SwingPendulumModel::~SwingPendulumModel()
   delete problemRange;
   delete acting;
   delete control;
+  delete agent;
   delete simulator;
   delete valueFunction;
 }
@@ -86,8 +86,8 @@ void SwingPendulumModel::doWork()
   }
 
   emit signal_add(window->views[0],
-      Vec(simulator->getEnvironment()->getObservations()->at(0),
-          simulator->getEnvironment()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
+      Vec(simulator->getRLProblem()->getObservations()->at(0),
+          simulator->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
   emit signal_draw(window->views[0]);
 
   // Value function
