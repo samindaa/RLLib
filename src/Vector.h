@@ -45,7 +45,7 @@ template<class T> std::ostream& operator<<(std::ostream& out, const DenseVector<
 template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that);
 
 /**
- * Vector<T> is restricted to int, float, and double types.
+ * RLLib::Vector<T> is restricted to int, float, and double types.
  */
 template<class T> struct VectorType         { enum { value = false }; };
 template<>        struct VectorType<int>    { enum { value = true  }; };
