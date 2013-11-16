@@ -36,11 +36,21 @@
 namespace RLLib
 {
 
-// Forward declarations
+/**
+ * Forward declarations
+ */
 template<class T> class DenseVector;
 template<class T> class SparseVector;
 template<class T> std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that);
 template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that);
+
+/**
+ * Vector<T> is restricted to int, float, and double types.
+ */
+template<class T> struct VectorType         { enum { value = false }; };
+template<>        struct VectorType<int>    { enum { value = true  }; };
+template<>        struct VectorType<float>  { enum { value = true  }; };
+template<>        struct VectorType<double> { enum { value = true  }; };
 
 /**
  * This is used in parameter representation in a given vector space for
@@ -121,6 +131,7 @@ class DenseVector: public Vector<T>
     DenseVector(const int& capacity = 1) :
         capacity(capacity), data(new T[capacity])
     {
+      assert(VectorType<T>::value);
       std::fill(data, data + capacity, 0);
     }
 
@@ -361,6 +372,7 @@ class SparseVector: public Vector<T>
             new int[indexesPositionLength]), activeIndexes(new int[activeIndexesLength]), values(
             new T[activeIndexesLength])
     {
+      assert(VectorType<T>::value);
       std::fill(indexesPosition, indexesPosition + capacity, -1);
     }
 
