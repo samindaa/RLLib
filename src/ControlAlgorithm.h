@@ -118,28 +118,29 @@ template<class T>
 class ExpectedSarsaControl: public SarsaControl<T>
 {
   protected:
-    Vector<T>* phi_bar_tp1;
     ActionList<T>* actions;
+    VectorPool<T>* pool;
     typedef SarsaControl<T> Base;
   public:
 
     ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T>* toStateAction, Sarsa<T>* sarsa,
         ActionList<T>* actions) :
-        SarsaControl<T>(acting, toStateAction, sarsa), phi_bar_tp1(
-            new SVector<T>(toStateAction->dimension())), actions(actions)
+        SarsaControl<T>(acting, toStateAction, sarsa), actions(actions), pool(
+            new VectorPool<T>(toStateAction->dimension()))
     {
     }
     virtual ~ExpectedSarsaControl()
     {
-      delete phi_bar_tp1;
+      delete pool;
     }
 
     const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-      phi_bar_tp1->clear();
       const Representations<T>* phi_tp1 = Base::toStateAction->stateActions(x_tp1);
       const Action<T>* a_tp1 = Policies::sampleAction(Base::acting, phi_tp1);
+      Vector<T>* phi_bar_tp1 = pool->newVector(phi_tp1->at(a_tp1));
+      phi_bar_tp1->clear();
       for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         double pi = Base::acting->pi(*a);
@@ -154,6 +155,7 @@ class ExpectedSarsaControl: public SarsaControl<T>
       const Vector<T>* xa_tp1 = phi_tp1->at(a_tp1);
       Base::sarsa->update(SarsaControl<T>::xa_t, phi_bar_tp1, r_tp1);
       Base::xa_t->set(xa_tp1);
+      pool->releaseAll();
       return a_tp1;
     }
 
