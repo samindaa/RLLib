@@ -47,34 +47,10 @@ template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector
 /**
  * RLLib::Vector<T> is restricted to int, float, and double types.
  */
-template<class T> struct VectorType
-{
-    enum
-    {
-      value = false
-    };
-};
-template<> struct VectorType<int>
-{
-    enum
-    {
-      value = true
-    };
-};
-template<> struct VectorType<float>
-{
-    enum
-    {
-      value = true
-    };
-};
-template<> struct VectorType<double>
-{
-    enum
-    {
-      value = true
-    };
-};
+template<class T> struct VectorType  { enum { value = false }; };
+template<> struct VectorType<int>    { enum { value = true  }; };
+template<> struct VectorType<float>  { enum { value = true  }; };
+template<> struct VectorType<double> { enum { value = true  }; };
 
 /**
  * This is used in parameter representation in a given vector space for
@@ -126,6 +102,7 @@ class Vector
     // This is a deep copy of Vector<T>.
     // The copied object exists even after the parent object is deleted.
     virtual Vector<T>* copy() const =0;
+    virtual Vector<T>* newInstance(const int& dimension) const =0;
     // Storage management
     virtual void persist(const std::string& f) const =0;
     virtual void resurrect(const std::string& f) =0;
@@ -882,6 +859,11 @@ class PVector: public DenseVector<T>
     {
       return new PVector<T>(*this);
     }
+
+    Vector<T>* newInstance(const int& dimension) const
+    {
+      return new PVector<T>(dimension);
+    }
 };
 
 // ================================================================================================
@@ -1057,6 +1039,11 @@ class SVector: public SparseVector<T>
     Vector<T>* copy() const
     {
       return new SVector<T>(*this);
+    }
+
+    Vector<T>* newInstance(const int& dimension) const
+    {
+      return new SVector<T>(dimension);
     }
 
 };
@@ -1340,6 +1327,43 @@ class Filters
         return result;
       }
       return result->mapMultiplyToSelf(d);
+    }
+};
+
+template<class T>
+class VectorPool
+{
+  protected:
+    std::vector<Vector<T>*>* stackedVectors;
+    int nbAllocation;
+    int dimension;
+  public:
+    VectorPool(const int& dimension) :
+        stackedVectors(new std::vector<Vector<T>*>()), nbAllocation(0), dimension(dimension)
+    {
+    }
+
+    ~VectorPool()
+    {
+      for (typename std::vector<Vector<T>*>::iterator iter = stackedVectors->begin();
+          iter != stackedVectors->end(); ++iter)
+        delete *iter;
+      stackedVectors->clear();
+      delete stackedVectors;
+    }
+
+  public:
+    Vector<T>* newVector(const Vector<T>* v)
+    {
+      ++nbAllocation;
+      if (nbAllocation > static_cast<int>(stackedVectors->size()))
+        stackedVectors->push_back(v->newInstance(dimension));
+      return stackedVectors->at(nbAllocation - 1)->set(v);
+    }
+
+    void releaseAll()
+    {
+      nbAllocation = 0;
     }
 };
 
