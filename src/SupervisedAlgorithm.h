@@ -31,11 +31,11 @@ template<class T>
 class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
 {
   protected:
-    SparseVector<T>* w;
+    Vector<T>* w;
     double alpha;
   public:
     Adaline(const int& size, const double& alpha) :
-        w(new SVector<T>(size)), alpha(alpha)
+        w(new PVector<T>(size)), alpha(alpha)
     {
     }
     virtual ~Adaline()
@@ -58,9 +58,11 @@ class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
       w->clear();
     }
 
-    void learn(const Vector<T>* x, const T& y)
+    double learn(const Vector<T>* x, const T& y)
     {
-      w->addToSelf(alpha * (y - predict(x)), x);
+      double delta = y - predict(x);
+      w->addToSelf(alpha * delta, x);
+      return delta;
     }
 
     void persist(const std::string& f) const
@@ -83,34 +85,36 @@ template<class T>
 class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
 {
   protected:
-    SparseVector<T>* w;
-    SparseVector<T>* alpha;
-    SparseVector<T>* h;
+    Vector<T>* w;
+    Vector<T>* alphas;
+    Vector<T>* hs;
     double theta, minimumStepSize;
 
     // Auxiliary variables
-    SparseVector<T>* deltaX;
-    SparseVector<T>* deltaXh;
-    SparseVector<T>* alphaX2;
+    Vector<T>* deltaX;
+    Vector<T>* deltaXh;
+    Vector<T>* alphaX2;
 
   public:
     IDBD(const int& size, const double& theta) :
-        w(new SVector<T>(size)), alpha(new SVector<T>(w->dimension())), h(
-            new SVector<T>(w->dimension())), theta(theta), minimumStepSize(10e-7), deltaX(
-            new SVector<T>(w->dimension())), deltaXh(new SVector<T>(w->dimension())), alphaX2(
-            new SVector<T>(w->dimension()))
+        w(new PVector<T>(size)), alphas(new PVector<T>(w->dimension())), hs(
+            new PVector<T>(w->dimension())), theta(theta), minimumStepSize(1e-6), deltaX(0), deltaXh(
+            0), alphaX2(0)
     {
-      alpha->set(1.0 / w->dimension());
+      alphas->set(1.0 / w->dimension());
     }
     virtual ~IDBD()
     {
       delete w;
-      delete alpha;
-      delete h;
+      delete alphas;
+      delete hs;
 
-      delete deltaX;
-      delete deltaXh;
-      delete alphaX2;
+      if (deltaX)
+        delete deltaX;
+      if (deltaXh)
+        delete deltaXh;
+      if (alphaX2)
+        delete alphaX2;
     }
 
     double initialize()
@@ -126,24 +130,23 @@ class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
     void reset()
     {
       w->clear();
-      alpha->set(1.0 / w->dimension());
-      h->clear();
+      alphas->set(1.0 / w->dimension());
+      hs->clear();
     }
 
-    void learn(const Vector<T>* x, const T& y)
+    double learn(const Vector<T>* x, const T& y)
     {
       double delta = y - predict(x);
-      deltaX->set(x);
-      deltaX->mapMultiplyToSelf(delta);
-      deltaXh->set(deltaX);
-      deltaXh->ebeMultiplyToSelf(h);
-      Vectors<T>::multiplySelfByExponential(alpha, theta, deltaXh, minimumStepSize);
-      Vector<T>* alphaDeltaX = deltaX->ebeMultiplyToSelf(alpha);
+      Vectors<T>::bufferedCopy(x, deltaX)->mapMultiplyToSelf(delta);
+      Vectors<T>::bufferedCopy(deltaX, deltaXh)->ebeMultiplyToSelf(hs);
+      Vectors<T>::multiplySelfByExponential(alphas, theta, deltaXh, minimumStepSize);
+      Vector<T>* alphaDeltaX = deltaX->ebeMultiplyToSelf(alphas);
       w->addToSelf(alphaDeltaX);
-      alphaX2->set(x);
-      alphaX2->ebeMultiplyToSelf(x)->ebeMultiplyToSelf(alpha)->ebeMultiplyToSelf(h);
-      h->addToSelf(-1.0, alphaX2);
-      h->addToSelf(alphaDeltaX);
+      Vectors<T>::bufferedCopy(x, alphaX2)->ebeMultiplyToSelf(x)->ebeMultiplyToSelf(alphas)->ebeMultiplyToSelf(
+          hs);
+      hs->addToSelf(-1.0f, alphaX2);
+      hs->addToSelf(alphaDeltaX);
+      return delta;
     }
 
     void persist(const std::string& f) const
@@ -166,34 +169,36 @@ template<class T>
 class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
 {
   protected:
-    SparseVector<T>* w;
-    SparseVector<T>* alpha;
-    SparseVector<T>* h;
+    Vector<T>* w;
+    Vector<T>* alphas;
+    Vector<T>* hs;
     double theta, minimumStepSize;
 
     // Auxiliary variables
-    SparseVector<T>* deltaX;
-    SparseVector<T>* deltaXh;
-    SparseVector<T>* alphaX2YMinusOneMinusY;
+    Vector<T>* deltaX;
+    Vector<T>* deltaXh;
+    Vector<T>* alphaX2YMinusOneMinusY;
 
   public:
     SemiLinearIDBD(const int& size, const double& theta) :
-        w(new SVector<T>(size)), alpha(new SVector<T>(w->dimension())), h(
-            new SVector<T>(w->dimension())), theta(theta), minimumStepSize(10e-7), deltaX(
-            new SVector<T>(w->dimension())), deltaXh(new SVector<T>(w->dimension())), alphaX2YMinusOneMinusY(
-            new SVector<T>(w->dimension()))
+        w(new PVector<T>(size)), alphas(new PVector<T>(w->dimension())), hs(
+            new PVector<T>(w->dimension())), theta(theta), minimumStepSize(1e-6), deltaX(0), deltaXh(
+            0), alphaX2YMinusOneMinusY(0)
     {
-      alpha->set(1.0 / w->dimension());
+      alphas->set(1.0 / w->dimension());
     }
     virtual ~SemiLinearIDBD()
     {
       delete w;
-      delete alpha;
-      delete h;
+      delete alphas;
+      delete hs;
 
-      delete deltaX;
-      delete deltaXh;
-      delete alphaX2YMinusOneMinusY;
+      if (deltaX)
+        delete deltaX;
+      if (deltaXh)
+        delete deltaXh;
+      if (alphaX2YMinusOneMinusY)
+        delete alphaX2YMinusOneMinusY;
     }
 
     double initialize()
@@ -209,26 +214,24 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
     void reset()
     {
       w->clear();
-      alpha->set(1.0 / w->dimension());
-      h->clear();
+      alphas->set(1.0 / w->dimension());
+      hs->clear();
     }
 
-    void learn(const Vector<T>* x, const T& z)
+    double learn(const Vector<T>* x, const T& z)
     {
       double y = predict(x);
       double delta = z - y;
-      deltaX->set(x);
-      deltaX->mapMultiplyToSelf(delta);
-      deltaXh->set(deltaX);
-      deltaXh->ebeMultiplyToSelf(h);
-      Vectors<T>::multiplySelfByExponential(alpha, theta, deltaXh, minimumStepSize);
-      Vector<T>* alphaDeltaX = deltaX->ebeMultiplyToSelf(alpha);
+      Vectors<T>::bufferedCopy(x, deltaX)->mapMultiplyToSelf(delta);
+      Vectors<T>::bufferedCopy(deltaX, deltaXh)->ebeMultiplyToSelf(hs);
+      Vectors<T>::multiplySelfByExponential(alphas, theta, deltaXh, minimumStepSize);
+      Vector<T>* alphaDeltaX = deltaX->ebeMultiplyToSelf(alphas);
       w->addToSelf(alphaDeltaX);
-      alphaX2YMinusOneMinusY->set(x);
-      alphaX2YMinusOneMinusY->ebeMultiplyToSelf(x)->ebeMultiplyToSelf(alpha)->ebeMultiplyToSelf(h)->mapMultiplyToSelf(
-          y)->mapMultiplyToSelf(1.0 - y);
-      h->addToSelf(-1.0, alphaX2YMinusOneMinusY);
-      h->addToSelf(alphaDeltaX);
+      Vectors<T>::bufferedCopy(x, alphaX2YMinusOneMinusY)->ebeMultiplyToSelf(x)->ebeMultiplyToSelf(
+          alphas)->ebeMultiplyToSelf(hs)->mapMultiplyToSelf(y)->mapMultiplyToSelf(1.0 - y);
+      hs->addToSelf(-1.0f, alphaX2YMinusOneMinusY);
+      hs->addToSelf(alphaDeltaX);
+      return delta;
     }
 
     void persist(const std::string& f) const
@@ -251,68 +254,73 @@ template<class T>
 class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
 {
   protected:
-    SparseVector<T>* w;
-    SparseVector<T>* alpha;
-    SparseVector<T>* h;
-    SparseVector<T>* v;
-    double tau, minimumStepSize;
+    Vector<T>* w;
+    Vector<T>* alphas;
+    Vector<T>* h;
+    Vector<T>* v;
+    double tau, minimumStepsize, kappa;
 
     // Auxiliary variables
-    SparseVector<T>* deltaXh;
-    SparseVector<T>* absDeltaXh;
-    SparseVector<T>* vUpdate;
-    SparseVector<T>* x2ByAlpha;
+    Vector<T>* deltaXh;
+    Vector<T>* absDeltaXh;
+    Vector<T>* sparseV;
+    Vector<T>* vUpdate;
+    Vector<T>* x2ByAlphas;
 
-    SparseVector<T>* deltaX;
-    SparseVector<T>* x2;
+    Vector<T>* deltaX;
+    Vector<T>* x2;
 
   public:
     Autostep(const int& nbFeatures) :
-        w(new SVector<T>(nbFeatures)), alpha(new SVector<T>(w->dimension())), h(
-            new SVector<T>(w->dimension())), v(new SVector<T>(w->dimension())), tau(1000.0), minimumStepSize(
-            10e-7), deltaXh(new SVector<T>(w->dimension())), absDeltaXh(
-            new SVector<T>(w->dimension())), vUpdate(new SVector<T>(w->dimension())), x2ByAlpha(
-            new SVector<T>(w->dimension())), deltaX(new SVector<T>(w->dimension())), x2(
-            new SVector<T>(w->dimension()))
+        w(new PVector<T>(nbFeatures)), alphas(new PVector<T>(w->dimension())), h(
+            new PVector<T>(w->dimension())), v(new PVector<T>(w->dimension())), tau(10000), minimumStepsize(
+            1e-6), kappa(0.01f), deltaXh(0), absDeltaXh(0), sparseV(0), vUpdate(0), x2ByAlphas(0), deltaX(
+            0), x2(0)
     {
-      alpha->set(1.0 / nbFeatures);
+      alphas->set(1.0);
       v->set(1.0);
     }
 
     virtual ~Autostep()
     {
       delete w;
-      delete alpha;
+      delete alphas;
       delete h;
       delete v;
 
-      delete deltaXh;
-      delete absDeltaXh;
-      delete vUpdate;
-      delete x2ByAlpha;
-
-      delete deltaX;
-      delete x2;
+      if (deltaXh)
+        delete deltaXh;
+      if (absDeltaXh)
+        delete absDeltaXh;
+      if (sparseV)
+        delete sparseV;
+      if (vUpdate)
+        delete vUpdate;
+      if (x2ByAlphas)
+        delete x2ByAlphas;
+      if (deltaX)
+        delete deltaX;
+      if (x2)
+        delete x2;
     }
   private:
-    void updateAlpha(const SparseVector<T>* x, const SparseVector<T>* x2,
-        const SparseVector<T>* deltaX)
+    void updateAlphas(const Vector<T>* x, const Vector<T>* x2, const Vector<T>* deltaX)
     {
-      deltaXh->set(deltaX);
-      deltaXh->ebeMultiplyToSelf(h);
-      absDeltaXh->set(deltaXh);
-      Vectors<T>::absToSelf(absDeltaXh);
-      vUpdate->set(absDeltaXh);
-      vUpdate->subtractToSelf(v)->ebeMultiplyToSelf(x2)->ebeMultiplyToSelf(alpha);
-      v->addToSelf(1.0 / tau, vUpdate);
+      Vectors<T>::bufferedCopy(deltaX, deltaXh)->ebeMultiplyToSelf(h);
+      Vectors<T>::absToSelf(Vectors<T>::bufferedCopy(deltaXh, absDeltaXh));
+      if (!sparseV)
+        sparseV = deltaX->copy();
+      Vectors<T>::toBinary(sparseV, deltaX)->ebeMultiplyToSelf(v);
+      Vectors<T>::bufferedCopy(absDeltaXh, vUpdate)->subtractToSelf(sparseV)->ebeMultiplyToSelf(x2)->ebeMultiplyToSelf(
+          alphas);
+      v->addToSelf(1.0f / tau, vUpdate);
       Vectors<T>::positiveMaxToSelf(v, absDeltaXh);
-      Vectors<T>::multiplySelfByExponential(alpha, 0.01,
-          (const SparseVector<T>*) deltaXh->ebeDivideToSelf(v), minimumStepSize);
-      x2ByAlpha->set(x2);
-      x2ByAlpha->ebeMultiplyToSelf(alpha);
-      double sum = std::max(x2ByAlpha->sum(), 1.0);
-      if (sum > 1.0)
-        alpha->mapMultiplyToSelf(1.0 / sum);
+      Vectors<T>::multiplySelfByExponential(dynamic_cast<DenseVector<T>*>(alphas), kappa,
+          deltaXh->ebeDivideToSelf(v), minimumStepsize);
+      Vectors<T>::bufferedCopy(x2, x2ByAlphas)->ebeMultiplyToSelf(alphas);
+      double sum = x2ByAlphas->sum();
+      if (sum > 1.0f)
+        Filters<T>::mapMultiplyToSelf(alphas, 1.0f / sum, x);
     }
 
   public:
@@ -330,18 +338,17 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
       w->clear();
     }
 
-    void learn(const Vector<T>* x, const T& y)
+    double learn(const Vector<T>* x, const T& y)
     {
       double delta = y - predict(x);
-      deltaX->set(x);
-      deltaX->mapMultiplyToSelf(delta);
-      x2->set(x);
-      x2->ebeMultiplyToSelf(x);
-      updateAlpha((const SparseVector<T>*) x, x2, deltaX); // fixMe
-      Vector<T>* alphaDeltaX = deltaX->ebeMultiplyToSelf(alpha);
-      w->addToSelf(alphaDeltaX);
-      Vector<T>* minusX2AlphaH = x2->ebeMultiplyToSelf(alpha)->ebeMultiplyToSelf(h);
-      h->addToSelf(minusX2AlphaH->mapMultiplyToSelf(-1.0))->addToSelf(alphaDeltaX);
+      Vectors<T>::bufferedCopy(x, deltaX)->mapMultiplyToSelf(delta);
+      Vectors<T>::bufferedCopy(x, x2)->ebeMultiplyToSelf(x);
+      updateAlphas(x, x2, deltaX);
+      Vector<T>* alphasDeltaX = deltaX->ebeMultiplyToSelf(alphas);
+      w->addToSelf(alphasDeltaX);
+      Vector<T>* x2AlphasH = x2->ebeMultiplyToSelf(alphas)->ebeMultiplyToSelf(h);
+      h->addToSelf(-1.0, x2AlphasH)->addToSelf(alphasDeltaX);
+      return delta;
     }
 
     void persist(const std::string& f) const

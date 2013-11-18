@@ -34,7 +34,7 @@ class LearningAlgorithm: public Predictor<T>
     virtual ~LearningAlgorithm()
     {
     }
-    virtual void learn(const Vector<T>* x, const T& y) = 0;
+    virtual double learn(const Vector<T>* x, const T& y) = 0;
 };
 
 } // namespace RLLib

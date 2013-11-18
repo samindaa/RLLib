@@ -571,7 +571,7 @@ void SVectorTest::testFullVector()
   i[0] = 1.0;
   cout << i << endl;
   cout << i.maxNorm() << endl;
-  cout << i.euclideanNorm() << endl;
+  cout << i.l2Norm() << endl;
 }
 
 void SVectorTest::testSVector()

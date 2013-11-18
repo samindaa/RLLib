@@ -47,10 +47,34 @@ template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector
 /**
  * RLLib::Vector<T> is restricted to int, float, and double types.
  */
-template<class T> struct VectorType         { enum { value = false }; };
-template<>        struct VectorType<int>    { enum { value = true  }; };
-template<>        struct VectorType<float>  { enum { value = true  }; };
-template<>        struct VectorType<double> { enum { value = true  }; };
+template<class T> struct VectorType
+{
+    enum
+    {
+      value = false
+    };
+};
+template<> struct VectorType<int>
+{
+    enum
+    {
+      value = true
+    };
+};
+template<> struct VectorType<float>
+{
+    enum
+    {
+      value = true
+    };
+};
+template<> struct VectorType<double>
+{
+    enum
+    {
+      value = true
+    };
+};
 
 /**
  * This is used in parameter representation in a given vector space for
@@ -70,7 +94,7 @@ class Vector
     virtual bool empty() const =0;
     virtual double maxNorm() const =0;
     virtual double l1Norm() const =0;
-    virtual double euclideanNorm() const =0;
+    virtual double l2Norm() const =0;
     virtual double sum() const =0;
 
     // Return the data as an array
@@ -849,7 +873,7 @@ class PVector: public DenseVector<T>
       return set(that, 0);
     }
 
-    double euclideanNorm() const
+    double l2Norm() const
     {
       return sqrt(this->dot(this));
     }
@@ -1020,13 +1044,12 @@ class SVector: public SparseVector<T>
     Vector<T>* set(const double& value)
     {
       // This will set 'value' to all the elements
-      this->clear();
       for (int index = 0; index < Base::indexesPositionLength; index++)
         this->setNonZeroEntry(index, value);
       return this;
     }
 
-    double euclideanNorm() const
+    double l2Norm() const
     {
       return sqrt(this->dot(this));
     }
@@ -1177,6 +1200,25 @@ class Vectors
       return other;
     }
 
+    inline static void positiveMaxToSelf(Vector<T>* result, const Vector<T>* that)
+    {
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
+      {
+        const int* activeIndexes = other->nonZeroIndexes();
+        for (int i = 0; i < other->nonZeroElements(); i++)
+        {
+          int index = activeIndexes[i];
+          result->setEntry(index, std::max(result->getEntry(index), other->getEntry(index)));
+        }
+      }
+      else
+      {
+        for (int index = 0; index < that->dimension(); index++)
+          result->setEntry(index, std::max(result->getEntry(index), that->getEntry(index)));
+      }
+    }
+
     inline static void multiplySelfByExponential(SparseVector<T>* result, const double& factor,
         const SparseVector<T>* other, const double& min)
     {
@@ -1186,16 +1228,6 @@ class Vectors
         int index = activeIndexes[i];
         result->setEntry(index,
             std::max(min, result->getEntry(index) * std::exp(factor * other->getEntry(index))));
-      }
-    }
-
-    inline static void positiveMaxToSelf(SparseVector<T>* result, const SparseVector<T>* other)
-    {
-      const int* activeIndexes = other->nonZeroIndexes();
-      for (int i = 0; i < other->nonZeroElements(); i++)
-      {
-        int index = activeIndexes[i];
-        result->setEntry(index, std::max(result->getEntry(index), other->getEntry(index)));
       }
     }
 
@@ -1227,6 +1259,19 @@ class Vectors
       }
     }
 
+    static void multiplySelfByExponential(Vector<T>* result, const double& factor,
+        const Vector<T>* other, const double& min)
+    {
+      SparseVector<T>* sresult = dynamic_cast<SparseVector<T>*>(result);
+      if (sresult)
+        multiplySelfByExponential(sresult, factor, other, min);
+      else
+      {
+        DenseVector<T>* dresult = dynamic_cast<DenseVector<T>*>(result);
+        multiplySelfByExponential(dresult, factor, other, min);
+      }
+    }
+
     static void multiplySelfByExponential(DenseVector<T>* result, const double& factor,
         const Vector<T>* other)
     {
@@ -1255,6 +1300,46 @@ class Vectors
       result->set(source);
       target = result;
       return target;
+    }
+
+    static Vector<T>* toBinary(Vector<T>* result, const Vector<T>* v)
+    {
+      assert(result->dimension() == v->dimension());
+      result->clear();
+      const SparseVector<T>* sv = dynamic_cast<const SparseVector<T>*>(v);
+      if (sv)
+      {
+        for (int i = 0; i < sv->nonZeroElements(); i++)
+          result->setEntry(sv->nonZeroIndexes()[i], 1.0f);
+        return result;
+      }
+
+      for (int i = 0; i < v->dimension(); i++)
+      {
+        if (v->getValues()[i] != 0)
+          result->setEntry(i, 1.0f);
+      }
+      return result;
+    }
+};
+
+template<class T>
+class Filters
+{
+  public:
+    static Vector<T>* mapMultiplyToSelf(Vector<T>* result, const double& d, const Vector<T>* filter)
+    {
+      const SparseVector<T>* sfilter = dynamic_cast<const SparseVector<T>*>(filter);
+      if (sfilter)
+      {
+        for (int i = 0; i < sfilter->nonZeroElements(); i++)
+        {
+          const int index = sfilter->nonZeroIndexes()[i];
+          result->setEntry(index, result->getEntry(index) * d);
+        }
+        return result;
+      }
+      return result->mapMultiplyToSelf(d);
     }
 };
 
