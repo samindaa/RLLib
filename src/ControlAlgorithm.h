@@ -71,7 +71,6 @@ class SarsaControl: public OnPolicyControlLearner<T>
       const Action<T>* a_tp1 = Policies::sampleAction(acting, phi_tp1);
       const Vector<T>* xa_tp1 = phi_tp1->at(a_tp1);
       sarsa->update(xa_t, xa_tp1, r_tp1);
-      xa_t->set(xa_tp1);
       Vectors<T>::bufferedCopy(xa_tp1, xa_t);
       return a_tp1;
     }
@@ -154,7 +153,7 @@ class ExpectedSarsaControl: public SarsaControl<T>
 
       const Vector<T>* xa_tp1 = phi_tp1->at(a_tp1);
       Base::sarsa->update(SarsaControl<T>::xa_t, phi_bar_tp1, r_tp1);
-      Base::xa_t->set(xa_tp1);
+      Vectors<T>::bufferedCopy(xa_tp1, Base::xa_t);
       pool->releaseAll();
       return a_tp1;
     }
@@ -209,30 +208,6 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       return target->pi(a_t) / behavior->pi(a_t);
     }
 
-    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
-        const double& r_tp1, const double& z_tp1)
-    {
-      rho_t = computeRho(a_t);
-
-      const Representations<T>* xas_tp1 = toStateAction->stateActions(x_tp1);
-      target->update(xas_tp1);
-      phi_bar_tp1->clear();
-      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
-      {
-        double pi = target->pi(*a);
-        if (pi == 0)
-          continue;
-        phi_bar_tp1->addToSelf(pi, xas_tp1->at(*a));
-      }
-
-      gq->update(phi_t, phi_bar_tp1, rho_t, r_tp1, z_tp1);
-      // Next cycle update the target policy
-      target->update(xas_tp1);
-      const Action<T>* a_tp1 = Policies::sampleAction(behavior, xas_tp1);
-      Vectors<T>::bufferedCopy(xas_tp1->at(a_tp1), phi_t);
-      return a_tp1;
-    }
-
     void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
@@ -254,6 +229,13 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       }
 
       gq->update(phi_t, phi_bar_tp1, rho_t, r_tp1, z_tp1);
+    }
+
+    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
+        const double& r_tp1, const double& z_tp1)
+    {
+      learn(x_t, a_t, x_tp1, r_tp1, z_tp1);
+      return Policies::sampleAction(behavior, toStateAction->stateActions(x_tp1));
     }
 
     void reset()
@@ -449,7 +431,7 @@ class OffPAC: public OffPolicyControlLearner<T>
       return a;
     }
 
-    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
+    void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
       const Representations<T>* xas_t = toStateAction->stateActions(x_t);
@@ -463,14 +445,13 @@ class OffPAC: public OffPolicyControlLearner<T>
       Vectors<T>::bufferedCopy(phi_tp1, phi_t);
       Boundedness::checkValue(delta_t);
       actor->update(xas_t, a_t, rho_t, delta_t);
-
-      return Policies::sampleAction(behavior, toStateAction->stateActions(x_tp1));
     }
 
-    void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
+    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const double& r_tp1, const double& z_tp1)
     {
-      step(x_t, a_t, x_tp1, r_tp1, z_tp1);
+      learn(x_t, a_t, x_tp1, r_tp1, z_tp1);
+      return Policies::sampleAction(behavior, toStateAction->stateActions(x_tp1));
     }
 
     void reset()
