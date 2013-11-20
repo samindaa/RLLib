@@ -58,10 +58,10 @@ class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
       w->clear();
     }
 
-    double learn(const Vector<T>* x, const T& y)
+    double learn(const Vector<T>* x_t, const T& y_tp1)
     {
-      double delta = y - predict(x);
-      w->addToSelf(alpha * delta, x);
+      double delta = y_tp1 - predict(x_t);
+      w->addToSelf(alpha * delta, x_t);
       return delta;
     }
 
@@ -216,6 +216,112 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
               hs)->mapMultiplyToSelf(y_tp1)->mapMultiplyToSelf(1.0 - y_tp1);
       hs->addToSelf(-1.0f, alphasX2YMinusOneMinusY);
       hs->addToSelf(alphasDeltaX);
+      return delta;
+    }
+
+    void persist(const std::string& f) const
+    {
+      w->persist(f);
+    }
+
+    void resurrect(const std::string& f)
+    {
+      w->resurrect(f);
+    }
+
+    const Vector<T>* weights() const
+    {
+      return w;
+    }
+};
+
+template<class T>
+class K1: public LearningAlgorithm<T>, public LinearLearner<T>
+{
+  protected:
+    Vector<T>* w;
+    Vector<T>* alphas;
+    Vector<T>* betas;
+    Vector<T>* hs;
+    VectorPool<T>* pool;
+    double theta;
+
+  public:
+    K1(const int& size, const double& theta) :
+        w(new PVector<T>(size)), alphas(new PVector<T>(size)), betas(new PVector<T>(size)), hs(
+            new PVector<T>(size)), pool(new VectorPool<T>(size)), theta(theta)
+    {
+      betas->set(std::log(0.1));
+    }
+
+    virtual ~K1()
+    {
+      delete w;
+      delete alphas;
+      delete betas;
+      delete hs;
+      delete pool;
+    }
+
+    double initialize()
+    {
+      return 0.0;
+    }
+
+    double predict(const Vector<T>* x) const
+    {
+      return w->dot(x);
+    }
+
+    void reset()
+    {
+      w->clear();
+      alphas->clear();
+      betas->clear();
+      hs->clear();
+      betas->set(std::log(0.1));
+    }
+
+  private:
+    void updateHS(const Vector<T>* x, const Vector<T>* x2, const Vector<T>* pi,
+        const Vector<T>* piX, const double& delta)
+    {
+      Vector<T>* piX2 = pool->newVector(x2)->ebeMultiplyToSelf(pi);
+      const SparseVector<T>* sresult = dynamic_cast<const SparseVector<T>*>(piX2);
+      if (sresult)
+      {
+        const int* activeIndexes = sresult->nonZeroIndexes();
+        for (int i = 0; i < sresult->nonZeroElements(); i++)
+        {
+          int index = activeIndexes[i];
+          piX2->setEntry(index, std::max(0.0, 1.0 - piX2->getEntry(index)));
+        }
+      }
+      else
+      {
+        for (int index = 0; index < piX2->dimension(); index++)
+          piX2->setEntry(index, std::max(0.0, 1.0 - piX2->getEntry(index)));
+      }
+      Vector<T>* piDeltaXPiX2 = pool->newVector(piX)->mapMultiplyToSelf(delta)->ebeMultiplyToSelf(
+          piX2);
+      hs->ebeMultiplyToSelf(piX2)->addToSelf(piDeltaXPiX2);
+    }
+
+  public:
+    double learn(const Vector<T>* x_t, const T& y_tp1)
+    {
+      double delta = y_tp1 - predict(x_t);
+      Vector<T>* xHS = pool->newVector(x_t)->ebeMultiplyToSelf(hs);
+      betas->addToSelf(theta * delta, xHS);
+      Vectors<T>::expToSelf(alphas, betas);
+      Vector<T>* x2 = pool->newVector(x_t)->ebeMultiplyToSelf(x_t);
+      Vector<T>* alphasX2 = pool->newVector(x2)->ebeMultiplyToSelf(alphas);
+      double pnorm = alphasX2->sum();
+      Vector<T>* pi = pool->newVector(alphas)->mapMultiplyToSelf(1.0 / (1.0 + pnorm));
+      Vector<T>* piX = pool->newVector(x_t)->ebeMultiplyToSelf(pi);
+      w->addToSelf(delta, piX);
+      updateHS(x_t, x2, pi, piX, delta);
+      pool->releaseAll();
       return delta;
     }
 

@@ -290,6 +290,97 @@ class Probabilistic
     }
 };
 
+template<class T, int n>
+class History
+{
+  private:
+    int current;
+    int numberOfEntries;
+    T buffer[n];
+    T sum;
+
+  public:
+
+    History()
+    {
+      init();
+    }
+
+    inline void init()
+    {
+      current = n - 1;
+      numberOfEntries = 0;
+      sum = T();
+    }
+
+    void add(const T& value)
+    {
+      if (numberOfEntries == n)
+        sum -= getEntry(numberOfEntries - 1);
+      sum += value;
+      current++;
+      current %= n;
+      if (++numberOfEntries >= n)
+        numberOfEntries = n;
+      buffer[current] = value;
+    }
+
+    void fill(const T& value)
+    {
+      for (int i = 0; i < n; i++)
+        add(value);
+    }
+
+    T getEntry(const int& i) const
+    {
+      return buffer[(n + current - i) % n];
+    }
+
+    T getSum() const
+    {
+      return sum;
+    }
+
+    T getMinimum() const
+    {
+      // Return 0 if buffer is empty
+      if (0 == numberOfEntries)
+        return T();
+
+      T min = buffer[0];
+      for (int i = 0; i < numberOfEntries; i++)
+      {
+        if (buffer[i] < min)
+          min = buffer[i];
+      }
+      return min;
+    }
+
+    T getAverage() const
+    {
+      // Return 0 if buffer is empty
+      if (0 == numberOfEntries)
+        return T();
+
+      return (sum / numberOfEntries);
+    }
+
+    T operator[](const int& i) const
+    {
+      return buffer[(n + current - i) % n];
+    }
+
+    int getNumberOfEntries() const
+    {
+      return numberOfEntries;
+    }
+
+    int getMaxEntries() const
+    {
+      return n;
+    }
+};
+
 } // namespace RLLib
 
 #endif /* MATH_H_ */

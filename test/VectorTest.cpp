@@ -315,7 +315,7 @@ void VectorTest::testEbeDivideSelf()
 }
 
 void VectorTest::testMax()
-{ // FixMe:
+{
   const double aValues[] = { 1.0, -2.0, -3.0, 0.0, 2.0 };
   Vector<double>* a = newVector(aValues, Arrays::length(aValues));
   Assert::assertObjectEquals(3.0, a->maxNorm());
@@ -323,7 +323,17 @@ void VectorTest::testMax()
 
 void VectorTest::testPositiveMax()
 {
-  // FixMe:
+  const double a1Values[] = {2, -1, 1, 3, 1};
+  const double sa2Values[] = {1, 0, -2, 0, -3};
+  Vector<double>* a1 = newVector(a1Values, Arrays::length(a1Values));
+  Vector<double>* sa2 = newSVector(sa2Values, Arrays::length(sa2Values));
+  Vector<double>* pa2 = newPVector(sa2Values, Arrays::length(sa2Values));
+  const double expectedValues[] = {2, 0, 1, 3, 1};
+  Vector<double>* expected = newPVector(expectedValues, Arrays::length(expectedValues));
+  Vectors<double>::positiveMaxToSelf(sa2, a1);
+  Vectors<double>::positiveMaxToSelf(pa2, a1);
+  Assert::assertEquals(expected, sa2);
+  Assert::assertEquals(expected, pa2);
 }
 
 void VectorTest::testCheckValue()

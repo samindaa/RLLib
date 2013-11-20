@@ -1206,6 +1206,25 @@ class Vectors
       }
     }
 
+    inline static void expToSelf(Vector<T>* result, const Vector<T>* that)
+    {
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
+      {
+        const int* activeIndexes = other->nonZeroIndexes();
+        for (int i = 0; i < other->nonZeroElements(); i++)
+        {
+          int index = activeIndexes[i];
+          result->setEntry(index, std::exp(other->getEntry(index)));
+        }
+      }
+      else
+      {
+        for (int index = 0; index < that->dimension(); index++)
+          result->setEntry(index, std::exp(that->getEntry(index)));
+      }
+    }
+
     inline static void multiplySelfByExponential(SparseVector<T>* result, const double& factor,
         const SparseVector<T>* other, const double& min)
     {

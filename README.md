@@ -23,11 +23,12 @@ Features
 * **Supervised learning algorithms**: 
  `Adaline`
  `IDBD`
+ `KI`
  `SemiLinearIDBD`
  `Autostep`
 * **Policies**: 
  `Random`
- `Random50%Bias`
+ `RandomX%Bias`
  `Greedy`
  `Epsilon-greedy`
  `Boltzmann`
@@ -109,6 +110,7 @@ void YourTestBase::run() { testYourMethod(); }
 ```
   
 * Add `YourTest` to the `test/test.cfg` file.
+* You can use `@YourTest` to execute only `YourTest`. For example, if you need to execute only MountainCar test cases, use @MountainCarTest.
 
 Test Configuration
 -------------------
@@ -127,6 +129,24 @@ The test cases are executed using:
     ./configure_debug
     make
     ./RLLibTest
+
+Visualization
+-------------
+
+RLLib provides a [QT4.8](http://qt-project.org/doc/qt-4.8/index.html) based Reinforcement Learning problems and algorithms visualization tool named `RLLibViz`. Currently RLLibViz visualizes following problems and algorithms:
+
+* On-policy:
+	SwingPendulum problem with continuous actions. We use AverageRewardActorCritic algorithm.
+* Off-policy: 
+	ContinuousGridworld and MountainCar problems with discrete actions. We use Off-PAC algorithm.
+* In order to run the visualization tool, you need to have QT4.8 installed in your system. 
+* In order to install RLLibViz:
+	Change directory to `visualization/RLLibViz`
+	./configure
+	./RLLibVizSwingPendulum
+	./RLLibVizContinuousGridworld
+	./RLLibVizMountainCar
+  
 	
 Documentation
 ------------- 

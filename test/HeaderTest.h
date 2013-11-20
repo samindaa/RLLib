@@ -41,11 +41,13 @@
 #include "Trace.h"
 #include "Projector.h"
 #include "ControlAlgorithm.h"
+#include "SupervisedAlgorithm.h"
 #include "StateToStateAction.h"
 #include "MountainCar.h"
 #include "SwingPendulum.h"
 #include "NoStateProblem.h"
 #include "StateGraph.h"
+#include "NoisyInputSum.h"
 #include "RL.h"
 
 using namespace std;
@@ -311,14 +313,14 @@ class Assert
       assert(!condition);
     }
 
-    template<class T>
-    static void assertObjectEquals(const T& a, const T& b)
+    template<class T1, class T2>
+    static void assertObjectEquals(const T1& a, const T2& b)
     {
       assert(a == b);
     }
 
-    template<class T>
-    static void assertObjectEquals(const T& a, const T& b, const double& margin)
+    template<class T1, class T2>
+    static void assertObjectEquals(const T1& a, const T2& b, const double& margin)
     {
       double tmp = std::fabs(a - b);
       assert(tmp <= margin);

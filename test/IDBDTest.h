@@ -9,8 +9,6 @@
 #define IDBDTEST_H_
 
 #include "HeaderTest.h"
-#include "NoisyInputSum.h"
-#include "SupervisedAlgorithm.h"
 
 RLLIB_TEST(IDBDTest)
 class IDBDTest: public IDBDTestBase
@@ -20,6 +18,7 @@ class IDBDTest: public IDBDTestBase
 
   private:
     void testIDBD();
+    void testK1();
     void testAutostep();
 };
 

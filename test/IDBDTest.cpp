@@ -10,6 +10,7 @@
 void IDBDTest::run()
 {
   testIDBD();
+  testK1();
   testAutostep();
 }
 
@@ -31,6 +32,27 @@ void IDBDTest::testIDBD()
     double error = noisyInputSumEvaluation.evaluateLearner(&idbd);
     std::cout << error << std::endl;
     Assert::assertObjectEquals(1.5, error, 0.1);
+  }
+}
+
+void IDBDTest::testK1()
+{
+  {
+    Probabilistic::srand(0);
+    NoisyInputSumEvaluation noisyInputSumEvaluation;
+    K1<double> k1(noisyInputSumEvaluation.nbInputs, 0.001);
+    double error = noisyInputSumEvaluation.evaluateLearner(&k1);
+    std::cout << error << std::endl;
+    Assert::assertObjectEquals(1.5, error, 0.1);
+  }
+
+  {
+    Probabilistic::srand(0);
+    NoisyInputSumEvaluation noisyInputSumEvaluation;
+    K1<double> k1(noisyInputSumEvaluation.nbInputs, 0.01);
+    double error = noisyInputSumEvaluation.evaluateLearner(&k1);
+    std::cout << error << std::endl;
+    Assert::assertObjectEquals(1.0, error, 0.1);
   }
 }
 
