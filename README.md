@@ -136,16 +136,16 @@ Visualization
 RLLib provides a [QT4.8](http://qt-project.org/doc/qt-4.8/index.html) based Reinforcement Learning problems and algorithms visualization tool named `RLLibViz`. Currently RLLibViz visualizes following problems and algorithms:
 
 * On-policy:
-	SwingPendulum problem with continuous actions. We use AverageRewardActorCritic algorithm.
+    SwingPendulum problem with continuous actions. We use AverageRewardActorCritic algorithm.
 * Off-policy: 
-	ContinuousGridworld and MountainCar problems with discrete actions. We use Off-PAC algorithm.
+    ContinuousGridworld and MountainCar problems with discrete actions. We use Off-PAC algorithm.
 * In order to run the visualization tool, you need to have QT4.8 installed in your system. 
-* In order to install RLLibViz:
-	Change directory to `visualization/RLLibViz`
-	./configure
-	./RLLibVizSwingPendulum
-	./RLLibVizContinuousGridworld
-	./RLLibVizMountainCar
+* In order to install RLLibViz: 
+    Change directory to `visualization/RLLibViz`
+    ./configure
+    ./RLLibVizSwingPendulum
+    ./RLLibVizContinuousGridworld
+    ./RLLibVizMountainCar
   
 	
 Documentation
