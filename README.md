@@ -119,21 +119,21 @@ The test cases are executed using:
    
 * 64-bit machines:
 
-    ./configure_m64
-    make
-    ./RLLibTest
+    * ./configure_m64
+    * make
+    * ./RLLibTest
 
 * 32-bit machines:
 
-    ./configure_m32
-    make
-    ./RLLibTest
+    * ./configure_m32
+    * make
+    * ./RLLibTest
 
 * Debugging:
 
-    ./configure_debug
-    make
-    ./RLLibTest
+    * ./configure_debug
+    * make
+    * ./RLLibTest
 
 Visualization
 -------------
@@ -142,21 +142,21 @@ RLLib provides a [QT4.8](http://qt-project.org/doc/qt-4.8/index.html) based Rein
 
 * On-policy:
 
-    SwingPendulum problem with continuous actions. We use AverageRewardActorCritic algorithm.
+    * SwingPendulum problem with continuous actions. We use AverageRewardActorCritic algorithm.
 
 * Off-policy: 
 
-    ContinuousGridworld and MountainCar problems with discrete actions. We use Off-PAC algorithm.
+    * ContinuousGridworld and MountainCar problems with discrete actions. We use Off-PAC algorithm.
 
 * In order to run the visualization tool, you need to have QT4.8 installed in your system. 
 
 * In order to install RLLibViz: 
     
-   Change directory to `visualization/RLLibViz`
-    ./configure
-    ./RLLibVizSwingPendulum
-    ./RLLibVizContinuousGridworld
-    ./RLLibVizMountainCar
+    * Change directory to `visualization/RLLibViz`
+    * ./configure
+    * ./RLLibVizSwingPendulum
+    * ./RLLibVizContinuousGridworld
+    * ./RLLibVizMountainCar
   
 	
 Documentation
