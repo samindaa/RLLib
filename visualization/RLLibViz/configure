@@ -24,4 +24,10 @@ make
 
 make clean
 
+qmake RLLibVizSwingPendulum2.pro
+
+make 
+
+make clean
+
 rm Makefile

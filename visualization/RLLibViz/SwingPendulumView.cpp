@@ -37,7 +37,7 @@ void SwingPendulumView::add(QWidget* that, const Vec& p, const Vec& p2)
   if (this != that)
     return;
   this->p = p;
-  trans = Mat::translate(width() / 2.0, height() / 2.0, 0);
+  trans = Mat::translate(double(width()) / 2.0, double(height()) / 2.0, 0);
   rotation = Mat::rotateZ(p.x + M_PI);
 }
 
@@ -52,7 +52,7 @@ void SwingPendulumView::paintEvent(QPaintEvent* event)
   painter.setRenderHint(QPainter::Antialiasing, true);
 
   Vec p1 = trans * Vec(0.0, 0.0, 0.0, 1.0);
-  Vec p2 = trans * rotation * Vec(0.0, width() / 2.0, 0.0, 1.0);
+  Vec p2 = trans * rotation * Vec(0.0, double(width()) / 3.0, 0.0, 1.0);
 
   painter.drawLine(QPoint(p1.x, p1.y), QPoint(p2.x, p2.y));
 

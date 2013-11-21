@@ -56,142 +56,6 @@ class Boundedness
     }
 };
 
-// Helper class for range management for testing environments
-template<class T>
-class Range
-{
-  private:
-    T minv, maxv;
-
-  public:
-    Range(const T& minv = std::numeric_limits<T>::min(), const T& maxv =
-        std::numeric_limits<T>::max()) :
-        minv(minv), maxv(maxv)
-    {
-    }
-
-    T bound(const T& value) const
-    {
-      return std::max(minv, std::min(maxv, value));
-    }
-
-    bool in(const T& value) const
-    {
-      return value >= minv && value <= maxv;
-    }
-
-    T length() const
-    {
-      return maxv - minv;
-    }
-
-    T min() const
-    {
-      return minv;
-    }
-
-    T max() const
-    {
-      return maxv;
-    }
-
-    T center() const
-    {
-      return min() + (length() / 2.0);
-    }
-};
-
-template<class T>
-class Ranges
-{
-  protected:
-    typename std::vector<Range<T>*>* ranges;
-  public:
-    typedef typename std::vector<Range<T>*>::iterator iterator;
-    typedef typename std::vector<Range<T>*>::const_iterator const_iterator;
-
-    Ranges() :
-        ranges(new std::vector<Range<T>*>())
-    {
-    }
-
-    ~Ranges()
-    {
-      ranges->clear();
-      delete ranges;
-    }
-
-    Ranges(const Range<T>& that) :
-        ranges(new std::vector<Range<T>*>())
-    {
-      for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
-        ranges->push_back(*iter);
-    }
-
-    Ranges<T>& operator=(const Ranges<T>& that)
-    {
-      if (this != that)
-      {
-        ranges->clear();
-        for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
-          ranges->push_back(*iter);
-      }
-      return *this;
-    }
-
-    void push_back(Range<T>* range)
-    {
-      ranges->push_back(range);
-    }
-
-    iterator begin()
-    {
-      return ranges->begin();
-    }
-
-    const_iterator begin() const
-    {
-      return ranges->begin();
-    }
-
-    iterator end()
-    {
-      return ranges->end();
-    }
-
-    const_iterator end() const
-    {
-      return ranges->end();
-    }
-
-    unsigned int dimension() const
-    {
-      return ranges->size();
-    }
-
-    const Range<T>& operator[](const unsigned index) const
-    {
-      assert(index >= 0 && index < dimension());
-      return *ranges->at(index);
-    }
-
-    Range<T>* at(const unsigned index) const
-    {
-      assert(index >= 0 && index < dimension());
-      return ranges->at(index);
-    }
-};
-
-class Signum
-{
-  public:
-    template<typename T>
-    inline static int valueOf(const T& val)
-    {
-      return (T(0) < val) - (val < T(0));
-    }
-};
-
 // Important distributions
 class Probabilistic
 {
@@ -287,6 +151,148 @@ class Probabilistic
     {
       float randResult = 2.0f * ((nextFloat() - 0.5f) * b) + 2.0f * ((nextFloat() - 0.5f) * b);
       return (sqrt(6.0f) / 2.0f) * randResult;
+    }
+};
+
+
+// Helper class for range management for testing environments
+template<class T>
+class Range
+{
+  private:
+    T minv, maxv;
+
+  public:
+    Range(const T& minv = std::numeric_limits<T>::min(), const T& maxv =
+        std::numeric_limits<T>::max()) :
+        minv(minv), maxv(maxv)
+    {
+    }
+
+    T bound(const T& value) const
+    {
+      return std::max(minv, std::min(maxv, value));
+    }
+
+    bool in(const T& value) const
+    {
+      return value >= minv && value <= maxv;
+    }
+
+    T length() const
+    {
+      return maxv - minv;
+    }
+
+    T min() const
+    {
+      return minv;
+    }
+
+    T max() const
+    {
+      return maxv;
+    }
+
+    T center() const
+    {
+      return min() + (length() / 2.0);
+    }
+
+    T chooseRandom() const
+    {
+      return Probabilistic::nextFloat() * length() + min();
+    }
+};
+
+template<class T>
+class Ranges
+{
+  protected:
+    typename std::vector<Range<T>*>* ranges;
+  public:
+    typedef typename std::vector<Range<T>*>::iterator iterator;
+    typedef typename std::vector<Range<T>*>::const_iterator const_iterator;
+
+    Ranges() :
+        ranges(new std::vector<Range<T>*>())
+    {
+    }
+
+    ~Ranges()
+    {
+      ranges->clear();
+      delete ranges;
+    }
+
+    Ranges(const Range<T>& that) :
+        ranges(new std::vector<Range<T>*>())
+    {
+      for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+        ranges->push_back(*iter);
+    }
+
+    Ranges<T>& operator=(const Ranges<T>& that)
+    {
+      if (this != that)
+      {
+        ranges->clear();
+        for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+          ranges->push_back(*iter);
+      }
+      return *this;
+    }
+
+    void push_back(Range<T>* range)
+    {
+      ranges->push_back(range);
+    }
+
+    iterator begin()
+    {
+      return ranges->begin();
+    }
+
+    const_iterator begin() const
+    {
+      return ranges->begin();
+    }
+
+    iterator end()
+    {
+      return ranges->end();
+    }
+
+    const_iterator end() const
+    {
+      return ranges->end();
+    }
+
+    unsigned int dimension() const
+    {
+      return ranges->size();
+    }
+
+    const Range<T>& operator[](const unsigned index) const
+    {
+      assert(index >= 0 && index < dimension());
+      return *ranges->at(index);
+    }
+
+    Range<T>* at(const unsigned index) const
+    {
+      assert(index >= 0 && index < dimension());
+      return ranges->at(index);
+    }
+};
+
+class Signum
+{
+  public:
+    template<typename T>
+    inline static int valueOf(const T& val)
+    {
+      return (T(0) < val) - (val < T(0));
     }
 };
 

@@ -40,14 +40,14 @@ class SwingPendulum: public RLProblem<T>
     float mass, length, g, requiredUpTime, upRange;
 
     int upTime;
-    std::ofstream outfile;
+    bool random;
   public:
-    SwingPendulum() :
+    SwingPendulum(const bool& random = false) :
         RLProblem<T>(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(0), maxVelocity(
         M_PI_4 / stepTime), actionRange(new Range<float>(-uMax, uMax)), thetaRange(
             new Range<float>(-M_PI, M_PI)), velocityRange(
             new Range<float>(-maxVelocity, maxVelocity)), mass(1.0), length(1.0), g(9.8), requiredUpTime(
-            10.0 /*seconds*/), upRange(M_PI_4 /*seconds*/), upTime(0)
+            10.0 /*seconds*/), upRange(M_PI_4 /*seconds*/), upTime(0), random(random)
     {
 
       Base::discreteActions->push_back(0, actionRange->min());
@@ -84,7 +84,8 @@ class SwingPendulum: public RLProblem<T>
       DenseVector<T>& vars = *Base::output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = (theta - thetaRange->min()) * Base::resolutions->at(0) / thetaRange->length();
-      vars[1] = (velocity - velocityRange->min()) * Base::resolutions->at(1) / velocityRange->length();
+      vars[1] = (velocity - velocityRange->min()) * Base::resolutions->at(1)
+          / velocityRange->length();
 
       Base::observations->at(0) = theta;
       Base::observations->at(1) = velocity;
@@ -94,11 +95,10 @@ class SwingPendulum: public RLProblem<T>
     void initialize()
     {
       upTime = 0;
-      //if (getOn())
-      //  theta = M_PI_2;
-      //else
-      //  theta = (drand48() - 0.5) * 2.0 * M_PI;
-      theta = M_PI_2;
+      if (random)
+        theta = thetaRange->chooseRandom();
+      else
+        theta = M_PI_2;
       velocity = 0.0;
       adjustTheta();
       updateRTStep();
