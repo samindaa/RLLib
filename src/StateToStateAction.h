@@ -40,10 +40,10 @@ class Representations
   protected:
     std::map<int, Vector<T>*>* phis;
   public:
-    Representations(const int& numFeatures, const ActionList<T>* actions) :
+    Representations(const int& numFeatures, const Actions<T>* actions) :
         phis(new std::map<int, Vector<T>*>())
     {
-      for (typename ActionList<T>::const_iterator iter = actions->begin(); iter != actions->end();
+      for (typename Actions<T>::const_iterator iter = actions->begin(); iter != actions->end();
           ++iter)
         phis->insert(std::make_pair((*iter)->id(), new SVector<T>(numFeatures)));
     }
@@ -113,7 +113,7 @@ class StateToStateAction
     }
     virtual const Vector<T>* stateAction(const Vector<T>* x, const Action<T>* a) =0;
     virtual const Representations<T>* stateActions(const Vector<T>* x) =0;
-    virtual const ActionList<T>* getActionList() const =0;
+    virtual const Actions<T>* getActions() const =0;
     virtual double vectorNorm() const =0;
     virtual int dimension() const =0;
 };
@@ -124,10 +124,10 @@ class StateActionTilings: public StateToStateAction<T>
 {
   protected:
     Projector<T>* projector;
-    ActionList<T>* actions;
+    Actions<T>* actions;
     Representations<T>* phis;
   public:
-    StateActionTilings(Projector<T>* projector, ActionList<T>* actions) :
+    StateActionTilings(Projector<T>* projector, Actions<T>* actions) :
         projector(projector), actions(actions), phis(
             new Representations<T>(projector->dimension(), actions))
     {
@@ -154,12 +154,12 @@ class StateActionTilings: public StateToStateAction<T>
         phis->clear();
         return phis;
       }
-      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename Actions<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
         phis->set(stateAction(x, *a), *a);
       return phis;
     }
 
-    const ActionList<T>* getActionList() const
+    const Actions<T>* getActions() const
     {
       return actions;
     }
@@ -180,12 +180,12 @@ class TabularAction: public StateToStateAction<T>
 {
   protected:
     Projector<T>* projector;
-    ActionList<T>* actions;
+    Actions<T>* actions;
     Representations<T>* phis;
     Vector<T>* _phi;
     bool includeActiveFeature;
   public:
-    TabularAction(Projector<T>* projector, ActionList<T>* actions, bool includeActiveFeature = true) :
+    TabularAction(Projector<T>* projector, Actions<T>* actions, bool includeActiveFeature = true) :
         projector(projector), actions(actions), phis(
             new Representations<T>(
                 includeActiveFeature ?
@@ -216,12 +216,12 @@ class TabularAction: public StateToStateAction<T>
     const Representations<T>* stateActions(const Vector<T>* x)
     {
       assert(actions->dimension() == phis->dimension());
-      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename Actions<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
         phis->set(stateAction(x, *a), *a);
       return phis;
     }
 
-    const ActionList<T>* getActionList() const
+    const Actions<T>* getActions() const
     {
       return actions;
     }

@@ -200,7 +200,7 @@ class FiniteStateGraph
 
     virtual double gamma() const=0;
     virtual const Vector<double>* expectedDiscountedSolution() const=0;
-    virtual ActionList<double>* actions() const =0;
+    virtual Actions<double>* getActions() const =0;
 
     static double distanceToSolution(const Vector<double>* solution, const Vector<double>* theta)
     {
@@ -216,7 +216,7 @@ class LineProblem: public FiniteStateGraph
 {
   public:
     const double Gamma;
-    ActionList<double>* actionList;
+    Actions<double>* actions;
     Policy<double>* acting;
     std::vector<GraphState*>* states;
     DenseVector<double>* solution;
@@ -228,9 +228,9 @@ class LineProblem: public FiniteStateGraph
     GraphState* D;
 
     LineProblem() :
-        FiniteStateGraph(), Gamma(0.9), actionList(new GeneralActionList<double>(1)), acting(
-            new SingleActionPolicy<double>(actionList)), states(new std::vector<GraphState*>()), solution(
-            new PVector<double>(3)), Move(actionList->at(0))
+        FiniteStateGraph(), Gamma(0.9), actions(new ActionArray<double>(1)), acting(
+            new SingleActionPolicy<double>(actions)), states(new std::vector<GraphState*>()), solution(
+            new PVector<double>(3)), Move(actions->at(0))
     {
       A = new GraphState("A", 0.0);
       B = new GraphState("B", 0.0);
@@ -266,7 +266,7 @@ class LineProblem: public FiniteStateGraph
 
     virtual ~LineProblem()
     {
-      delete actionList;
+      delete actions;
       delete acting;
       for (std::vector<GraphState*>::iterator i = states->begin(); i != states->end(); ++i)
       {
@@ -288,9 +288,9 @@ class LineProblem: public FiniteStateGraph
       return solution;
     }
 
-    ActionList<double>* actions() const
+    Actions<double>* getActions() const
     {
-      return actionList;
+      return actions;
     }
 
 };
@@ -299,7 +299,7 @@ class RandomWalk: public FiniteStateGraph
 {
   public:
     const double Gamma;
-    ActionList<double>* actionList;
+    Actions<double>* actions;
     std::vector<GraphState*>* states;
     DenseVector<double>* solution;
     const Action<double>* Left;
@@ -316,9 +316,9 @@ class RandomWalk: public FiniteStateGraph
     Policy<double>* acting;
 
     RandomWalk() :
-        FiniteStateGraph(), Gamma(0.9), actionList(new GeneralActionList<double>(2)), states(
+        FiniteStateGraph(), Gamma(0.9), actions(new ActionArray<double>(2)), states(
             new std::vector<GraphState*>()), solution(new PVector<double>(5)), Left(
-            actionList->at(0)), Right(actionList->at(1))
+            actions->at(0)), Right(actions->at(1))
     {
       TL = new GraphState("TL", 0.0);
       A = new GraphState("A", 0.0);
@@ -336,11 +336,11 @@ class RandomWalk: public FiniteStateGraph
       states->push_back(E);
       states->push_back(TR);
 
-      PVector<double> distribution(actionList->dimension());
+      PVector<double> distribution(actions->dimension());
       for (int i = 0; i < distribution.dimension(); i++)
-        distribution[i] = 1.0 / actionList->dimension();
+        distribution[i] = 1.0 / actions->dimension();
 
-      acting = new ConstantPolicy<double>(actionList, &distribution);
+      acting = new ConstantPolicy<double>(actions, &distribution);
 
       int stateIndex = 0;
       for (std::vector<GraphState*>::iterator i = states->begin(); i != states->end(); ++i)
@@ -379,7 +379,7 @@ class RandomWalk: public FiniteStateGraph
 
     virtual ~RandomWalk()
     {
-      delete actionList;
+      delete actions;
       //delete acting; // FixMe
       for (std::vector<GraphState*>::iterator i = states->begin(); i != states->end(); ++i)
       {
@@ -402,28 +402,28 @@ class RandomWalk: public FiniteStateGraph
       return solution;
     }
 
-    ActionList<double>* actions() const
+    Actions<double>* getActions() const
     {
-      return actionList;
+      return actions;
     }
 
     void enableOnlyLeftPolicy()
     {
-      actionList->erase(Right->id());
+      actions->erase(Right->id());
       if (acting)
         delete acting;
-      acting = new SingleActionPolicy<double>(actionList);
+      acting = new SingleActionPolicy<double>(actions);
     }
 
     void enableOnlyRightPolicy()
     {
-      actionList->erase(Left->id());
+      actions->erase(Left->id());
       if (acting)
         delete acting;
-      acting = new SingleActionPolicy<double>(actionList);
+      acting = new SingleActionPolicy<double>(actions);
     }
 
-    static Policy<double>* newPolicy(ActionList<double>* actionList, const double& leftProbability)
+    static Policy<double>* newPolicy(Actions<double>* actionList, const double& leftProbability)
     {
       PVector<double> distribution(actionList->dimension());
       distribution[0] = leftProbability;
@@ -451,8 +451,8 @@ class FSGAgentState: public StateToStateAction<double>
           stateIndexes->insert(std::make_pair(*iter, stateIndexes->size()));
       }
       featureState = new PVector<double>(stateIndexes->size());
-      phis = new Representations<double>(stateIndexes->size() * graph->actions()->dimension(),
-          graph->actions());
+      phis = new Representations<double>(stateIndexes->size() * graph->getActions()->dimension(),
+          graph->getActions());
     }
 
     ~FSGAgentState()
@@ -494,15 +494,15 @@ class FSGAgentState: public StateToStateAction<double>
       phis->clear();
       if (x->empty())
         return phis;
-      for (ActionList<double>::const_iterator a = graph->actions()->begin();
-          a != graph->actions()->end(); ++a)
+      for (Actions<double>::const_iterator a = graph->getActions()->begin();
+          a != graph->getActions()->end(); ++a)
         stateAction(x, *a);
       return phis;
     }
 
-    const ActionList<double>* getActionList() const
+    const Actions<double>* getActions() const
     {
-      return graph->actions();
+      return graph->getActions();
     }
 
     double vectorNorm() const
@@ -564,8 +564,8 @@ class FSGAgentState: public StateToStateAction<double>
       {
         GraphState* s_t = states()->at(si);
         policy->update(stateActions(s_t->v()));
-        for (ActionList<double>::const_iterator a = graph->actions()->begin();
-            a != graph->actions()->end(); ++a)
+        for (Actions<double>::const_iterator a = graph->getActions()->begin();
+            a != graph->getActions()->end(); ++a)
         {
           double pa = policy->pi(*a);
           GraphState* s_tp1 = s_t->nextState(*a);

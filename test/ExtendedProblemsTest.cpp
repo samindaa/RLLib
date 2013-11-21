@@ -316,7 +316,7 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
   VectorXd k(4);
   k << 10, 15, -90, -25;
 
-  ActionList<double>* actions = poleBalancing.getContinuousActionList();
+  Actions<double>* actions = poleBalancing.getContinuousActionList();
 
   for (int r = 0; r < 1; r++)
   {

@@ -56,26 +56,25 @@ class TileCoder: public Projector<T>
 {
   protected:
     bool includeActiveFeature;
-    SparseVector<T>* vector;
-    PVector<int>* tileIndices;
+    Vector<T>* vector;
+    int nbTiling;
+
   public:
-    TileCoder(const int& memorySize, const int& numTiling, bool includeActiveFeature = true) :
+    TileCoder(const int& memorySize, const int& nbTiling, bool includeActiveFeature = true) :
         includeActiveFeature(includeActiveFeature), vector(
-            new SVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)), tileIndices(
-            new PVector<int>(numTiling))
+            new SVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)), nbTiling(nbTiling)
     {
     }
 
     virtual ~TileCoder()
     {
-
       delete vector;
-      delete tileIndices;
     }
 
-    virtual void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory) =0;
-    virtual void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory,
-        const int& h1) =0;
+    virtual void coder(Vector<T>* vector, const Vector<T>* x, const int& memory,
+        const int& nbTiling) =0;
+    virtual void coder(Vector<T>* vector, const Vector<T>* x, const int& memory,
+        const int& nbTiling, const int& h1) =0;
 
     const Vector<T>* project(const Vector<T>* x, int h1)
     {
@@ -84,14 +83,11 @@ class TileCoder: public Projector<T>
         return vector;
       if (includeActiveFeature)
       {
-        coder(tileIndices, x, vector->dimension() - 1, h1);
+        coder(vector, x, vector->dimension() - 1, nbTiling, h1);
         vector->setEntry(vector->dimension() - 1, 1.0);
       }
       else
-        coder(tileIndices, x, vector->dimension(), h1);
-
-      for (int i = 0; i < tileIndices->dimension(); i++)
-        vector->setEntry(tileIndices->at(i), 1.0);
+        coder(vector, x, vector->dimension(), nbTiling, h1);
       return vector;
     }
 
@@ -102,21 +98,17 @@ class TileCoder: public Projector<T>
         return vector;
       if (includeActiveFeature)
       {
-        coder(tileIndices, x, vector->dimension() - 1);
+        coder(vector, x, vector->dimension() - 1, nbTiling);
         vector->setEntry(vector->dimension() - 1, 1.0);
       }
       else
-        coder(tileIndices, x, vector->dimension());
-
-      for (int i = 0; i < tileIndices->dimension(); i++)
-        vector->setEntry(tileIndices->at(i), 1.0);
+        coder(vector, x, vector->dimension(), nbTiling);
       return vector;
-
     }
 
     double vectorNorm() const
     {
-      return includeActiveFeature ? tileIndices->dimension() + 1 : tileIndices->dimension();
+      return includeActiveFeature ? nbTiling + 1 : nbTiling;
     }
 
     int dimension() const
@@ -132,9 +124,9 @@ class TileCoderHashing: public TileCoder<T>
   private:
     Tiles<T>* tiles;
   public:
-    TileCoderHashing(const int& memorySize, const int& numTiling, bool includeActiveFeature = true,
+    TileCoderHashing(const int& memorySize, const int& nbTiling, bool includeActiveFeature = true,
         Hashing* hashing = 0) :
-        TileCoder<T>(memorySize, numTiling, includeActiveFeature), tiles(new Tiles<T>(hashing))
+        TileCoder<T>(memorySize, nbTiling, includeActiveFeature), tiles(new Tiles<T>(hashing))
     {
     }
 
@@ -143,16 +135,15 @@ class TileCoderHashing: public TileCoder<T>
       delete tiles;
     }
 
-    void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory)
+    void coder(Vector<T>* vector, const Vector<T>* x, const int& memory, const int& nbTiling)
     {
-      tiles->tiles(theTiles->getValues(), theTiles->dimension(), memory, x->getValues(),
-          x->dimension());
+      tiles->tiles(vector, nbTiling, memory, x);
     }
 
-    void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory, const int& h1)
+    void coder(Vector<T>* vector, const Vector<T>* x, const int& memory, const int& nbTiling,
+        const int& h1)
     {
-      tiles->tiles(theTiles->getValues(), theTiles->dimension(), memory, x->getValues(),
-          x->dimension(), h1);
+      tiles->tiles(vector, nbTiling, memory, x, h1);
     }
 
 };
@@ -160,13 +151,13 @@ class TileCoderHashing: public TileCoder<T>
 template<class T>
 class TileCoderNoHashing: public TileCoder<T>
 {
+    typedef TileCoder<T> Base;
   protected:
     Tiles<T>* tiles;
     CollisionTable* ct;
   public:
-    TileCoderNoHashing(const int& memorySize, const int& numTiling,
-        bool includeActiveFeature = true) :
-        TileCoder<T>(memorySize, numTiling, includeActiveFeature), tiles(new Tiles<T>)
+    TileCoderNoHashing(const int& memorySize, const int& nbTiling, bool includeActiveFeature = true) :
+        TileCoder<T>(memorySize, nbTiling, includeActiveFeature), tiles(new Tiles<T>)
     {
       // http://graphics.stanford.edu/~seander/bithacks.html
       // Compute the next highest power of 2 of 32-bit v
@@ -180,8 +171,8 @@ class TileCoderNoHashing: public TileCoder<T>
       v++;
 
       // The vector needs to reflect the correct memory size
-      delete TileCoder<T>::vector;
-      TileCoder<T>::vector = new SVector<T>(includeActiveFeature ? v + 1 : v);
+      delete Base::vector;
+      Base::vector = new SVector<T>(includeActiveFeature ? v + 1 : v);
       ct = new CollisionTable(v, 1);
     }
 
@@ -191,16 +182,15 @@ class TileCoderNoHashing: public TileCoder<T>
       delete ct;
     }
 
-    void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory)
+    void coder(Vector<T>* vector, const Vector<T>* x, const int& memory, const int& nbTiling)
     {
-      tiles->tiles(theTiles->getValues(), theTiles->dimension(), ct, x->getValues(),
-          x->dimension());
+      tiles->tiles(vector, nbTiling, ct, x);
     }
 
-    void coder(Vector<int>* theTiles, const Vector<T>* x, const int& memory, const int& h1)
+    void coder(Vector<T>* vector, const Vector<T>* x, const int& memory, const int& nbTiling,
+        const int& h1)
     {
-      tiles->tiles(theTiles->getValues(), theTiles->dimension(), ct, x->getValues(), x->dimension(),
-          h1);
+      tiles->tiles(vector, nbTiling, ct, x, h1);
     }
 };
 

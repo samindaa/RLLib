@@ -25,7 +25,7 @@ GreedyGQFactory::~GreedyGQFactory()
     delete *iter;
 }
 
-OffPolicyControlLearner<double>* GreedyGQFactory::createLearner(ActionList<double>* actions,
+OffPolicyControlLearner<double>* GreedyGQFactory::createLearner(Actions<double>* actions,
     StateToStateAction<double>* toStateAction, Policy<double>* target, Policy<double>* behavior)
 {
   Trace<double>* e = new ATrace<double>(toStateAction->dimension() * actions->dimension());
@@ -71,12 +71,12 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
   Probabilistic::srand(0);
   RandomWalk* problem = new RandomWalk;
 
-  Policy<double>* behaviorPolicy = RandomWalk::newPolicy(problem->actions(),
+  Policy<double>* behaviorPolicy = RandomWalk::newPolicy(problem->getActions(),
       behaviourLeftProbability);
-  Policy<double>* targetPolicy = RandomWalk::newPolicy(problem->actions(), targetLeftProbability);
+  Policy<double>* targetPolicy = RandomWalk::newPolicy(problem->getActions(), targetLeftProbability);
   problem->setPolicy(behaviorPolicy);
   FSGAgentState* agentState = new FSGAgentState(problem);
-  OffPolicyControlLearner<double>* learner = learnerFactory->createLearner(problem->actions(),
+  OffPolicyControlLearner<double>* learner = learnerFactory->createLearner(problem->getActions(),
       agentState, targetPolicy, behaviorPolicy);
   Vector<double>* vFun = new PVector<double>(agentState->dimension());
 

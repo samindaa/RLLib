@@ -91,8 +91,8 @@ class SarsaControl: public OnPolicyControlLearner<T>
       acting->update(phis);
       double v_s = 0;
       // V(s) = \sum_{a \in A} \pi(s,a) * Q(s,a)
-      for (typename ActionList<T>::const_iterator a = toStateAction->getActionList()->begin();
-          a != toStateAction->getActionList()->end(); ++a)
+      for (typename Actions<T>::const_iterator a = toStateAction->getActions()->begin();
+          a != toStateAction->getActions()->end(); ++a)
         v_s += acting->pi(*a) * sarsa->predict(phis->at(*a));
       return v_s;
     }
@@ -117,13 +117,13 @@ template<class T>
 class ExpectedSarsaControl: public SarsaControl<T>
 {
   protected:
-    ActionList<T>* actions;
+    Actions<T>* actions;
     VectorPool<T>* pool;
     typedef SarsaControl<T> Base;
   public:
 
     ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T>* toStateAction, Sarsa<T>* sarsa,
-        ActionList<T>* actions) :
+        Actions<T>* actions) :
         SarsaControl<T>(acting, toStateAction, sarsa), actions(actions), pool(
             new VectorPool<T>(toStateAction->dimension()))
     {
@@ -140,7 +140,7 @@ class ExpectedSarsaControl: public SarsaControl<T>
       const Action<T>* a_tp1 = Policies::sampleAction(Base::acting, phi_tp1);
       Vector<T>* phi_bar_tp1 = pool->newVector(phi_tp1->at(a_tp1));
       phi_bar_tp1->clear();
-      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename Actions<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         double pi = Base::acting->pi(*a);
         if (pi == 0)
@@ -169,7 +169,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
   protected:
     Policy<T>* target;
     Policy<T>* behavior;
-    ActionList<T>* actions;
+    Actions<T>* actions;
 
     StateToStateAction<T>* toStateAction;
     GQ<T>* gq;
@@ -177,7 +177,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
     Vector<T>* phi_bar_tp1;
 
   public:
-    GreedyGQ(Policy<T>* target, Policy<T>* behavior, ActionList<T>* actions,
+    GreedyGQ(Policy<T>* target, Policy<T>* behavior, Actions<T>* actions,
         StateToStateAction<T>* toStateAction, GQ<T>* gq) :
         rho_t(0), target(target), behavior(behavior), actions(actions), toStateAction(
             toStateAction), gq(gq), phi_t(0), phi_bar_tp1(0)
@@ -220,7 +220,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       const Representations<T>* xas_tp1 = toStateAction->stateActions(x_tp1);
       target->update(xas_tp1);
       phi_bar_tp1->clear();
-      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename Actions<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
       {
         double pi = target->pi(*a);
         if (pi == 0)
@@ -254,7 +254,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       target->update(phis);
       double v_s = 0;
       // V(s) = \sum_{a \in A} \pi(s,a) * Q(s,a)
-      for (typename ActionList<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (typename Actions<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
         v_s += target->pi(*a) * gq->predict(phis->at(*a));
       return v_s;
     }
@@ -279,7 +279,7 @@ template<class T>
 class GQOnPolicyControl: public GreedyGQ<T>
 {
   public:
-    GQOnPolicyControl(Policy<T>* acting, ActionList<T>* actions,
+    GQOnPolicyControl(Policy<T>* acting, Actions<T>* actions,
         StateToStateAction<T>* toStateAction, GQ<T>* gq) :
         GreedyGQ<T>(acting, acting, actions, toStateAction, gq)
     {

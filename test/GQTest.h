@@ -16,7 +16,7 @@ class OffPolicyLearnerFactory
     virtual ~OffPolicyLearnerFactory()
     {
     }
-    virtual OffPolicyControlLearner<double>* createLearner(ActionList<double>* actions,
+    virtual OffPolicyControlLearner<double>* createLearner(Actions<double>* actions,
         StateToStateAction<double>* toStateAction, Policy<double>* target,
         Policy<double>* behavior) =0;
 
@@ -41,7 +41,7 @@ class GreedyGQFactory: public OffPolicyLearnerFactory
         const double& lambda);
     ~GreedyGQFactory();
 
-    OffPolicyControlLearner<double>* createLearner(ActionList<double>* actions,
+    OffPolicyControlLearner<double>* createLearner(Actions<double>* actions,
         StateToStateAction<double>* toStateAction, Policy<double>* target,
         Policy<double>* behavior);
     double getBeta() const;

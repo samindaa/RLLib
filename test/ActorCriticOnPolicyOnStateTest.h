@@ -102,11 +102,11 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double>
 {
   protected:
     Projector<double>* projector;
-    ActionList<double>* actions;
+    Actions<double>* actions;
     Representations<double>* phis;
 
   public:
-    NoStateProblemStateToStateAction(Projector<double>* projector, ActionList<double>* actions) :
+    NoStateProblemStateToStateAction(Projector<double>* projector, Actions<double>* actions) :
         projector(projector), actions(actions), phis(
             new Representations<double>(projector->dimension(), actions))
     {
@@ -134,12 +134,12 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double>
         phis->clear();
         return phis;
       }
-      for (ActionList<double>::const_iterator a = actions->begin(); a != actions->end(); ++a)
+      for (Actions<double>::const_iterator a = actions->begin(); a != actions->end(); ++a)
         phis->set(stateAction(x, *a), *a);
       return phis;
     }
 
-    const ActionList<double>* getActionList() const
+    const Actions<double>* getActions() const
     {
       return actions;
     }

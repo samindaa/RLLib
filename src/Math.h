@@ -45,11 +45,11 @@ class Boundedness
     }
 
     template<class T>
-    inline static bool checkDistribution(const PVector<T>& distribution)
+    inline static bool checkDistribution(const Vector<T>* distribution)
     {
       double sum = 0.0;
-      for (int i = 0; i < distribution.dimension(); i++)
-        sum += distribution[i];
+      for (int i = 0; i < distribution->dimension(); i++)
+        sum += distribution->getEntry(i);
       bool bvalue = ::fabs(1.0 - sum) < 10e-8;
       assert(bvalue);
       return bvalue;
@@ -153,7 +153,6 @@ class Probabilistic
       return (sqrt(6.0f) / 2.0f) * randResult;
     }
 };
-
 
 // Helper class for range management for testing environments
 template<class T>

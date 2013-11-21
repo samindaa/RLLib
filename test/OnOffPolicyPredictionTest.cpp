@@ -53,8 +53,8 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(FSGAgentState* agentState, Rand
   Timer timer;
   timer.start();
   int nbEpisode = 0;
-  Policy<double>* behaviorPolicy = RandomWalk::newPolicy(problem->actions(), behaviourLeftProbability);
-  Policy<double>* targetPolicy = RandomWalk::newPolicy(problem->actions(), targetLeftProbability);
+  Policy<double>* behaviorPolicy = RandomWalk::newPolicy(problem->getActions(), behaviourLeftProbability);
+  Policy<double>* targetPolicy = RandomWalk::newPolicy(problem->getActions(), targetLeftProbability);
   problem->setPolicy(behaviorPolicy);
 
   const Vector<double>* solution = problem->expectedDiscountedSolution();

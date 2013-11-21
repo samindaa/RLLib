@@ -124,33 +124,29 @@ class AdvancedTilesProjector: public Projector<T>
 {
   protected:
     Vector<double>* vector;
-    int* activeTiles;
     Tiles<T>* tiles;
 
   public:
     AdvancedTilesProjector() :
-        vector(new SVector<T>(1000000 + 1)), activeTiles(new int[48]), tiles(new Tiles<T>)
+        vector(new SVector<T>(1000000 + 1)), tiles(new Tiles<T>)
     {
     }
 
     virtual ~AdvancedTilesProjector()
     {
       delete vector;
-      delete[] activeTiles;
       delete tiles;
     }
 
   public:
-    const Vector<T>* project(const Vector<T>* xin, int h2)
+    const Vector<T>* project(const Vector<T>* x, int h2)
     {
       vector->clear();
-      if (xin->empty())
+      if (x->empty())
         return vector;
       int h1 = 0;
-      const PVector<T>& x = *(const PVector<T>*) xin; // FixMe
       // all 4
-      tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x.getValues(), x.dimension(), h1++,
-          h2);
+      tiles->tiles(vector, 12, vector->dimension() - 1, x, h1++, h2);
       // 3 of 4
       static CombinationGenerator cg43(4, 3, 4); // We know x.dimension() == 4
       static CombinationGenerator::Combinations& c43 = cg43.getCombinations();
@@ -158,9 +154,8 @@ class AdvancedTilesProjector: public Projector<T>
       for (int i = 0; i < (int) c43.size(); i++)
       {
         for (int j = 0; j < (int) c43[i].size(); j++)
-          x3[j] = x[c43[i][j]];
-        tiles->tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3.getValues(), 3, h1++,
-            h2);
+          x3[j] = x->getEntry(c43[i][j]);
+        tiles->tiles(vector, 3, vector->dimension() - 1, &x3, h1++, h2);
       }
       // 2 of 6
       static CombinationGenerator cg42(4, 2, 4);
@@ -169,9 +164,8 @@ class AdvancedTilesProjector: public Projector<T>
       for (int i = 0; i < (int) c42.size(); i++)
       {
         for (int j = 0; j < (int) c42[i].size(); j++)
-          x2[j] = x[c42[i][j]];
-        tiles->tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2.getValues(), 2, h1++,
-            h2);
+          x2[j] = x->getEntry(c42[i][j]);
+        tiles->tiles(vector, 2, vector->dimension() - 1, &x2, h1++, h2);
       }
 
       // 1 of 4
@@ -180,28 +174,23 @@ class AdvancedTilesProjector: public Projector<T>
       static PVector<T> x1(1);
       for (int i = 0; i < (int) c41.size(); i++)
       {
-        x1[0] = x[c41[i][0]]; // there is only a single element
-        tiles->tiles(&activeTiles[36 + i * 3], 3, vector->dimension() - 1, x1.getValues(), 1, h1++,
-            h2);
+        x1[0] = x->getEntry(c41[i][0]); // there is only a single element
+        tiles->tiles(vector, 3, vector->dimension() - 1, &x1, h1++, h2);
       }
 
       // bias
       vector->setEntry(vector->dimension() - 1, 1.0);
-      for (int* i = activeTiles; i < activeTiles + 48; ++i)
-        vector->setEntry(*i, 1.0);
-
       return vector;
     }
 
-    const Vector<T>* project(const Vector<T>* xin)
+    const Vector<T>* project(const Vector<T>* x)
     {
 
       vector->clear();
-      if (xin->empty())
+      if (x->empty())
         return vector;
-      const PVector<T>& x = *(const PVector<T>*) xin; // FixMe
       // all 4
-      tiles->tiles(&activeTiles[0], 12, vector->dimension() - 1, x.getValues(), x.dimension());
+      tiles->tiles(vector, 12, vector->dimension() - 1, x);
       // 3 of 4
       static CombinationGenerator cg43(4, 3, 4); // We know x.dimension() == 4
       static CombinationGenerator::Combinations& c43 = cg43.getCombinations();
@@ -209,8 +198,8 @@ class AdvancedTilesProjector: public Projector<T>
       for (int i = 0; i < (int) c43.size(); i++)
       {
         for (int j = 0; j < (int) c43[i].size(); j++)
-          x3[j] = x[c43[i][j]];
-        tiles->tiles(&activeTiles[12 + i * 3], 3, vector->dimension() - 1, x3.getValues(), 3);
+          x3[j] = x->getEntry(c43[i][j]);
+        tiles->tiles(vector, 3, vector->dimension() - 1, &x3);
       }
       // 2 of 6
       static CombinationGenerator cg42(4, 2, 4);
@@ -219,8 +208,8 @@ class AdvancedTilesProjector: public Projector<T>
       for (int i = 0; i < (int) c42.size(); i++)
       {
         for (int j = 0; j < (int) c42[i].size(); j++)
-          x2[j] = x[c42[i][j]];
-        tiles->tiles(&activeTiles[24 + i * 2], 2, vector->dimension() - 1, x2.getValues(), 2);
+          x2[j] = x->getEntry(c42[i][j]);
+        tiles->tiles(vector, 2, vector->dimension() - 1, &x2);
       }
 
       // 1 of 4
@@ -229,15 +218,12 @@ class AdvancedTilesProjector: public Projector<T>
       static PVector<T> x1(1);
       for (int i = 0; i < (int) c41.size(); i++)
       {
-        x1[0] = x[c41[i][0]]; // there is only a single element
-        tiles->tiles(&activeTiles[36 + i * 3], 3, vector->dimension() - 1, x1.getValues(), 1);
+        x1[0] = x->getEntry(c41[i][0]); // there is only a single element
+        tiles->tiles(vector, 3, vector->dimension() - 1, &x1);
       }
 
       // bias
       vector->setEntry(vector->dimension() - 1, 1.0);
-      for (int* i = activeTiles; i < activeTiles + 48; ++i)
-        vector->setEntry(*i, 1.0);
-
       return vector;
     }
 

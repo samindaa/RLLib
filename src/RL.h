@@ -160,13 +160,13 @@ class RLProblem
     DenseVector<T>* observations;
     DenseVector<T>* resolutions;
     TRStep<T>* output;
-    ActionList<T>* discreteActions;
-    ActionList<T>* continuousActions;
+    Actions<T>* discreteActions;
+    Actions<T>* continuousActions;
   public:
     RLProblem(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
         observations(new PVector<T>(nbVars)), resolutions(new PVector<T>(nbVars)), output(
-            new TRStep<T>(nbVars)), discreteActions(new GeneralActionList<T>(nbDiscreteActions)), continuousActions(
-            new GeneralActionList<T>(nbContinuousActions))
+            new TRStep<T>(nbVars)), discreteActions(new ActionArray<T>(nbDiscreteActions)), continuousActions(
+            new ActionArray<T>(nbContinuousActions))
     {
     }
 
@@ -191,12 +191,12 @@ class RLProblem
     {/*To output useful information*/
     }
 
-    virtual ActionList<T>* getDiscreteActionList() const
+    virtual Actions<T>* getDiscreteActionList() const
     {
       return discreteActions;
     }
 
-    virtual ActionList<T>* getContinuousActionList() const
+    virtual Actions<T>* getContinuousActionList() const
     {
       return continuousActions;
     }

@@ -85,12 +85,12 @@ class Action
 };
 
 template<class T>
-class ActionList
+class Actions
 {
   protected:
     std::vector<Action<T>*> actions;
   public:
-    virtual ~ActionList()
+    virtual ~Actions()
     {
     }
 
@@ -127,18 +127,18 @@ class ActionList
 };
 
 template<class T>
-class GeneralActionList: public ActionList<T>
+class ActionArray: public Actions<T>
 {
   private:
-    typedef ActionList<T> Base;
+    typedef Actions<T> Base;
   public:
-    GeneralActionList(const int& nbActions)
+    ActionArray(const int& nbActions)
     {
       for (int i = 0; i < nbActions; i++)
         Base::actions.push_back(new Action<T>(i));
     }
 
-    virtual ~GeneralActionList()
+    virtual ~ActionArray()
     {
       for (typename std::vector<Action<T>*>::iterator iter = Base::actions.begin();
           iter != Base::actions.end(); ++iter)
