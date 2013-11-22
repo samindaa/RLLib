@@ -18,7 +18,7 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
   hashing = new MurmurHashing;
   projector = new TileCoderHashing<double>(1000000, 10, true, hashing);
   toStateAction = new StateActionTilings<double>(projector,
-      behaviourEnvironment->getDiscreteActionList());
+      behaviourEnvironment->getDiscreteActions());
 
   alpha_v = 0.1 / projector->vectorNorm();
   alpha_w = 0.0001 / projector->vectorNorm();
@@ -30,14 +30,14 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
   alpha_u = 0.001 / projector->vectorNorm();
 
   target = new BoltzmannDistribution<double>(projector->dimension(),
-      behaviourEnvironment->getDiscreteActionList());
+      behaviourEnvironment->getDiscreteActions());
 
   actore = new ATrace<double>(projector->dimension());
   actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target, actoreTraces);
 
-  behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActionList());
+  behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActions());
   control = new OffPAC<double>(behavior, critic, actor, toStateAction, projector);
 
   learningAgent = new LearnerAgent<double>(control);

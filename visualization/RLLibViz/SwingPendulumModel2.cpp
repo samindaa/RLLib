@@ -13,37 +13,37 @@ SwingPendulumModel2::SwingPendulumModel2(QObject *parent) :
     ModelBase(parent)
 {
   // RLLib:
-  behaviourEnvironment = new SwingPendulum<double>(false);
+  behaviourEnvironment = new SwingPendulum<double>(true);
   evaluationEnvironment = new SwingPendulum<double>;
   hashing = new MurmurHashing;
   projector = new TileCoderHashing<double>(1000000, 10, true, hashing);
   toStateAction = new StateActionTilings<double>(projector,
-      behaviourEnvironment->getDiscreteActionList());
+      behaviourEnvironment->getDiscreteActions());
 
   alpha_v = 0.1 / projector->vectorNorm();
   alpha_w = .0001 / projector->vectorNorm();
   gamma = 0.99;
-  lambda = 0.4;
+  lambda = 0.0;
   alpha_u = 0.5 / projector->vectorNorm();
 
   critice = new ATrace<double>(projector->dimension());
   critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
 
   target = new BoltzmannDistribution<double>(projector->dimension(),
-      behaviourEnvironment->getDiscreteActionList());
+      behaviourEnvironment->getDiscreteActions());
 
   actore = new ATrace<double>(projector->dimension());
   actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target, actoreTraces);
 
-  behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActionList());
+  behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActions());
   control = new OffPAC<double>(behavior, critic, actor, toStateAction, projector);
 
   learningAgent = new LearnerAgent<double>(control);
   evaluationAgent = new ControlAgent<double>(control);
 
-  learningRunner = new Simulator<double>(learningAgent, behaviourEnvironment, 5000);
+  learningRunner = new Simulator<double>(learningAgent, behaviourEnvironment, 1000);
   evaluationRunner = new Simulator<double>(evaluationAgent, evaluationEnvironment, 5000);
   learningRunner->setVerbose(false);
   evaluationRunner->setVerbose(false);

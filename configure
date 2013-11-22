@@ -24,7 +24,7 @@ sourcedirs="."
 
 # Use single quotes around pattern with * to avoid early glob expansion. 
 ignore=""
-hideWarnings=""
+hideWarnings="util/cma/cmaes.c util/cma/boundary_transformation.c util/cma/example_restarts.c"
 
 includedMakefiles=""
 generatedFiles=""

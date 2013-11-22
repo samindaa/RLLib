@@ -12,8 +12,7 @@ ActorCriticOnPolicyOnStateTest::ActorCriticOnPolicyOnStateTest() :
 {
   problem = new NoStateProblem(mu, sigma);
   projector = new NoStateProblemProjector();
-  toStateAction = new NoStateProblemStateToStateAction(projector,
-      problem->getContinuousActionList());
+  toStateAction = new NoStateProblemStateToStateAction(projector, problem->getContinuousActions());
 
   alpha_v = alpha_u = alpha_r = lambda = 0;
 
@@ -91,14 +90,14 @@ void ActorCriticOnPolicyOnStateTest::checkDistribution(
 void ActorCriticOnPolicyOnStateTest::testNormalDistribution()
 {
   policyDistribution = new NormalDistribution<double>(0.5, 1.0, projector->dimension(),
-      problem->getContinuousActionList());
+      problem->getContinuousActions());
   checkDistribution(policyDistribution);
 }
 
 void ActorCriticOnPolicyOnStateTest::testNormalDistributionMeanAdjusted()
 {
   policyDistribution = new NormalDistributionSkewed<double>(0.5, 1.0, projector->dimension(),
-      problem->getContinuousActionList());
+      problem->getContinuousActions());
   checkDistribution(policyDistribution);
 }
 
@@ -119,7 +118,7 @@ void ActorCriticOnPolicyOnStateTest::testNormalDistributionWithEligibility()
   alpha_u = 0.1 / projector->vectorNorm();
 
   policyDistribution = new NormalDistribution<double>(0.5, 1.0, projector->dimension(),
-      problem->getContinuousActionList());
+      problem->getContinuousActions());
 
   actor = new ActorLambda<double>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
   control = new ActorCritic<double>(critic, actor, projector, toStateAction);

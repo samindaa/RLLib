@@ -30,7 +30,7 @@ ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearner
 {
   problem = new SwingPendulum<double>;
   projector = new TileCoderHashing<double>(1000, 10, true);
-  toStateAction = new StateActionTilings<double>(projector, problem->getContinuousActionList());
+  toStateAction = new StateActionTilings<double>(projector, problem->getContinuousActions());
 
   alpha_v = alpha_u = alpha_r = gamma = lambda = 0;
 
@@ -38,7 +38,7 @@ ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearner
   critic = 0;
 
   policyDistribution = new NormalDistributionScaled<double>(0, 1.0, projector->dimension(),
-      problem->getContinuousActionList());
+      problem->getContinuousActions());
 
   actorMuE = new ATrace<double>(projector->dimension());
   actorSigmaE = new ATrace<double>(projector->dimension());

@@ -29,9 +29,6 @@
  *      Author: sam
  */
 
-#ifndef MCAR2D_H_
-#define MCAR2D_H_
-
 #include "RL.h"
 
 using namespace RLLib;
@@ -127,7 +124,5 @@ class MountainCar: public RLProblem<T>
     }
 
 };
-
-#endif /* MCAR2D_H_ */
 
 #endif /* MOUNTAINCAR_H_ */

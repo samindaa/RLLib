@@ -20,65 +20,73 @@ using namespace RLLib;
 template<class T>
 class NonMarkovPoleBalancing: public RLProblem<T>
 {
+    typedef RLProblem<T> Base;
   protected:
-    int nbUnjointedPoles;
+    int nbPoles;
+    bool random;
     float stepTime; // s
     float x; // m
     float xDot; // ms^{-1}
     float g; // ms^{-2}
     float M; // Kg
     float muc; // coefficient of friction of cart on track
+    float threeFourth;
+    float fifteenRadian;
+    float twelveRadian;
 
     Range<float>* xRange;
     Range<float>* thetaRange;
     Range<float>* actionRange;
 
   public:
-    DenseVector<float>* theta;
-    DenseVector<float>* thetaDot;
-    DenseVector<float>* thetaDotDot;
-    DenseVector<float>* l; // half length of i^{th} pole
-    DenseVector<float>* f; // effective force
-    DenseVector<float>* m; // mass of i^{th} pole
-    DenseVector<float>* mm; // effective mass
-    DenseVector<float>* mup; // coefficient of friction of i^{th} pole's hinge
+    Vector<float>* theta;
+    Vector<float>* thetaDot;
+    Vector<float>* length; // half length of i^{th} pole
+    Vector<float>* effectiveForce; // effective force
+    Vector<float>* mass; // mass of i^{th} pole
+    Vector<float>* effectiveMass; // effective mass
+    Vector<float>* mup; // coefficient of friction of i^{th} pole's hinge
 
   public:
-    NonMarkovPoleBalancing(const int& nbUnjointedPoles = 1) :
-        RLProblem<T>(1 + nbUnjointedPoles, 3, 1), nbUnjointedPoles(nbUnjointedPoles), stepTime(
-            0.01), x(0), xDot(0), g(-9.81), M(1.0), muc(0), xRange(new Range<float>(-2.4f, 2.4f)), actionRange(
-            new Range<float>(-10.0f, 10.0f)), theta(new PVector<float>(nbUnjointedPoles)), thetaDot(
-            new PVector<float>(nbUnjointedPoles)), thetaDotDot(
-            new PVector<float>(nbUnjointedPoles)), l(new PVector<float>(nbUnjointedPoles)), f(
-            new PVector<float>(nbUnjointedPoles)), m(new PVector<float>(nbUnjointedPoles)), mm(
-            new PVector<float>(nbUnjointedPoles)), mup(new PVector<float>(nbUnjointedPoles))
+    NonMarkovPoleBalancing(const int& nbPoles = 1, const bool& random = false) :
+        RLProblem<T>((1 + nbPoles) * 2, 3, 1), nbPoles(nbPoles), random(random), stepTime(0.02), x(
+            0), xDot(0), g(-9.81), M(1.0), muc(0), threeFourth(3.0f / 4.0f), fifteenRadian(
+            15.0f / 180.0f * M_PI), twelveRadian(12.0f / 180.0f * M_PI), xRange(
+            new Range<float>(-2.4f, 2.4f)), actionRange(new Range<float>(-10.0f, 10.0f)), theta(
+            new PVector<float>(nbPoles)), thetaDot(new PVector<float>(nbPoles)), length(
+            new PVector<float>(nbPoles)), effectiveForce(new PVector<float>(nbPoles)), mass(
+            new PVector<float>(nbPoles)), effectiveMass(new PVector<float>(nbPoles)), mup(
+            new PVector<float>(nbPoles))
     {
-      if (nbUnjointedPoles == 2)
+      assert(nbPoles <= 2);
+      if (nbPoles == 2)
       {
-        thetaRange = new Range<float>(-15.0f / 180.0f * M_PI, 15.0f / 180.0f * M_PI);
-        l->at(0) = 0.5;
-        l->at(1) = 0.05;
-        m->at(0) = 0.1;
-        m->at(1) = 0.01;
+        thetaRange = new Range<float>(-fifteenRadian, fifteenRadian);
+        length->setEntry(0, 0.5);
+        length->setEntry(1, 0.05);
+        mass->setEntry(0, 0.1);
+        mass->setEntry(1, 0.01);
         muc = 0.0005f;
-        mup->at(0) = mup->at(1) = 0.000002f;
+        mup->setEntry(0, 0.000002f);
+        mup->setEntry(1, 0.000002f);
       }
       else
       {
-        thetaRange = new Range<float>(-12.0f / 180.0f * M_PI, 12.0f / 180.0f * M_PI);
-        l->at(0) = 0.5; // Kg
-        m->at(0) = 0.1; // Kg
+        thetaRange = new Range<float>(-twelveRadian, twelveRadian);
+        length->setEntry(0, 0.5); // Kg
+        mass->setEntry(0, 0.1); // Kg
         muc = 0.0;
       }
-      discreteActions->push_back(0, actionRange->min());
-      discreteActions->push_back(1, 0.0);
-      discreteActions->push_back(2, actionRange->max());
+
+      Base::discreteActions->push_back(0, actionRange->min());
+      Base::discreteActions->push_back(1, 0.0);
+      Base::discreteActions->push_back(2, actionRange->max());
 
       // subject to change
-      continuousActions->push_back(0, 0.0);
+      Base::continuousActions->push_back(0, 0.0);
 
-      for (int i = 0; i < getVars().dimension(); i++)
-        resolutions->at(i) = 6.0;
+      for (int i = 0; i < this->dimension(); i++)
+        Base::resolutions->setEntry(i, 6.0);
 
     }
 
@@ -89,83 +97,111 @@ class NonMarkovPoleBalancing: public RLProblem<T>
       delete actionRange;
       delete theta;
       delete thetaDot;
-      delete thetaDotDot;
-      delete l;
-      delete f;
-      delete m;
-      delete mm;
+      delete length;
+      delete effectiveForce;
+      delete mass;
+      delete effectiveMass;
       delete mup;
     }
 
   private:
     void adjustTheta()
     {
-      for (int i = 0; i < nbUnjointedPoles; i++)
+      for (int i = 0; i < nbPoles; i++)
       {
-        if (theta->at(i) >= M_PI)
-          theta->at(i) -= 2.0 * M_PI;
-        if (theta->at(i) < -M_PI)
-          theta->at(i) += 2.0 * M_PI;
+        if (theta->getEntry(i) >= M_PI)
+          theta->setEntry(i, theta->getEntry(i) - 2.0 * M_PI);
+        if (theta->getEntry(i) < -M_PI)
+          theta->setEntry(i, theta->getEntry(i) + 2.0 * M_PI);
       }
     }
 
   public:
     void updateRTStep()
     {
-      DenseVector<T>& vars = *output->o_tp1;
-      vars[0] = (x - xRange->min()) * resolutions->at(0) / xRange->length();
-      observations->at(0) = x;
-      for (int i = 0; i < nbUnjointedPoles; i++)
+      Base::output->updateRTStep(r(), z(), endOfEpisode());
+      DenseVector<T>& vars = *Base::output->o_tp1;
+
+      Base::observations->at(0) = xRange->bound(x);
+      Base::observations->at(1) = xDot;
+      vars[0] = Base::observations->at(0); //<<FixMe: only for testing
+      vars[1] = Base::observations->at(1);
+
+      for (int i = 0; i < nbPoles; i += 2)
       {
-        vars[i + 1] = (theta->at(i) - thetaRange->min()) * resolutions->at(i + 1)
-            / thetaRange->length();
-        observations->at(1) = theta->at(i);
+        Base::observations->at(i + 2) = theta->getEntry(i);
+        Base::observations->at(i + 3) = thetaDot->getEntry(i);
+        vars[i + 2] = Base::observations->at(i + 2); //<<FixMe: only for testing
+        vars[i + 3] = Base::observations->at(i + 3);
       }
+
     }
 
     void initialize()
     {
-      x = 0.0;
-      for (int i = 0; i < nbUnjointedPoles; i++)
-        theta->at(i) = 0.0f;
+      if (random)
+      {
+        Range<float> xs1(-2, 2);
+        Range<float> thetas1(-0.6, 0.6);
+        Range<float> xs2(-0.2, 0.2);
+        Range<float> thetas2(-0.2, 0.2);
+
+        //<<FixMe: S2
+        x = xs2.chooseRandom();
+        for (int i = 0; i < nbPoles; i++)
+          theta->setEntry(i, thetas2.chooseRandom());
+      }
+      else
+      {
+        x = 0.0;
+        for (int i = 0; i < nbPoles; i++)
+          theta->setEntry(i, 0.0f);
+      }
+
+      xDot = 0;
+      for (int i = 0; i < nbPoles; i++)
+        thetaDot->setEntry(i, 0.0f);
 
       adjustTheta();
       updateRTStep();
     }
 
-    void step(const Action<T>& a)
+    void step(const Action<T>* a)
     {
       float totalEffectiveForce = 0;
       float totalEffectiveMass = 0;
-      for (int i = 0; i < nbUnjointedPoles; i++)
+      for (int i = 0; i < nbPoles; i++)
       {
-        float effectiveForce = 0;
-        effectiveForce += m->at(i) * l->at(i) * std::pow(thetaDot->at(i), 2) * ::sin(theta->at(i));
-        effectiveForce += 0.75f * m->at(i) * ::cos(theta->at(i))
-            * ((mup->at(i) * theta->at(i)) / (m->at(i) * l->at(i)) + g * ::sin(theta->at(i)));
-        f->at(i) = effectiveForce;
-        mm->at(i) = m->at(i) * (1.0f - 0.75f * std::pow(::cos(theta->at(i)), 2));
-        totalEffectiveForce += f->at(i);
-        totalEffectiveMass += mm->at(i);
+        double effForce = mass->getEntry(i) * length->getEntry(i) * pow(thetaDot->getEntry(i), 2)
+            * sin(theta->getEntry(i));
+        effForce += threeFourth * mass->getEntry(i) * cos(theta->getEntry(i))
+            * ((mup->getEntry(i) * thetaDot->getEntry(i))
+                / (mass->getEntry(i) * length->getEntry(i)) + g * sin(theta->getEntry(i)));
+        effectiveForce->setEntry(i, effForce);
+        effectiveMass->setEntry(i,
+            mass->getEntry(i) * (1.0f - threeFourth * pow(cos(theta->getEntry(i)), 2)));
+        totalEffectiveForce += effectiveForce->getEntry(i);
+        totalEffectiveMass += effectiveMass->getEntry(i);
       }
 
-      float torque = actionRange->bound(a.at());
+      float torque = actionRange->bound(a->at(0));
       float xAcc = (torque - muc * Signum::valueOf(xDot) + totalEffectiveForce)
           / (M + totalEffectiveMass);
 
       // Update the four state variables, using Euler's method.
-      x = xRange->bound(x + xDot * stepTime);
+      x += xDot * stepTime;
       xDot += xAcc * stepTime;
 
-      for (int i = 0; i < nbUnjointedPoles; i++)
+      for (int i = 0; i < nbPoles; i++)
       {
-        thetaDotDot->at(i) = -0.75f
-            * (xAcc * ::cos(theta->at(i)) + g * ::sin(theta->at(i))
-                + (mup->at(i) * theta->at(i)) / (m->at(i) * l->at(i))) / l->at(i);
+        float thetaDotDot = -threeFourth
+            * (xAcc * cos(theta->getEntry(i)) + g * sin(theta->getEntry(i))
+                + (mup->getEntry(i) * thetaDot->getEntry(i))
+                    / (mass->getEntry(i) * length->getEntry(i))) / length->getEntry(i);
 
         // Update the four state variables, using Euler's method.
-        theta->at(i) = thetaRange->bound(theta->at(i) + thetaDot->at(i) * stepTime);
-        thetaDot->at(i) += thetaDotDot->at(i) * stepTime;
+        theta->setEntry(i, theta->getEntry(i) + thetaDot->getEntry(i) * stepTime);
+        thetaDot->setEntry(i, thetaDot->getEntry(i) + thetaDotDot * stepTime);
       }
 
       adjustTheta();
@@ -175,8 +211,8 @@ class NonMarkovPoleBalancing: public RLProblem<T>
     bool endOfEpisode() const
     {
       bool value = true;
-      for (int i = 0; i < nbUnjointedPoles; i++)
-        value *= thetaRange->in(theta->at(i));
+      for (int i = 0; i < nbPoles; i++)
+        value *= thetaRange->in(theta->getEntry(i));
       value = value && xRange->in(x);
       return !value;
     }
@@ -184,8 +220,8 @@ class NonMarkovPoleBalancing: public RLProblem<T>
     float r() const
     {
       float value = 0;
-      for (int i = 0; i < nbUnjointedPoles; i++)
-        value += ::cos(theta->at(i));
+      for (int i = 0; i < nbPoles; i++)
+        value += cos(theta->getEntry(i));
       return value;
     }
 

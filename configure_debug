@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ./configure target="RLLibTestDebug" \
-               cflags="-I. -I./src -I./test -I./simulation -Wall -Werror  -ggdb -Wno-deprecated -fPIC" \
+               cflags="-I. -I./src -I./test -I./simulation -ggdb -Wno-deprecated -fPIC" \
                lflags="" \
                ignore="'visualization/*'" \
                bin="RLLibTest"

@@ -16,7 +16,7 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
   problem = new SwingPendulum<double>;
   hashing = new MurmurHashing;
   projector = new TileCoderHashing<double>(1000, 10, false, hashing);
-  toStateAction = new StateActionTilings<double>(projector, problem->getContinuousActionList());
+  toStateAction = new StateActionTilings<double>(projector, problem->getContinuousActions());
 
   alpha_v = 0.1 / projector->vectorNorm();
   alpha_u = 0.001 / projector->vectorNorm();
@@ -28,11 +28,11 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
   critic = new TDLambda<double>(alpha_v, gamma, lambda, critice);
 
   policyDistribution = new NormalDistributionScaled<double>(0, 1.0, projector->dimension(),
-      problem->getContinuousActionList());
+      problem->getContinuousActions());
   policyRange = new Range<double>(-2.0, 2.0);
   problemRange = new Range<double>(-2.0, 2.0);
-  acting = new ScaledPolicyDistribution<double>(problem->getContinuousActionList(),
-      policyDistribution, policyRange, problemRange);
+  acting = new ScaledPolicyDistribution<double>(problem->getContinuousActions(), policyDistribution,
+      policyRange, problemRange);
 
   actore1 = new ATrace<double>(projector->dimension());
   actore2 = new ATrace<double>(projector->dimension());

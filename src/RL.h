@@ -191,12 +191,12 @@ class RLProblem
     {/*To output useful information*/
     }
 
-    virtual Actions<T>* getDiscreteActionList() const
+    virtual Actions<T>* getDiscreteActions() const
     {
       return discreteActions;
     }
 
-    virtual Actions<T>* getContinuousActionList() const
+    virtual Actions<T>* getContinuousActions() const
     {
       return continuousActions;
     }
@@ -380,8 +380,8 @@ class Simulator
         if (verbose)
         {
           double averageTimePerStep = totalTimeInMilliseconds / timeStep;
-          std::cout << "{" << nbEpisodeDone << " [" << timeStep << " (" << episodeR << ","
-              << episodeZ << "," << averageTimePerStep << ")]} ";
+          std::cout << "{" << nbEpisodeDone << " [" << timeStep << " (" << episodeR << ", "
+              << episodeZ << ", " << averageTimePerStep << ")]} ";
           //std::cout << ".";
           std::cout.flush();
         }
