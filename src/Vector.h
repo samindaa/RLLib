@@ -831,10 +831,10 @@ class PVector: public DenseVector<T>
     { // FixMe:
       //assert(this->dimension() == that->dimension());
 
-      const DenseVector<T>* _that = dynamic_cast<const DenseVector<T>*>(that);
-      if (_that)
+      const DenseVector<T>* other = dynamic_cast<const DenseVector<T>*>(that);
+      if (other)
       {
-        std::copy(_that->getValues() + offset, _that->getValues() + this->dimension(),
+        std::copy(other->getValues() + offset, other->getValues() + this->dimension(),
             this->getValues());
         return this;
       }

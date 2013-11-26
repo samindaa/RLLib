@@ -8,7 +8,7 @@
 #ifndef IDBDTEST_H_
 #define IDBDTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLIB_TEST(IDBDTest)
 class IDBDTest: public IDBDTestBase

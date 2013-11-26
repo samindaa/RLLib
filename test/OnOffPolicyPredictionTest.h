@@ -8,7 +8,7 @@
 #ifndef ONOFFPOLICYPREDICTIONTEST_H_
 #define ONOFFPOLICYPREDICTIONTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLIB_TEST(OnOffPolicyPredictionTest)
 

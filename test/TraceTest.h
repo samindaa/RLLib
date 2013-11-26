@@ -22,7 +22,7 @@
 #ifndef TRACETEST_H_
 #define TRACETEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLIB_TEST(TraceTest)
 

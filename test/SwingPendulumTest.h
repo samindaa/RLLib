@@ -22,7 +22,7 @@
 #ifndef SWINGPENDULUMTEST_H_
 #define SWINGPENDULUMTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 // From the RLLib
 #include "Vector.h"

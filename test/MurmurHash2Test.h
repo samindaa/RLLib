@@ -8,7 +8,7 @@
 #ifndef MURMURHASH2TEST_H_
 #define MURMURHASH2TEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 #include "Tiles.h"
 
 RLLIB_TEST(MurmurHash2Test)

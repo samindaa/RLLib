@@ -318,23 +318,27 @@ class Tiles
     int wrap_widths_times_num_tilings[Hashing::MAX_NUM_VARS];
     int coordinates[Hashing::MAX_NUM_VARS * 2 + 1]; /* one interval number per relevant dimension */
 
-    int i_tmp_arr[Hashing::MAX_NUM_VARS];
-    T f_tmp_arr[Hashing::MAX_NUM_VARS];
-
     Hashing* hashing; /*The has function*/
-    Hashing* hashUNH;
+    Hashing* defaultHashing;
+
+    Vector<int>* i_tmp_arr;
+    Vector<T>* f_tmp_arr;
 
   public:
     Tiles(Hashing* hashing = 0) :
-        hashing(hashing), hashUNH(new UNH)
+        hashing(hashing), defaultHashing(new UNH), i_tmp_arr(
+            new PVector<int>(Hashing::MAX_NUM_VARS)), f_tmp_arr(
+            new PVector<T>(Hashing::MAX_NUM_VARS))
     {
       if (!hashing)
-        this->hashing = hashUNH; //<< default hashing method
+        this->hashing = defaultHashing; //<< default hashing method
     }
 
     ~Tiles()
     {
-      delete hashUNH;
+      delete defaultHashing;
+      delete i_tmp_arr;
+      delete f_tmp_arr;
     }
 
   private:
@@ -347,8 +351,8 @@ class Tiles
       long ccheck;
 
       ct->calls++;
-      j = hashUNH->hash(ints, num_ints, ct->m, 449);
-      ccheck = hashUNH->hash(ints, num_ints, Hashing::MaxLONGINT, 457);
+      j = defaultHashing->hash(ints, num_ints, ct->m, 449);
+      ccheck = defaultHashing->hash(ints, num_ints, Hashing::MaxLONGINT, 457);
       if (ccheck == ct->data[j])
         ct->clearhits++;
       else if (ct->data[j] == -1)
@@ -360,7 +364,7 @@ class Tiles
         ct->collisions++;
       else
       {
-        long h2 = 1 + 2 * hashUNH->hash(ints, num_ints, (Hashing::MaxLONGINT) / 4, 449);
+        long h2 = 1 + 2 * defaultHashing->hash(ints, num_ints, (Hashing::MaxLONGINT) / 4, 449);
         int i = 0;
         while (++i)
         {
@@ -389,14 +393,14 @@ class Tiles
         int num_tilings,           // number of tile indices to be returned in tiles
         int memory_size,           // total number of possible tiles
         const Vector<T>* floats,            // array of floating point variables
-        int ints[],                   // array of integer variables
+        int num_floats, // number of active floating point variables
+        const Vector<int>* ints,                   // array of integer variables
         int num_ints)              // number of integer variables
     {
       int i, j;
-      int num_floats = floats->dimension();
       int num_coordinates = num_floats + num_ints + 1;
       for (int i = 0; i < num_ints; i++)
-        coordinates[num_floats + 1 + i] = ints[i];
+        coordinates[num_floats + 1 + i] = ints->getEntry(i);
 
       /* quantize state to integers (henceforth, tile widths == num_tilings) */
       for (i = 0; i < num_floats; i++)
@@ -433,17 +437,27 @@ class Tiles
 
     void tiles(Vector<T>* the_tiles,        // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
+        int memory_size,           // total number of possible tiles
+        const Vector<T>* floats,            // array of floating point variables
+        const Vector<int>* ints,                   // array of integer variables
+        int num_ints)              // number of integer variables
+    {
+      tiles(the_tiles, num_tilings, memory_size, floats, floats->dimension(), ints, num_ints);
+    }
+
+    void tiles(Vector<T>* the_tiles,        // provided array contains returned tiles (tile indices)
+        int num_tilings,           // number of tile indices to be returned in tiles
         CollisionTable *ctable,    // total number of possible tiles
         const Vector<T>* floats,            // array of floating point variables
-        int ints[],                   // array of integer variables
+        int num_floats, // number of active floating point variables
+        const Vector<int>* ints,                   // array of integer variables
         int num_ints)              // number of integer variables
     {
       int i, j;
-      int num_floats = floats->dimension();
       int num_coordinates = num_floats + num_ints + 1;
 
       for (int i = 0; i < num_ints; i++)
-        coordinates[num_floats + 1 + i] = ints[i];
+        coordinates[num_floats + 1 + i] = ints->getEntry(i);
 
       /* quantize state to integers (henceforth, tile widths == num_tilings) */
       for (i = 0; i < num_floats; i++)
@@ -478,6 +492,16 @@ class Tiles
       return;
     }
 
+    void tiles(Vector<T>* the_tiles,        // provided array contains returned tiles (tile indices)
+        int num_tilings,           // number of tile indices to be returned in tiles
+        CollisionTable *ctable,    // total number of possible tiles
+        const Vector<T>* floats,            // array of floating point variables
+        const Vector<int>* ints,                   // array of integer variables
+        int num_ints)              // number of integer variables
+    {
+      tiles(the_tiles, num_tilings, ctable, floats, floats->dimension(), ints, num_ints);
+    }
+
 // No ints
     void tiles(Vector<T>* the_tiles, int nt, int memory, const Vector<T>* floats)
     {
@@ -492,29 +516,29 @@ class Tiles
 //one int
     void tiles(Vector<T>* the_tiles, int nt, int memory, const Vector<T>* floats, int h1)
     {
-      i_tmp_arr[0] = h1;
+      i_tmp_arr->setEntry(0, h1);
       tiles(the_tiles, nt, memory, floats, i_tmp_arr, 1);
     }
 
     void tiles(Vector<T>* the_tiles, int nt, CollisionTable *ct, const Vector<T>* floats, int h1)
     {
-      i_tmp_arr[0] = h1;
+      i_tmp_arr->setEntry(0, h1);
       tiles(the_tiles, nt, ct, floats, i_tmp_arr, 1);
     }
 
 // two ints
     void tiles(Vector<T>* the_tiles, int nt, int memory, const Vector<T>* floats, int h1, int h2)
     {
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
       tiles(the_tiles, nt, memory, floats, i_tmp_arr, 2);
     }
 
     void tiles(Vector<T>* the_tiles, int nt, CollisionTable *ct, const Vector<T>* floats, int h1,
         int h2)
     {
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
       tiles(the_tiles, nt, ct, floats, i_tmp_arr, 2);
     }
 
@@ -522,135 +546,135 @@ class Tiles
     void tiles(Vector<T>* the_tiles, int nt, int memory, const Vector<T>* floats, int h1, int h2,
         int h3)
     {
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
-      i_tmp_arr[2] = h3;
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
+      i_tmp_arr->setEntry(2, h3);
       tiles(the_tiles, nt, memory, floats, i_tmp_arr, 3);
     }
 
     void tiles(Vector<T>* the_tiles, int nt, CollisionTable *ct, const Vector<T>* floats, int h1,
         int h2, int h3)
     {
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
-      i_tmp_arr[2] = h3;
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
+      i_tmp_arr->setEntry(2, h3);
       tiles(the_tiles, nt, ct, floats, i_tmp_arr, 3);
     }
 
 // one float, No ints
     void tiles1(Vector<T>* the_tiles, int nt, int memory, const T& f1)
     {
-      f_tmp_arr[0] = f1;
+      f_tmp_arr->setEntry(0, f1);
       tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 0);
     }
 
     void tiles1(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1)
     {
-      f_tmp_arr[0] = f1;
+      f_tmp_arr->setEntry(0, f1);
       tiles(the_tiles, nt, ct, f_tmp_arr, 1, i_tmp_arr, 0);
     }
 
 // one float, one int
     void tiles1(Vector<T>* the_tiles, int nt, int memory, const T& f1, int h1)
     {
-      f_tmp_arr[0] = f1;
-      i_tmp_arr[0] = h1;
+      f_tmp_arr->setEntry(0, f1);
+      i_tmp_arr->setEntry(0, h1);
       tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 1);
     }
 
     void tiles1(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, int h1)
     {
-      f_tmp_arr[0] = f1;
-      i_tmp_arr[0] = h1;
+      f_tmp_arr->setEntry(0, f1);
+      i_tmp_arr->setEntry(0, h1);
       tiles(the_tiles, nt, ct, f_tmp_arr, 1, i_tmp_arr, 1);
     }
 
 // one float, two ints
     void tiles1(Vector<T>* the_tiles, int nt, int memory, const T& f1, int h1, int h2)
     {
-      f_tmp_arr[0] = f1;
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
+      f_tmp_arr->setEntry(0, f1);
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
       tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 2);
     }
 
     void tiles1(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, int h1, int h2)
     {
-      f_tmp_arr[0] = f1;
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
+      f_tmp_arr->setEntry(0, f1);
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
       tiles(the_tiles, nt, ct, f_tmp_arr, 1, i_tmp_arr, 2);
     }
 
 // one float, three ints
     void tiles1(Vector<T>* the_tiles, int nt, int memory, const T& f1, int h1, int h2, int h3)
     {
-      f_tmp_arr[0] = f1;
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
-      i_tmp_arr[2] = h3;
+      f_tmp_arr->setEntry(0, f1);
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
+      i_tmp_arr->setEntry(2, h3);
       tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 3);
     }
 
     void tiles1(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, int h1, int h2,
         int h3)
     {
-      f_tmp_arr[0] = f1;
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
-      i_tmp_arr[2] = h3;
+      f_tmp_arr->setEntry(0, f1);
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
+      i_tmp_arr->setEntry(2, h3);
       tiles(the_tiles, nt, ct, f_tmp_arr, 1, i_tmp_arr, 3);
     }
 
 // two floats, No ints
     void tiles2(Vector<T>* the_tiles, int nt, int memory, const T& f1, const T& f2)
     {
-      f_tmp_arr[0] = f1;
-      f_tmp_arr[1] = f2;
+      f_tmp_arr->setEntry(0, f1);
+      f_tmp_arr->setEntry(1, f2);
       tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 0);
     }
 
     void tiles2(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, const T& f2)
     {
-      f_tmp_arr[0] = f1;
-      f_tmp_arr[1] = f2;
+      f_tmp_arr->setEntry(0, f1);
+      f_tmp_arr->setEntry(1, f2);
       tiles(the_tiles, nt, ct, f_tmp_arr, 2, i_tmp_arr, 0);
     }
 
 // two floats, one int
     void tiles2(Vector<T>* the_tiles, int nt, int memory, const T& f1, const T& f2, int h1)
     {
-      f_tmp_arr[0] = f1;
-      f_tmp_arr[1] = f2;
-      i_tmp_arr[0] = h1;
+      f_tmp_arr->setEntry(0, f1);
+      f_tmp_arr->setEntry(1, f2);
+      i_tmp_arr->setEntry(0, h1);
       tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 1);
     }
 
     void tiles2(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, const T& f2, int h1)
     {
-      f_tmp_arr[0] = f1;
-      f_tmp_arr[1] = f2;
-      i_tmp_arr[0] = h1;
+      f_tmp_arr->setEntry(0, f1);
+      f_tmp_arr->setEntry(1, f2);
+      i_tmp_arr->setEntry(0, h1);
       tiles(the_tiles, nt, ct, f_tmp_arr, 2, i_tmp_arr, 1);
     }
 
 // two floats, two ints
     void tiles2(Vector<T>* the_tiles, int nt, int memory, const T& f1, const T& f2, int h1, int h2)
     {
-      f_tmp_arr[0] = f1;
-      f_tmp_arr[1] = f2;
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
+      f_tmp_arr->setEntry(0, f1);
+      f_tmp_arr->setEntry(1, f2);
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
       tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 2);
     }
 
     void tiles2(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, const T& f2, int h1,
         int h2)
     {
-      f_tmp_arr[0] = f1;
-      f_tmp_arr[1] = f2;
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
+      f_tmp_arr->setEntry(0, f1);
+      f_tmp_arr->setEntry(1, f2);
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
       tiles(the_tiles, nt, ct, f_tmp_arr, 2, i_tmp_arr, 2);
     }
 
@@ -658,22 +682,22 @@ class Tiles
     void tiles2(Vector<T>* the_tiles, int nt, int memory, const T& f1, const T& f2, int h1, int h2,
         int h3)
     {
-      f_tmp_arr[0] = f1;
-      f_tmp_arr[1] = f2;
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
-      i_tmp_arr[2] = h3;
+      f_tmp_arr->setEntry(0, f1);
+      f_tmp_arr->setEntry(1, f2);
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
+      i_tmp_arr->setEntry(2, h3);
       tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 3);
     }
 
     void tiles2(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, const T& f2, int h1,
         int h2, int h3)
     {
-      f_tmp_arr[0] = f1;
-      f_tmp_arr[1] = f2;
-      i_tmp_arr[0] = h1;
-      i_tmp_arr[1] = h2;
-      i_tmp_arr[2] = h3;
+      f_tmp_arr->setEntry(0, f1);
+      f_tmp_arr->setEntry(1, f2);
+      i_tmp_arr->setEntry(0, h1);
+      i_tmp_arr->setEntry(1, h2);
+      i_tmp_arr->setEntry(2, h3);
       tiles(the_tiles, nt, ct, f_tmp_arr, 2, i_tmp_arr, 3);
     }
 
@@ -681,16 +705,16 @@ class Tiles
         int num_tilings,           // number of tile indices to be returned in tiles
         int memory_size,           // total number of possible tiles
         const Vector<T>* floats,            // array of floating point variables
+        int num_floats, // number of active floating point variables
         int wrap_widths[],         // array of widths (length and units as in floats)
-        int ints[],                  // array of integer variables
+        const Vector<int>* ints,                  // array of integer variables
         int num_ints)             // number of integer variables
     {
       int i, j;
-      int num_floats = floats->dimension();
       int num_coordinates = num_floats + num_ints + 1;
 
       for (int i = 0; i < num_ints; i++)
-        coordinates[num_floats + 1 + i] = ints[i];
+        coordinates[num_floats + 1 + i] = ints->getEntry(i);
 
       /* quantize state to integers (henceforth, tile widths == num_tilings) */
       for (i = 0; i < num_floats; i++)
@@ -736,16 +760,16 @@ class Tiles
         int num_tilings,           // number of tile indices to be returned in tiles
         CollisionTable *ctable,   // total number of possible tiles
         const Vector<T>* floats,            // array of floating point variables
+        int num_floats, // number of active floating point variables
         int wrap_widths[],         // array of widths (length and units as in floats)
-        int ints[],                  // array of integer variables
+        const Vector<int>* ints,                  // array of integer variables
         int num_ints)             // number of integer variables
     {
       int i, j;
-      int num_floats = floats->dimension();
       int num_coordinates = num_floats + num_ints + 1;
 
       for (int i = 0; i < num_ints; i++)
-        coordinates[num_floats + 1 + i] = ints[i];
+        coordinates[num_floats + 1 + i] = ints->getEntry(i);
 
       /* quantize state to integers (henceforth, tile widths == num_tilings) */
       for (i = 0; i < num_floats; i++)

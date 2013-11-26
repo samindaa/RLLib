@@ -8,7 +8,7 @@
 #ifndef ADALINETEST_H_
 #define ADALINETEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLIB_TEST(AdalineTest)
 class AdalineTest: public AdalineTestBase

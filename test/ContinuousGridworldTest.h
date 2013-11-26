@@ -22,7 +22,7 @@
 #ifndef CONTINUOUSGRIDWORLDTEST_H_
 #define CONTINUOUSGRIDWORLDTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 // From the RLLib
 #include "Vector.h"

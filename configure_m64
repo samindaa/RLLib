@@ -2,6 +2,6 @@
 
 ./configure target="RLLibTestM64" \
                cflags="-I. -I./src -I./test -I./simulation -m64 -O3 -Wno-deprecated -fPIC" \
-               lflags="" \
+               lflags="-lpthread" \
                ignore="'visualization/*'" \
                bin="RLLibTest"

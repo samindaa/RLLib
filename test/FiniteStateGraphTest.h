@@ -8,7 +8,7 @@
 #ifndef FINITESTATEGRAPHTEST_H_
 #define FINITESTATEGRAPHTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLIB_TEST(FiniteStateGraphTest)
 

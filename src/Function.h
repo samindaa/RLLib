@@ -50,6 +50,26 @@ class LinearLearner: public ParameterizedFunction<T>
     virtual const Vector<T>* weights() const =0;
 };
 
+template<class T>
+class RewardFunction
+{
+  public:
+    virtual ~RewardFunction()
+    {
+    }
+    virtual T reward() =0;
+};
+
+template<class T>
+class OutcomeFunction
+{
+  public:
+    virtual ~OutcomeFunction()
+    {
+    }
+    virtual T outcome() =0;
+};
+
 }  // namespace RLLib
 
 #endif /* FUNCTION_H_ */

@@ -8,7 +8,7 @@
 #ifndef CARTPOLEBALANCINGTEST_H_
 #define CARTPOLEBALANCINGTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 #include "PoleBalancing.h"
 #include "CartPole.h"
 #include "NonMarkovPoleBalancing.h"

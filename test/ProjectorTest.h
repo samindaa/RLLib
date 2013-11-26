@@ -22,7 +22,7 @@
 #ifndef PROJECTORTEST_H_
 #define PROJECTORTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 #include "Projector.h"
 
 RLLIB_TEST(ProjectorTest)

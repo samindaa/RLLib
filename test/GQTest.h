@@ -8,7 +8,7 @@
 #ifndef GQTEST_H_
 #define GQTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 class OffPolicyLearnerFactory
 {

@@ -22,7 +22,7 @@
 #ifndef EXTENDEDPROBLEMSTEST_H_
 #define EXTENDEDPROBLEMSTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 // From the RLLib
 #include "Vector.h"

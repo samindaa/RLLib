@@ -22,7 +22,7 @@
 #ifndef VECTORTEST_H_
 #define VECTORTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 class VectorTest
 {

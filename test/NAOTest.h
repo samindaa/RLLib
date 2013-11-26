@@ -8,7 +8,7 @@
 #ifndef NAOTEST_H_
 #define NAOTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLIB_TEST(NAOTest)
 class NAOTest: public NAOTestBase

@@ -2,6 +2,6 @@
 
 ./configure target="RLLibTestDebug" \
                cflags="-I. -I./src -I./test -I./simulation -ggdb -Wno-deprecated -fPIC" \
-               lflags="" \
+               lflags="-lpthread" \
                ignore="'visualization/*'" \
                bin="RLLibTest"

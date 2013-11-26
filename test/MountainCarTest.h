@@ -22,7 +22,7 @@
 #ifndef MOUNTAINCARTEST_H_
 #define MOUNTAINCARTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLIB_TEST(MountainCarTest)
 

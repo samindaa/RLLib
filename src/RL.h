@@ -458,6 +458,11 @@ class Simulator
       return endingOfEpisode;
     }
 
+    bool isRunning() const
+    {
+      return (nbEpisodeDone < nbEpisodes) || (nbEpisodes == -1);
+    }
+
     const RLProblem<T>* getRLProblem() const
     {
       return problem;

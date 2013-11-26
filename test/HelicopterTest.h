@@ -22,7 +22,7 @@
 #ifndef HELICOPTERTEST_H_
 #define HELICOPTERTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 #include "Helicopter.h"
 
 RLLIB_TEST(HelicopterTest)

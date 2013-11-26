@@ -22,7 +22,7 @@
  *
  */
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLibTestRegistry::RLLibTestRegistry()
 {

@@ -8,7 +8,7 @@
 #ifndef ACTORCRITICONPOLICYONSTATETEST_H_
 #define ACTORCRITICONPOLICYONSTATETEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLIB_TEST(ActorCriticOnPolicyOnStateTest)
 

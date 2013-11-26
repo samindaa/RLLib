@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * HeaderTest.h
+ * Test.h
  *
  *  Created on: Dec 18, 2012
  *      Author: sam
@@ -50,8 +50,8 @@
 #include "NoisyInputSum.h"
 #include "RL.h"
 
-using namespace std;
-using namespace RLLib;
+namespace RLLib
+{
 
 // Testing framework
 class RLLibTestCase
@@ -67,13 +67,16 @@ class RLLibTestCase
     }
     virtual void run() =0;
     virtual const char* getName() const =0;
-    virtual void setArgv(const std::vector<std::string>& argv) {this->argv = argv;}
+    virtual void setArgv(const std::vector<std::string>& argv)
+    {
+      this->argv = argv;
+    }
 };
 
 /** Test macro **/
 #define RLLIB_TEST(NAME)                            \
 class NAME;                                         \
-class NAME##Base : public RLLibTestCase             \
+class NAME##Base : public RLLib::RLLibTestCase      \
 {                                                   \
   public:                                           \
     NAME##Base() :  RLLibTestCase() {}              \
@@ -160,7 +163,7 @@ class RLLibTestCaseLoader
 
 /** Test make macro **/
 #define RLLIB_TEST_MAKE(NAME) \
-  RLLibTestCaseLoader<NAME> __theTestcaseLoader##NAME;
+  RLLib::RLLibTestCaseLoader<NAME> __theTestLoader##NAME;
 
 /** Test generic code **/
 typedef Trace<double> TraceDoubleType;
@@ -342,5 +345,10 @@ class Arrays
       return N;
     }
 };
+
+}  // namespace RLLib
+
+using namespace std;
+using namespace RLLib;
 
 #endif /* HEADERTEST_H_ */

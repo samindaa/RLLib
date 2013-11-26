@@ -22,7 +22,7 @@
 #ifndef LEARNINGALGORITHMTEST_H_
 #define LEARNINGALGORITHMTEST_H_
 
-#include "HeaderTest.h"
+#include "Test.h"
 #include "Projector.h"
 #include "SupervisedAlgorithm.h"
 

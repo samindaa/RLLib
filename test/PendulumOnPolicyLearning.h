@@ -24,7 +24,7 @@
 
 #include "ControlAlgorithm.h"
 #include "SwingPendulum.h"
-#include "HeaderTest.h"
+#include "Test.h"
 
 RLLIB_TEST(ActorCriticOnPolicyControlLearnerPendulumTest)
 
