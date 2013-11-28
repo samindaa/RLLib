@@ -368,14 +368,14 @@ class Simulator
         episodeR += step->r_tp1;
         episodeZ += step->z_tp1;
         endingOfEpisode = step->endOfEpisode || (timeStep == maxEpisodeTimeSteps);
-        step->setForcedEndOfEpisode(endingOfEpisode);
+        //step->setForcedEndOfEpisode(endingOfEpisode);
         timer.start();
         agentAction = agent->getAtp1(step);
         timer.stop();
         totalTimeInMilliseconds += timer.getElapsedTimeInMilliSec();
       }
 
-      if (endingOfEpisode/*The episode is just ended*/|| (timeStep == maxEpisodeTimeSteps))
+      if (endingOfEpisode/*The episode is just ended*/)
       {
         if (verbose)
         {

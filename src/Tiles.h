@@ -61,24 +61,51 @@ class Hashing
   public:
     enum
     {
-      MAX_NUM_VARS = 20,          // Maximum number of variables in a grid-tiling
-      //MAX_NUM_COORDS = 100,     // Maximum number of hashing coordinates
-      MaxLONGINT = 2147483647
+      MAX_NUM_VARS = 20          // Maximum number of variables in a grid-tiling
     };
     virtual ~Hashing()
     {
     }
-    virtual int hash(int* ints/*coordinates*/, int num_ints, int m/*memory_size*/,
-        int increment) =0;
+    virtual int hash(int* ints/*coordinates*/, int num_ints) =0;
+    virtual int getMemorySize() const =0;
+    virtual void setMemorySize(const int& memorySize) =0;
 };
 
-class UNH: public Hashing
+class AbstractHashing: public Hashing
 {
   protected:
+    int memorySize;
+
+  public:
+    AbstractHashing(const int& memorySize = 0) :
+        memorySize(memorySize)
+    {
+    }
+
+    virtual ~AbstractHashing()
+    {
+    }
+
+    int getMemorySize() const
+    {
+      return memorySize;
+    }
+
+    void setMemorySize(const int& memorySize)
+    {
+      this->memorySize = memorySize;
+    }
+};
+
+class UNH: public AbstractHashing
+{
+  protected:
+    int increment;
     unsigned int rndseq[16384]; // 2^14 (16384)  {old: 2048}
 
   public:
-    UNH()
+    UNH(const int& memorySize = 0) :
+        AbstractHashing(memorySize), increment(470)
     {
       /*First call to hashing, initialize table of random numbers */
       //printf("inside tiles \n");
@@ -95,7 +122,7 @@ class UNH: public Hashing
     /** hash_UNH
      *  Takes an array of integers and returns the corresponding tile after hashing
      */
-    int hash(int* ints/*coordinates*/, int num_ints, int m/*memory_size*/, int increment)
+    int hash(int* ints/*coordinates*/, int num_ints)
     {
       long index;
       long sum = 0;
@@ -113,22 +140,23 @@ class UNH: public Hashing
         /* add selected random number to sum */
         sum += (long) rndseq[(int) index];
       }
-      index = (int) (sum % m);
+      index = (int) (sum % memorySize);
       while (index < 0)
-        index += m;
+        index += memorySize;
 
       /* printf("index is %d \n", index); */
       return (index);
     }
 };
 
-class MurmurHashing: public Hashing
+class MurmurHashing: public AbstractHashing
 {
   protected:
     unsigned int seed;
     uint8_t* key;
   public:
-    MurmurHashing()
+    MurmurHashing(const int& memorySize = 0) :
+        AbstractHashing(memorySize)
     {
       // Constant seed
       //srand(0);
@@ -210,64 +238,58 @@ class MurmurHashing: public Hashing
       dest[3] = (val & 0x000000ff);
     }
   public:
-    int hash(int* ints/*coordinates*/, int num_ints, int m/*memory_size*/, int increment)
+    int hash(int* ints/*coordinates*/, int num_ints)
     {
       for (int i = 0; i < num_ints; i++)
         pack((uint32_t) ints[i], &key[i * 4]);
-      return (int) (murmurHashNeutral2(key, (num_ints * 4), seed) % m);
+      return (int) (murmurHashNeutral2(key, (num_ints * 4), seed) % memorySize);
     }
 
 };
 
-// ============================================================================
-class CollisionTable
+class ColisionDetection: public Hashing
 {
-  public:
-    long m;
-    long *data;
+  protected:
+    Hashing* hashing;
+    Hashing* referenceHashing;
+    Hashing* referenceHashing2;
     int safe;
     long calls;
     long clearhits;
     long collisions;
+    long *data;
+    long m;
 
-    CollisionTable(int size, int safety)
+  public:
+    ColisionDetection(Hashing* hashing, const int& size, const int& safety) :
+        hashing(hashing), referenceHashing(new UNH(INT_MAX)), referenceHashing2(
+            new UNH(INT_MAX / 4)), safe(safe), calls(0), clearhits(0), collisions(0), m(size)
     {
-      int tmp = size;
-      while (tmp > 2)
+      if (size % 2 != 0)
       {
-        if (tmp % 2 != 0)
-        {
-          printf("\nSize of collision table must be power of 2 %d", size);
-          exit(0);
-        }
-        tmp /= 2;
+        std::cerr << "Size of collision table must be power of 2 " << size << std::endl;
+        exit(0);
       }
       data = new long[size];
-      m = size;
-      safe = safety;
-      // reset();
-
-      for (int i = 0; i < m; i++)
-        data[i] = -1;
-      calls = 0;
-      clearhits = 0;
-      collisions = 0;
+      for (long* i = data; i < data + size; ++i)
+        *i = -1;
     }
 
-    ~CollisionTable()
+    ~ColisionDetection()
     {
       delete[] data;
+      delete referenceHashing;
+      delete referenceHashing2;
     }
 
     int usage()
     {
       int count = 0;
       for (int i = 0; i < m; i++)
+      {
         if (data[i] != -1)
-        {
           count++;
-        }
-
+      }
       return count;
     }
 
@@ -306,6 +328,49 @@ class CollisionTable
     {
       //read(open(filename, O_BINARY | O_CREAT | O_WRONLY);
     }
+
+    int hash(int* ints/*coordinates*/, int num_ints)
+    {
+      int j;
+      long ccheck;
+
+      calls++;
+      j = hashing->hash(ints, num_ints);
+      ccheck = referenceHashing->hash(ints, num_ints);
+      if (ccheck == data[j])
+        clearhits++;
+      else if (data[j] == -1)
+      {
+        clearhits++;
+        data[j] = ccheck;
+      }
+      else if (safe == 0)
+        collisions++;
+      else
+      {
+        long h2 = 1 + 2 * referenceHashing2->hash(ints, num_ints);
+        int i = 0;
+        while (++i)
+        {
+          collisions++;
+          j = (j + h2) % (this->m);
+          /*printf("collision (%d) \n",j);*/
+          if (i > this->m)
+          {
+            printf("\nTiles: Collision table out of Memory");
+            break/*exit(0) <<@ Sam Abeyruwan*/;
+          }
+          if (ccheck == data[j])
+            break;
+          if (data[j] == -1)
+          {
+            data[j] = ccheck;
+            break;
+          }
+        }
+      }
+      return j;
+    }
 };
 
 // ============================================================================
@@ -319,79 +384,25 @@ class Tiles
     int coordinates[Hashing::MAX_NUM_VARS * 2 + 1]; /* one interval number per relevant dimension */
 
     Hashing* hashing; /*The has function*/
-    Hashing* defaultHashing;
 
     Vector<int>* i_tmp_arr;
     Vector<T>* f_tmp_arr;
 
   public:
-    Tiles(Hashing* hashing = 0) :
-        hashing(hashing), defaultHashing(new UNH), i_tmp_arr(
-            new PVector<int>(Hashing::MAX_NUM_VARS)), f_tmp_arr(
+    Tiles(Hashing* hashing) :
+        hashing(hashing), i_tmp_arr(new PVector<int>(Hashing::MAX_NUM_VARS)), f_tmp_arr(
             new PVector<T>(Hashing::MAX_NUM_VARS))
     {
-      if (!hashing)
-        this->hashing = defaultHashing; //<< default hashing method
     }
 
     ~Tiles()
     {
-      delete defaultHashing;
       delete i_tmp_arr;
       delete f_tmp_arr;
     }
 
-  private:
-    /* hash
-     Takes an array of integers and returns the corresponding tile after hashing
-     */
-    int hash(int *ints, int num_ints, CollisionTable *ct)
-    {
-      int j;
-      long ccheck;
-
-      ct->calls++;
-      j = defaultHashing->hash(ints, num_ints, ct->m, 449);
-      ccheck = defaultHashing->hash(ints, num_ints, Hashing::MaxLONGINT, 457);
-      if (ccheck == ct->data[j])
-        ct->clearhits++;
-      else if (ct->data[j] == -1)
-      {
-        ct->clearhits++;
-        ct->data[j] = ccheck;
-      }
-      else if (ct->safe == 0)
-        ct->collisions++;
-      else
-      {
-        long h2 = 1 + 2 * defaultHashing->hash(ints, num_ints, (Hashing::MaxLONGINT) / 4, 449);
-        int i = 0;
-        while (++i)
-        {
-          ct->collisions++;
-          j = (j + h2) % (ct->m);
-          /*printf("collision (%d) \n",j);*/
-          if (i > ct->m)
-          {
-            printf("\nTiles: Collision table out of Memory");
-            break/*exit(0) <<@ Sam Abeyruwan*/;
-          }
-          if (ccheck == ct->data[j])
-            break;
-          if (ct->data[j] == -1)
-          {
-            ct->data[j] = ccheck;
-            break;
-          }
-        }
-      }
-      return j;
-    }
-
-  public:
     void tiles(Vector<T>* the_tiles,        // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
-        int memory_size,           // total number of possible tiles
         const Vector<T>* floats,            // array of floating point variables
         int num_floats, // number of active floating point variables
         const Vector<int>* ints,                   // array of integer variables
@@ -430,280 +441,123 @@ class Tiles
         /* add additional indices for tiling and hashing_set so they hash differently */
         coordinates[i] = j;
 
-        the_tiles->setEntry(hashing->hash(coordinates, num_coordinates, memory_size, 470), 1.0f);
+        the_tiles->setEntry(hashing->hash(coordinates, num_coordinates), 1.0f);
       }
-      return;
     }
 
     void tiles(Vector<T>* the_tiles,        // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
-        int memory_size,           // total number of possible tiles
         const Vector<T>* floats,            // array of floating point variables
         const Vector<int>* ints,                   // array of integer variables
         int num_ints)              // number of integer variables
     {
-      tiles(the_tiles, num_tilings, memory_size, floats, floats->dimension(), ints, num_ints);
-    }
-
-    void tiles(Vector<T>* the_tiles,        // provided array contains returned tiles (tile indices)
-        int num_tilings,           // number of tile indices to be returned in tiles
-        CollisionTable *ctable,    // total number of possible tiles
-        const Vector<T>* floats,            // array of floating point variables
-        int num_floats, // number of active floating point variables
-        const Vector<int>* ints,                   // array of integer variables
-        int num_ints)              // number of integer variables
-    {
-      int i, j;
-      int num_coordinates = num_floats + num_ints + 1;
-
-      for (int i = 0; i < num_ints; i++)
-        coordinates[num_floats + 1 + i] = ints->getEntry(i);
-
-      /* quantize state to integers (henceforth, tile widths == num_tilings) */
-      for (i = 0; i < num_floats; i++)
-      {
-        qstate[i] = (int) floor(floats->getEntry(i) * num_tilings);
-        base[i] = 0;
-      }
-
-      /*compute the tile numbers */
-      for (j = 0; j < num_tilings; j++)
-      {
-
-        /* loop over each relevant dimension */
-        for (i = 0; i < num_floats; i++)
-        {
-
-          /* find coordinates of activated tile in tiling space */
-          if (qstate[i] >= base[i])
-            coordinates[i] = qstate[i] - ((qstate[i] - base[i]) % num_tilings);
-          else
-            coordinates[i] = qstate[i] + 1 + ((base[i] - qstate[i] - 1) % num_tilings)
-                - num_tilings;
-
-          /* compute displacement of next tiling in quantized space */
-          base[i] += 1 + (2 * i);
-        }
-        /* add additional indices for tiling and hashing_set so they hash differently */
-        coordinates[i] = j;
-
-        the_tiles->setEntry(hash(coordinates, num_coordinates, ctable), 1.0);
-      }
-      return;
-    }
-
-    void tiles(Vector<T>* the_tiles,        // provided array contains returned tiles (tile indices)
-        int num_tilings,           // number of tile indices to be returned in tiles
-        CollisionTable *ctable,    // total number of possible tiles
-        const Vector<T>* floats,            // array of floating point variables
-        const Vector<int>* ints,                   // array of integer variables
-        int num_ints)              // number of integer variables
-    {
-      tiles(the_tiles, num_tilings, ctable, floats, floats->dimension(), ints, num_ints);
+      tiles(the_tiles, num_tilings, floats, floats->dimension(), ints, num_ints);
     }
 
 // No ints
-    void tiles(Vector<T>* the_tiles, int nt, int memory, const Vector<T>* floats)
+    void tiles(Vector<T>* the_tiles, int nt, const Vector<T>* floats)
     {
-      tiles(the_tiles, nt, memory, floats, i_tmp_arr, 0);
-    }
-
-    void tiles(Vector<T>* the_tiles, int nt, CollisionTable *ct, const Vector<T>* floats)
-    {
-      tiles(the_tiles, nt, ct, floats, i_tmp_arr, 0);
+      tiles(the_tiles, nt, floats, i_tmp_arr, 0);
     }
 
 //one int
-    void tiles(Vector<T>* the_tiles, int nt, int memory, const Vector<T>* floats, int h1)
+    void tiles(Vector<T>* the_tiles, int nt, const Vector<T>* floats, int h1)
     {
       i_tmp_arr->setEntry(0, h1);
-      tiles(the_tiles, nt, memory, floats, i_tmp_arr, 1);
-    }
-
-    void tiles(Vector<T>* the_tiles, int nt, CollisionTable *ct, const Vector<T>* floats, int h1)
-    {
-      i_tmp_arr->setEntry(0, h1);
-      tiles(the_tiles, nt, ct, floats, i_tmp_arr, 1);
+      tiles(the_tiles, nt, floats, i_tmp_arr, 1);
     }
 
 // two ints
-    void tiles(Vector<T>* the_tiles, int nt, int memory, const Vector<T>* floats, int h1, int h2)
+    void tiles(Vector<T>* the_tiles, int nt, const Vector<T>* floats, int h1, int h2)
     {
       i_tmp_arr->setEntry(0, h1);
       i_tmp_arr->setEntry(1, h2);
-      tiles(the_tiles, nt, memory, floats, i_tmp_arr, 2);
-    }
-
-    void tiles(Vector<T>* the_tiles, int nt, CollisionTable *ct, const Vector<T>* floats, int h1,
-        int h2)
-    {
-      i_tmp_arr->setEntry(0, h1);
-      i_tmp_arr->setEntry(1, h2);
-      tiles(the_tiles, nt, ct, floats, i_tmp_arr, 2);
+      tiles(the_tiles, nt, floats, i_tmp_arr, 2);
     }
 
 // three ints
-    void tiles(Vector<T>* the_tiles, int nt, int memory, const Vector<T>* floats, int h1, int h2,
-        int h3)
+    void tiles(Vector<T>* the_tiles, int nt, const Vector<T>* floats, int h1, int h2, int h3)
     {
       i_tmp_arr->setEntry(0, h1);
       i_tmp_arr->setEntry(1, h2);
       i_tmp_arr->setEntry(2, h3);
-      tiles(the_tiles, nt, memory, floats, i_tmp_arr, 3);
-    }
-
-    void tiles(Vector<T>* the_tiles, int nt, CollisionTable *ct, const Vector<T>* floats, int h1,
-        int h2, int h3)
-    {
-      i_tmp_arr->setEntry(0, h1);
-      i_tmp_arr->setEntry(1, h2);
-      i_tmp_arr->setEntry(2, h3);
-      tiles(the_tiles, nt, ct, floats, i_tmp_arr, 3);
+      tiles(the_tiles, nt, floats, i_tmp_arr, 3);
     }
 
 // one float, No ints
-    void tiles1(Vector<T>* the_tiles, int nt, int memory, const T& f1)
+    void tiles1(Vector<T>* the_tiles, int nt, const T& f1)
     {
       f_tmp_arr->setEntry(0, f1);
-      tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 0);
-    }
-
-    void tiles1(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1)
-    {
-      f_tmp_arr->setEntry(0, f1);
-      tiles(the_tiles, nt, ct, f_tmp_arr, 1, i_tmp_arr, 0);
+      tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 0);
     }
 
 // one float, one int
-    void tiles1(Vector<T>* the_tiles, int nt, int memory, const T& f1, int h1)
+    void tiles1(Vector<T>* the_tiles, int nt, const T& f1, int h1)
     {
       f_tmp_arr->setEntry(0, f1);
       i_tmp_arr->setEntry(0, h1);
-      tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 1);
-    }
-
-    void tiles1(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, int h1)
-    {
-      f_tmp_arr->setEntry(0, f1);
-      i_tmp_arr->setEntry(0, h1);
-      tiles(the_tiles, nt, ct, f_tmp_arr, 1, i_tmp_arr, 1);
+      tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 1);
     }
 
 // one float, two ints
-    void tiles1(Vector<T>* the_tiles, int nt, int memory, const T& f1, int h1, int h2)
+    void tiles1(Vector<T>* the_tiles, int nt, const T& f1, int h1, int h2)
     {
       f_tmp_arr->setEntry(0, f1);
       i_tmp_arr->setEntry(0, h1);
       i_tmp_arr->setEntry(1, h2);
-      tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 2);
-    }
-
-    void tiles1(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, int h1, int h2)
-    {
-      f_tmp_arr->setEntry(0, f1);
-      i_tmp_arr->setEntry(0, h1);
-      i_tmp_arr->setEntry(1, h2);
-      tiles(the_tiles, nt, ct, f_tmp_arr, 1, i_tmp_arr, 2);
+      tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 2);
     }
 
 // one float, three ints
-    void tiles1(Vector<T>* the_tiles, int nt, int memory, const T& f1, int h1, int h2, int h3)
+    void tiles1(Vector<T>* the_tiles, int nt, const T& f1, int h1, int h2, int h3)
     {
       f_tmp_arr->setEntry(0, f1);
       i_tmp_arr->setEntry(0, h1);
       i_tmp_arr->setEntry(1, h2);
       i_tmp_arr->setEntry(2, h3);
-      tiles(the_tiles, nt, memory, f_tmp_arr, 1, i_tmp_arr, 3);
-    }
-
-    void tiles1(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, int h1, int h2,
-        int h3)
-    {
-      f_tmp_arr->setEntry(0, f1);
-      i_tmp_arr->setEntry(0, h1);
-      i_tmp_arr->setEntry(1, h2);
-      i_tmp_arr->setEntry(2, h3);
-      tiles(the_tiles, nt, ct, f_tmp_arr, 1, i_tmp_arr, 3);
+      tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 3);
     }
 
 // two floats, No ints
-    void tiles2(Vector<T>* the_tiles, int nt, int memory, const T& f1, const T& f2)
+    void tiles2(Vector<T>* the_tiles, int nt, const T& f1, const T& f2)
     {
       f_tmp_arr->setEntry(0, f1);
       f_tmp_arr->setEntry(1, f2);
-      tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 0);
-    }
-
-    void tiles2(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, const T& f2)
-    {
-      f_tmp_arr->setEntry(0, f1);
-      f_tmp_arr->setEntry(1, f2);
-      tiles(the_tiles, nt, ct, f_tmp_arr, 2, i_tmp_arr, 0);
+      tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 0);
     }
 
 // two floats, one int
-    void tiles2(Vector<T>* the_tiles, int nt, int memory, const T& f1, const T& f2, int h1)
+    void tiles2(Vector<T>* the_tiles, int nt, const T& f1, const T& f2, int h1)
     {
       f_tmp_arr->setEntry(0, f1);
       f_tmp_arr->setEntry(1, f2);
       i_tmp_arr->setEntry(0, h1);
-      tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 1);
-    }
-
-    void tiles2(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, const T& f2, int h1)
-    {
-      f_tmp_arr->setEntry(0, f1);
-      f_tmp_arr->setEntry(1, f2);
-      i_tmp_arr->setEntry(0, h1);
-      tiles(the_tiles, nt, ct, f_tmp_arr, 2, i_tmp_arr, 1);
+      tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 1);
     }
 
 // two floats, two ints
-    void tiles2(Vector<T>* the_tiles, int nt, int memory, const T& f1, const T& f2, int h1, int h2)
+    void tiles2(Vector<T>* the_tiles, int nt, const T& f1, const T& f2, int h1, int h2)
     {
       f_tmp_arr->setEntry(0, f1);
       f_tmp_arr->setEntry(1, f2);
       i_tmp_arr->setEntry(0, h1);
       i_tmp_arr->setEntry(1, h2);
-      tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 2);
-    }
-
-    void tiles2(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, const T& f2, int h1,
-        int h2)
-    {
-      f_tmp_arr->setEntry(0, f1);
-      f_tmp_arr->setEntry(1, f2);
-      i_tmp_arr->setEntry(0, h1);
-      i_tmp_arr->setEntry(1, h2);
-      tiles(the_tiles, nt, ct, f_tmp_arr, 2, i_tmp_arr, 2);
+      tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 2);
     }
 
 // two floats, three ints
-    void tiles2(Vector<T>* the_tiles, int nt, int memory, const T& f1, const T& f2, int h1, int h2,
-        int h3)
+    void tiles2(Vector<T>* the_tiles, int nt, const T& f1, const T& f2, int h1, int h2, int h3)
     {
       f_tmp_arr->setEntry(0, f1);
       f_tmp_arr->setEntry(1, f2);
       i_tmp_arr->setEntry(0, h1);
       i_tmp_arr->setEntry(1, h2);
       i_tmp_arr->setEntry(2, h3);
-      tiles(the_tiles, nt, memory, f_tmp_arr, 2, i_tmp_arr, 3);
-    }
-
-    void tiles2(Vector<T>* the_tiles, int nt, CollisionTable *ct, const T& f1, const T& f2, int h1,
-        int h2, int h3)
-    {
-      f_tmp_arr->setEntry(0, f1);
-      f_tmp_arr->setEntry(1, f2);
-      i_tmp_arr->setEntry(0, h1);
-      i_tmp_arr->setEntry(1, h2);
-      i_tmp_arr->setEntry(2, h3);
-      tiles(the_tiles, nt, ct, f_tmp_arr, 2, i_tmp_arr, 3);
+      tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 3);
     }
 
     void tileswrap(Vector<T>* the_tiles,    // provided array contains returned tiles (tile indices)
         int num_tilings,           // number of tile indices to be returned in tiles
-        int memory_size,           // total number of possible tiles
         const Vector<T>* floats,            // array of floating point variables
         int num_floats, // number of active floating point variables
         int wrap_widths[],         // array of widths (length and units as in floats)
@@ -751,63 +605,7 @@ class Tiles
         /* add additional indices for tiling and hashing_set so they hash differently */
         coordinates[i] = j;
 
-        the_tiles->setEntry(hashing->hash(coordinates, num_coordinates, memory_size, 470), 1.0);
-      }
-      return;
-    }
-
-    void tileswrap(Vector<T>* the_tiles,    // provided array contains returned tiles (tile indices)
-        int num_tilings,           // number of tile indices to be returned in tiles
-        CollisionTable *ctable,   // total number of possible tiles
-        const Vector<T>* floats,            // array of floating point variables
-        int num_floats, // number of active floating point variables
-        int wrap_widths[],         // array of widths (length and units as in floats)
-        const Vector<int>* ints,                  // array of integer variables
-        int num_ints)             // number of integer variables
-    {
-      int i, j;
-      int num_coordinates = num_floats + num_ints + 1;
-
-      for (int i = 0; i < num_ints; i++)
-        coordinates[num_floats + 1 + i] = ints->getEntry(i);
-
-      /* quantize state to integers (henceforth, tile widths == num_tilings) */
-      for (i = 0; i < num_floats; i++)
-      {
-        qstate[i] = (int) floor(floats->getEntry(i) * num_tilings);
-        base[i] = 0;
-        wrap_widths_times_num_tilings[i] = wrap_widths[i] * num_tilings;
-      }
-
-      /*compute the tile numbers */
-      for (j = 0; j < num_tilings; j++)
-      {
-
-        /* loop over each relevant dimension */
-        for (i = 0; i < num_floats; i++)
-        {
-
-          /* find coordinates of activated tile in tiling space */
-          if (qstate[i] >= base[i])
-            coordinates[i] = qstate[i] - ((qstate[i] - base[i]) % num_tilings);
-          else
-            coordinates[i] = qstate[i] + 1 + ((base[i] - qstate[i] - 1) % num_tilings)
-                - num_tilings;
-
-          if (wrap_widths[i] != 0)
-            coordinates[i] = coordinates[i] % wrap_widths_times_num_tilings[i];
-          if (coordinates[i] < 0)
-          {
-            while (coordinates[i] < 0)
-              coordinates[i] += wrap_widths_times_num_tilings[i];
-          }
-          /* compute displacement of next tiling in quantized space */
-          base[i] += 1 + (2 * i);
-        }
-        /* add additional indices for tiling and hashing_set so they hash differently */
-        coordinates[i] = j;
-
-        the_tiles->setEntry(hash(coordinates, num_coordinates, ctable), 1.0);
+        the_tiles->setEntry(hashing->hash(coordinates, num_coordinates), 1.0f);
       }
       return;
     }

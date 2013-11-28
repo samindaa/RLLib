@@ -71,10 +71,9 @@ class TileCoder: public Projector<T>
       delete vector;
     }
 
-    virtual void coder(Vector<T>* vector, const Vector<T>* x, const int& memory,
-        const int& nbTiling) =0;
-    virtual void coder(Vector<T>* vector, const Vector<T>* x, const int& memory,
-        const int& nbTiling, const int& h1) =0;
+    virtual void coder(Vector<T>* vector, const Vector<T>* x, const int& nbTiling) =0;
+    virtual void coder(Vector<T>* vector, const Vector<T>* x, const int& nbTiling,
+        const int& h1) =0;
 
     const Vector<T>* project(const Vector<T>* x, int h1)
     {
@@ -83,11 +82,11 @@ class TileCoder: public Projector<T>
         return vector;
       if (includeActiveFeature)
       {
-        coder(vector, x, vector->dimension() - 1, nbTiling, h1);
+        coder(vector, x, nbTiling, h1);
         vector->setEntry(vector->dimension() - 1, 1.0);
       }
       else
-        coder(vector, x, vector->dimension(), nbTiling, h1);
+        coder(vector, x, nbTiling, h1);
       return vector;
     }
 
@@ -98,11 +97,11 @@ class TileCoder: public Projector<T>
         return vector;
       if (includeActiveFeature)
       {
-        coder(vector, x, vector->dimension() - 1, nbTiling);
+        coder(vector, x, nbTiling);
         vector->setEntry(vector->dimension() - 1, 1.0);
       }
       else
-        coder(vector, x, vector->dimension(), nbTiling);
+        coder(vector, x, nbTiling);
       return vector;
     }
 
@@ -122,75 +121,42 @@ template<class T>
 class TileCoderHashing: public TileCoder<T>
 {
   private:
+    Hashing* referenceHashing;
     Tiles<T>* tiles;
   public:
     TileCoderHashing(const int& memorySize, const int& nbTiling, bool includeActiveFeature = true,
         Hashing* hashing = 0) :
-        TileCoder<T>(memorySize, nbTiling, includeActiveFeature), tiles(new Tiles<T>(hashing))
+        TileCoder<T>(memorySize, nbTiling, includeActiveFeature), referenceHashing(0), tiles(0)
     {
+      if (!hashing)
+      {
+        referenceHashing = new UNH(memorySize);
+        tiles = new Tiles<T>(referenceHashing);
+      }
+      else
+      {
+        if (hashing->getMemorySize() == 0)
+          hashing->setMemorySize(memorySize);
+        tiles = new Tiles<T>(hashing);
+      }
+
     }
 
     virtual ~TileCoderHashing()
     {
+      if (referenceHashing)
+        delete referenceHashing;
       delete tiles;
     }
 
-    void coder(Vector<T>* vector, const Vector<T>* x, const int& memory, const int& nbTiling)
+    void coder(Vector<T>* vector, const Vector<T>* x, const int& nbTiling)
     {
-      tiles->tiles(vector, nbTiling, memory, x);
+      tiles->tiles(vector, nbTiling, x);
     }
 
-    void coder(Vector<T>* vector, const Vector<T>* x, const int& memory, const int& nbTiling,
-        const int& h1)
+    void coder(Vector<T>* vector, const Vector<T>* x, const int& nbTiling, const int& h1)
     {
-      tiles->tiles(vector, nbTiling, memory, x, h1);
-    }
-
-};
-
-template<class T>
-class TileCoderNoHashing: public TileCoder<T>
-{
-    typedef TileCoder<T> Base;
-  protected:
-    Tiles<T>* tiles;
-    CollisionTable* ct;
-  public:
-    TileCoderNoHashing(const int& memorySize, const int& nbTiling, bool includeActiveFeature = true) :
-        TileCoder<T>(memorySize, nbTiling, includeActiveFeature), tiles(new Tiles<T>)
-    {
-      // http://graphics.stanford.edu/~seander/bithacks.html
-      // Compute the next highest power of 2 of 32-bit v
-      unsigned int v = TileCoder<T>::vector->dimension();
-      v--;
-      v |= v >> 1;
-      v |= v >> 2;
-      v |= v >> 4;
-      v |= v >> 8;
-      v |= v >> 16;
-      v++;
-
-      // The vector needs to reflect the correct memory size
-      delete Base::vector;
-      Base::vector = new SVector<T>(includeActiveFeature ? v + 1 : v);
-      ct = new CollisionTable(v, 1);
-    }
-
-    virtual ~TileCoderNoHashing()
-    {
-      delete tiles;
-      delete ct;
-    }
-
-    void coder(Vector<T>* vector, const Vector<T>* x, const int& memory, const int& nbTiling)
-    {
-      tiles->tiles(vector, nbTiling, ct, x);
-    }
-
-    void coder(Vector<T>* vector, const Vector<T>* x, const int& memory, const int& nbTiling,
-        const int& h1)
-    {
-      tiles->tiles(vector, nbTiling, ct, x, h1);
+      tiles->tiles(vector, nbTiling, x, h1);
     }
 };
 

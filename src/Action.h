@@ -33,53 +33,58 @@ class Action
 {
   private:
     int actionID;
-    std::vector<T> values;
+    std::vector<T>* values;
+
   public:
     explicit Action(const int& actionID) :
-        actionID(actionID)
+        actionID(actionID), values(new std::vector<T>())
     {
+    }
+
+    ~Action()
+    {
+      delete values;
     }
 
     void push_back(const T& value)
     {
-      values.push_back(value);
+      values->push_back(value);
     }
 
     T at(const int& i = 0 /*default to a single action*/)
     {
-      return values.at(i);
+      return values->at(i);
     }
 
     const T at(const int& i = 0 /*default to a single action*/) const
     {
-      return values.at(i);
+      return values->at(i);
+    }
+
+    int dimension() const
+    {
+      return values->size();
     }
 
     void update(const int& i, const T& value)
     {
-      assert(values.size() != 0 && (i >= 0 && i < (int )values.size()));
-      values[i] = value;
+      values->at(i) = value;
     }
 
-    const bool operator==(const Action<T>& that) const
+    bool operator==(const Action<T>& that) const
     {
       return actionID == that.actionID;
     }
 
-    const bool operator!=(const Action<T>& that) const
+    bool operator!=(const Action<T>& that) const
     {
       return actionID != that.actionID;
     }
 
     // Id within an associated id group
-    const int id() const
+    int id() const
     {
       return actionID;
-    }
-
-    const int dimension() const
-    {
-      return values.size();
     }
 
 };
@@ -88,13 +93,20 @@ template<class T>
 class Actions
 {
   protected:
-    std::vector<Action<T>*> actions;
+    std::vector<Action<T>*>* actions;
+
   public:
-    virtual ~Actions()
+    Actions() :
+        actions(new std::vector<Action<T>*>())
     {
     }
 
-    virtual const int dimension() const =0;
+    virtual ~Actions()
+    {
+      delete actions;
+    }
+
+    virtual int dimension() const =0;
     virtual const Action<T>* operator[](const int& index) const =0;
     virtual const Action<T>* at(const int& index) const =0;
     virtual void push_back(const int& index, const T& value) =0;
@@ -106,22 +118,22 @@ class Actions
 
     iterator begin()
     {
-      return actions.begin();
+      return actions->begin();
     }
 
     const_iterator begin() const
     {
-      return actions.begin();
+      return actions->begin();
     }
 
     iterator end()
     {
-      return actions.end();
+      return actions->end();
     }
 
     const_iterator end() const
     {
-      return actions.end();
+      return actions->end();
     }
 
 };
@@ -132,43 +144,44 @@ class ActionArray: public Actions<T>
   private:
     typedef Actions<T> Base;
   public:
-    ActionArray(const int& nbActions)
+    ActionArray(const int& nbActions) :
+        Actions<T>()
     {
       for (int i = 0; i < nbActions; i++)
-        Base::actions.push_back(new Action<T>(i));
+        Base::actions->push_back(new Action<T>(i));
     }
 
     virtual ~ActionArray()
     {
-      for (typename std::vector<Action<T>*>::iterator iter = Base::actions.begin();
-          iter != Base::actions.end(); ++iter)
+      for (typename std::vector<Action<T>*>::iterator iter = Base::actions->begin();
+          iter != Base::actions->end(); ++iter)
         delete *iter;
-      Base::actions.clear();
+      Base::actions->clear();
     }
 
     const Action<T>* operator[](const int& index) const
     {
-      return Base::actions.at(index);
+      return Base::actions->at(index);
     }
 
     const Action<T>* at(const int& index) const
     {
-      return Base::actions.at(index);
+      return Base::actions->at(index);
     }
 
     void push_back(const int& index, const T& value)
     {
-      Base::actions.at(index)->push_back(value);
+      Base::actions->at(index)->push_back(value);
     }
 
     void erase(const int& index)
     {
-      typename std::vector<Action<T>*>::iterator iter = Base::actions.begin();
-      while (iter != Base::actions.end())
+      typename std::vector<Action<T>*>::iterator iter = Base::actions->begin();
+      while (iter != Base::actions->end())
       {
         if ((*iter)->id() == index)
         {
-          Base::actions.erase(iter);
+          Base::actions->erase(iter);
           break;
         }
         else
@@ -178,12 +191,12 @@ class ActionArray: public Actions<T>
 
     void update(const int& actionIndex, const int& vectorIndex, const T& value)
     {
-      Base::actions.at(actionIndex)->update(vectorIndex, value);
+      Base::actions->at(actionIndex)->update(vectorIndex, value);
     }
 
-    const int dimension() const
+    int dimension() const
     {
-      return Base::actions.size();
+      return Base::actions->size();
     }
 };
 

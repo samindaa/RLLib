@@ -56,7 +56,7 @@ class Representations
       delete phis;
     }
 
-    const int dimension() const
+    int dimension() const
     {
       return phis->size();
     }

@@ -85,7 +85,7 @@ class SarsaControl: public OnPolicyControlLearner<T>
       return Policies::sampleBestAction(acting, toStateAction->stateActions(x));
     }
 
-    const double computeValueFunction(const Vector<T>* x) const
+    double computeValueFunction(const Vector<T>* x) const
     {
       const Representations<T>* phis = toStateAction->stateActions(x);
       acting->update(phis);
@@ -248,7 +248,7 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       return Policies::sampleBestAction(target, toStateAction->stateActions(x));
     }
 
-    const double computeValueFunction(const Vector<T>* x) const
+    double computeValueFunction(const Vector<T>* x) const
     {
       const Representations<T>* phis = toStateAction->stateActions(x);
       target->update(phis);
@@ -279,8 +279,8 @@ template<class T>
 class GQOnPolicyControl: public GreedyGQ<T>
 {
   public:
-    GQOnPolicyControl(Policy<T>* acting, Actions<T>* actions,
-        StateToStateAction<T>* toStateAction, GQ<T>* gq) :
+    GQOnPolicyControl(Policy<T>* acting, Actions<T>* actions, StateToStateAction<T>* toStateAction,
+        GQ<T>* gq) :
         GreedyGQ<T>(acting, acting, actions, toStateAction, gq)
     {
     }
@@ -465,7 +465,7 @@ class OffPAC: public OffPolicyControlLearner<T>
       return actor->proposeAction(toStateAction->stateActions(x));
     }
 
-    const double computeValueFunction(const Vector<T>* x) const
+    double computeValueFunction(const Vector<T>* x) const
     {
       return critic->predict(projector->project(x));
     }
@@ -711,7 +711,7 @@ class AbstractActorCritic: public OnPolicyControlLearner<T>
       return policy()->sampleAction();
     }
 
-    const double computeValueFunction(const Vector<T>* x) const
+    double computeValueFunction(const Vector<T>* x) const
     {
       return critic->predict(projector->project(x));
     }

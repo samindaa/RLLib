@@ -54,45 +54,38 @@ namespace RLLib
 {
 
 // Testing framework
-class RLLibTestCase
+class RLLibTest
 {
-  protected:
-    std::vector<std::string> argv;
-  public:
-    RLLibTestCase()
-    {
-    }
-    virtual ~RLLibTestCase()
-    {
-    }
-    virtual void run() =0;
-    virtual const char* getName() const =0;
-    virtual void setArgv(const std::vector<std::string>& argv)
-    {
-      this->argv = argv;
-    }
+  protected:  std::vector<std::string> argv;
+
+  public:  RLLibTest() { }
+  public:  virtual ~RLLibTest() { }
+  public:  virtual void run() =0;
+  public:  virtual const char* getName() const =0;
+  public:  virtual void setArgv(const std::vector<std::string>& argv) { this->argv = argv; }
 };
 
 /** Test macro **/
-#define RLLIB_TEST(NAME)                            \
-class NAME;                                         \
-class NAME##Base : public RLLib::RLLibTestCase      \
-{                                                   \
-  public:                                           \
-    NAME##Base() :  RLLibTestCase() {}              \
-    virtual ~NAME##Base() {}                        \
-    const char* getName() const { return #NAME ; }  \
-};                                                  \
+#define RLLIB_TEST(NAME)                                                   \
+class NAME;                                                                \
+class NAME##Base : public RLLib::RLLibTest                                 \
+{                                                                          \
+  private:  typedef NAME##Base Me;                                         \
+  public:  NAME##Base() :  RLLibTest() { }                                 \
+  public:  virtual ~NAME##Base() {}                                        \
+  public:  const char* getName() const { return #NAME ; }                  \
+  public:  static const char* getNameStatic() { return #NAME ; }           \
+};                                                                         \
 
 class RLLibTestRegistry
 {
   protected:
-    std::map<string, RLLibTestCase*> registry;
+    std::map<string, RLLibTest*> registry;
 
   public:
 
-    typedef std::map<string, RLLibTestCase*>::iterator iterator;
-    typedef std::map<string, RLLibTestCase*>::const_iterator const_iterator;
+    typedef std::map<string, RLLibTest*>::iterator iterator;
+    typedef std::map<string, RLLibTest*>::const_iterator const_iterator;
 
     iterator begin()
     {
@@ -131,7 +124,7 @@ class RLLibTestRegistry
 
     static RLLibTestRegistry* getInstance();
     static void deleteInstance();
-    static void registerInstance(RLLibTestCase* testCase);
+    static void registerInstance(RLLibTest* test);
 
   protected:
     RLLibTestRegistry();
@@ -144,18 +137,18 @@ class RLLibTestRegistry
 };
 
 template<class T>
-class RLLibTestCaseLoader
+class RLLibTestLoader
 {
   protected:
     T* theInstance;
   public:
-    RLLibTestCaseLoader() :
+    RLLibTestLoader() :
         theInstance(new T())
     {
       RLLibTestRegistry::registerInstance(theInstance);
     }
 
-    ~RLLibTestCaseLoader()
+    ~RLLibTestLoader()
     {
       delete theInstance;
     }
@@ -163,7 +156,7 @@ class RLLibTestCaseLoader
 
 /** Test make macro **/
 #define RLLIB_TEST_MAKE(NAME) \
-  RLLib::RLLibTestCaseLoader<NAME> __theTestLoader##NAME;
+  RLLib::RLLibTestLoader<NAME> __theTestLoader##NAME;
 
 /** Test generic code **/
 typedef Trace<double> TraceDoubleType;

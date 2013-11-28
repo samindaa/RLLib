@@ -43,7 +43,7 @@ class Control: public ParameterizedFunction<T>
     virtual const Action<T>* proposeAction(const Vector<T>* x) =0;
     virtual const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t,
         const Vector<T>* x_tp1, const double& r_tp1, const double& z_tp1) =0;
-    virtual const double computeValueFunction(const Vector<T>* x) const =0;
+    virtual double computeValueFunction(const Vector<T>* x) const =0;
     virtual const Predictor<T>* predictor() const =0;
 };
 

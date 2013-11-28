@@ -333,7 +333,7 @@ class PolicyBasedControl: public OnPolicyControlLearner<T>
       return Policies::sampleBestAction(policy, toStateAction->stateActions(x));
     }
 
-    const double computeValueFunction(const Vector<T>* x) const
+    double computeValueFunction(const Vector<T>* x) const
     {
       return 0.0f;
     }

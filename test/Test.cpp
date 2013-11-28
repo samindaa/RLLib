@@ -48,9 +48,9 @@ void RLLibTestRegistry::deleteInstance()
   delete instance;
 }
 
-void RLLibTestRegistry::registerInstance(RLLibTestCase* testCase)
+void RLLibTestRegistry::registerInstance(RLLibTest* test)
 {
-  RLLibTestRegistry::getInstance()->registry.insert(make_pair(testCase->getName(), testCase));
+  RLLibTestRegistry::getInstance()->registry.insert(make_pair(test->getName(), test));
 }
 
 int main(int argc, char** argv)
@@ -96,15 +96,14 @@ int main(int argc, char** argv)
     }
   }
   set<string>* running = !onlyTestSet.empty() ? &onlyTestSet : &activeTestSet;
-  for (set<string>::const_iterator iter = running->begin(); iter != running->end();
-      ++iter)
+  for (set<string>::const_iterator iter = running->begin(); iter != running->end(); ++iter)
   {
     RLLibTestRegistry::iterator iter2 = registry->find(*iter);
-    RLLibTestCase* testCase = iter2->second;
-    cout << "*** starts " << testCase->getName() << endl;
-    testCase->setArgv(params);
-    testCase->run();
-    cout << "*** ends   " << testCase->getName() << endl;
+    RLLibTest* test = iter2->second;
+    cout << "*** starts " << test->getName() << endl;
+    test->setArgv(params);
+    test->run();
+    cout << "*** ends   " << test->getName() << endl;
   }
 
   RLLibTestRegistry::deleteInstance();

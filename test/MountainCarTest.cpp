@@ -28,7 +28,8 @@ void MountainCarTest::testSarsaTabularActionMountainCar()
   Probabilistic::srand(0);
   cout << "time=" << time(0) << endl;
   RLProblem<double>* problem = new MountainCar<double>;
-  Projector<double>* projector = new TileCoderNoHashing<double>(1000, 10, true);
+  //Projector<double>* projector = new TileCoderNoHashing<double>(1000, 10, true); << FixMe
+  Projector<double>* projector = new TileCoderHashing<double>(1000, 10, true);
   StateToStateAction<double>* toStateAction = new TabularAction<double>(projector,
       problem->getDiscreteActions(), true);
   Trace<double>* e = new RTrace<double>(toStateAction->dimension());
@@ -636,21 +637,23 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
 
 void MountainCarTest::run()
 {
-  testSarsaTabularActionMountainCar();
-  testOnPolicyBoltzmannRTraceTabularActionCar();
   testSarsaMountainCar();
-
   testSarsaAdaptiveMountainCar();
   testExpectedSarsaMountainCar();
-  testGreedyGQOnPolicyMountainCar();
+
   testGreedyGQMountainCar();
   testSoftmaxGQOnMountainCar();
   testOffPACMountainCar();
+  testGreedyGQOnPolicyMountainCar();
   testOffPACOnPolicyMountainCar();
 
   testOnPolicyBoltzmannATraceCar();
   testOnPolicyBoltzmannRTraceCar();
   testOnPolicyContinousActionCar();
   testOnPolicyBoltzmannATraceNaturalActorCriticCar();
+
+  testSarsaTabularActionMountainCar();
+  testOnPolicyBoltzmannRTraceTabularActionCar();
+
 }
 
