@@ -40,7 +40,8 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
   int numObservations = 1;
   int memorySize = 512;
   int numTiling = 16;
-  TileCoderHashing<double> coder(memorySize, numTiling, true);
+  UNH hashing(memorySize);
+  TileCoderHashing<double> coder(&hashing, numTiling, true);
   PVector<double> x(numObservations);
   Adaline<double> adaline(coder.dimension(), 0.1 / coder.vectorNorm());
   IDBD<double> idbd(coder.dimension(), 0.001); // This value looks good
@@ -111,7 +112,8 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
   int memorySize = 512;
   int numTiling = 16;
   PVector<double> x(numObservations);
-  TileCoderHashing<double> coder(memorySize, numTiling, true);
+  UNH hashing(memorySize);
+  TileCoderHashing<double> coder(&hashing, numTiling, true);
   SemiLinearIDBD<double> semiLinearIdbd(coder.dimension(), 0.001 / x.dimension()); // This value looks good
   int traininCounter = 0;
   ofstream outFileError("visualization/logisticRegressionWithTileFeaturesTrainError.dat");

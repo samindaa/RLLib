@@ -29,7 +29,8 @@ RLLIB_TEST_MAKE(ActorCriticOnPolicyControlLearnerPendulumTest)
 ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearnerPendulumTest()
 {
   problem = new SwingPendulum<double>;
-  projector = new TileCoderHashing<double>(1000, 10, true);
+  hashing = new UNH(1000);
+  projector = new TileCoderHashing<double>(hashing, 10, true);
   toStateAction = new StateActionTilings<double>(projector, problem->getContinuousActions());
 
   alpha_v = alpha_u = alpha_r = gamma = lambda = 0;
@@ -55,6 +56,7 @@ ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearner
 ActorCriticOnPolicyControlLearnerPendulumTest::~ActorCriticOnPolicyControlLearnerPendulumTest()
 {
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete criticE;

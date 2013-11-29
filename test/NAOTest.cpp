@@ -39,8 +39,8 @@ void NAOTest::testTrain()
   {
     Probabilistic::srand(0);
     RLProblem<float>* problem = new MountainCar<float>;
-    Hashing* hashing = new MurmurHashing;
-    Projector<float>* projector = new TileCoderHashing<float>(1000000, 10, true, hashing);
+    Hashing* hashing = new MurmurHashing(1000000);
+    Projector<float>* projector = new TileCoderHashing<float>(hashing, 10, true);
     StateToStateAction<float>* toStateAction = new StateActionTilings<float>(projector,
         problem->getDiscreteActions());
 
@@ -90,8 +90,8 @@ void NAOTest::testTrain()
   {
     Probabilistic::srand(0);
     RLProblem<double>* problem = new SwingPendulum<double>;
-    Hashing* hashing = new MurmurHashing;
-    Projector<double>* projector = new TileCoderHashing<double>(1000, 10, false, hashing);
+    Hashing* hashing = new MurmurHashing(1000);
+    Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
     StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
         problem->getContinuousActions());
 
@@ -150,8 +150,8 @@ void NAOTest::testEvaluate()
   {
     Probabilistic::srand(0);
     RLProblem<float>* problem = new MountainCar<float>;
-    Hashing* hashing = new MurmurHashing;
-    Projector<float>* projector = new TileCoderHashing<float>(1000000, 10, true, hashing);
+    Hashing* hashing = new MurmurHashing(1000000);
+    Projector<float>* projector = new TileCoderHashing<float>(hashing, 10, true);
     StateToStateAction<float>* toStateAction = new StateActionTilings<float>(projector,
         problem->getDiscreteActions());
 
@@ -196,8 +196,8 @@ void NAOTest::testEvaluate()
   {
     Probabilistic::srand(0);
     RLProblem<double>* problem = new SwingPendulum<double>;
-    Hashing* hashing = new MurmurHashing;
-    Projector<double>* projector = new TileCoderHashing<double>(1000, 10, false, hashing);
+    Hashing* hashing = new MurmurHashing(1000);
+    Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
     StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
         problem->getContinuousActions());
 

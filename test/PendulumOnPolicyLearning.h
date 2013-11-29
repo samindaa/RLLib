@@ -32,6 +32,7 @@ class ActorCriticOnPolicyControlLearnerPendulumTest: public ActorCriticOnPolicyC
 {
   protected:
     RLProblem<>* problem;
+    Hashing* hashing;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;
 

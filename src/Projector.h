@@ -121,31 +121,17 @@ template<class T>
 class TileCoderHashing: public TileCoder<T>
 {
   private:
-    Hashing* referenceHashing;
     Tiles<T>* tiles;
-  public:
-    TileCoderHashing(const int& memorySize, const int& nbTiling, bool includeActiveFeature = true,
-        Hashing* hashing = 0) :
-        TileCoder<T>(memorySize, nbTiling, includeActiveFeature), referenceHashing(0), tiles(0)
-    {
-      if (!hashing)
-      {
-        referenceHashing = new UNH(memorySize);
-        tiles = new Tiles<T>(referenceHashing);
-      }
-      else
-      {
-        if (hashing->getMemorySize() == 0)
-          hashing->setMemorySize(memorySize);
-        tiles = new Tiles<T>(hashing);
-      }
 
+  public:
+    TileCoderHashing(Hashing* hashing, const int& nbTiling, bool includeActiveFeature = true) :
+        TileCoder<T>(hashing->getMemorySize(), nbTiling, includeActiveFeature), tiles(
+            new Tiles<T>(hashing))
+    {
     }
 
     virtual ~TileCoderHashing()
     {
-      if (referenceHashing)
-        delete referenceHashing;
       delete tiles;
     }
 

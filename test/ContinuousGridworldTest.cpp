@@ -27,7 +27,8 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
 {
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
-  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, false);
+  Hashing* hashing = new MurmurHashing(1000000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -52,6 +53,7 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
   sim->computeValueFunction();
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete e;
@@ -67,8 +69,8 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
 {
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
-  Hashing* hashing = new MurmurHashing;
-  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true, hashing);
+  Hashing* hashing = new MurmurHashing(1000000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -125,7 +127,8 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
 {
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
-  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true);
+  Hashing* hashing = new MurmurHashing(1000000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -163,6 +166,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
   //sim->test(100, 2000);
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete critice;
@@ -181,7 +185,8 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
 {
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
-  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true);
+  Hashing* hashing = new MurmurHashing(1000000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -220,6 +225,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
   sim->runEvaluate(100);
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete critice;
@@ -238,7 +244,8 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
 {
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
-  Projector<double>* projector = new TileCoderHashing<double>(1000000, 10, true);
+  Hashing* hashing = new MurmurHashing(1000000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -276,6 +283,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
   sim->runEvaluate(100);
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete critice;

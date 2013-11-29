@@ -33,7 +33,8 @@ void ProjectorTest::testProjector()
   SVector<double> w(memorySize + bias);
   for (int t = 0; t < 50; t++)
     w.insertEntry(Probabilistic::nextInt(memorySize), Probabilistic::nextDouble());
-  TileCoderHashing<double> coder(memorySize, numTiling, bias);
+  UNH hashing(memorySize);
+  TileCoderHashing<double> coder(&hashing, numTiling, bias);
   PVector<double> x(numObservations);
   for (int p = 0; p < 5; p++)
   {

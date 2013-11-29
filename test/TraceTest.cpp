@@ -34,8 +34,7 @@ void TraceTest::runTestOnOnMountainCar(Projector<double>* projector, Trace<doubl
   double lambda = 0.3;
   double epsilon = 0.01;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, trace);
-  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(),
-      epsilon);
+  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
@@ -57,8 +56,8 @@ void TraceTest::runTestOnOnMountainCar(Projector<double>* projector, Trace<doubl
 
 void TraceTest::testSarsaOnMountainCarSVectorTraces()
 {
-  Hashing* hashing = new MurmurHashing;
-  Projector<double>* projector = new TileCoderHashing<double>(30000, 10, false, hashing);
+  Hashing* hashing = new MurmurHashing(30000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
   Trace<double>* e = new ATrace<double>(projector->dimension());
   runTestOnOnMountainCar(projector, e);
   delete e;
@@ -78,8 +77,8 @@ void TraceTest::testSarsaOnMountainCarSVectorTraces()
 
 void TraceTest::testSarsaOnMountainCarMaxLengthTraces()
 {
-  Hashing* hashing = new MurmurHashing;
-  Projector<double>* projector = new TileCoderHashing<double>(10000, 10, false, hashing);
+  Hashing* hashing = new MurmurHashing(10000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
   Trace<double>* e = new ATrace<double>(projector->dimension());
   Trace<double>* trace = new MaxLengthTrace<double>(e, 100);
   runTestOnOnMountainCar(projector, trace);

@@ -162,7 +162,8 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 {
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MCar3D<double>;
-  Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
+  Hashing* hashing = new UNH(100000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -193,6 +194,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
   sim->computeValueFunction();
 
   delete problem;
+  delete hashing;
   delete projector;
   delete toStateAction;
   delete critice;

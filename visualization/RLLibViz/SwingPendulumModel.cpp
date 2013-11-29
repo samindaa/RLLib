@@ -14,8 +14,8 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
 {
   Probabilistic::srand(0);
   problem = new SwingPendulum<double>;
-  hashing = new MurmurHashing;
-  projector = new TileCoderHashing<double>(1000, 10, false, hashing);
+  hashing = new MurmurHashing(1000);
+  projector = new TileCoderHashing<double>(hashing, 10, false);
   toStateAction = new StateActionTilings<double>(projector, problem->getContinuousActions());
 
   alpha_v = 0.1 / projector->vectorNorm();

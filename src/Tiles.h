@@ -68,7 +68,6 @@ class Hashing
     }
     virtual int hash(int* ints/*coordinates*/, int num_ints) =0;
     virtual int getMemorySize() const =0;
-    virtual void setMemorySize(const int& memorySize) =0;
 };
 
 class AbstractHashing: public Hashing
@@ -77,7 +76,7 @@ class AbstractHashing: public Hashing
     int memorySize;
 
   public:
-    AbstractHashing(const int& memorySize = 0) :
+    AbstractHashing(const int& memorySize) :
         memorySize(memorySize)
     {
     }
@@ -89,11 +88,6 @@ class AbstractHashing: public Hashing
     int getMemorySize() const
     {
       return memorySize;
-    }
-
-    void setMemorySize(const int& memorySize)
-    {
-      this->memorySize = memorySize;
     }
 };
 
