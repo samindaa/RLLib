@@ -35,10 +35,8 @@
 #include "StateToStateAction.h"
 #include "Math.h"
 
-using namespace std;
 namespace RLLib
 {
-
 template<class T>
 class Policy
 {

@@ -80,12 +80,12 @@ class NAME##Base : public RLLib::RLLibTest                                 \
 class RLLibTestRegistry
 {
   protected:
-    std::map<string, RLLibTest*> registry;
+    std::map<std::string, RLLibTest*> registry;
 
   public:
 
-    typedef std::map<string, RLLibTest*>::iterator iterator;
-    typedef std::map<string, RLLibTest*>::const_iterator const_iterator;
+    typedef std::map<std::string, RLLibTest*>::iterator iterator;
+    typedef std::map<std::string, RLLibTest*>::const_iterator const_iterator;
 
     iterator begin()
     {
@@ -107,12 +107,12 @@ class RLLibTestRegistry
       return registry.end();
     }
 
-    iterator find(const string& key)
+    iterator find(const std::string& key)
     {
       return registry.find(key);
     }
 
-    const_iterator find(const string& key) const
+    const_iterator find(const std::string& key) const
     {
       return registry.find(key);
     }
@@ -276,7 +276,7 @@ class Assert
     {
       assert(VectorsTestsUtils::checkConsistency(a));
       assert(VectorsTestsUtils::checkConsistency(b));
-      assert(VectorsTestsUtils::checkVectorEquals(a, b, numeric_limits<float>::epsilon()));
+      assert(VectorsTestsUtils::checkVectorEquals(a, b, std::numeric_limits<float>::epsilon()));
     }
 
     template<class T>
