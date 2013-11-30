@@ -65,6 +65,7 @@ class ExtendedProblemsTest: public ExtendedProblemsTestBase
     void testPersistResurrect();
     void testMatrix();
     void testTorquedPendulum();
+    void testSupervisedProjector();
 
 };
 

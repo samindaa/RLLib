@@ -407,6 +407,97 @@ void ExtendedProblemsTest::testTorquedPendulum()
   }
 }
 
+void ExtendedProblemsTest::testSupervisedProjector()
+{
+  /**
+   * This test uses regression on three problems, f(x) = sin(x), f(x) = sinc(x), and f(x) = x / pi,
+   * to interpret the output, y_tp1, based on the parameter changes.  The independent variable, x_t,
+   * has confined to the range [-pi, pi], and it is normalized to [0,1]. We have used a tile coding
+   * feature extractor with parameters memory, nbTiling, and resolution. The curve fitting uses LMS rule
+   * with a learning rate of alpha / ||norm||, such that ||norm|| is the number of active features.
+   * The tile coding function approximator uses Murmur hashing function. We have added a constant bias
+   * unit to the features. y_tp1 is perturb with Gaussian with zero mean and standard deviation one.
+   *
+   * visualization/dout.data contains the outputs and the user can use the following Gnuplot script
+   * to visualize the data.
+   *
+   *
+   unset key
+
+   set term wxt 2
+   plot "dout.data" using 1:2 with linespoints lt 1, "dout.data" using 1:5 with linespoints lt 2
+
+   set term wxt 3
+   plot "dout.data" using 1:3 with linespoints lt 1, "dout.data" using 1:6 with linespoints lt 2
+
+   set term wxt 4
+   plot "dout.data" using 1:4 with linespoints lt 1, "dout.data" using 1:7 with linespoints lt 2
+
+   pause -1 "Hit return to continue"
+
+   */
+  Probabilistic::srand(time(0));
+  // Parameters:
+  int memory = 512 / 4;
+  int nbTiling = 8;
+  double alpha = 0.01;
+  double resolution = 4.0f;
+  int nbTraingExamples = 200;
+  int nbRuns = 8;
+
+  Hashing* hashing = new MurmurHashing(memory);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, nbTiling, true);
+
+  VectorXd trainX = VectorXd::Zero(nbTraingExamples);
+  MatrixXd trainY = MatrixXd::Zero(trainX.rows(), 3);
+
+  // Training set: [sin(x), sinc(x), line(x)]
+  for (int i = 0; i < trainX.rows(); i++)
+  {
+    trainX(i) = -M_PI + 2 * M_PI * Probabilistic::nextDouble();
+    trainY(i, 0) = sin(trainX(i)) + Probabilistic::nextNormalGaussian();
+    trainY(i, 1) = sin(M_PI * trainX(i)) / (M_PI * trainX(i)) + Probabilistic::nextNormalGaussian();
+    trainY(i, 2) = trainX(i) / M_PI + Probabilistic::nextNormalGaussian();
+  }
+
+  std::vector<LearningAlgorithm<double>*> predictors;
+  for (int i = 0; i < 3; i++)
+    predictors.push_back(
+        new Adaline<double>(hashing->getMemorySize(), alpha / projector->vectorNorm()));
+
+  // Passes through the training set
+  Vector<double>* x_t = new PVector<double>(1);
+  for (int runs = 0; runs < nbRuns; runs++)
+  {
+    for (int i = 0; i < trainX.rows(); i++)
+    {
+      x_t->setEntry(0, resolution * (trainX(i) + M_PI) / (2.0 * M_PI));
+      for (int j = 0; j < 3; j++)
+        predictors[j]->learn(projector->project(x_t, j), trainY(i, j));
+    }
+  }
+
+  std::ofstream dout("visualization/dout.data");
+  for (double x = -M_PI; x < M_PI; x += 0.05)
+  {
+    x_t->setEntry(0, resolution * (x + M_PI) / (2.0 * M_PI));
+    dout << (x_t->getEntry(0) / resolution) << " " << sin(x) << " " << (sin(M_PI * x) / (M_PI * x))
+        << " " << (x / M_PI) << " ";
+    for (int j = 0; j < 3; j++)
+      dout << predictors[j]->predict(projector->project(x_t, j)) << " ";
+    dout << std::endl;
+    dout.flush();
+  }
+  dout.close();
+
+  delete hashing;
+  delete projector;
+  for (int i = 0; i < 3; i++)
+    delete predictors[i];
+  delete x_t;
+
+}
+
 void ExtendedProblemsTest::run()
 {
   testOffPACMountainCar3D_1();
@@ -418,8 +509,7 @@ void ExtendedProblemsTest::run()
 
   testMatrix();
   testPoleBalancingPlant();
-  //testPersistResurrect();
   testTorquedPendulum();
-
+  testSupervisedProjector();
 }
 

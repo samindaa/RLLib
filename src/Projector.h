@@ -124,7 +124,7 @@ class TileCoderHashing: public TileCoder<T>
     Tiles<T>* tiles;
 
   public:
-    TileCoderHashing(Hashing* hashing, const int& nbTiling, bool includeActiveFeature = true) :
+    TileCoderHashing(Hashing* hashing, const int& nbTiling, const bool& includeActiveFeature = true) :
         TileCoder<T>(hashing->getMemorySize(), nbTiling, includeActiveFeature), tiles(
             new Tiles<T>(hashing))
     {
