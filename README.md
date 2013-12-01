@@ -44,8 +44,12 @@ Features
  `Mountain Car`
  `Mountain Car 3D`
  `Swinging Pendulum`
+ `Continuous Grid World`
+ `Bicycle`
+ `Cart Pole`
+ `Acrobot`
+ `Non-Markov Pole Balancing`
  `Helicopter`
-`Continuous Grid World`
 * **Optimization**: 
  Optimized for very fast duty cycles (e.g., with culling traces, RLLib has been tested on `the Robocup 3D simulator agent`, and on `the NAO V4  (cognition thread)`). 
 * **Usage**: 
