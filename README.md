@@ -14,12 +14,16 @@ Features
 * **Off-policy control algorithms**:  
  `Greedy-GQ(lambda)`
  `Softmax-GQ(lambda)`
- `Off-PAC` (can be used in on-policy setting)
+ `Off-PAC (can be used in on-policy setting)`
 * **On-policy algorithms**: 
  `TD(lambda)`
- `SARSA(lambda)`
- `Expected-SARSA(lambda)`
- `Actor-Critic (continuous and discrete actions, discounted, averaged reward settings, etc.)` 
+ `TD(lambda)AlphaBound`
+ `TD(lambda)True` 
+ `Sarsa(lambda)`
+ `Sarsa(lambda)AlphaBound`
+ `Sarsa(lambda)True`
+ `Sarsa(lambda)Expected`
+ `Actor-Critic (continuous actions, discrete actions, discounted reward settting, averaged reward settings, and so on)` 
 * **Supervised learning algorithms**: 
  `Adaline`
  `IDBD`

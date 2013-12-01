@@ -79,9 +79,9 @@ class TD: public OnPolicyTD<T>
       v->clear();
     }
 
-    double predict(const Vector<T>* phi) const
+    double predict(const Vector<T>* x) const
     {
-      return v->dot(phi);
+      return v->dot(x);
     }
 
     void persist(const std::string& f) const
@@ -98,22 +98,22 @@ class TD: public OnPolicyTD<T>
     {
       return v;
     }
-
 };
 
 template<class T>
-class TDLambda: public TD<T>
+class TDLambdaAbstract: public TD<T>
 {
   protected:
     typedef TD<T> Base;
     double lambda, gamma_t;
     Trace<T>* e;
+
   public:
-    TDLambda(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
+    TDLambdaAbstract(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
         TD<T>(alpha, gamma, e->vect()->dimension()), lambda(lambda), gamma_t(gamma), e(e)
     {
     }
-    virtual ~TDLambda()
+    virtual ~TDLambdaAbstract()
     {
     }
 
@@ -127,24 +127,6 @@ class TDLambda: public TD<T>
       return Base::delta_t;
     }
 
-    virtual void updateAlpha(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& r_tp1,
-        const double& gamma_tp1)
-    {/*Default is for fixed step-size*/
-    }
-
-    virtual double update(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& r_tp1,
-        const double& gamma_tp1)
-    {
-      assert(Base::initialized);
-
-      Base::delta_t = r_tp1 + gamma_tp1 * Base::v->dot(x_tp1) - Base::v->dot(x_t);
-      e->update(lambda * gamma_t, x_t);
-      updateAlpha(x_t, x_tp1, r_tp1, gamma_tp1);
-      Base::v->addToSelf(Base::alpha_v * Base::delta_t, e->vect());
-      gamma_t = gamma_tp1;
-      return Base::delta_t;
-    }
-
     void reset()
     {
       Base::reset();
@@ -154,21 +136,107 @@ class TDLambda: public TD<T>
 };
 
 template<class T>
-class TDLambdaAlphaBound: public TDLambda<T>
+class TDLambda: public TDLambdaAbstract<T>
+{
+  protected:
+    typedef TDLambdaAbstract<T> Base;
+
+  public:
+    TDLambda(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
+        TDLambdaAbstract<T>(alpha, gamma, lambda, e)
+    {
+    }
+
+    virtual ~TDLambda()
+    {
+    }
+
+  public:
+    double update(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& r_tp1,
+        const double& gamma_tp1)
+    {
+      assert(TD<T>::initialized);
+
+      TD<T>::delta_t = r_tp1 + gamma_tp1 * TD<T>::v->dot(x_tp1) - TD<T>::v->dot(x_t);
+      Base::e->update(Base::lambda * Base::gamma_t, x_t);
+      TD<T>::v->addToSelf(TD<T>::alpha_v * TD<T>::delta_t, Base::e->vect());
+      Base::gamma_t = gamma_tp1;
+      return TD<T>::delta_t;
+    }
+};
+
+template<class T>
+class TDLambdaTrue: public TDLambdaAbstract<T>
+{
+  protected:
+    typedef TDLambdaAbstract<T> Base;
+    Vector<T>* newVector;
+    double v_t;
+    double v_tp1;
+    bool initializedVt;
+  public:
+    TDLambdaTrue(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
+        TDLambdaAbstract<T>(alpha, gamma, lambda, e), newVector(
+            new SVector<T>(e->vect()->dimension())), v_t(0), v_tp1(0), initializedVt(false)
+    {
+    }
+
+    virtual ~TDLambdaTrue()
+    {
+      delete newVector;
+    }
+
+    double initialize()
+    {
+      Base::initialize();
+      initializedVt = false;
+      return Base::delta_t;
+    }
+
+    void initialize(const Vector<T>* x_t)
+    {
+      v_t = TD<T>::v->dot(x_t);
+      initializedVt = true;
+    }
+
+    double update(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& r_tp1,
+        const double& gamma_tp1)
+    {
+      assert(TD<T>::initialized);
+      if (!initializedVt)
+        initialize(x_t);
+      v_tp1 = TD<T>::v->dot(x_tp1);
+      TD<T>::delta_t = r_tp1 + gamma_tp1 * v_tp1 - v_t;
+      newVector->set(x_t)->mapMultiplyToSelf(
+          TD<T>::alpha_v * (1.0f - Base::gamma_t * Base::lambda * Base::e->vect()->dot(x_t)));
+      Base::e->update(Base::lambda * Base::gamma_t,
+          newVector->set(x_t)->mapMultiplyToSelf(
+              TD<T>::alpha_v * (1.0f - Base::gamma_t * Base::lambda * Base::e->vect()->dot(x_t))));
+      newVector->set(x_t)->mapMultiplyToSelf(TD<T>::alpha_v * (v_t - TD<T>::v->dot(x_t)));
+      TD<T>::v->addToSelf(TD<T>::delta_t, Base::e->vect())->addToSelf(newVector);
+      v_t = v_tp1;
+      Base::gamma_t = gamma_tp1;
+      return TD<T>::delta_t;
+    }
+};
+
+template<class T>
+class TDLambdaAlphaBound: public TDLambdaAbstract<T>
 {
   private:
-    typedef TDLambda<T> Base;
-    SparseVector<T>* gammaX_tp1MinusX_t;
+    typedef TDLambdaAbstract<T> Base;
+    Vector<T>* gammaXtp1MinusX;
+
   public:
-    TDLambdaAlphaBound(const double& gamma, const double& lambda, Trace<T>* e) :
-        TDLambda<T>(1.0f, gamma, lambda, e), gammaX_tp1MinusX_t(
-            new SparseVector<T>(e->vect().dimension()))
+    TDLambdaAlphaBound(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
+        TDLambdaAbstract<T>(alpha, gamma, lambda, e), gammaXtp1MinusX(
+            new SVector<T>(e->vect()->dimension()))
     {
     }
 
     virtual ~TDLambdaAlphaBound()
     {
-      delete gammaX_tp1MinusX_t;
+      delete gammaXtp1MinusX;
     }
 
     void reset()
@@ -177,15 +245,29 @@ class TDLambdaAlphaBound: public TDLambda<T>
       TD<T>::alpha_v = 1.0f;
     }
 
-    virtual void updateAlpha(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& r_tp1,
-        const double& gamma_tp1)
+  private:
+    void updateAlpha(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& gamma_tp1)
     {
       // Update the adaptive step-size
-      double b = std::abs(
-          Base::e->vect().dot(
-              gammaX_tp1MinusX_t->set(x_tp1).multiplyToSelf(gamma_tp1).substractToSelf(x_t)));
+      double b = std::fabs(
+          Base::e->vect()->dot(
+              gammaXtp1MinusX->set(x_tp1)->mapMultiplyToSelf(gamma_tp1)->subtractToSelf(x_t)));
       if (b > 0.0f)
         TD<T>::alpha_v = std::min(TD<T>::alpha_v, 1.0f / b);
+    }
+
+  public:
+    double update(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& r_tp1,
+        const double& gamma_tp1)
+    {
+      assert(TD<T>::initialized);
+
+      TD<T>::delta_t = r_tp1 + gamma_tp1 * TD<T>::v->dot(x_tp1) - TD<T>::v->dot(x_t);
+      Base::e->update(Base::lambda * Base::gamma_t, x_t);
+      updateAlpha(x_t, x_tp1, gamma_tp1);
+      TD<T>::v->addToSelf(TD<T>::alpha_v * TD<T>::delta_t, Base::e->vect());
+      Base::gamma_t = gamma_tp1;
+      return TD<T>::delta_t;
     }
 
 };
@@ -199,6 +281,7 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
     double alpha, gamma, lambda;
     Trace<T>* e;
     Vector<T>* q;
+
   public:
     Sarsa(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
         v_t(0), v_tp1(0), delta(0), initialized(false), alpha(alpha), gamma(gamma), lambda(lambda), e(
@@ -219,18 +302,13 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
       return 0.0;
     }
 
-    virtual void updateAlpha(const Vector<T>* phi_t, const Vector<T>* phi_tp1, double r_tp1)
-    {/*Default is for fixed step-size*/
-    }
-
-    double update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, double r_tp1)
+    virtual double update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, double r_tp1)
     {
       assert(initialized);
 
       v_t = q->dot(phi_t);
       v_tp1 = q->dot(phi_tp1);
       e->update(gamma * lambda, phi_t);
-      updateAlpha(phi_t, phi_tp1, r_tp1);
       delta = r_tp1 + gamma * v_tp1 - v_t;
       q->addToSelf(alpha * delta, e->vect());
       return delta;
@@ -265,17 +343,71 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
 };
 
 template<class T>
+class SarsaTrue: public Sarsa<T>
+{
+  private:
+    typedef Sarsa<T> Base;
+    Vector<T>* newVector;
+    bool initializedVt;
+
+  public:
+    SarsaTrue(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
+        Sarsa<T>(alpha, gamma, lambda, e), newVector(new SVector<T>(e->vect()->dimension())), initializedVt(
+            false)
+    {
+    }
+
+    virtual ~SarsaTrue()
+    {
+      delete newVector;
+    }
+
+  public:
+
+    double initialize()
+    {
+      Base::initialize();
+      initializedVt = false;
+      return 0.0f;
+    }
+
+    void initialize(const Vector<T>* phi_t)
+    {
+      Base::v_t = Base::q->dot(phi_t);
+      initializedVt = true;
+    }
+
+    double update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, double r_tp1)
+    {
+      assert(Base::initialized);
+      if (!initializedVt)
+        initialize(phi_t);
+      Base::v_tp1 = Base::q->dot(phi_tp1);
+      Base::delta = r_tp1 + Base::gamma * Base::v_tp1 - Base::v_t;
+      newVector->set(phi_t)->mapMultiplyToSelf(
+          Base::alpha * (1.0f - Base::gamma * Base::lambda * Base::e->vect()->dot(phi_t)));
+      Base::e->update(Base::lambda * Base::gamma, newVector);
+      newVector->set(phi_t)->mapMultiplyToSelf(Base::alpha * (Base::v_t - Base::q->dot(phi_t)));
+      Base::q->addToSelf(Base::delta, Base::e->vect())->addToSelf(newVector);
+      Base::v_t = Base::v_tp1;
+      return Base::delta;
+    }
+};
+
+template<class T>
 class SarsaAlphaBound: public Sarsa<T>
 {
   private:
     typedef Sarsa<T> Base;
-    SparseVector<T>* gammaXtp1MinusX;
+    Vector<T>* gammaXtp1MinusX;
+
   public:
     SarsaAlphaBound(const double& gamma, const double& lambda, Trace<T>* e) :
         Sarsa<T>(1.0f/*According to the paper*/, gamma, lambda, e), gammaXtp1MinusX(
             new SVector<T>(e->vect()->dimension()))
     {
     }
+
     virtual ~SarsaAlphaBound()
     {
       delete gammaXtp1MinusX;
@@ -287,7 +419,8 @@ class SarsaAlphaBound: public Sarsa<T>
       Base::alpha = 1.0f;
     }
 
-    void updateAlpha(const Vector<T>* phi_t, const Vector<T>* phi_tp1, double r_tp1)
+  private:
+    void updateAlpha(const Vector<T>* phi_t, const Vector<T>* phi_tp1)
     {
       // Update the adaptive step-size
       double b = std::fabs(
@@ -298,6 +431,19 @@ class SarsaAlphaBound: public Sarsa<T>
         Base::alpha = std::min(Base::alpha, 1.0f / b);
     }
 
+  public:
+    double update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, double r_tp1)
+    {
+      assert(Base::initialized);
+
+      Base::v_t = Base::q->dot(phi_t);
+      Base::v_tp1 = Base::q->dot(phi_tp1);
+      Base::e->update(Base::gamma * Base::lambda, phi_t);
+      Base::delta = r_tp1 + Base::gamma * Base::v_tp1 - Base::v_t;
+      updateAlpha(phi_t, phi_tp1);
+      Base::q->addToSelf(Base::alpha * Base::delta, Base::e->vect());
+      return Base::delta;
+    }
 };
 
 // Gradient decent

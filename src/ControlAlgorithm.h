@@ -569,9 +569,9 @@ class ActorLambda: public Actor<T>
       assert(e->dimension() == Base::u->dimension());
     }
 
-    void initialize()
+    void initialize(const Vector<T>* x)
     {
-      Base::initialize();
+      Base::initialize(x);
       e->clear();
     }
 

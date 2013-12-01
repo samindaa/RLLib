@@ -171,6 +171,13 @@ class FiniteStateGraph
       return acting;
     }
 
+    void initialize()
+    {
+      stepTime = -1;
+      s_t = 0;
+      a_t = 0;
+    }
+
     StepData/*small object*/step()
     {
       stepTime += 1;

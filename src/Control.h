@@ -38,7 +38,7 @@ class Control: public ParameterizedFunction<T>
     virtual ~Control()
     {
     }
-    virtual const Action<T>* initialize(const Vector<T>* x_0) =0;
+    virtual const Action<T>* initialize(const Vector<T>* x) =0;
     virtual void reset() =0;
     virtual const Action<T>* proposeAction(const Vector<T>* x) =0;
     virtual const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t,

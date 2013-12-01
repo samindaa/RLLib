@@ -152,6 +152,41 @@ void MountainCarTest::testSarsaMountainCar()
   delete sim;
 }
 
+void MountainCarTest::testSarsaTrueMountainCar()
+{
+  Probabilistic::srand(0);
+  RLProblem<float>* problem = new MountainCar<float>;
+  Hashing* hashing = new MurmurHashing(10000);
+  Projector<float>* projector = new TileCoderHashing<float>(hashing, 10, true);
+  StateToStateAction<float>* toStateAction = new StateActionTilings<float>(projector,
+      problem->getDiscreteActions());
+  Trace<float>* e = new ATrace<float>(projector->dimension());
+  double alpha = 1.0 / projector->vectorNorm();
+  double gamma = 0.99;
+  double lambda = 0.9;
+  Sarsa<float>* sarsa = new SarsaTrue<float>(alpha, gamma, lambda, e);
+  double epsilon = 0.01;
+  Policy<float>* acting = new EpsilonGreedy<float>(sarsa, problem->getDiscreteActions(), epsilon);
+  OnPolicyControlLearner<float>* control = new SarsaControl<float>(acting, toStateAction, sarsa);
+
+  RLAgent<float>* agent = new LearnerAgent<float>(control);
+  Simulator<float>* sim = new Simulator<float>(agent, problem, 5000, 100, 5);
+  sim->setTestEpisodesAfterEachRun(true);
+  sim->run();
+  sim->computeValueFunction();
+
+  delete problem;
+  delete hashing;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete sarsa;
+  delete acting;
+  delete control;
+  delete agent;
+  delete sim;
+}
+
 void MountainCarTest::testSarsaAdaptiveMountainCar()
 {
   Probabilistic::srand(0);
@@ -656,6 +691,7 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
 void MountainCarTest::run()
 {
   testSarsaMountainCar();
+  testSarsaTrueMountainCar();
   testSarsaAdaptiveMountainCar();
   testExpectedSarsaMountainCar();
 
