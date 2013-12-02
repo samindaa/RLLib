@@ -587,7 +587,7 @@ class SparseVector: public Vector<T>
       return values;
     }
 
-    double dotT(const T* data) const
+    double dotData(const T* data) const
     {
       double result = 0.0f;
       for (int position = 0; position < nbActive; position++)
@@ -595,19 +595,13 @@ class SparseVector: public Vector<T>
       return result;
     }
 
-    void addToSelfT(T* data) const
-    {
-      for (int position = 0; position < nbActive; position++)
-        data[activeIndexes[position]] += values[position];
-    }
-
-    void addToSelfT(const double& factor, T* data) const
+    void addToData(const double& factor, T* data) const
     {
       for (int position = 0; position < nbActive; position++)
         data[activeIndexes[position]] += factor * values[position];
     }
 
-    void subtractToSelfT(T* data) const
+    void subtractToData(T* data) const
     {
       for (int position = 0; position < nbActive; position++)
         data[activeIndexes[position]] -= values[position];
@@ -736,9 +730,9 @@ class PVector: public DenseVector<T>
     {
       assert(this->dimension() == that->dimension());
 
-      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
-      if (_that)
-        return _that->dotT(this->getValues());
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
+        return other->dotData(this->getValues());
 
       double result = 0;
       for (int i = 0; i < this->dimension(); i++)
@@ -750,10 +744,10 @@ class PVector: public DenseVector<T>
     {
       assert(this->dimension() == that->dimension());
 
-      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
-      if (_that)
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
       {
-        _that->subtractToSelfT(this->getValues());
+        other->subtractToSelfT(this->getValues());
         return *this;
       }
 
@@ -766,10 +760,10 @@ class PVector: public DenseVector<T>
     {
       assert(this->dimension() == that->dimension());
 
-      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
-      if (_that)
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
       {
-        _that->addToSelfT(this->getValues());
+        other->addToSelfT(this->getValues());
         return *this;
       }
 
@@ -794,10 +788,10 @@ class PVector: public DenseVector<T>
     {
       assert(this->dimension() == that->dimension());
 
-      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
-      if (_that)
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
       {
-        _that->addToSelfT(factor, this->getValues());
+        other->addToData(factor, this->getValues());
         return this;
       }
 
@@ -808,17 +802,17 @@ class PVector: public DenseVector<T>
 
     Vector<T>* addToSelf(const Vector<T>* that)
     {
-      return addToSelf(1.0, that);
+      return addToSelf(1.0f, that);
     }
 
     Vector<T>* subtractToSelf(const Vector<T>* that)
     {
       assert(this->dimension() == that->dimension());
 
-      const SparseVector<T>* _that = dynamic_cast<const SparseVector<T>*>(that);
-      if (_that)
+      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      if (other)
       {
-        _that->subtractToSelfT(this->getValues());
+        other->subtractToData(this->getValues());
         return this;
       }
 

@@ -35,7 +35,7 @@ class Trace
     virtual ~Trace()
     {
     }
-    virtual void update(const double& lambda, const Vector<T>* phi) =0;
+    virtual void update(const double& lambda, const Vector<T>* phi, const double& factor = 1.0f) =0;
     virtual void clear() =0;
     virtual Vector<T>* vect() const =0;
 };
@@ -76,15 +76,15 @@ class ATrace: public Trace<T>
     }
 
   public:
-    virtual void updateVector(const double& lambda, const Vector<T>* phi)
+    virtual void updateVector(const double& lambda, const Vector<T>* phi, const double& factor)
     {
       vector->mapMultiplyToSelf(lambda);
-      vector->addToSelf(phi);
+      vector->addToSelf(factor, phi);
     }
 
-    void update(const double& lambda, const Vector<T>* phi)
+    void update(const double& lambda, const Vector<T>* phi, const double& factor = 1.0f)
     {
-      updateVector(lambda, phi);
+      updateVector(lambda, phi, factor);
       adjustUpdate();
       clearBelowThreshold();
     }
@@ -121,18 +121,18 @@ class RTrace: public ATrace<T>
     }
 
   private:
-    void replaceWith(const Vector<T>* x)
+    void replaceWith(const Vector<T>* x, const double& factor)
     { // FixMe:
       const SparseVector<T>* phi = dynamic_cast<const SparseVector<T>*>(x);
       const int* indexes = phi->nonZeroIndexes();
       for (const int* index = indexes; index < indexes + phi->nonZeroElements(); ++index)
-        ATrace<T>::vector->setEntry(*index, phi->getEntry(*index));
+        ATrace<T>::vector->setEntry(*index, factor * phi->getEntry(*index));
     }
   public:
-    virtual void updateVector(const double& lambda, const Vector<T>* phi)
+    virtual void updateVector(const double& lambda, const Vector<T>* phi, const double& factor)
     {
       ATrace<T>::vector->mapMultiplyToSelf(lambda);
-      replaceWith(phi);
+      replaceWith(phi, factor);
     }
 
 };
@@ -226,9 +226,9 @@ class MaxLengthTrace: public Trace<T>
 
   public:
 
-    void update(const double& lambda, const Vector<T>* phi)
+    void update(const double& lambda, const Vector<T>* phi, const double& factor = 1.0f)
     {
-      trace->update(lambda, phi);
+      trace->update(lambda, phi, factor);
       controlLength();
     }
 
