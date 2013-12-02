@@ -302,9 +302,9 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
 
       v_t = q->dot(phi_t);
       v_tp1 = q->dot(phi_tp1);
-      e->update(gamma * lambda, phi_t);
+      e->update(gamma * lambda, phi_t, alpha);
       delta = r_tp1 + gamma * v_tp1 - v_t;
-      q->addToSelf(alpha * delta, e->vect());
+      q->addToSelf(delta, e->vect());
       return delta;
     }
 
