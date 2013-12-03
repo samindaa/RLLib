@@ -90,7 +90,7 @@ NextingProjector::NextingProjector()
 
   vector = new SVector<double>(memory + 1/*bias unit*/);
 
-  hashing = new MurmurHashing;
+  hashing = new MurmurHashing(memory);
   tiles = new Tiles<double>(hashing);
 }
 

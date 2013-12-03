@@ -98,7 +98,7 @@ class UNH: public AbstractHashing
     unsigned int rndseq[16384]; // 2^14 (16384)  {old: 2048}
 
   public:
-    UNH(const int& memorySize = 0) :
+    UNH(const int& memorySize) :
         AbstractHashing(memorySize), increment(470)
     {
       /*First call to hashing, initialize table of random numbers */
@@ -149,7 +149,7 @@ class MurmurHashing: public AbstractHashing
     unsigned int seed;
     uint8_t* key;
   public:
-    MurmurHashing(const int& memorySize = 0) :
+    MurmurHashing(const int& memorySize) :
         AbstractHashing(memorySize)
     {
       // Constant seed

@@ -59,9 +59,12 @@ class RandlovBike: public RLProblem<>
     /* distance between the point where the front and back tyre touch the ground */
     pi;
 
+    /*ranges*/
+    Range<float> *thetaRange, *thetaDotRange, *omegaRange, *omegaDotRange, *omegaDotDotRange;
+
   public:
     RandlovBike() :
-        RLProblem<>(8, 9, 1), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
+        RLProblem<>(5 /*+ 2*/, 9, 0), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
             false), omega(0), omega_dot(0), omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(
             0), yf(0), xb(0), yb(0), psi_goal(0), aux_state(0), R1(-1.0), R2(0.0), R3(+1.0),
         // +0.01
@@ -72,21 +75,22 @@ class RandlovBike: public RLProblem<>
         /* tyre radius */
         sigma_dot(v / R), I_bike((13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)), I_dc(
             Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl((1.0 / 2) * Md * R * R), l(1.11), pi(
-        M_PI)
+        M_PI), thetaRange(new Range<float>(-M_PI_2, M_PI_2)), thetaDotRange(
+            new Range<float>(-2, 2)), omegaRange(new Range<float>(-M_PI / 15.0f, M_PI / 15.0f)), omegaDotRange(
+            new Range<float>(-0.5, 0.5)), omegaDotDotRange(new Range<float>(-2, 2))
     {
 
       for (int i = 0; i < discreteActions->dimension(); i++)
         discreteActions->push_back(i, i);
+    }
 
-      // @@>> TODO: this needs a some work
-      resolutions->at(0) = 2.0 * pi;
-      resolutions->at(1) = 1.;
-      resolutions->at(2) = 1.;
-      resolutions->at(3) = pi / 4.0;
-      resolutions->at(4) = 1.;
-      resolutions->at(5) = 1.;
-      resolutions->at(6) = 1000;
-      resolutions->at(7) = 1.0f;
+    virtual ~RandlovBike()
+    {
+      delete thetaRange;
+      delete thetaDotRange;
+      delete omegaRange;
+      delete omegaDotRange;
+      delete omegaDotDotRange;
     }
 
   private:
@@ -198,40 +202,38 @@ class RandlovBike: public RLProblem<>
       return (box);
     }
 
+    double toUnit(const Range<float>* range, const float& value)
+    {
+      return (range->bound(value) - range->min()) / range->length();
+    }
+
   public:
 
     void updateRTStep()
     {
       DenseVector<double>& vars = *output->o_tp1;
-      vars[0] = omega;
-      vars[1] = omega_dot;
-      vars[2] = omega_d_dot;
-      vars[3] = theta;
-      vars[4] = theta_dot;
-      vars[5] = theta_d_dot;
-      vars[6] = psi_goal;
-      vars[7] = calc_dist_to_goal(xf, xb, yf, yb);
-
-      for (int i = 0; i < dimension(); i++)
-        vars[i] /= resolutions->at(i);
+      vars[0] = toUnit(omegaRange, omega);
+      vars[1] = toUnit(omegaDotRange, omega_dot);
+      vars[2] = toUnit(omegaDotDotRange, omega_d_dot);
+      vars[3] = toUnit(thetaRange, theta);
+      vars[4] = toUnit(thetaDotRange, theta_dot);
+      //vars[5] = theta_d_dot;
+      //vars[6] = psi_goal;
+      //vars[7] = calc_dist_to_goal(xf, xb, yf, yb);
 
       observations->at(0) = omega;
       observations->at(1) = omega_dot;
       observations->at(2) = omega_d_dot;
       observations->at(3) = theta;
       observations->at(4) = theta_dot;
-      observations->at(5) = theta_d_dot;
-      observations->at(6) = psi_goal;
-      observations->at(7) = calc_dist_to_goal(xf, xb, yf, yb);
+      //observations->at(5) = theta_d_dot;
+      //observations->at(6) = psi_goal;
+      //observations->at(7) = calc_dist_to_goal(xf, xb, yf, yb);
 
-      // debug
-      //for (int i = 0; i < env->getNumStateVars(); i++)
-      //  cout << percepts[i] << " ";
-      //cout << endl;
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 
-    void bike(int to_do, int action = 0)
+    void bike(const int& to_do, const int& action = 0)
     {
       static double rCM, rf, rb;
       static float T, d, phi, psi /* bike's angle to the y-axis */;
@@ -357,9 +359,9 @@ class RandlovBike: public RLProblem<>
         }
         else
         {
-          reinforcement = (0.95 - pow(psi_goal, 2)) * R_FACTOR;
+          // reinforcement = (0.95 - pow(psi_goal, 2)) * R_FACTOR; //<< To Ride
           // in order to make the agent to learn
-          // reinforcement = R2;
+          reinforcement = R2; //<< To Balance
           isTerminal = false;
         }
       }
@@ -393,9 +395,9 @@ class RandlovBike: public RLProblem<>
       updateRTStep();
     }
 
-    void step(const Action<double>& action)
+    void step(const Action<double>* action)
     {
-      bike(execute_action, action.id());
+      bike(execute_action, action->id());
       updateRTStep();
     }
 

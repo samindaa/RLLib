@@ -1,26 +1,12 @@
 /*
- * Copyright 2013 Saminda Abeyruwan (saminda@cs.miami.edu)
+ * MountainCar3D.h
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * Mcar3D.h
- *
- *  Created on: Jun 29, 2012
+ *  Created on: Dec 2, 2013
  *      Author: sam
  */
 
-#ifndef MCAR3D_H_
-#define MCAR3D_H_
+#ifndef MOUNTAINCAR3D_H_
+#define MOUNTAINCAR3D_H_
 
 #include "RL.h"
 /******************************************************************************
@@ -47,9 +33,10 @@
  *
  ******************************************************************************
  */
+using namespace RLLib;
 
 template<class T>
-class MCar3D: public RLProblem<T>
+class MountainCar3D: public RLProblem<T>
 {
     typedef RLProblem<T> Base;
   protected:
@@ -65,7 +52,7 @@ class MCar3D: public RLProblem<T>
     Range<float>* velocityRange;
 
   public:
-    MCar3D() :
+    MountainCar3D() :
         RLProblem<T>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(0), targetPosition(
             0.5), positionRange(new Range<float>(-1.2, 0.5)), velocityRange(
             new Range<float>(-0.07, 0.07))
@@ -80,7 +67,7 @@ class MCar3D: public RLProblem<T>
         Base::resolutions->at(i) = 6.0;
     }
 
-    virtual ~MCar3D()
+    virtual ~MountainCar3D()
     {
       delete positionRange;
       delete velocityRange;
@@ -150,10 +137,14 @@ class MCar3D: public RLProblem<T>
     void updateRTStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
-      vars[0] = (xposition - positionRange->min()) * Base::resolutions->at(0) / positionRange->length();
-      vars[1] = (yposition - positionRange->min()) * Base::resolutions->at(1) / positionRange->length();
-      vars[2] = (xvelocity - velocityRange->min()) * Base::resolutions->at(2) / velocityRange->length();
-      vars[3] = (yvelocity - velocityRange->min()) * Base::resolutions->at(3) / velocityRange->length();
+      vars[0] = (xposition - positionRange->min()) * Base::resolutions->at(0)
+          / positionRange->length();
+      vars[1] = (yposition - positionRange->min()) * Base::resolutions->at(1)
+          / positionRange->length();
+      vars[2] = (xvelocity - velocityRange->min()) * Base::resolutions->at(2)
+          / velocityRange->length();
+      vars[3] = (yvelocity - velocityRange->min()) * Base::resolutions->at(3)
+          / velocityRange->length();
 
       Base::observations->at(0) = xposition;
       Base::observations->at(1) = yposition;
@@ -195,4 +186,4 @@ class MCar3D: public RLProblem<T>
 
 };
 
-#endif /* MCAR3D_H_ */
+#endif /* MOUNTAINCAR3D_H_ */

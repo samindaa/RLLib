@@ -26,7 +26,7 @@ RLLIB_TEST_MAKE(ExtendedProblemsTest)
 void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 {
   Probabilistic::srand(0);
-  RLProblem<double>* problem = new MCar3D<double>;
+  RLProblem<double>* problem = new MountainCar3D<double>;
   //Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
   Projector<double>* projector = new MountainCar3DTilesProjector<double>();
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -79,7 +79,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 {
   Probabilistic::srand(0);
-  RLProblem<double>* problem = new MCar3D<double>;
+  RLProblem<double>* problem = new MountainCar3D<double>;
   Projector<double>* projector = new MountainCar3DTilesProjector<double>();
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
@@ -125,7 +125,7 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 void ExtendedProblemsTest::testSarsaMountainCar3D()
 {
   Probabilistic::srand(0);
-  RLProblem<double>* problem = new MCar3D<double>;
+  RLProblem<double>* problem = new MountainCar3D<double>;
   Projector<double>* projector = new MountainCar3DTilesProjector<double>();
   //Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -161,7 +161,7 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
 void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 {
   Probabilistic::srand(0);
-  RLProblem<double>* problem = new MCar3D<double>;
+  RLProblem<double>* problem = new MountainCar3D<double>;
   Hashing* hashing = new UNH(100000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,

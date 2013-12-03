@@ -32,7 +32,7 @@
 #include "ControlAlgorithm.h"
 
 // From the simulation
-#include "MCar3D.h"
+#include "MountainCar3D.h"
 #include "Acrobot.h"
 #include "RandlovBike.h"
 #include "PoleBalancing.h"

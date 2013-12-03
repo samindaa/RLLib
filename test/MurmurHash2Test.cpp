@@ -9,7 +9,7 @@
 
 void MurmurHash2Test::testChangingSeed()
 {
-  MurmurHashing* murmurHashing = new MurmurHashing();
+  MurmurHashing* murmurHashing = new MurmurHashing(0);
   unsigned char key[] =
   { 0x4E, 0xE3, 0x91, 0x00, 0x10, 0x8F, 0xFF };
   unsigned int expected[] =
@@ -29,7 +29,7 @@ void MurmurHash2Test::testChangingSeed()
 
 void MurmurHash2Test::testChangingKey()
 {
-  MurmurHashing* murmurHashing = new MurmurHashing();
+  MurmurHashing* murmurHashing = new MurmurHashing(0);
   unsigned char key[133] =
   { 0 };
   unsigned int expected[] =
@@ -50,7 +50,7 @@ void MurmurHash2Test::testChangingKey()
 
 void MurmurHash2Test::testChangingKeyLength()
 {
-  MurmurHashing* murmurHashing = new MurmurHashing();
+  MurmurHashing* murmurHashing = new MurmurHashing(0);
   unsigned int expected[] =
       { 0xa0c72f8e, 0x29c2f97e, 0x00ca8bba, 0x88387876, 0xe203ce49, 0x58d75952, 0xab84febe,
           0x98153c65, 0xcbb38375, 0x6ea1a28b, 0x9afa8f55, 0xfb890eb6, 0x9516cc49, 0x6408a8eb,
