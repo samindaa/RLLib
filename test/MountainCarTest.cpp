@@ -26,11 +26,10 @@ RLLIB_TEST_MAKE(MountainCarTest)
 void MountainCarTest::testSarsaTabularActionMountainCar()
 {
   Probabilistic::srand(0);
-  cout << "time=" << time(0) << endl;
   RLProblem<double>* problem = new MountainCar<double>;
-  //Projector<double>* projector = new TileCoderNoHashing<double>(1000, 10, true); << FixMe
   Hashing* hashing = new UNH(1000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new TabularAction<double>(projector,
       problem->getDiscreteActions(), true);
   Trace<double>* e = new RTrace<double>(toStateAction->dimension());
@@ -69,7 +68,8 @@ void MountainCarTest::testOnPolicyBoltzmannRTraceTabularActionCar()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new UNH(1000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      false);
   StateToStateAction<double>* toStateAction = new TabularAction<double>(projector,
       problem->getDiscreteActions(), false);
 
@@ -123,7 +123,8 @@ void MountainCarTest::testSarsaMountainCar()
   Probabilistic::srand(0);
   RLProblem<float>* problem = new MountainCar<float>;
   Hashing* hashing = new UNH(10000);
-  Projector<float>* projector = new TileCoderHashing<float>(hashing, 10, true);
+  Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<float>* toStateAction = new StateActionTilings<float>(projector,
       problem->getDiscreteActions());
   Trace<float>* e = new RTrace<float>(projector->dimension());
@@ -157,7 +158,8 @@ void MountainCarTest::testSarsaTrueMountainCar()
   Probabilistic::srand(0);
   RLProblem<float>* problem = new MountainCar<float>;
   Hashing* hashing = new MurmurHashing(10000);
-  Projector<float>* projector = new TileCoderHashing<float>(hashing, 10, true);
+  Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<float>* toStateAction = new StateActionTilings<float>(projector,
       problem->getDiscreteActions());
   Trace<float>* e = new ATrace<float>(projector->dimension());
@@ -191,9 +193,9 @@ void MountainCarTest::testSarsaAdaptiveMountainCar()
 {
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
-  problem->setResolution(9.0);
   Hashing* hashing = new UNH(10000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 9, 10,
+      false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -228,7 +230,8 @@ void MountainCarTest::testExpectedSarsaMountainCar()
 {
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new UNH(10000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new RTrace<double>(projector->dimension());
@@ -263,7 +266,8 @@ void MountainCarTest::testGreedyGQOnPolicyMountainCar()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new UNH(10000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -301,7 +305,8 @@ void MountainCarTest::testGreedyGQMountainCar()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -343,7 +348,8 @@ void MountainCarTest::testSoftmaxGQOnMountainCar()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -382,7 +388,8 @@ void MountainCarTest::testOffPACMountainCar()
   Probabilistic::srand(0);
   RLProblem<float>* problem = new MountainCar<float>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<float>* projector = new TileCoderHashing<float>(hashing, 10, true);
+  Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<float>* toStateAction = new StateActionTilings<float>(projector,
       problem->getDiscreteActions());
 
@@ -440,7 +447,8 @@ void MountainCarTest::testOffPACOnPolicyMountainCar()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(1000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -495,7 +503,8 @@ void MountainCarTest::testOnPolicyContinousActionCar(const int& nbMemory, const 
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(nbMemory);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getContinuousActions());
 
@@ -546,7 +555,8 @@ void MountainCarTest::testOnPolicyBoltzmannATraceCar()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(10000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -596,7 +606,8 @@ void MountainCarTest::testOnPolicyBoltzmannRTraceCar()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(10000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -651,7 +662,8 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(10000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 

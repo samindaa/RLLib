@@ -52,9 +52,6 @@ class CartPole: public RLProblem<T>
 
       // subject to change
       Base::continuousActions->push_back(0, 0.0);
-
-      for (int i = 0; i < Base::resolutions->dimension(); i++)
-        Base::resolutions->at(i) = 10.0;
     }
 
     virtual ~CartPole()
@@ -74,8 +71,10 @@ class CartPole: public RLProblem<T>
       Base::observations->at(2) = theta;
       Base::observations->at(3) = theta_dot;
 
-      for (int i = 0; i < vars.dimension(); i++)
-        vars[i] = Base::observations->at(i);
+      vars[0] = xRange->toUnit(x);
+      vars[1] = x_dot; // FixME
+      vars[2] = thetaRange->toUnit(theta);
+      vars[3] = theta_dot; // FixME
 
     }
 

@@ -37,12 +37,14 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
   }
 
   // train
-  int numObservations = 1;
+  int nbInputs = 1;
+  double gridResolution = 8;
   int memorySize = 512;
-  int numTiling = 16;
+  int nbTilings = 16;
   UNH hashing(memorySize);
-  TileCoderHashing<double> coder(&hashing, numTiling, true);
-  PVector<double> x(numObservations);
+  Range<double> inputRange(-M_PI_2, M_PI_2);
+  TileCoderHashing<double> coder(&hashing, nbInputs, gridResolution, nbTilings, true);
+  PVector<double> x(nbInputs);
   Adaline<double> adaline(coder.dimension(), 0.1 / coder.vectorNorm());
   IDBD<double> idbd(coder.dimension(), 0.001); // This value looks good
   Autostep<double> autostep(coder.dimension());
@@ -52,7 +54,7 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
   {
     for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
     {
-      x[0] = 2.0 * iter->first / M_PI; // normalized and unit generalized
+      x[0] = inputRange.toUnit(iter->first); // normalized and unit generalized
       const Vector<double>* phi = coder.project(&x);
       adaline.learn(phi, iter->second);
       idbd.learn(phi, iter->second);
@@ -64,7 +66,7 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
     for (multimap<double, double>::const_iterator iterMse = X.begin(); iterMse != X.end();
         ++iterMse)
     {
-      x[0] = 2.0 * iterMse->first / M_PI;
+      x[0] = inputRange.toUnit(iterMse->first);
       const Vector<double>* phi = coder.project(&x);
       mse[0] += pow(iterMse->second - adaline.predict(phi), 2) / X.size();
       mse[1] += pow(iterMse->second - idbd.predict(phi), 2) / X.size();
@@ -79,7 +81,7 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
   ofstream outFilePrediction("visualization/linearRegressionWithTileFeaturesPrediction.dat");
   for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
   {
-    x[0] = 2.0 * iter->first / M_PI;
+    x[0] = inputRange.toUnit(iter->first);
     const Vector<double>* phi = coder.project(&x);
     if (outFilePrediction.is_open())
       outFilePrediction << iter->first << " " << iter->second << " " << adaline.predict(phi) << " "
@@ -93,11 +95,16 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
   // simple sine curve estimation
   // training samples
   multimap<double, double> X;
+  double minValue = 0, maxValue = 0;
   for (int i = 0; i < 50; i++)
   {
     double x = Probabilistic::nextGaussian(0.25, 0.2); // @@>> input noise?
     double y = 0; // @@>> output noise?
     X.insert(make_pair(x, y));
+    if (x < minValue)
+      minValue = x;
+    if (x > maxValue)
+      maxValue = x;
   }
 
   for (int i = 50; i < 100; i++)
@@ -105,15 +112,21 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
     double x = Probabilistic::nextGaussian(0.75, 0.2); // @@>> input noise?
     double y = 1; // @@>> output noise?
     X.insert(make_pair(x, y));
+    if (x < minValue)
+      minValue = x;
+    if (x > maxValue)
+      maxValue = x;
   }
 
   // train
-  int numObservations = 1;
+  int nbInputs = 1;
   int memorySize = 512;
-  int numTiling = 16;
-  PVector<double> x(numObservations);
+  double gridResolution = 10;
+  int nbTilings = 16;
+  PVector<double> x(nbInputs);
   UNH hashing(memorySize);
-  TileCoderHashing<double> coder(&hashing, numTiling, true);
+  Range<double> inputRange(minValue, maxValue);
+  TileCoderHashing<double> coder(&hashing, nbInputs, gridResolution, nbTilings, true);
   SemiLinearIDBD<double> semiLinearIdbd(coder.dimension(), 0.001 / x.dimension()); // This value looks good
   int traininCounter = 0;
   ofstream outFileError("visualization/logisticRegressionWithTileFeaturesTrainError.dat");
@@ -121,7 +134,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
   {
     for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
     {
-      x[0] = 10.0 * iter->first; // normalized and unit generalized
+      x[0] = inputRange.toUnit(iter->first); // normalized and unit generalized
       const Vector<double>* phi = coder.project(&x);
       semiLinearIdbd.learn(phi, iter->second);
     }
@@ -131,7 +144,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
     for (multimap<double, double>::const_iterator iterCrossEntropy = X.begin();
         iterCrossEntropy != X.end(); ++iterCrossEntropy)
     {
-      x[0] = 10.0 * iterCrossEntropy->first;
+      x[0] = inputRange.toUnit(iterCrossEntropy->first);
       const Vector<double>* phi = coder.project(&x);
       crossEntropy += -iterCrossEntropy->second * log(semiLinearIdbd.predict(phi))
           - (1.0 - iterCrossEntropy->second) * log(1.0 - semiLinearIdbd.predict(phi));
@@ -145,7 +158,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
   ofstream outFilePrediction("visualization/logisticRegressionWithTileFeaturesPrediction.dat");
   for (multimap<double, double>::const_iterator iter = X.begin(); iter != X.end(); ++iter)
   {
-    x[0] = 10.0 * iter->first;
+    x[0] = inputRange.toUnit(iter->first);
     const Vector<double>* phi = coder.project(&x);
     if (outFilePrediction.is_open())
       outFilePrediction << iter->first << " " << iter->second << " " << semiLinearIdbd.predict(phi)
@@ -168,8 +181,8 @@ void SupervisedAlgorithmTest::linearRegressionWithRegularFeatures()
   }
 
   // train
-  int numObservations = 1;
-  PVector<double> phi(numObservations + 1);
+  int nbInputs = 1;
+  PVector<double> phi(nbInputs + 1);
   phi.setEntry(phi.dimension() - 1, 1.0);
   Adaline<double> adaline(phi.dimension(), 0.00001);
   IDBD<double> idbd(phi.dimension(), 0.001); // This value looks good
@@ -233,8 +246,8 @@ void SupervisedAlgorithmTest::logisticRegressionWithRegularFeatures()
   }
 
   // train
-  int numObservations = 1;
-  PVector<double> phi(numObservations + 1);
+  int nbInputs = 1;
+  PVector<double> phi(nbInputs + 1);
   phi.setEntry(phi.dimension() - 1, 1.0);
   SemiLinearIDBD<double> semiLinearIdbd(phi.dimension(), 0.001 / phi.dimension()); // This value looks good
   int traininCounter = 0;

@@ -28,7 +28,8 @@ void SwingPendulumTest::testOffPACSwingPendulum()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -82,7 +83,8 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getContinuousActions());
 
@@ -143,7 +145,8 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -199,7 +202,8 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -249,7 +253,8 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
   Probabilistic::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 

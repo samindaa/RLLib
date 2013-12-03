@@ -57,12 +57,13 @@ class TileCoder: public Projector<T>
   protected:
     bool includeActiveFeature;
     Vector<T>* vector;
-    int nbTiling;
+    int nbTilings;
 
   public:
-    TileCoder(const int& memorySize, const int& nbTiling, bool includeActiveFeature = true) :
+    TileCoder(const int& memorySize, const int& nbTilings, bool includeActiveFeature = true) :
         includeActiveFeature(includeActiveFeature), vector(
-            new SVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)), nbTiling(nbTiling)
+            new SVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)), nbTilings(
+            nbTilings)
     {
     }
 
@@ -71,9 +72,8 @@ class TileCoder: public Projector<T>
       delete vector;
     }
 
-    virtual void coder(Vector<T>* vector, const Vector<T>* x, const int& nbTiling) =0;
-    virtual void coder(Vector<T>* vector, const Vector<T>* x, const int& nbTiling,
-        const int& h1) =0;
+    virtual void coder(const Vector<T>* x) =0;
+    virtual void coder(const Vector<T>* x, const int& h1) =0;
 
     const Vector<T>* project(const Vector<T>* x, int h1)
     {
@@ -82,11 +82,11 @@ class TileCoder: public Projector<T>
         return vector;
       if (includeActiveFeature)
       {
-        coder(vector, x, nbTiling, h1);
+        coder(x, h1);
         vector->setEntry(vector->dimension() - 1, 1.0);
       }
       else
-        coder(vector, x, nbTiling, h1);
+        coder(x, h1);
       return vector;
     }
 
@@ -97,17 +97,17 @@ class TileCoder: public Projector<T>
         return vector;
       if (includeActiveFeature)
       {
-        coder(vector, x, nbTiling);
+        coder(x);
         vector->setEntry(vector->dimension() - 1, 1.0);
       }
       else
-        coder(vector, x, nbTiling);
+        coder(x);
       return vector;
     }
 
     double vectorNorm() const
     {
-      return includeActiveFeature ? nbTiling + 1 : nbTiling;
+      return includeActiveFeature ? nbTilings + 1 : nbTilings;
     }
 
     int dimension() const
@@ -121,28 +121,35 @@ template<class T>
 class TileCoderHashing: public TileCoder<T>
 {
   private:
+    typedef TileCoder<T> Base;
+    T gridResolution;
+    Vector<T>* inputs;
     Tiles<T>* tiles;
 
   public:
-    TileCoderHashing(Hashing* hashing, const int& nbTiling, const bool& includeActiveFeature = true) :
-        TileCoder<T>(hashing->getMemorySize(), nbTiling, includeActiveFeature), tiles(
-            new Tiles<T>(hashing))
+    TileCoderHashing(Hashing* hashing, const int& nbInputs, const T& gridResolution,
+        const int& nbTilings, const bool& includeActiveFeature = true) :
+        TileCoder<T>(hashing->getMemorySize(), nbTilings, includeActiveFeature), gridResolution(
+            gridResolution), inputs(new PVector<T>(nbInputs)), tiles(new Tiles<T>(hashing))
     {
     }
 
     virtual ~TileCoderHashing()
     {
+      delete inputs;
       delete tiles;
     }
 
-    void coder(Vector<T>* vector, const Vector<T>* x, const int& nbTiling)
+    void coder(const Vector<T>* x)
     {
-      tiles->tiles(vector, nbTiling, x);
+      inputs->set(x)->mapMultiplyToSelf(gridResolution);
+      tiles->tiles(Base::vector, Base::nbTilings, inputs);
     }
 
-    void coder(Vector<T>* vector, const Vector<T>* x, const int& nbTiling, const int& h1)
+    void coder(const Vector<T>* x, const int& h1)
     {
-      tiles->tiles(vector, nbTiling, x, h1);
+      inputs->set(x)->mapMultiplyToSelf(gridResolution);
+      tiles->tiles(Base::vector, Base::nbTilings, inputs, h1);
     }
 };
 

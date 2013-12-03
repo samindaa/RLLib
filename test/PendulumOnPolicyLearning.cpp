@@ -30,7 +30,7 @@ ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearner
 {
   problem = new SwingPendulum<double>;
   hashing = new UNH(1000);
-  projector = new TileCoderHashing<double>(hashing, 10, true);
+  projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10, true);
   toStateAction = new StateActionTilings<double>(projector, problem->getContinuousActions());
 
   alpha_v = alpha_u = alpha_r = gamma = lambda = 0;

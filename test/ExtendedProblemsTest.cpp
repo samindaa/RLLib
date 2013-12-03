@@ -163,7 +163,8 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new MountainCar3D<double>;
   Hashing* hashing = new UNH(100000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -439,14 +440,16 @@ void ExtendedProblemsTest::testSupervisedProjector()
   Probabilistic::srand(time(0));
   // Parameters:
   int memory = 512 / 4;
-  int nbTiling = 8;
+  int nbTilings = 8;
   double alpha = 0.01;
-  double resolution = 4.0f;
+  int nbInputs = 1;
+  double gridResolution = 4.0f;
   int nbTraingExamples = 200;
   int nbRuns = 8;
-
+  Range<double>* inputRange = new Range<double>(-M_PI, M_PI);
   Hashing* hashing = new MurmurHashing(memory);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, nbTiling, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, nbInputs, gridResolution,
+      nbTilings, true);
 
   VectorXd trainX = VectorXd::Zero(nbTraingExamples);
   MatrixXd trainY = MatrixXd::Zero(trainX.rows(), 3);
@@ -471,7 +474,7 @@ void ExtendedProblemsTest::testSupervisedProjector()
   {
     for (int i = 0; i < trainX.rows(); i++)
     {
-      x_t->setEntry(0, resolution * (trainX(i) + M_PI) / (2.0 * M_PI));
+      x_t->setEntry(0, inputRange->toUnit(trainX(i)));
       for (int j = 0; j < 3; j++)
         predictors[j]->learn(projector->project(x_t, j), trainY(i, j));
     }
@@ -480,9 +483,9 @@ void ExtendedProblemsTest::testSupervisedProjector()
   std::ofstream dout("visualization/dout.data");
   for (double x = -M_PI; x < M_PI; x += 0.05)
   {
-    x_t->setEntry(0, resolution * (x + M_PI) / (2.0 * M_PI));
-    dout << (x_t->getEntry(0) / resolution) << " " << sin(x) << " " << (sin(M_PI * x) / (M_PI * x))
-        << " " << (x / M_PI) << " ";
+    x_t->setEntry(0, inputRange->toUnit(x));
+    dout << (x_t->getEntry(0) * gridResolution) << " " << sin(x) << " "
+        << (sin(M_PI * x) / (M_PI * x)) << " " << (x / M_PI) << " ";
     for (int j = 0; j < 3; j++)
       dout << predictors[j]->predict(projector->project(x_t, j)) << " ";
     dout << std::endl;
@@ -491,6 +494,7 @@ void ExtendedProblemsTest::testSupervisedProjector()
   dout.close();
 
   delete hashing;
+  delete inputRange;
   delete projector;
   for (int i = 0; i < 3; i++)
     delete predictors[i];

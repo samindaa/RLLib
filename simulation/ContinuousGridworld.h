@@ -56,10 +56,6 @@ class ContinuousGridworld: public RLProblem<T>
         else
           Base::discreteActions->update(i, dimension, 1.0);
       }
-
-      for (int i = 0; i < this->dimension(); i++)
-        Base::resolutions->at(i) = 10.0;
-
       // continuous actions are not setup for this problem
     }
 
@@ -80,8 +76,7 @@ class ContinuousGridworld: public RLProblem<T>
     { // nothing
       // unit generalization
       for (int i = 0; i < Base::output->o_tp1->dimension(); i++)
-        Base::output->o_tp1->at(i) = Base::observations->at(i) * Base::resolutions->at(i);
-      //std::cout << __vars->at(0) << " " << __vars->at(1) << " || ";
+        Base::output->o_tp1->at(i) = Base::observations->at(i);
       Base::output->updateRTStep(r(), z(), endOfEpisode());
     }
 

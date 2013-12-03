@@ -28,7 +28,8 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
@@ -70,7 +71,8 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -128,7 +130,8 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -186,7 +189,8 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -245,7 +249,8 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
   Probabilistic::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, true);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 

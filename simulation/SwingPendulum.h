@@ -56,10 +56,6 @@ class SwingPendulum: public RLProblem<T>
 
       // subject to change
       Base::continuousActions->push_back(0, 0.0);
-
-      for (int i = 0; i < this->dimension(); i++)
-        Base::resolutions->at(i) = 10.0;
-
     }
 
     virtual ~SwingPendulum()
@@ -82,10 +78,8 @@ class SwingPendulum: public RLProblem<T>
     void updateRTStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
-      //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
-      vars[0] = (theta - thetaRange->min()) * Base::resolutions->at(0) / thetaRange->length();
-      vars[1] = (velocity - velocityRange->min()) * Base::resolutions->at(1)
-          / velocityRange->length();
+      vars[0] = thetaRange->toUnit(theta);
+      vars[1] = velocityRange->toUnit(velocity);
 
       Base::observations->at(0) = theta;
       Base::observations->at(1) = velocity;

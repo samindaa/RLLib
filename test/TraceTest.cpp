@@ -23,10 +23,9 @@
 
 RLLIB_TEST_MAKE(TraceTest)
 
-void TraceTest::runTestOnOnMountainCar(Projector<double>* projector, Trace<double>* trace)
+void TraceTest::runTest(RLProblem<double>* problem, Projector<double>* projector,
+    Trace<double>* trace)
 {
-  RLProblem<double>* problem = new MountainCar<double>;
-  problem->setResolution(9.0);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   double alpha = 0.2 / projector->vectorNorm();
@@ -44,7 +43,6 @@ void TraceTest::runTestOnOnMountainCar(Projector<double>* projector, Trace<doubl
   sim->setVerbose(false);
   sim->run();
 
-  delete problem;
   delete toStateAction;
   delete sarsa;
   delete acting;
@@ -56,20 +54,24 @@ void TraceTest::runTestOnOnMountainCar(Projector<double>* projector, Trace<doubl
 
 void TraceTest::testSarsaOnMountainCarSVectorTraces()
 {
+  RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(30000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 9, 10,
+      false);
+
   Trace<double>* e = new ATrace<double>(projector->dimension());
-  runTestOnOnMountainCar(projector, e);
+  runTest(problem, projector, e);
   delete e;
 
   e = new AMaxTrace<double>(projector->dimension());
-  runTestOnOnMountainCar(projector, e);
+  runTest(problem, projector, e);
   delete e;
 
   e = new RTrace<double>(projector->dimension());
-  runTestOnOnMountainCar(projector, e);
+  runTest(problem, projector, e);
   delete e;
 
+  delete problem;
   delete hashing;
   delete projector;
 
@@ -77,26 +79,29 @@ void TraceTest::testSarsaOnMountainCarSVectorTraces()
 
 void TraceTest::testSarsaOnMountainCarMaxLengthTraces()
 {
+  RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(10000);
-  Projector<double>* projector = new TileCoderHashing<double>(hashing, 10, false);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      false);
   Trace<double>* e = new ATrace<double>(projector->dimension());
   Trace<double>* trace = new MaxLengthTrace<double>(e, 100);
-  runTestOnOnMountainCar(projector, trace);
+  runTest(problem, projector, e);
   delete trace;
   delete e;
 
   e = new AMaxTrace<double>(projector->dimension());
   trace = new MaxLengthTrace<double>(e, 100);
-  runTestOnOnMountainCar(projector, trace);
+  runTest(problem, projector, e);
   delete trace;
   delete e;
 
   e = new RTrace<double>(projector->dimension());
   trace = new MaxLengthTrace<double>(e, 100);
-  runTestOnOnMountainCar(projector, trace);
+  runTest(problem, projector, e);
   delete trace;
   delete e;
 
+  delete problem;
   delete hashing;
   delete projector;
 }

@@ -159,38 +159,38 @@ template<class T>
 class Range
 {
   private:
-    T minv, maxv;
+    T minValue, maxValue;
 
   public:
-    Range(const T& minv = std::numeric_limits<T>::min(), const T& maxv =
+    Range(const T& minValue = std::numeric_limits<T>::min(), const T& maxValue =
         std::numeric_limits<T>::max()) :
-        minv(minv), maxv(maxv)
+        minValue(minValue), maxValue(maxValue)
     {
     }
 
     T bound(const T& value) const
     {
-      return std::max(minv, std::min(maxv, value));
+      return std::max(minValue, std::min(maxValue, value));
     }
 
     bool in(const T& value) const
     {
-      return value >= minv && value <= maxv;
+      return value >= minValue && value <= maxValue;
     }
 
     T length() const
     {
-      return maxv - minv;
+      return maxValue - minValue;
     }
 
     T min() const
     {
-      return minv;
+      return minValue;
     }
 
     T max() const
     {
-      return maxv;
+      return maxValue;
     }
 
     T center() const
@@ -201,6 +201,12 @@ class Range
     T chooseRandom() const
     {
       return Probabilistic::nextFloat() * length() + min();
+    }
+
+    // Unit output [0,1]
+    T toUnit(const T& value) const
+    {
+      return (bound(value) - min()) / length();
     }
 };
 

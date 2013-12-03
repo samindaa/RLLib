@@ -62,9 +62,6 @@ class MountainCar3D: public RLProblem<T>
         Base::discreteActions->push_back(a, a);
       // not used
       Base::continuousActions->push_back(0, 0.0);
-
-      for (int i = 0; i < this->dimension(); i++)
-        Base::resolutions->at(i) = 6.0;
     }
 
     virtual ~MountainCar3D()
@@ -137,14 +134,10 @@ class MountainCar3D: public RLProblem<T>
     void updateRTStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
-      vars[0] = (xposition - positionRange->min()) * Base::resolutions->at(0)
-          / positionRange->length();
-      vars[1] = (yposition - positionRange->min()) * Base::resolutions->at(1)
-          / positionRange->length();
-      vars[2] = (xvelocity - velocityRange->min()) * Base::resolutions->at(2)
-          / velocityRange->length();
-      vars[3] = (yvelocity - velocityRange->min()) * Base::resolutions->at(3)
-          / velocityRange->length();
+      vars[0] = positionRange->toUnit(xposition);
+      vars[1] = positionRange->toUnit(yposition);
+      vars[2] = velocityRange->toUnit(xvelocity);
+      vars[3] = velocityRange->toUnit(yvelocity);
 
       Base::observations->at(0) = xposition;
       Base::observations->at(1) = yposition;

@@ -16,7 +16,8 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
   behaviourEnvironment = new ContinuousGridworld<double>;
   evaluationEnvironment = new ContinuousGridworld<double>;
   hashing = new MurmurHashing(1000000);
-  projector = new TileCoderHashing<double>(hashing, 10, true);
+  projector = new TileCoderHashing<double>(hashing, behaviourEnvironment->dimension(), 10, 10,
+      true);
   toStateAction = new StateActionTilings<double>(projector,
       behaviourEnvironment->getDiscreteActions());
 

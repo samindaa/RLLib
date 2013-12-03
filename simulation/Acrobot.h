@@ -52,10 +52,8 @@ class Acrobot: public RLProblem<T>
 
       // subject to change
       Base::continuousActions->push_back(0, 0.0);
-
-      for (int i = 0; i < this->dimension(); i++)
-        Base::resolutions->at(i) = 6.0;
     }
+
     ~Acrobot()
     {
       delete thetaRange;
@@ -85,12 +83,10 @@ class Acrobot: public RLProblem<T>
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
       //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
-      vars[0] = ((theta1 - thetaRange->min()) / thetaRange->length()) * Base::resolutions->at(0);
-      vars[1] = ((theta2 - thetaRange->min()) / thetaRange->length()) * Base::resolutions->at(1);
-      vars[2] = ((theta1Dot - theta1DotRange->min()) / theta1DotRange->length())
-          * Base::resolutions->at(2);
-      vars[3] = ((theta2Dot - theta2DotRange->min()) / theta2DotRange->length())
-          * Base::resolutions->at(3);
+      vars[0] = thetaRange->toUnit(theta1);
+      vars[1] = thetaRange->toUnit(theta2);
+      vars[2] = theta1DotRange->toUnit(theta1Dot);
+      vars[3] = theta2DotRange->toUnit(theta2Dot);
       Base::output->updateRTStep(r(), z(), endOfEpisode());
 
       Base::observations->at(0) = theta1;

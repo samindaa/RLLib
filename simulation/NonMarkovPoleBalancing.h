@@ -84,10 +84,6 @@ class NonMarkovPoleBalancing: public RLProblem<T>
 
       // subject to change
       Base::continuousActions->push_back(0, 0.0);
-
-      for (int i = 0; i < this->dimension(); i++)
-        Base::resolutions->setEntry(i, 6.0);
-
     }
 
     ~NonMarkovPoleBalancing()

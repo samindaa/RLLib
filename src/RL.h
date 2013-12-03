@@ -158,14 +158,13 @@ class RLProblem
 {
   protected:
     DenseVector<T>* observations;
-    DenseVector<T>* resolutions;
     TRStep<T>* output;
     Actions<T>* discreteActions;
     Actions<T>* continuousActions;
   public:
     RLProblem(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
-        observations(new PVector<T>(nbVars)), resolutions(new PVector<T>(nbVars)), output(
-            new TRStep<T>(nbVars)), discreteActions(new ActionArray<T>(nbDiscreteActions)), continuousActions(
+        observations(new PVector<T>(nbVars)), output(new TRStep<T>(nbVars)), discreteActions(
+            new ActionArray<T>(nbDiscreteActions)), continuousActions(
             new ActionArray<T>(nbContinuousActions))
     {
     }
@@ -173,7 +172,6 @@ class RLProblem
     virtual ~RLProblem()
     {
       delete observations;
-      delete resolutions;
       delete output;
       delete discreteActions;
       delete continuousActions;
@@ -206,20 +204,9 @@ class RLProblem
       return observations;
     }
 
-    virtual const DenseVector<T>* getResolutions() const
-    {
-      return resolutions;
-    }
-
     virtual TRStep<T>* getTRStep() const
     {
       return output;
-    }
-
-    virtual void setResolution(const double& resolution)
-    {
-      for (int i = 0; i < resolutions->dimension(); i++)
-        resolutions->at(i) = resolution;
     }
 
     virtual int dimension() const
