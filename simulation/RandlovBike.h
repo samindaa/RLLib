@@ -46,12 +46,17 @@
 class RandlovBike: public RLProblem<>
 {
   protected:
+    /*is go-to-target behavior*/
+    bool goToTarget;
     /* position of goal */
     float x_goal, y_goal, radius_goal, reinforcement;
     bool isTerminal;
 
     float omega, omega_dot, omega_d_dot, theta, theta_dot, theta_d_dot, xf, yf, xb,
         yb /* tyre position */, psi_goal /* Angle to the goal */, aux_state;
+    double rCM, rf, rb;
+    float T, d, phi, psi /* bike's angle to the y-axis */;
+    float temp;
 
     float R1, R2, R3, R_FACTOR, NO_STATES2, dt, /* 10 km/t in m/s */
     v, g, dCM, c, h, Mc, Md, Mp, M, R, /* tyre radius */
@@ -60,13 +65,16 @@ class RandlovBike: public RLProblem<>
     pi;
 
     /*ranges*/
-    Range<float> *thetaRange, *thetaDotRange, *omegaRange, *omegaDotRange, *omegaDotDotRange;
+    Range<float> *thetaRange, *thetaDotRange, *omegaRange, *omegaDotRange, *omegaDotDotRange,
+        *distanceRange, *psiRange;
 
   public:
-    RandlovBike() :
-        RLProblem<>(5 /*+ 2*/, 9, 0), x_goal(0), y_goal(0), radius_goal(0), reinforcement(0), isTerminal(
-            false), omega(0), omega_dot(0), omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(
-            0), yf(0), xb(0), yb(0), psi_goal(0), aux_state(0), R1(-1.0), R2(0.0), R3(+1.0),
+    RandlovBike(const bool& goToTarget) :
+        RLProblem<>((goToTarget ? 2 : 0) + 5, 9, 0), goToTarget(goToTarget), x_goal(1000.0f), y_goal(
+            0), radius_goal(10.0f), reinforcement(0), isTerminal(false), omega(0), omega_dot(0), omega_d_dot(
+            0), theta(0), theta_dot(0), theta_d_dot(0), xf(0), yf(0), xb(0), yb(0), psi_goal(0), aux_state(
+            0), rCM(0), rf(0), rb(0), T(0), d(0), phi(0), psi(0), temp(0), R1(-1.0), R2(0.0), R3(
+            +1.0),
         // +0.01
         R_FACTOR(0.0001), NO_STATES2(20),
 
@@ -77,7 +85,8 @@ class RandlovBike: public RLProblem<>
             Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl((1.0 / 2) * Md * R * R), l(1.11), pi(
         M_PI), thetaRange(new Range<float>(-M_PI_2, M_PI_2)), thetaDotRange(
             new Range<float>(-2, 2)), omegaRange(new Range<float>(-M_PI / 15.0f, M_PI / 15.0f)), omegaDotRange(
-            new Range<float>(-0.5, 0.5)), omegaDotDotRange(new Range<float>(-2, 2))
+            new Range<float>(-0.5, 0.5)), omegaDotDotRange(new Range<float>(-2, 2)), distanceRange(
+            new Range<float>(0, 2000)), psiRange(new Range<float>(-2, 2))
     {
 
       for (int i = 0; i < discreteActions->dimension(); i++)
@@ -91,6 +100,8 @@ class RandlovBike: public RLProblem<>
       delete omegaRange;
       delete omegaDotRange;
       delete omegaDotDotRange;
+      delete distanceRange;
+      delete psiRange;
     }
 
   private:
@@ -217,27 +228,28 @@ class RandlovBike: public RLProblem<>
       vars[2] = toUnit(omegaDotDotRange, omega_d_dot);
       vars[3] = toUnit(thetaRange, theta);
       vars[4] = toUnit(thetaDotRange, theta_dot);
-      //vars[5] = theta_d_dot;
-      //vars[6] = psi_goal;
-      //vars[7] = calc_dist_to_goal(xf, xb, yf, yb);
-
+      if (goToTarget)
+      {
+        vars[5] = toUnit(psiRange, psi_goal);
+        vars[6] = toUnit(distanceRange,
+            std::sqrt(std::pow(x_goal - xf, 2) + std::pow(y_goal - yf, 2)));
+      }
       observations->at(0) = omega;
       observations->at(1) = omega_dot;
       observations->at(2) = omega_d_dot;
       observations->at(3) = theta;
       observations->at(4) = theta_dot;
-      //observations->at(5) = theta_d_dot;
-      //observations->at(6) = psi_goal;
-      //observations->at(7) = calc_dist_to_goal(xf, xb, yf, yb);
+      if (goToTarget)
+      {
+        observations->at(5) = psi_goal;
+        observations->at(6) = calc_dist_to_goal(xf, xb, yf, yb);
+      }
 
       output->updateRTStep(r(), z(), endOfEpisode());
     }
 
     void bike(const int& to_do, const int& action = 0)
     {
-      static double rCM, rf, rb;
-      static float T, d, phi, psi /* bike's angle to the y-axis */;
-      float temp;
 
       T = 2 * ((action / 3) - 1);
       d = 0.02 * ((action % 3) - 1);
@@ -359,9 +371,10 @@ class RandlovBike: public RLProblem<>
         }
         else
         {
-          // reinforcement = (0.95 - pow(psi_goal, 2)) * R_FACTOR; //<< To Ride
-          // in order to make the agent to learn
-          reinforcement = R2; //<< To Balance
+          if (goToTarget)
+            reinforcement = (0.95 - pow(psi_goal, 2)) * R_FACTOR; // << to ride (reward shaping)
+          else
+            reinforcement = R2; //<< to Balance
           isTerminal = false;
         }
       }

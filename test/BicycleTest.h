@@ -18,6 +18,7 @@ class BicycleTest: public BicycleTestBase
     void run();
   protected:
     void testBicycleBalance();
+    void testBicycleGoToTarget();
 };
 
 class BicycleProjector: public Projector<double>
@@ -29,7 +30,7 @@ class BicycleProjector: public Projector<double>
     Hashing* hashing;
     Tiles<double>* tiles;
   public:
-    BicycleProjector();
+    BicycleProjector(const int& nbVars);
     virtual ~BicycleProjector();
     const Vector<double>* project(const Vector<double>* x, int h1);
     const Vector<double>* project(const Vector<double>* x);
