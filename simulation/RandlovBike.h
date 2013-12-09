@@ -43,8 +43,10 @@
  * bib2html_rescat = "Applications, General RL",
  }
  */
-class RandlovBike: public RLProblem<>
+template<class Type>
+class RandlovBike: public RLProblem<Type>
 {
+    typedef RLProblem<Type> Base;
   protected:
     /*is go-to-target behavior*/
     bool goToTarget;
@@ -61,7 +63,7 @@ class RandlovBike: public RLProblem<>
     v, g, dCM, c, h, Mc, Md, Mp, M, R, /* tyre radius */
     sigma_dot, I_bike, I_dc, I_dv, I_dl, l,
     /* distance between the point where the front and back tyre touch the ground */
-    pi;
+    pi, Gamma;
 
     /*ranges*/
     Range<float> *thetaRange, *thetaDotRange, *omegaRange, *omegaDotRange, *omegaDotDotRange,
@@ -69,7 +71,7 @@ class RandlovBike: public RLProblem<>
 
   public:
     RandlovBike(const bool& goToTarget) :
-        RLProblem<>((goToTarget ? 1 : 0) + 5, 9, 0), goToTarget(goToTarget), x_goal(1000.0f), y_goal(
+        RLProblem<Type>((goToTarget ? 1 : 0) + 5, 9, 0), goToTarget(goToTarget), x_goal(1000.0f), y_goal(
             0), radius_goal(10.0f), reinforcement(0), isTerminal(false), omega(0), omega_dot(0), omega_d_dot(
             0), theta(0), theta_dot(0), theta_d_dot(0), xf(0), yf(0), xb(0), yb(0), psi_goal(0), rCM(
             0), rf(0), rb(0), T(0), d(0), phi(0), psi(0), R1(-1.0), R2(0.0), R3(+1.0), R_FACTOR(
@@ -78,14 +80,14 @@ class RandlovBike: public RLProblem<>
         /* tyre radius */
         sigma_dot(v / R), I_bike((13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)), I_dc(
             Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl((1.0 / 2) * Md * R * R), l(1.11), pi(
-        M_PI), thetaRange(new Range<float>(-M_PI_2, M_PI_2)), thetaDotRange(
+        M_PI), Gamma(0.99), thetaRange(new Range<float>(-M_PI_2, M_PI_2)), thetaDotRange(
             new Range<float>(-2, 2)), omegaRange(new Range<float>(-M_PI / 15.0f, M_PI / 15.0f)), omegaDotRange(
             new Range<float>(-0.5, 0.5)), omegaDotDotRange(new Range<float>(-2, 2)), psiRange(
             new Range<float>(-M_PI, M_PI))
     {
 
-      for (int i = 0; i < discreteActions->dimension(); i++)
-        discreteActions->push_back(i, i);
+      for (int i = 0; i < Base::discreteActions->dimension(); i++)
+        Base::discreteActions->push_back(i, i);
     }
 
     virtual ~RandlovBike()
@@ -122,7 +124,7 @@ class RandlovBike: public RLProblem<>
 
     void updateRTStep()
     {
-      DenseVector<double>& vars = *output->o_tp1;
+      DenseVector<Type>& vars = *Base::output->o_tp1;
       vars[0] = omegaRange->toUnit(omega);
       vars[1] = omegaDotRange->toUnit(omega_dot);
       vars[2] = omegaDotDotRange->toUnit(omega_d_dot);
@@ -130,15 +132,14 @@ class RandlovBike: public RLProblem<>
       vars[4] = thetaDotRange->toUnit(theta_dot);
       if (goToTarget)
         vars[5] = psiRange->toUnit(psi_goal);
-      observations->at(0) = omega;
-      observations->at(1) = omega_dot;
-      observations->at(2) = omega_d_dot;
-      observations->at(3) = theta;
-      observations->at(4) = theta_dot;
+      Base::observations->at(0) = omega;
+      Base::observations->at(1) = omega_dot;
+      Base::observations->at(2) = omega_d_dot;
+      Base::observations->at(3) = theta;
+      Base::observations->at(4) = theta_dot;
       if (goToTarget)
-        observations->at(5) = psi_goal;
-
-      output->updateRTStep(r(), z(), endOfEpisode());
+        Base::observations->at(5) = psi_goal;
+      Base::output->updateRTStep(r(), z(), endOfEpisode());
     }
 
     void bike(const int& to_do, const int& action = 0)
@@ -152,7 +153,6 @@ class RandlovBike: public RLProblem<>
       {
       case start:
       {
-
         omega = omega_dot = omega_d_dot = 0;
         theta = theta_dot = theta_d_dot = 0;
         xb = 0;
@@ -263,7 +263,7 @@ class RandlovBike: public RLProblem<>
         else
         {
           if (goToTarget)
-            reinforcement = (4.0f - pow(psi_goal, 2)) * R_FACTOR; // << to ride (reward shaping)
+            reinforcement = (M_PI / 3.0f - pow(psi_goal, 2)) * R_FACTOR; // << (reward shaping)
           else
             reinforcement = R2; //<< to Balance
           isTerminal = false;
@@ -296,6 +296,11 @@ class RandlovBike: public RLProblem<>
     float z() const
     {
       return reinforcement;
+    }
+
+    float getGamma() const
+    {
+      return Gamma;
     }
 
 };

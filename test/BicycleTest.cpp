@@ -12,13 +12,13 @@ BicycleProjector::BicycleProjector(const int& nbVars)
   /**
    * Number of inputs | Tiling type | Number of intervals | Number of tilings
    *            5/7   |     1D      |       8             |       8
-   *                  |     1D      |       2             |       4
-   *                  |     2D      |       8             |       8
+   *                  |     1D      |       4             |       4
+   *                  |     2D      |       4             |       4
    *                  |     2D + 1  |       4             |       4
    *                  |     2D + 2  |       4             |       4
    */
-  nbTiles = nbVars * (8 + 4 + 8 + 4 + 4);
-  memory = nbVars * (8 * 8 + 2 * 4 + 8 * 8 * 8 + 4 * 4 * 4 + 4 * 4 * 4) * 9/*nbActions*/
+  nbTiles = nbVars * (8 + 4 + 4 + 4 + 4);
+  memory = nbVars * (8 * 8 + 4 * 4 + 4 * 4 * 4 + 4 * 4 * 4 + 4 * 4 * 4) * 9/*nbActions*/
   * 8/*to hash*/;
   vector = new SVector<double>(memory + 1/*bias unit*/, nbTiles + 1/*bias unit*/);
   hashing = new MurmurHashing(memory);
@@ -45,7 +45,7 @@ const Vector<double>* BicycleProjector::project(const Vector<double>* x, int h1)
   for (int i = 0; i < x->dimension(); i++)
   {
     tiles->tiles1(vector, 8, memory, x->getEntry(i) * 8, h1, h2++);
-    tiles->tiles1(vector, 4, memory, x->getEntry(i) * 2, h1, h2++);
+    tiles->tiles1(vector, 4, memory, x->getEntry(i) * 4, h1, h2++);
 
     int j = (i + 1) % x->dimension();
     tiles->tiles2(vector, 4, memory, x->getEntry(i) * 4, x->getEntry(j) * 4, h1, h2++);
@@ -71,7 +71,7 @@ const Vector<double>* BicycleProjector::project(const Vector<double>* x)
   for (int i = 0; i < x->dimension(); i++)
   {
     tiles->tiles1(vector, 8, memory, x->getEntry(i) * 8, h2++);
-    tiles->tiles1(vector, 4, memory, x->getEntry(i) * 2, h2++);
+    tiles->tiles1(vector, 4, memory, x->getEntry(i) * 4, h2++);
 
     int j = (i + 1) % x->dimension();
     tiles->tiles2(vector, 4, memory, x->getEntry(i) * 4, x->getEntry(j) * 4, h2++);
@@ -100,21 +100,21 @@ int BicycleProjector::dimension() const
 void BicycleTest::testBicycleBalance()
 {
   Probabilistic::srand(0);
-  RLProblem<double>* problem = new RandlovBike(false);
+  RandlovBike<double>* problem = new RandlovBike<double>(false);
   Projector<double>* projector = new BicycleProjector(problem->dimension());
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha = 0.1 / projector->vectorNorm();
-  double gamma = 0.99;
-  double lambda = 0.95;
+  double gamma = problem->getGamma();
+  double lambda = 0.96;
   Sarsa<double>* sarsa = new SarsaTrue<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 100000, 180, 1);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 100000, 130, 1);
   sim->run();
   control->persist("visualization/bicycle_balance.dat");
   control->reset();
@@ -135,14 +135,14 @@ void BicycleTest::testBicycleBalance()
 void BicycleTest::testBicycleGoToTarget()
 {
   Probabilistic::srand(0);
-  RLProblem<double>* problem = new RandlovBike(true);
+  RandlovBike<double>* problem = new RandlovBike<double>(true);
   Projector<double>* projector = new BicycleProjector(problem->dimension());
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
-  double alpha = 0.1 / projector->vectorNorm();
-  double gamma = 0.99;
-  double lambda = 0.96;
+  double alpha = 0.05 / projector->vectorNorm();
+  double gamma = problem->getGamma();
+  double lambda = 0.98;
   Sarsa<double>* sarsa = new SarsaTrue<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
@@ -154,7 +154,7 @@ void BicycleTest::testBicycleGoToTarget()
   control->persist("visualization/bicycle_goToTarget.dat");
   control->reset();
   control->resurrect("visualization/bicycle_goToTarget.dat");
-  sim->runEvaluate(10);
+  sim->runEvaluate(10); // << The agent finds the goal 100% of the time
 
   delete problem;
   delete projector;
