@@ -53,12 +53,11 @@ class RandlovBike: public RLProblem<>
     bool isTerminal;
 
     float omega, omega_dot, omega_d_dot, theta, theta_dot, theta_d_dot, xf, yf, xb,
-        yb /* tyre position */, psi_goal /* Angle to the goal */, aux_state;
+        yb /* tyre position */, psi_goal /* Angle to the goal */;
     double rCM, rf, rb;
     float T, d, phi, psi /* bike's angle to the y-axis */;
-    float temp;
 
-    float R1, R2, R3, R_FACTOR, NO_STATES2, dt, /* 10 km/t in m/s */
+    float R1, R2, R3, R_FACTOR, dt, /* 10 km/t in m/s */
     v, g, dCM, c, h, Mc, Md, Mp, M, R, /* tyre radius */
     sigma_dot, I_bike, I_dc, I_dv, I_dl, l,
     /* distance between the point where the front and back tyre touch the ground */
@@ -66,27 +65,23 @@ class RandlovBike: public RLProblem<>
 
     /*ranges*/
     Range<float> *thetaRange, *thetaDotRange, *omegaRange, *omegaDotRange, *omegaDotDotRange,
-        *distanceRange, *psiRange;
+        *psiRange;
 
   public:
     RandlovBike(const bool& goToTarget) :
-        RLProblem<>((goToTarget ? 2 : 0) + 5, 9, 0), goToTarget(goToTarget), x_goal(1000.0f), y_goal(
+        RLProblem<>((goToTarget ? 1 : 0) + 5, 9, 0), goToTarget(goToTarget), x_goal(1000.0f), y_goal(
             0), radius_goal(10.0f), reinforcement(0), isTerminal(false), omega(0), omega_dot(0), omega_d_dot(
-            0), theta(0), theta_dot(0), theta_d_dot(0), xf(0), yf(0), xb(0), yb(0), psi_goal(0), aux_state(
-            0), rCM(0), rf(0), rb(0), T(0), d(0), phi(0), psi(0), temp(0), R1(-1.0), R2(0.0), R3(
-            +1.0),
-        // +0.01
-        R_FACTOR(0.0001), NO_STATES2(20),
-
-        dt(0.01), v(10.0 / 3.6), g(9.82), dCM(0.3), c(0.66), h(0.94), Mc(15.0), Md(1.7), Mp(60.0), M(
-            Mc + Mp), R(0.34),
+            0), theta(0), theta_dot(0), theta_d_dot(0), xf(0), yf(0), xb(0), yb(0), psi_goal(0), rCM(
+            0), rf(0), rb(0), T(0), d(0), phi(0), psi(0), R1(-1.0), R2(0.0), R3(+1.0), R_FACTOR(
+            0.00001), dt(0.01), v(10.0 / 3.6), g(9.82), dCM(0.3), c(0.66), h(0.94), Mc(15.0), Md(
+            1.7), Mp(60.0), M(Mc + Mp), R(0.34),
         /* tyre radius */
         sigma_dot(v / R), I_bike((13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)), I_dc(
             Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl((1.0 / 2) * Md * R * R), l(1.11), pi(
         M_PI), thetaRange(new Range<float>(-M_PI_2, M_PI_2)), thetaDotRange(
             new Range<float>(-2, 2)), omegaRange(new Range<float>(-M_PI / 15.0f, M_PI / 15.0f)), omegaDotRange(
-            new Range<float>(-0.5, 0.5)), omegaDotDotRange(new Range<float>(-2, 2)), distanceRange(
-            new Range<float>(0, 2000)), psiRange(new Range<float>(-2, 2))
+            new Range<float>(-0.5, 0.5)), omegaDotDotRange(new Range<float>(-2, 2)), psiRange(
+            new Range<float>(-M_PI, M_PI))
     {
 
       for (int i = 0; i < discreteActions->dimension(); i++)
@@ -100,7 +95,6 @@ class RandlovBike: public RLProblem<>
       delete omegaRange;
       delete omegaDotRange;
       delete omegaDotDotRange;
-      delete distanceRange;
       delete psiRange;
     }
 
@@ -111,111 +105,17 @@ class RandlovBike: public RLProblem<>
       execute_action,
     };
 
-    float calc_dist_to_goal(float xf, float xb, float yf, float yb)
+    float calcDistToGoal(float xf, float xb, float yf, float yb)
     {
       float temp = (x_goal - xf) * (x_goal - xf) + (y_goal - yf) * (y_goal - yf)
           - radius_goal * radius_goal;
       temp = sqrt(std::max(0.0f, temp));
       return (temp);
     }
-    float calc_angle_to_goal(float xf, float xb, float yf, float yb)
+
+    float calcAngleToGoal(float xf, float xb, float yf, float yb)
     {
-      float temp, scalar, tvaer;
-
-      temp = (xf - xb) * (x_goal - xf) + (yf - yb) * (y_goal - yf);
-      scalar = temp / (l * sqrt(pow((x_goal - xf), 2) + pow((y_goal - yf), 2)));
-      tvaer = (-yf + yb) * (x_goal - xf) + (xf - xb) * (y_goal - yf);
-
-      if (tvaer <= 0)
-        temp = scalar - 1;
-      else
-        temp = fabs(scalar - 1);
-
-      /* These angles are neither in degrees nor radians, but something
-       strange invented in order to save CPU-time. The measure is arranged the
-       same way as radians, but with a slightly different negative factor.
-
-       Say, the goal is to the east.
-       If the agent rides to the east then  temp = 0
-       - " -          - " -   north              = -1
-       - " -                  west               = -2 or 2
-       - " -                  south              =  1 */
-
-      return (temp);
-    }
-    int get_box(float theta, float theta_dot, float omega, float omega_dot, float omega_d_dot,
-        float psi_goal)
-    {
-      int box;
-
-      if (theta < -1)
-        box = 0;
-      else if (theta < -0.2)
-        box = 1;
-      else if (theta < 0)
-        box = 2;
-      else if (theta < 0.2)
-        box = 3;
-      else if (theta < 1)
-        box = 4;
-      else
-        box = 5;
-      /* The last restriction is taken care off in the physics part */
-
-      if (theta_dot < -2)
-      {
-      }
-      else if (theta_dot < 0)
-        box += 6;
-      else if (theta_dot < 2)
-        box += 12;
-      else
-        box += 18;
-
-      if (omega < -0.15)
-      {
-      }
-      else if (omega < -0.06)
-        box += 24;
-      else if (omega < 0)
-        box += 48;
-      else if (omega < 0.06)
-        box += 72;
-      else if (omega < 0.15)
-        box += 96;
-      else
-        box += 120;
-
-      if (omega_dot < -0.45)
-      {
-      }
-      else if (omega_dot < -0.24)
-        box += 144;
-      else if (omega_dot < 0)
-        box += 288;
-      else if (omega_dot < 0.24)
-        box += 432;
-      else if (omega_dot < 0.45)
-        box += 576;
-      else
-        box += 720;
-
-      if (omega_d_dot < -1.8)
-      {
-      }
-      else if (omega_d_dot < 0)
-        box += 864;
-      else if (omega_d_dot < 1.8)
-        box += 1728;
-      else
-        box += 2592;
-
-      return (box);
-    }
-
-    double toUnit(const Range<float>* range, const float& value)
-    {
-      return (range->bound(value) - range->min()) / range->length();
+      return std::atan2(yf - yb, xf - xb) - std::atan2(y_goal - yb, x_goal - xb);
     }
 
   public:
@@ -223,27 +123,20 @@ class RandlovBike: public RLProblem<>
     void updateRTStep()
     {
       DenseVector<double>& vars = *output->o_tp1;
-      vars[0] = toUnit(omegaRange, omega);
-      vars[1] = toUnit(omegaDotRange, omega_dot);
-      vars[2] = toUnit(omegaDotDotRange, omega_d_dot);
-      vars[3] = toUnit(thetaRange, theta);
-      vars[4] = toUnit(thetaDotRange, theta_dot);
+      vars[0] = omegaRange->toUnit(omega);
+      vars[1] = omegaDotRange->toUnit(omega_dot);
+      vars[2] = omegaDotDotRange->toUnit(omega_d_dot);
+      vars[3] = thetaRange->toUnit(theta);
+      vars[4] = thetaDotRange->toUnit(theta_dot);
       if (goToTarget)
-      {
-        vars[5] = toUnit(psiRange, psi_goal);
-        vars[6] = toUnit(distanceRange,
-            std::sqrt(std::pow(x_goal - xf, 2) + std::pow(y_goal - yf, 2)));
-      }
+        vars[5] = psiRange->toUnit(psi_goal);
       observations->at(0) = omega;
       observations->at(1) = omega_dot;
       observations->at(2) = omega_d_dot;
       observations->at(3) = theta;
       observations->at(4) = theta_dot;
       if (goToTarget)
-      {
         observations->at(5) = psi_goal;
-        observations->at(6) = calc_dist_to_goal(xf, xb, yf, yb);
-      }
 
       output->updateRTStep(r(), z(), endOfEpisode());
     }
@@ -267,7 +160,7 @@ class RandlovBike: public RLProblem<>
         xf = 0;
         yf = l;
         psi = atan((xb - xf) / (yf - yb));
-        psi_goal = calc_angle_to_goal(xf, xb, yf, yb);
+        psi_goal = calcAngleToGoal(xf, xb, yf, yb);
         isTerminal = false;
         break;
       }
@@ -308,7 +201,7 @@ class RandlovBike: public RLProblem<>
         }
 
         /* New position of front tyre */
-        temp = v * dt / (2 * rf);
+        float temp = v * dt / (2 * rf);
         if (temp > 1)
           temp = Signum::valueOf(psi + theta) * pi / 2;
         else
@@ -345,7 +238,7 @@ class RandlovBike: public RLProblem<>
             psi = Signum::valueOf(xb - xf) * (pi / 2) - atan(temp / (xb - xf));
         }
 
-        psi_goal = calc_angle_to_goal(xf, xb, yf, yb);
+        psi_goal = calcAngleToGoal(xf, xb, yf, yb);
 
         break;
       }
@@ -360,9 +253,7 @@ class RandlovBike: public RLProblem<>
       }
       else
       {
-        temp = calc_dist_to_goal(xf, xb, yf, yb);
-
-        if (temp < 1e-3)
+        if (calcDistToGoal(xf, xb, yf, yb) < 1e-3)
         {
           reinforcement = R3;
           isTerminal = true;
@@ -372,27 +263,11 @@ class RandlovBike: public RLProblem<>
         else
         {
           if (goToTarget)
-            reinforcement = (0.95 - pow(psi_goal, 2)) * R_FACTOR; // << to ride (reward shaping)
+            reinforcement = (4.0f - pow(psi_goal, 2)) * R_FACTOR; // << to ride (reward shaping)
           else
             reinforcement = R2; //<< to Balance
           isTerminal = false;
         }
-      }
-
-      /* There are two sorts of state information. The first (*return_state) is
-       about the state of the bike, while the second (*return_state2) deals with the
-       position relative to the goal */
-      /**return_state = get_box(theta, theta_dot, omega, omega_dot, omega_d_dot,
-       psi_goal);*/
-
-      int i = 0;
-      aux_state = -1;
-      while (aux_state < 0)
-      {
-        temp = -2 + ((float) (4 * (i))) / NO_STATES2;
-        if (psi_goal < temp)
-          aux_state = i;
-        i++;
       }
 
       updateRTStep();
@@ -400,10 +275,6 @@ class RandlovBike: public RLProblem<>
 
     void initialize()
     {
-      /* position of goal */
-      x_goal = 1000;
-      y_goal = 0;
-      radius_goal = 10;
       bike(start);
       updateRTStep();
     }

@@ -13,12 +13,12 @@ BicycleProjector::BicycleProjector(const int& nbVars)
    * Number of inputs | Tiling type | Number of intervals | Number of tilings
    *            5/7   |     1D      |       8             |       8
    *                  |     1D      |       2             |       4
-   *                  |     2D      |       4             |       4
+   *                  |     2D      |       8             |       8
    *                  |     2D + 1  |       4             |       4
    *                  |     2D + 2  |       4             |       4
    */
-  nbTiles = nbVars * (8 + 4 + 4 + 4 + 4);
-  memory = nbVars * (8 * 8 + 2 * 4 + 4 * 4 * 4 + 4 * 4 * 4 + 4 * 4 * 4) * 9/*nbActions*/
+  nbTiles = nbVars * (8 + 4 + 8 + 4 + 4);
+  memory = nbVars * (8 * 8 + 2 * 4 + 8 * 8 * 8 + 4 * 4 * 4 + 4 * 4 * 4) * 9/*nbActions*/
   * 8/*to hash*/;
   vector = new SVector<double>(memory + 1/*bias unit*/, nbTiles + 1/*bias unit*/);
   hashing = new MurmurHashing(memory);
@@ -114,7 +114,7 @@ void BicycleTest::testBicycleBalance()
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 100000, 250, 1);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 100000, 180, 1);
   sim->run();
   control->persist("visualization/bicycle_balance.dat");
   control->reset();
@@ -142,7 +142,7 @@ void BicycleTest::testBicycleGoToTarget()
   Trace<double>* e = new ATrace<double>(projector->dimension());
   double alpha = 0.1 / projector->vectorNorm();
   double gamma = 0.99;
-  double lambda = 0.9;
+  double lambda = 0.96;
   Sarsa<double>* sarsa = new SarsaTrue<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);

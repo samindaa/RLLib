@@ -142,13 +142,15 @@ class TileCoderHashing: public TileCoder<T>
 
     void coder(const Vector<T>* x)
     {
-      inputs->set(x)->mapMultiplyToSelf(gridResolution);
+      inputs->clear();
+      inputs->addToSelf(gridResolution, x);
       tiles->tiles(Base::vector, Base::nbTilings, inputs);
     }
 
     void coder(const Vector<T>* x, const int& h1)
     {
-      inputs->set(x)->mapMultiplyToSelf(gridResolution);
+      inputs->clear();
+      inputs->addToSelf(gridResolution, x);
       tiles->tiles(Base::vector, Base::nbTilings, inputs, h1);
     }
 };
