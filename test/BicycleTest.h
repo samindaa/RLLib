@@ -19,6 +19,7 @@ class BicycleTest: public BicycleTestBase
   protected:
     void testBicycleBalance();
     void testBicycleGoToTarget();
+    void testBicycleGoToTargetEvaluate();
 };
 
 class BicycleProjector: public Projector<double>

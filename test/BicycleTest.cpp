@@ -168,10 +168,41 @@ void BicycleTest::testBicycleGoToTarget()
 
 }
 
+void BicycleTest::testBicycleGoToTargetEvaluate()
+{
+  Probabilistic::srand(0);
+  RandlovBike<double>* problem = new RandlovBike<double>(true);
+  Projector<double>* projector = new BicycleProjector(problem->dimension());
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActions());
+  Trace<double>* e = new ATrace<double>(projector->dimension());
+  Sarsa<double>* sarsa = new SarsaTrue<double>(0, 0, 0, e);
+  Policy<double>* acting = new Greedy<double>(sarsa, problem->getDiscreteActions());
+  OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
+  control->reset();
+  control->resurrect("visualization/bicycle_goToTarget.dat");
+
+  RLAgent<double>* agent = new ControlAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 100000, 10, 1);
+  sim->run();
+
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete sarsa;
+  delete acting;
+  delete control;
+  delete agent;
+  delete sim;
+
+}
+
 void BicycleTest::run()
 {
   testBicycleBalance();
   testBicycleGoToTarget();
+  testBicycleGoToTargetEvaluate();
 }
 
 RLLIB_TEST_MAKE(BicycleTest)
