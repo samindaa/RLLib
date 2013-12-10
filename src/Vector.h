@@ -309,8 +309,8 @@ class DenseVector: public Vector<T>
         for (int j = 0; j < capacity; j++)
           Vector<T>::write(of, data[j]);
         of.close();
-        std::cout << "## DenseVector (" << sum() << ", " << l1Norm() << ", " << maxNorm()
-            << ") persisted=" << f << std::endl;
+        std::cout << "## DenseVector (sum=" << sum() << ", l1Norm=" << l1Norm() << ", maxNorm="
+            << maxNorm() << ") persisted=" << f << std::endl;
       }
       else
         std::cerr << "ERROR! (persist) file=" << f << std::endl;
@@ -336,8 +336,8 @@ class DenseVector: public Vector<T>
         for (int j = 0; j < capacity; j++)
           Vector<T>::read(ifs, data[j]);
         ifs.close();
-        std::cout << "## DenseVector (" << sum() << ", " << l1Norm() << ", " << maxNorm()
-            << ") resurrected=" << f << std::endl;
+        std::cout << "## DenseVector (sum=" << sum() << ", l1Norm=" << l1Norm() << ", maxNorm="
+            << maxNorm() << ") resurrected=" << f << std::endl;
       }
       else
       {
@@ -630,8 +630,8 @@ class SparseVector: public Vector<T>
         for (int position = 0; position < nbActive; position++)
           Vector<T>::write(of, values[position]);
         of.close();
-        std::cout << "## SparseVector (" << sum() << ", " << l1Norm() << ", " << maxNorm()
-            << ") persisted=" << f << std::endl;
+        std::cout << "## SparseVector (sum=" << sum() << ", l1Norm=" << l1Norm() << ", maxNorm="
+            << maxNorm() << ") persisted=" << f << std::endl;
       }
       else
         std::cerr << "ERROR! (persist) file=" << f << std::endl;
@@ -671,8 +671,8 @@ class SparseVector: public Vector<T>
         ifs.close();
 
         delete[] ractiveIndexes;
-        std::cout << "## SparseVector (" << sum() << ", " << l1Norm() << ", " << maxNorm()
-            << ") resurrected=" << f << std::endl;
+        std::cout << "## SparseVector (sum=" << sum() << ", l1Norm=" << l1Norm() << ", maxNorm"
+            << maxNorm() << ") resurrected=" << f << std::endl;
       }
       else
       {

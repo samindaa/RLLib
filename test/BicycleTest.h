@@ -33,7 +33,7 @@ class BicycleProjector: public Projector<double>
   public:
     BicycleProjector(const int& nbVars);
     virtual ~BicycleProjector();
-    const Vector<double>* project(const Vector<double>* x, int h1);
+    const Vector<double>* project(const Vector<double>* x, const int& h1);
     const Vector<double>* project(const Vector<double>* x);
     double vectorNorm() const;
     int dimension() const;

@@ -388,11 +388,11 @@ class SarsaAlphaBound: public Sarsa<T>
   private:
     typedef Sarsa<T> Base;
     Vector<T>* gammaXtp1MinusX;
-
+    double alpha_0;
   public:
-    SarsaAlphaBound(const double& gamma, const double& lambda, Trace<T>* e) :
-        Sarsa<T>(1.0f/*According to the paper*/, gamma, lambda, e), gammaXtp1MinusX(
-            new SVector<T>(e->vect()->dimension()))
+    SarsaAlphaBound(const double& alpha, const double& gamma, const double& lambda, Trace<T>* e) :
+        Sarsa<T>(alpha, gamma, lambda, e), gammaXtp1MinusX(new SVector<T>(e->vect()->dimension())), alpha_0(
+            alpha)
     {
     }
 
@@ -404,7 +404,7 @@ class SarsaAlphaBound: public Sarsa<T>
     void reset()
     {
       Base::reset();
-      Base::alpha = 1.0f;
+      Base::alpha = alpha_0;
     }
 
   private:

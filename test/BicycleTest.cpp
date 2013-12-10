@@ -34,7 +34,7 @@ BicycleProjector::~BicycleProjector()
   delete tiles;
 }
 
-const Vector<double>* BicycleProjector::project(const Vector<double>* x, int h1)
+const Vector<double>* BicycleProjector::project(const Vector<double>* x, const int& h1)
 {
   vector->clear();
   if (x->empty())

@@ -40,7 +40,7 @@ class Projector
     virtual ~Projector()
     {
     }
-    virtual const Vector<T>* project(const Vector<T>* x, int h1) =0;
+    virtual const Vector<T>* project(const Vector<T>* x, const int& h1) =0;
     virtual const Vector<T>* project(const Vector<T>* x) =0;
     virtual double vectorNorm() const =0;
     virtual int dimension() const =0;
@@ -75,7 +75,7 @@ class TileCoder: public Projector<T>
     virtual void coder(const Vector<T>* x) =0;
     virtual void coder(const Vector<T>* x, const int& h1) =0;
 
-    const Vector<T>* project(const Vector<T>* x, int h1)
+    const Vector<T>* project(const Vector<T>* x, const int& h1)
     {
       vector->clear();
       if (x->empty())

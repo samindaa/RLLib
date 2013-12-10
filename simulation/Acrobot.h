@@ -37,14 +37,16 @@ class Acrobot: public RLProblem<T>
     float targetPosition;
     float theta1, theta2, theta1Dot, theta2Dot;
     float transitionNoise;
+    bool random;
 
   public:
-    Acrobot() :
+    Acrobot(const bool& random = false) :
         RLProblem<T>(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
             new Range<float>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
             new Range<float>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(new Range<float>(-1.0, 1.0)), m1(
             1.0), m2(1.0), l1(1.0), l2(1.0), lc1(0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), targetPosition(
-            1.0), theta1(0), theta2(0), theta1Dot(0), theta2Dot(0), transitionNoise(0)
+            1.0), theta1(0), theta2(0), theta1Dot(0), theta2Dot(0), transitionNoise(0), random(
+            random)
     {
       Base::discreteActions->push_back(0, actionRange->min());
       Base::discreteActions->push_back(1, 0.0);
@@ -64,13 +66,14 @@ class Acrobot: public RLProblem<T>
 
     void initialize()
     {
-      bool isRandomStart = false;
-      if (isRandomStart) // random
+      if (random) // random
       {
-        theta1 = Probabilistic::nextFloat() - 0.5;
-        theta2 = Probabilistic::nextFloat() - 0.5;
-        theta1Dot = Probabilistic::nextFloat() - 0.5;
-        theta2Dot = Probabilistic::nextFloat() - 0.5;
+        theta1 = (Probabilistic::nextFloat() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
+        theta2 = (Probabilistic::nextFloat() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
+        theta1Dot = (Probabilistic::nextFloat() * (theta1DotRange->max() * 2.0f)
+            - theta1DotRange->max()) * 0.1f;
+        theta2Dot = (Probabilistic::nextFloat() * (theta2DotRange->max() * 2.0f)
+            - theta1DotRange->max()) * 0.1f;
       }
       else
         theta1 = theta2 = theta1Dot = theta2Dot = 0.0; // not random
@@ -82,7 +85,6 @@ class Acrobot: public RLProblem<T>
     void updateRTStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
-      //std::cout << (theta * 180 / M_PI) << " " << xDot << std::endl;
       vars[0] = thetaRange->toUnit(theta1);
       vars[1] = thetaRange->toUnit(theta2);
       vars[2] = theta1DotRange->toUnit(theta1Dot);
@@ -115,10 +117,10 @@ class Acrobot: public RLProblem<T>
             + I2;
         d2 = m2 * (pow(lc2, 2) + l1 * lc2 * cos(theta2)) + I2;
 
-        phi2 = m2 * lc2 * g * cos(theta1 + theta2 - M_PI / 2.0);
+        phi2 = m2 * lc2 * g * cos(theta1 + theta2 - M_PI_2);
         phi1 = -(m2 * l1 * lc2 * pow(theta2Dot, 2) * sin(theta2)
             - 2 * m2 * l1 * lc2 * theta1Dot * theta2Dot * sin(theta2))
-            + (m1 * lc1 + m2 * l1) * g * cos(theta1 - M_PI / 2.0) + phi2;
+            + (m1 * lc1 + m2 * l1) * g * cos(theta1 - M_PI_2) + phi2;
 
         theta2ddot = (torque + (d2 / d1) * phi1 - m2 * l1 * lc2 * pow(theta1Dot, 2) * sin(theta2)
             - phi2) / (m2 * pow(lc2, 2) + I2 - pow(d2, 2) / d1);

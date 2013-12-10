@@ -144,7 +144,7 @@ class AdvancedTilesProjector: public Projector<T>
     }
 
   public:
-    const Vector<T>* project(const Vector<T>* x, int h2)
+    const Vector<T>* project(const Vector<T>* x, const int& h2)
     {
       vector->clear();
       if (x->empty())

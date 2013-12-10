@@ -122,7 +122,7 @@ class NextingProjector: public Projector<double>
   public:
     NextingProjector();
     virtual ~NextingProjector();
-    const Vector<double>* project(const Vector<double>* x, int h1);
+    const Vector<double>* project(const Vector<double>* x, const int& h1);
     const Vector<double>* project(const Vector<double>* x);
     double vectorNorm() const;
     int dimension() const;

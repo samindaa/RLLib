@@ -136,7 +136,7 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
   Trace<double>* eML = new MaxLengthTrace<double>(e, 2000);
   double gamma = 0.99;
   double lambda = 0.9;
-  Sarsa<double>* sarsa = new SarsaAlphaBound<double>(gamma, lambda, eML);
+  Sarsa<double>* sarsa = new SarsaAlphaBound<double>(1.0f, gamma, lambda, eML);
   double epsilon = 0.1;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);

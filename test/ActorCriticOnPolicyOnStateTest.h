@@ -82,7 +82,7 @@ class NoStateProblemProjector: public Projector<double>
       return vec;
     }
 
-    const Vector<double>* project(const Vector<double>* x, int h1)
+    const Vector<double>* project(const Vector<double>* x, const int& h1)
     {
       return project(x);
     }
