@@ -126,34 +126,7 @@ class RandlovBike: public RLProblem<Type>
       return angle;
     }
 
-    float calcAngleToGoal2(float xf, float xb, float yf, float yb)
-    {
-      float temp, scalar, tvaer;
-
-      temp = (xf - xb) * (x_goal - xf) + (yf - yb) * (y_goal - yf);
-      scalar = temp / (l * std::sqrt(std::pow(x_goal - xf, 2) + std::pow(y_goal - yf, 2)));
-      tvaer = (-yf + yb) * (x_goal - xf) + (xf - xb) * (y_goal - yf);
-
-      if (tvaer <= 0)
-        temp = scalar - 1;
-      else
-        temp = fabs(scalar - 1);
-
-      /* These angles are neither in degrees nor radians, but something
-       strange invented in order to save CPU-time. The measure is arranged the
-       same way as radians, but with a slightly different negative factor.
-
-       Say, the goal is to the east.
-       If the agent rides to the east then  temp = 0
-       - " -          - " -   north              = -1
-       - " -                  west               = -2 or 2
-       - " -                  south              =  1 */
-
-      return (temp);
-    }
-
   public:
-
     void updateRTStep()
     {
       DenseVector<Type>& vars = *Base::output->o_tp1;
@@ -295,7 +268,7 @@ class RandlovBike: public RLProblem<Type>
         else
         {
           if (goToTarget)
-            reinforcement = (0.95 - std::pow(calcAngleToGoal2(xf, xb, yf, yb), 2)) * R_FACTOR; // << (reward shaping)
+            reinforcement = (4.0f - std::pow(psi_goal, 2)) * R_FACTOR; // << (reward shaping)
           else
             reinforcement = R2; //<< to Balance
           isTerminal = false;

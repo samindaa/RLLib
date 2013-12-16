@@ -143,7 +143,7 @@ void BicycleTest::testBicycleGoToTarget()
   double alpha = 0.1 / projector->vectorNorm();
   double gamma = problem->getGamma();
   double lambda = 0.9;
-  Sarsa<double>* sarsa = new SarsaTrue<double>(alpha, gamma, lambda, e);
+  Sarsa<double>* sarsa = new SarsaAlphaBound<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
