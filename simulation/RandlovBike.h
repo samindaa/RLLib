@@ -117,7 +117,39 @@ class RandlovBike: public RLProblem<Type>
 
     float calcAngleToGoal(float xf, float xb, float yf, float yb)
     {
-      return std::atan2(yf - yb, xf - xb) - std::atan2(y_goal - yb, x_goal - xb);
+      // Signed angle [-pi, pi]
+      float angle = std::atan2(yf - yb, xf - xb) - std::atan2(y_goal - yf, x_goal - xf);
+      if (angle > M_PI)
+        angle -= 2.0f * M_PI;
+      else if (angle < -M_PI)
+        angle += 2.0f * M_PI;
+      return angle;
+    }
+
+    float calcAngleToGoal2(float xf, float xb, float yf, float yb)
+    {
+      float temp, scalar, tvaer;
+
+      temp = (xf - xb) * (x_goal - xf) + (yf - yb) * (y_goal - yf);
+      scalar = temp / (l * std::sqrt(std::pow(x_goal - xf, 2) + std::pow(y_goal - yf, 2)));
+      tvaer = (-yf + yb) * (x_goal - xf) + (xf - xb) * (y_goal - yf);
+
+      if (tvaer <= 0)
+        temp = scalar - 1;
+      else
+        temp = fabs(scalar - 1);
+
+      /* These angles are neither in degrees nor radians, but something
+       strange invented in order to save CPU-time. The measure is arranged the
+       same way as radians, but with a slightly different negative factor.
+
+       Say, the goal is to the east.
+       If the agent rides to the east then  temp = 0
+       - " -          - " -   north              = -1
+       - " -                  west               = -2 or 2
+       - " -                  south              =  1 */
+
+      return (temp);
     }
 
   public:
@@ -263,13 +295,12 @@ class RandlovBike: public RLProblem<Type>
         else
         {
           if (goToTarget)
-            reinforcement = (M_PI / 3.0f - pow(psi_goal, 2)) * R_FACTOR; // << (reward shaping)
+            reinforcement = (0.95 - std::pow(calcAngleToGoal2(xf, xb, yf, yb), 2)) * R_FACTOR; // << (reward shaping)
           else
             reinforcement = R2; //<< to Balance
           isTerminal = false;
         }
       }
-
       updateRTStep();
     }
 

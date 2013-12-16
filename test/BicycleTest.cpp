@@ -140,9 +140,9 @@ void BicycleTest::testBicycleGoToTarget()
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
-  double alpha = 0.05 / projector->vectorNorm();
+  double alpha = 0.1 / projector->vectorNorm();
   double gamma = problem->getGamma();
-  double lambda = 0.98;
+  double lambda = 0.9;
   Sarsa<double>* sarsa = new SarsaTrue<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
@@ -154,7 +154,7 @@ void BicycleTest::testBicycleGoToTarget()
   control->persist("visualization/bicycle_goToTarget.dat");
   control->reset();
   control->resurrect("visualization/bicycle_goToTarget.dat");
-  sim->runEvaluate(10); // << The agent finds the goal 100% of the time
+  sim->runEvaluate(10);
 
   delete problem;
   delete projector;
