@@ -161,11 +161,12 @@ class RLProblem
     TRStep<T>* output;
     Actions<T>* discreteActions;
     Actions<T>* continuousActions;
+    Ranges<T>* observationRanges;
   public:
     RLProblem(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
         observations(new PVector<T>(nbVars)), output(new TRStep<T>(nbVars)), discreteActions(
             new ActionArray<T>(nbDiscreteActions)), continuousActions(
-            new ActionArray<T>(nbContinuousActions))
+            new ActionArray<T>(nbContinuousActions)), observationRanges(new Ranges<T>())
     {
     }
 
@@ -175,6 +176,7 @@ class RLProblem
       delete output;
       delete discreteActions;
       delete continuousActions;
+      delete observationRanges;
     }
 
   public:
@@ -212,6 +214,11 @@ class RLProblem
     virtual int dimension() const
     {
       return observations->dimension();
+    }
+
+    virtual const Ranges<T>* getObservationRanges() const
+    {
+      return observationRanges;
     }
 };
 

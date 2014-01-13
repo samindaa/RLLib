@@ -43,8 +43,8 @@ class MountainCar: public RLProblem<T>
     float position;
     float velocity;
 
-    Range<float>* positionRange;
-    Range<float>* velocityRange;
+    Range<T>* positionRange;
+    Range<T>* velocityRange;
     Range<float>* actionRange;
 
     float targetPosition;
@@ -52,8 +52,8 @@ class MountainCar: public RLProblem<T>
 
   public:
     MountainCar() :
-        RLProblem<T>(2, 3, 1), position(0), velocity(0), positionRange(new Range<float>(-1.2, 0.6)), velocityRange(
-            new Range<float>(-0.07, 0.07)), actionRange(new Range<float>(-1.0, 1.0)), targetPosition(
+        RLProblem<T>(2, 3, 1), position(0), velocity(0), positionRange(new Range<T>(-1.2, 0.6)), velocityRange(
+            new Range<T>(-0.07, 0.07)), actionRange(new Range<float>(-1.0, 1.0)), targetPosition(
             positionRange->max()), throttleFactor(1.0)
     {
       Base::discreteActions->push_back(0, actionRange->min());
@@ -62,6 +62,9 @@ class MountainCar: public RLProblem<T>
 
       // subject to change
       Base::continuousActions->push_back(0, 0.0);
+
+      Base::observationRanges->push_back(positionRange);
+      Base::observationRanges->push_back(velocityRange);
     }
 
     virtual ~MountainCar()

@@ -21,19 +21,19 @@ Window::~Window()
 void Window::addView(ViewBase* view)
 {
   views.push_back(view);
-  ((QGridLayout*) grid)->addWidget(view, 0, colsA++);
+  grid->addWidget(view, 0, colsA++);
 }
 
 void Window::addPlot(ViewBase* view)
 {
   plots.push_back(view);
-  ((QGridLayout*) grid)->addWidget(view, 1, colsB++);
+  grid->addWidget(view, 1, colsB++);
 }
 
 void Window::addValueFunctionView(ViewBase* valueFunctionView)
 {
   vfuns.push_back(valueFunctionView);
-  ((QGridLayout*) grid)->addWidget(valueFunctionView, 2, colsC++);
+  grid->addWidget(valueFunctionView, 2, colsC++);
 }
 
 void Window::keyPressEvent(QKeyEvent* event)

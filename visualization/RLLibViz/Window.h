@@ -21,7 +21,7 @@ class Window: public QWidget
     Views views;
     Plots plots;
     VFuns vfuns;
-    QLayout* grid;
+    QGridLayout* grid;
     int colsA, colsB, colsC;
 
   public:

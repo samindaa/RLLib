@@ -31,15 +31,15 @@ class ContinuousGridworld: public RLProblem<T>
 {
     typedef RLProblem<T> Base;
   protected:
-    Range<float>* observationRange;
-    Range<float>* actionRange;
+    Range<T>* observationRange;
+    Range<T>* actionRange;
     float absoluteNoise;
     std::ofstream outpath;
 
   public:
     ContinuousGridworld() :
-        RLProblem<T>(2, 2 * 2 + 1, 1), observationRange(new Range<float>(0, 1.0)), actionRange(
-            new Range<float>(-0.05, 0.05)), absoluteNoise(0.025)
+        RLProblem<T>(2, 2 * 2 + 1, 1), observationRange(new Range<T>(0, 1.0)), actionRange(
+            new Range<T>(-0.05, 0.05)), absoluteNoise(0.025)
     {
       // discrete actions
       for (int i = 0; i < Base::discreteActions->dimension(); i++)
@@ -57,6 +57,8 @@ class ContinuousGridworld: public RLProblem<T>
           Base::discreteActions->update(i, dimension, 1.0);
       }
       // continuous actions are not setup for this problem
+      Base::observationRanges->push_back(observationRange);
+      Base::observationRanges->push_back(observationRange);
     }
 
     virtual ~ContinuousGridworld()
@@ -80,7 +82,7 @@ class ContinuousGridworld: public RLProblem<T>
       Base::output->updateRTStep(r(), z(), endOfEpisode());
     }
 
-    void step(const Action<double>* action)
+    void step(const Action<T>* action)
     {
       float noise = Probabilistic::nextFloat() * absoluteNoise - (absoluteNoise / 2.0);
       for (int i = 0; i < Base::observations->dimension(); i++)

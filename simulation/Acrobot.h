@@ -29,9 +29,9 @@ class Acrobot: public RLProblem<T>
 {
     typedef RLProblem<T> Base;
   protected:
-    Range<float>* thetaRange;
-    Range<float>* theta1DotRange;
-    Range<float>* theta2DotRange;
+    Range<T>* thetaRange;
+    Range<T>* theta1DotRange;
+    Range<T>* theta2DotRange;
     Range<float>* actionRange;
     float m1, m2, l1, l2, lc1, lc2, I1, I2, g, dt;
     float targetPosition;
@@ -41,9 +41,9 @@ class Acrobot: public RLProblem<T>
 
   public:
     Acrobot(const bool& random = false) :
-        RLProblem<T>(4, 3, 1), thetaRange(new Range<float>(-M_PI, M_PI)), theta1DotRange(
-            new Range<float>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
-            new Range<float>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(new Range<float>(-1.0, 1.0)), m1(
+        RLProblem<T>(4, 3, 1), thetaRange(new Range<T>(-M_PI, M_PI)), theta1DotRange(
+            new Range<T>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
+            new Range<T>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(new Range<float>(-1.0, 1.0)), m1(
             1.0), m2(1.0), l1(1.0), l2(1.0), lc1(0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), targetPosition(
             1.0), theta1(0), theta2(0), theta1Dot(0), theta2Dot(0), transitionNoise(0), random(
             random)
@@ -54,6 +54,10 @@ class Acrobot: public RLProblem<T>
 
       // subject to change
       Base::continuousActions->push_back(0, 0.0);
+
+      Base::observationRanges->push_back(thetaRange);
+      Base::observationRanges->push_back(theta1DotRange);
+      Base::observationRanges->push_back(theta2DotRange);
     }
 
     ~Acrobot()

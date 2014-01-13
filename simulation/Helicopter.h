@@ -409,7 +409,7 @@ class Helicopter: public RLProblem<T>
 
   public:
     Helicopter(const int episodeLength = 6000) :
-        RLProblem<T>(12, 1, 1), episodeLength(episodeLength), step_time(0)
+        RLProblem<T>(12, 0, 1), episodeLength(episodeLength), step_time(0)
     {
       // Discrete actions are not setup for this problem.
       for (unsigned int i = 0; i < 4/*four values in the action*/; i++)

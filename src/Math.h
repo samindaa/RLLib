@@ -273,20 +273,28 @@ class Ranges
       return ranges->end();
     }
 
-    unsigned int dimension() const
+    int dimension() const
     {
       return ranges->size();
     }
 
-    const Range<T>& operator[](const unsigned index) const
+    Range<T>& operator[](const int& index)
     {
-      assert(index >= 0 && index < dimension());
       return *ranges->at(index);
     }
 
-    Range<T>* at(const unsigned index) const
+    const Range<T>& operator[](const int& index) const
     {
-      assert(index >= 0 && index < dimension());
+      return *ranges->at(index);
+    }
+
+    Range<T>* at(const int& index)
+    {
+      return ranges->at(index);
+    }
+
+    const Range<T>* at(const int& index) const
+    {
       return ranges->at(index);
     }
 };

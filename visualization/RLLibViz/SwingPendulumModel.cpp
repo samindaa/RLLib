@@ -45,7 +45,7 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
   agent = new LearnerAgent<double>(control);
   simulator = new Simulator<double>(agent, problem, 5000);
   simulator->setVerbose(false);
-  valueFunction = new Matrix(100, 100); // << Fixed for 0:0.1:10
+  valueFunction = new Matrix(100, 100);
 
 }
 
@@ -95,23 +95,24 @@ void SwingPendulumModel::doWork()
   {
     RLLib::PVector<double> x_t(2);
     double maxValue = 0, minValue = 0;
-    float y = 0;
-    for (int i = 0; i < valueFunction->rows(); i++)
+    const Range<double>* thetaRange = problem->getObservationRanges()->at(0);
+    const Range<double>* velocityRange = problem->getObservationRanges()->at(1);
+
+    for (int theta = 0; theta < valueFunction->rows(); theta++)
     {
-      float x = 0;
-      for (int j = 0; j < valueFunction->cols(); j++)
+      for (int velocity = 0; velocity < valueFunction->cols(); velocity++)
       {
-        x_t[0] = y;
-        x_t[1] = x;
+        x_t[0] = thetaRange->toUnit(
+            thetaRange->length() * theta / valueFunction->cols() + thetaRange->min());
+        x_t[1] = velocityRange->toUnit(
+            velocityRange->length() * velocity / valueFunction->rows() + velocityRange->min());
         double v = control->computeValueFunction(&x_t);
-        valueFunction->at(i, j) = v;
+        valueFunction->at(theta, velocity) = v;
         if (v > maxValue)
           maxValue = v;
         if (v < minValue)
           minValue = v;
-        x += 0.1;
       }
-      y += 0.1;
     }
     //out.close();
     emit signal_add(window->vfuns[0], valueFunction, minValue, maxValue);

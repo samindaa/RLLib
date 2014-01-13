@@ -34,8 +34,8 @@ class SwingPendulum: public RLProblem<T>
     float uMax, stepTime, theta, velocity, maxVelocity;
 
     Range<float>* actionRange;
-    Range<float>* thetaRange;
-    Range<float>* velocityRange;
+    Range<T>* thetaRange;
+    Range<T>* velocityRange;
 
     float mass, length, g, requiredUpTime, upRange;
 
@@ -45,9 +45,9 @@ class SwingPendulum: public RLProblem<T>
     SwingPendulum(const bool& random = false) :
         RLProblem<T>(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(0), maxVelocity(
         M_PI_4 / stepTime), actionRange(new Range<float>(-uMax, uMax)), thetaRange(
-            new Range<float>(-M_PI, M_PI)), velocityRange(
-            new Range<float>(-maxVelocity, maxVelocity)), mass(1.0), length(1.0), g(9.8), requiredUpTime(
-            10.0 /*seconds*/), upRange(M_PI_4 /*seconds*/), upTime(0), random(random)
+            new Range<T>(-M_PI, M_PI)), velocityRange(new Range<T>(-maxVelocity, maxVelocity)), mass(
+            1.0), length(1.0), g(9.8), requiredUpTime(10.0 /*seconds*/), upRange(
+            M_PI_4 /*seconds*/), upTime(0), random(random)
     {
 
       Base::discreteActions->push_back(0, actionRange->min());
@@ -56,6 +56,9 @@ class SwingPendulum: public RLProblem<T>
 
       // subject to change
       Base::continuousActions->push_back(0, 0.0);
+
+      Base::observationRanges->push_back(thetaRange);
+      Base::observationRanges->push_back(velocityRange);
     }
 
     virtual ~SwingPendulum()

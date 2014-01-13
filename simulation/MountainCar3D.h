@@ -48,20 +48,22 @@ class MountainCar3D: public RLProblem<T>
     float offset;
     float targetPosition;
 
-    Range<float>* positionRange;
-    Range<float>* velocityRange;
+    Range<T>* positionRange;
+    Range<T>* velocityRange;
 
   public:
     MountainCar3D() :
         RLProblem<T>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(0), targetPosition(
-            0.5), positionRange(new Range<float>(-1.2, 0.5)), velocityRange(
-            new Range<float>(-0.07, 0.07))
+            0.5), positionRange(new Range<T>(-1.2, 0.5)), velocityRange(new Range<T>(-0.07, 0.07))
     {
 
       for (int a = 0; a < Base::discreteActions->dimension(); a++)
         Base::discreteActions->push_back(a, a);
       // not used
       Base::continuousActions->push_back(0, 0.0);
+
+      Base::observationRanges->push_back(positionRange);
+      Base::observationRanges->push_back(velocityRange);
     }
 
     virtual ~MountainCar3D()

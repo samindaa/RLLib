@@ -36,15 +36,15 @@ class CartPole: public RLProblem<T>
     float twelveRadians;
 
     float x, x_dot, theta, theta_dot;
-    Range<float> *forceRange, *xRange, *thetaRange;
+    Range<float>* forceRange;
+    Range<T> *xRange, *thetaRange;
   public:
     CartPole(const bool& random = false) :
         RLProblem<T>(4, 3, 1), random(random), gravity(9.8), massCart(1.0), massPole(0.1), totalMass(
             massPole + massCart), length(0.5), poleMassLength(massPole * length), forceMag(10.0), tau(
             0.02), fourthirds(4.0f / 3.0f), twelveRadians(-12.0f / 180.0f * M_PI), x(0), x_dot(0), theta(
             0), theta_dot(0), forceRange(new Range<float>(-forceMag, forceMag)), xRange(
-            new Range<float>(-2.4, 2.4)), thetaRange(
-            new Range<float>(-twelveRadians, twelveRadians))
+            new Range<T>(-2.4, 2.4)), thetaRange(new Range<T>(-twelveRadians, twelveRadians))
     {
       Base::discreteActions->push_back(0, forceRange->min());
       Base::discreteActions->push_back(1, 0.0);
@@ -52,6 +52,9 @@ class CartPole: public RLProblem<T>
 
       // subject to change
       Base::continuousActions->push_back(0, 0.0);
+
+      Base::observationRanges->push_back(xRange);
+      Base::observationRanges->push_back(thetaRange);
     }
 
     virtual ~CartPole()
