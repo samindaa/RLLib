@@ -45,7 +45,7 @@ class LinearLearner: public ParameterizedFunction<T>
     virtual ~LinearLearner()
     {
     }
-    virtual double initialize() =0;
+    virtual T initialize() =0;
     virtual void reset() =0;
     virtual const Vector<T>* weights() const =0;
 };

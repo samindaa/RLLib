@@ -19,20 +19,20 @@
 namespace RLLib
 {
 
-template<class T = double>
+template<class T>
 class TRStep
 {
   public:
     DenseVector<T>* o_tp1;
-    double r_tp1;
-    double z_tp1;
+    T r_tp1;
+    T z_tp1;
     bool endOfEpisode;
     TRStep(const int& nbVars) :
         o_tp1(new PVector<T>(nbVars)), r_tp1(0.0f), z_tp1(0.0f), endOfEpisode(false)
     {
     }
 
-    void updateRTStep(const double& r_tp1, const double& z_tp1, const bool& endOfEpisode)
+    void updateRTStep(const T& r_tp1, const T& z_tp1, const bool& endOfEpisode)
     {
       this->r_tp1 = r_tp1;
       this->z_tp1 = z_tp1;
@@ -74,7 +74,7 @@ class RLAgent
       return control;
     }
 
-    virtual double computeValueFunction(const Vector<T>* x) const
+    virtual T computeValueFunction(const Vector<T>* x) const
     {
       return control->computeValueFunction(x);
     }
@@ -153,7 +153,7 @@ class ControlAgent: public RLAgent<T>
     }
 };
 
-template<class T = double>
+template<class T>
 class RLProblem
 {
   protected:
@@ -184,8 +184,8 @@ class RLProblem
     virtual void step(const Action<T>* action) =0;
     virtual void updateRTStep() =0;
     virtual bool endOfEpisode() const =0;
-    virtual float r() const =0;
-    virtual float z() const =0;
+    virtual T r() const =0;
+    virtual T z() const =0;
 
     virtual void draw() const
     {/*To output useful information*/
@@ -232,9 +232,9 @@ class Simulator
       protected:
         int nbTotalTimeSteps;
         int nbEpisodeDone;
-        double averageTimePerStep;
-        double episodeR;
-        double episodeZ;
+        T averageTimePerStep;
+        T episodeR;
+        T episodeZ;
 
       public:
         Event() :
@@ -262,17 +262,17 @@ class Simulator
     bool verbose;
 
     Timer timer;
-    double totalTimeInMilliseconds;
+    T totalTimeInMilliseconds;
 
-    std::vector<double> statistics;
+    std::vector<T> statistics;
     bool enableStatistics;
 
     bool enableTestEpisodesAfterEachRun;
     int maxTestEpisodesAfterEachRun;
   public:
     int timeStep;
-    double episodeR;
-    double episodeZ;
+    T episodeR;
+    T episodeZ;
     std::vector<Event*> onEpisodeEnd;
 
     Simulator(RLAgent<T>* agent, RLProblem<T>* problem, const int& maxEpisodeTimeSteps,
@@ -316,16 +316,18 @@ class Simulator
 
     void benchmark()
     {
-      double xbar = std::accumulate(statistics.begin(), statistics.end(), 0.0)
-          / (double(statistics.size()));
+      T xbar = std::accumulate(statistics.begin(), statistics.end(), 0.0f) / (T(statistics.size()));
       std::cout << std::endl;
-      std::cout << "## Average: length=" << xbar << std::endl;
-      double sigmabar = 0;
-      for (std::vector<double>::const_iterator x = statistics.begin(); x != statistics.end(); ++x)
+      std::cout << "## Average: length=" << xbar;
+      std::cout << std::endl;
+      T sigmabar = T(0);
+      for (typename std::vector<T>::const_iterator x = statistics.begin(); x != statistics.end();
+          ++x)
         sigmabar += pow((*x - xbar), 2);
-      sigmabar = sqrt(sigmabar) / double(statistics.size());
-      double se/*standard error*/= sigmabar / sqrt(double(statistics.size()));
-      std::cout << "## (+- 95%) =" << (se * 2) << std::endl;
+      sigmabar = sqrt(sigmabar) / T(statistics.size());
+      T se/*standard error*/= sigmabar / sqrt(T(statistics.size()));
+      std::cout << "## (+- 95%) =" << (se * 2);
+      std::cout << std::endl;
       statistics.clear();
     }
 
@@ -373,7 +375,7 @@ class Simulator
       {
         if (verbose)
         {
-          double averageTimePerStep = totalTimeInMilliseconds / timeStep;
+          T averageTimePerStep = totalTimeInMilliseconds / timeStep;
           std::cout << "{" << nbEpisodeDone << " [" << timeStep << " (" << episodeR << ", "
               << episodeZ << ", " << averageTimePerStep << ")]} ";
           //std::cout << ".";
@@ -473,9 +475,9 @@ class Simulator
       {
         std::ofstream out(outFile);
         PVector<T> x_t(2);
-        for (float x = 0; x <= 10; x += 0.1)
+        for (T x = 0; x <= 10; x += 0.1f)
         {
-          for (float y = 0; y <= 10; y += 0.1)
+          for (T y = 0; y <= 10; y += 0.1f)
           {
             x_t.at(0) = x;
             x_t.at(1) = y;

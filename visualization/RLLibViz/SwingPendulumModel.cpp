@@ -12,7 +12,7 @@ using namespace RLLibViz;
 SwingPendulumModel::SwingPendulumModel(QObject *parent) :
     ModelBase(parent)
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   problem = new SwingPendulum<double>;
   hashing = new MurmurHashing(1000);
   projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10, false);

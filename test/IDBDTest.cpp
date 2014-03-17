@@ -17,7 +17,7 @@ void IDBDTest::run()
 void IDBDTest::testIDBD()
 {
   {
-    Probabilistic::srand(0);
+    Probabilistic<double>::srand(0);
     NoisyInputSumEvaluation noisyInputSumEvaluation;
     IDBD<double> idbd(noisyInputSumEvaluation.nbInputs, 0.001);
     double error = noisyInputSumEvaluation.evaluateLearner(&idbd);
@@ -26,7 +26,7 @@ void IDBDTest::testIDBD()
   }
 
   {
-    Probabilistic::srand(0);
+    Probabilistic<double>::srand(0);
     NoisyInputSumEvaluation noisyInputSumEvaluation;
     IDBD<double> idbd(noisyInputSumEvaluation.nbInputs, 0.01);
     double error = noisyInputSumEvaluation.evaluateLearner(&idbd);
@@ -38,7 +38,7 @@ void IDBDTest::testIDBD()
 void IDBDTest::testK1()
 {
   {
-    Probabilistic::srand(0);
+    Probabilistic<double>::srand(0);
     NoisyInputSumEvaluation noisyInputSumEvaluation;
     K1<double> k1(noisyInputSumEvaluation.nbInputs, 0.001);
     double error = noisyInputSumEvaluation.evaluateLearner(&k1);
@@ -47,7 +47,7 @@ void IDBDTest::testK1()
   }
 
   {
-    Probabilistic::srand(0);
+    Probabilistic<double>::srand(0);
     NoisyInputSumEvaluation noisyInputSumEvaluation;
     K1<double> k1(noisyInputSumEvaluation.nbInputs, 0.01);
     double error = noisyInputSumEvaluation.evaluateLearner(&k1);
@@ -58,7 +58,7 @@ void IDBDTest::testK1()
 
 void IDBDTest::testAutostep()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   NoisyInputSumEvaluation noisyInputSumEvaluation;
   Autostep<double> autostep(noisyInputSumEvaluation.nbInputs);
   double error = noisyInputSumEvaluation.evaluateLearner(&autostep);

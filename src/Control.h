@@ -42,8 +42,8 @@ class Control: public ParameterizedFunction<T>
     virtual void reset() =0;
     virtual const Action<T>* proposeAction(const Vector<T>* x) =0;
     virtual const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t,
-        const Vector<T>* x_tp1, const double& r_tp1, const double& z_tp1) =0;
-    virtual double computeValueFunction(const Vector<T>* x) const =0;
+        const Vector<T>* x_tp1, const T& r_tp1, const T& z_tp1) =0;
+    virtual T computeValueFunction(const Vector<T>* x) const =0;
     virtual const Predictor<T>* predictor() const =0;
 };
 
@@ -64,7 +64,7 @@ class OffPolicyControlLearner: public Control<T>
     {
     }
     virtual void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
-        const double& r_tp1, const double& z_tp1) = 0;
+        const T& r_tp1, const T& z_tp1) = 0;
 };
 
 template<class T>
@@ -76,11 +76,11 @@ class ActorOffPolicy: public ParameterizedFunction<T>
     }
     virtual void initialize() =0;
     virtual void reset() =0;
-    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, double const& rho_t,
-        const double& delta_t) =0;
+    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, T const& rho_t,
+        const T& delta_t) =0;
     virtual PolicyDistribution<T>* policy() const =0;
     virtual const Action<T>* proposeAction(const Representations<T>* phi) =0;
-    virtual double pi(const Action<T>* a) const =0;
+    virtual T pi(const Action<T>* a) const =0;
 };
 
 template<class T>
@@ -92,7 +92,7 @@ class ActorOnPolicy: public ParameterizedFunction<T>
     }
     virtual void initialize() =0;
     virtual void reset() =0;
-    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, double delta) =0;
+    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, T delta) =0;
     virtual PolicyDistribution<T>* policy() const =0;
     virtual const Action<T>* proposeAction(const Representations<T>* phi) =0;
 };

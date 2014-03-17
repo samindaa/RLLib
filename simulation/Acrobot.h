@@ -72,12 +72,12 @@ class Acrobot: public RLProblem<T>
     {
       if (random) // random
       {
-        theta1 = (Probabilistic::nextFloat() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
-        theta2 = (Probabilistic::nextFloat() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
-        theta1Dot = (Probabilistic::nextFloat() * (theta1DotRange->max() * 2.0f)
-            - theta1DotRange->max()) * 0.1f;
-        theta2Dot = (Probabilistic::nextFloat() * (theta2DotRange->max() * 2.0f)
-            - theta1DotRange->max()) * 0.1f;
+        theta1 = (Probabilistic < T > ::nextReal() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
+        theta2 = (Probabilistic < T > ::nextReal() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
+        theta1Dot = (Probabilistic < T
+            > ::nextReal() * (theta1DotRange->max() * 2.0f) - theta1DotRange->max()) * 0.1f;
+        theta2Dot = (Probabilistic < T
+            > ::nextReal() * (theta2DotRange->max() * 2.0f) - theta1DotRange->max()) * 0.1f;
       }
       else
         theta1 = theta2 = theta1Dot = theta2Dot = 0.0; // not random
@@ -108,7 +108,7 @@ class Acrobot: public RLProblem<T>
 
       //torque is in [-1,1]
       //We'll make noise equal to at most +/- 1
-      float theNoise = transitionNoise * 2.0 * (Probabilistic::nextFloat() - 0.5);
+      float theNoise = transitionNoise * 2.0 * (Probabilistic<T>::nextReal() - 0.5);
 
       torque += theNoise;
 
@@ -165,14 +165,14 @@ class Acrobot: public RLProblem<T>
       return (feetHeight > targetPosition);
     }
 
-    float r() const
+    T r() const
     {
-      return endOfEpisode() ? 0.0 : -1.0;
+      return endOfEpisode() ? 0.0f : -1.0f;
     }
 
-    float z() const
+    T z() const
     {
-      return 0;
+      return 0.0f;
     }
 
 };

@@ -31,7 +31,7 @@ RLLIB_TEST(ActorCriticOnPolicyControlLearnerPendulumTest)
 class ActorCriticOnPolicyControlLearnerPendulumTest: public ActorCriticOnPolicyControlLearnerPendulumTestBase
 {
   protected:
-    RLProblem<>* problem;
+    RLProblem<double>* problem;
     Hashing* hashing;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;

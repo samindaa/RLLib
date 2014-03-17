@@ -25,7 +25,7 @@ RLLIB_TEST_MAKE(ContinuousGridworldTest)
 
 void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -68,7 +68,7 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
 
 void ContinuousGridworldTest::testOffPACContinuousGridworld()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -127,7 +127,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
 
 void ContinuousGridworldTest::testOffPACContinuousGridworld2()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -186,7 +186,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
 
 void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -246,7 +246,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
 
 void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new ContinuousGridworld<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,

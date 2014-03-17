@@ -42,7 +42,7 @@ class Projector
     }
     virtual const Vector<T>* project(const Vector<T>* x, const int& h1) =0;
     virtual const Vector<T>* project(const Vector<T>* x) =0;
-    virtual double vectorNorm() const =0;
+    virtual T vectorNorm() const =0;
     virtual int dimension() const =0;
 };
 
@@ -105,7 +105,7 @@ class TileCoder: public Projector<T>
       return vector;
     }
 
-    double vectorNorm() const
+    T vectorNorm() const
     {
       return includeActiveFeature ? nbTilings + 1 : nbTilings;
     }

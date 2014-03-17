@@ -213,17 +213,17 @@ class NonMarkovPoleBalancing: public RLProblem<T>
       return !value;
     }
 
-    float r() const
+    T r() const
     {
-      float value = 0;
+      float value = 0.0f;
       for (int i = 0; i < nbPoles; i++)
         value += cos(theta->getEntry(i));
       return value;
     }
 
-    float z() const
+    T z() const
     {
-      return 0.0;
+      return 0.0f;
     }
 
 };

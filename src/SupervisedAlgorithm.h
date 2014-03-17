@@ -32,9 +32,9 @@ class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
 {
   protected:
     Vector<T>* w;
-    double alpha;
+    T alpha;
   public:
-    Adaline(const int& size, const double& alpha) :
+    Adaline(const int& size, const T& alpha) :
         w(new PVector<T>(size)), alpha(alpha)
     {
     }
@@ -43,12 +43,12 @@ class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
       delete w;
     }
 
-    double initialize()
+    T initialize()
     {
-      return 0.0;
+      return T(0);
     }
 
-    double predict(const Vector<T>* x) const
+    T predict(const Vector<T>* x) const
     {
       return w->dot(x);
     }
@@ -58,9 +58,9 @@ class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
       w->clear();
     }
 
-    double learn(const Vector<T>* x_t, const T& y_tp1)
+    T learn(const Vector<T>* x_t, const T& y_tp1)
     {
-      double delta = y_tp1 - predict(x_t);
+      T delta = y_tp1 - predict(x_t);
       w->addToSelf(alpha * delta, x_t);
       return delta;
     }
@@ -89,15 +89,15 @@ class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
     Vector<T>* alphas;
     Vector<T>* hs;
     VectorPool<T>* pool;
-    double theta, minimumStepSize;
+    T theta, minimumStepSize;
 
   public:
-    IDBD(const int& size, const double& theta) :
+    IDBD(const int& size, const T& theta) :
         w(new PVector<T>(size)), alphas(new PVector<T>(w->dimension())), hs(
             new PVector<T>(w->dimension())), pool(new VectorPool<T>(size)), theta(theta), minimumStepSize(
             1e-6)
     {
-      alphas->set(1.0 / w->dimension());
+      alphas->set(1.0f / w->dimension());
     }
 
     virtual ~IDBD()
@@ -108,12 +108,12 @@ class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
       delete pool;
     }
 
-    double initialize()
+    T initialize()
     {
-      return 0.0;
+      return T(0);
     }
 
-    double predict(const Vector<T>* x) const
+    T predict(const Vector<T>* x) const
     {
       return w->dot(x);
     }
@@ -121,13 +121,13 @@ class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
     void reset()
     {
       w->clear();
-      alphas->set(1.0 / w->dimension());
+      alphas->set(1.0f / w->dimension());
       hs->clear();
     }
 
-    double learn(const Vector<T>* x_t, const T& y_tp1)
+    T learn(const Vector<T>* x_t, const T& y_tp1)
     {
-      double delta = y_tp1 - predict(x_t);
+      T delta = y_tp1 - predict(x_t);
       Vector<T>* deltaX = pool->newVector(x_t)->mapMultiplyToSelf(delta);
       Vector<T>* deltaXH = pool->newVector(deltaX)->ebeMultiplyToSelf(hs);
       Vectors<T>::multiplySelfByExponential(alphas, theta, deltaXH, minimumStepSize);
@@ -166,15 +166,15 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
     Vector<T>* alphas;
     Vector<T>* hs;
     VectorPool<T>* pool;
-    double theta, minimumStepSize;
+    T theta, minimumStepSize;
 
   public:
-    SemiLinearIDBD(const int& size, const double& theta) :
+    SemiLinearIDBD(const int& size, const T& theta) :
         w(new PVector<T>(size)), alphas(new PVector<T>(w->dimension())), hs(
             new PVector<T>(w->dimension())), pool(new VectorPool<T>(size)), theta(theta), minimumStepSize(
             1e-6)
     {
-      alphas->set(1.0 / w->dimension());
+      alphas->set(1.0f / w->dimension());
     }
 
     virtual ~SemiLinearIDBD()
@@ -185,27 +185,27 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
       delete pool;
     }
 
-    double initialize()
+    T initialize()
     {
-      return 0.0;
+      return T(0);
     }
 
-    double predict(const Vector<T>* x) const
+    T predict(const Vector<T>* x) const
     {
-      return 1.0 / (1.0 + exp(-w->dot(x)));
+      return 1.0f / (1.0f + exp(-w->dot(x)));
     }
 
     void reset()
     {
       w->clear();
-      alphas->set(1.0 / w->dimension());
+      alphas->set(1.0f / w->dimension());
       hs->clear();
     }
 
-    double learn(const Vector<T>* x_t, const T& z_tp1)
+    T learn(const Vector<T>* x_t, const T& z_tp1)
     {
-      double y_tp1 = predict(x_t);
-      double delta = z_tp1 - y_tp1;
+      T y_tp1 = predict(x_t);
+      T delta = z_tp1 - y_tp1;
       Vector<T>* deltaX = pool->newVector(x_t)->mapMultiplyToSelf(delta);
       Vector<T>* deltaXH = pool->newVector(deltaX)->ebeMultiplyToSelf(hs);
       Vectors<T>::multiplySelfByExponential(alphas, theta, deltaXH, minimumStepSize);
@@ -244,14 +244,14 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
     Vector<T>* betas;
     Vector<T>* hs;
     VectorPool<T>* pool;
-    double theta;
+    T theta;
 
   public:
-    K1(const int& size, const double& theta) :
+    K1(const int& size, const T& theta) :
         w(new PVector<T>(size)), alphas(new PVector<T>(size)), betas(new PVector<T>(size)), hs(
             new PVector<T>(size)), pool(new VectorPool<T>(size)), theta(theta)
     {
-      betas->set(std::log(0.1));
+      betas->set(std::log(0.1f));
     }
 
     virtual ~K1()
@@ -263,12 +263,12 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
       delete pool;
     }
 
-    double initialize()
+    T initialize()
     {
-      return 0.0;
+      return T(0);
     }
 
-    double predict(const Vector<T>* x) const
+    T predict(const Vector<T>* x) const
     {
       return w->dot(x);
     }
@@ -284,7 +284,7 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
 
   private:
     void updateHS(const Vector<T>* x, const Vector<T>* x2, const Vector<T>* pi,
-        const Vector<T>* piX, const double& delta)
+        const Vector<T>* piX, const T& delta)
     {
       Vector<T>* piX2 = pool->newVector(x2)->ebeMultiplyToSelf(pi);
       const SparseVector<T>* sresult = dynamic_cast<const SparseVector<T>*>(piX2);
@@ -308,15 +308,15 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
     }
 
   public:
-    double learn(const Vector<T>* x_t, const T& y_tp1)
+    T learn(const Vector<T>* x_t, const T& y_tp1)
     {
-      double delta = y_tp1 - predict(x_t);
+      T delta = y_tp1 - predict(x_t);
       Vector<T>* xHS = pool->newVector(x_t)->ebeMultiplyToSelf(hs);
       betas->addToSelf(theta * delta, xHS);
       Vectors<T>::expToSelf(alphas, betas);
       Vector<T>* x2 = pool->newVector(x_t)->ebeMultiplyToSelf(x_t);
       Vector<T>* alphasX2 = pool->newVector(x2)->ebeMultiplyToSelf(alphas);
-      double pnorm = alphasX2->sum();
+      T pnorm = alphasX2->sum();
       Vector<T>* pi = pool->newVector(alphas)->mapMultiplyToSelf(1.0 / (1.0 + pnorm));
       Vector<T>* piX = pool->newVector(x_t)->ebeMultiplyToSelf(pi);
       w->addToSelf(delta, piX);
@@ -350,7 +350,7 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
     Vector<T>* h;
     Vector<T>* v;
     VectorPool<T>* pool;
-    double tau, minimumStepsize, kappa;
+    T tau, minimumStepsize, kappa;
 
   public:
     Autostep(const int& nbFeatures) :
@@ -386,18 +386,18 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
       Vectors<T>::multiplySelfByExponential(dynamic_cast<DenseVector<T>*>(alphas), kappa,
           deltaXH->ebeDivideToSelf(v), minimumStepsize);
       Vector<T>* x2ByAlphas = pool->newVector(x2)->ebeMultiplyToSelf(alphas);
-      double sum = x2ByAlphas->sum();
+      T sum = x2ByAlphas->sum();
       if (sum > 1.0f)
         Filters<T>::mapMultiplyToSelf(alphas, 1.0f / sum, x);
     }
 
   public:
-    double initialize()
+    T initialize()
     {
-      return 0.0;
+      return T(0);
     }
 
-    double predict(const Vector<T>* x) const
+    T predict(const Vector<T>* x) const
     {
       return w->dot(x);
     }
@@ -406,9 +406,9 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
       w->clear();
     }
 
-    double learn(const Vector<T>* x_t, const T& y_tp1)
+    T learn(const Vector<T>* x_t, const T& y_tp1)
     {
-      double delta = y_tp1 - predict(x_t);
+      T delta = y_tp1 - predict(x_t);
       Vector<T>* deltaX = pool->newVector(x_t)->mapMultiplyToSelf(delta);
       Vector<T>* x2 = pool->newVector(x_t)->ebeMultiplyToSelf(x_t);
       updateAlphas(x_t, x2, deltaX);

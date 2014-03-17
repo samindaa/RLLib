@@ -84,7 +84,7 @@ class ContinuousGridworld: public RLProblem<T>
 
     void step(const Action<T>* action)
     {
-      float noise = Probabilistic::nextFloat() * absoluteNoise - (absoluteNoise / 2.0);
+      float noise = Probabilistic<float>::nextReal() * absoluteNoise - (absoluteNoise / 2.0f);
       for (int i = 0; i < Base::observations->dimension(); i++)
         Base::observations->at(i) = observationRange->bound(
             Base::observations->at(i) + actionRange->bound(action->at(i) + noise));
@@ -102,33 +102,33 @@ class ContinuousGridworld: public RLProblem<T>
 
     float N(const float& p, const float& mu, const float& sigma) const
     {
-      return Probabilistic::gaussianProbability(p, mu, sigma);
+      return Probabilistic<float>::gaussianProbability(p, mu, sigma);
     }
 
-    float r() const
+    T r() const
     {
       float px = Base::observations->at(0);
       float py = Base::observations->at(1);
-      return -1.0
-          - 2.0
-              * (N(px, 0.3, 0.1) * N(py, 0.6, 0.03) + N(px, 0.4, 0.03) * N(py, 0.5, 0.1)
-                  + N(px, 0.8, 0.03) * N(py, 0.9, 0.1));
+      return -1.0f
+          - 2.0f
+              * (N(px, 0.3f, 0.1f) * N(py, 0.6f, 0.03f) + N(px, 0.4f, 0.03f) * N(py, 0.5f, 0.1f)
+                  + N(px, 0.8f, 0.03f) * N(py, 0.9f, 0.1f));
     }
 
-    float z() const
+    T z() const
     {
-      return 0;
+      return 0.0f;
     }
 
     void draw() const
     {
       std::ofstream oute("visualization/continuousGridworld.txt");
-      for (float px = observationRange->min(); px <= observationRange->max(); px += 0.01)
+      for (float px = observationRange->min(); px <= observationRange->max(); px += 0.01f)
       {
-        for (float py = observationRange->min(); py <= observationRange->max(); py += 0.01)
+        for (float py = observationRange->min(); py <= observationRange->max(); py += 0.01f)
           oute
-              << (N(px, 0.3, 0.1) * N(py, 0.6, 0.03) + N(px, 0.4, 0.03) * N(py, 0.5, 0.1)
-                  + N(px, 0.8, 0.03) * N(py, 0.9, 0.1)) << " ";
+              << (N(px, 0.3f, 0.1f) * N(py, 0.6f, 0.03f) + N(px, 0.4f, 0.03f) * N(py, 0.5f, 0.1f)
+                  + N(px, 0.8f, 0.03f) * N(py, 0.9f, 0.1f)) << " ";
 
         oute << std::endl;
       }

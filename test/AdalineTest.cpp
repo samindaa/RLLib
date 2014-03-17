@@ -16,7 +16,7 @@ void AdalineTest::run()
 
 void AdalineTest::testAdaline()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   PVector<double> targetWeights(2);
   targetWeights[0] = 1.0;
   targetWeights[1] = 2.0;
@@ -30,7 +30,7 @@ void AdalineTest::testAdaline()
 void AdalineTest::testAdalineOnTracking()
 {
   {
-    Probabilistic::srand(0);
+    Probabilistic<double>::srand(0);
     NoisyInputSumEvaluation noisyInputSumEvaluation;
     Adaline<double> adaline(noisyInputSumEvaluation.nbInputs, 0.0);
     double error = noisyInputSumEvaluation.evaluateLearner(&adaline);
@@ -38,7 +38,7 @@ void AdalineTest::testAdalineOnTracking()
     Assert::assertObjectEquals(noisyInputSumEvaluation.nbNonZeroWeights, error, 0.2);
   }
   {
-    Probabilistic::srand(0);
+    Probabilistic<double>::srand(0);
     NoisyInputSumEvaluation noisyInputSumEvaluation;
     Adaline<double> adaline(noisyInputSumEvaluation.nbInputs, 0.03);
     double error = noisyInputSumEvaluation.evaluateLearner(&adaline);
@@ -50,7 +50,7 @@ void AdalineTest::testAdalineOnTracking()
 void AdalineTest::updateFeatures(Vector<double>* features)
 {
   for (int i = 0; i < features->dimension(); i++)
-    features->setEntry(i, Probabilistic::nextDouble());
+    features->setEntry(i, Probabilistic<double>::nextReal());
 }
 
 void AdalineTest::learnTarget(const Vector<double>* targetWeights, Adaline<double>* learner)

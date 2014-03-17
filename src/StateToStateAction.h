@@ -114,7 +114,7 @@ class StateToStateAction
     virtual const Vector<T>* stateAction(const Vector<T>* x, const Action<T>* a) =0;
     virtual const Representations<T>* stateActions(const Vector<T>* x) =0;
     virtual const Actions<T>* getActions() const =0;
-    virtual double vectorNorm() const =0;
+    virtual T vectorNorm() const =0;
     virtual int dimension() const =0;
 };
 
@@ -164,7 +164,7 @@ class StateActionTilings: public StateToStateAction<T>
       return actions;
     }
 
-    double vectorNorm() const
+    T vectorNorm() const
     {
       return projector->vectorNorm();
     }
@@ -226,7 +226,7 @@ class TabularAction: public StateToStateAction<T>
       return actions;
     }
 
-    double vectorNorm() const
+    T vectorNorm() const
     {
       return includeActiveFeature ? projector->vectorNorm() + 1 : projector->vectorNorm();
     }

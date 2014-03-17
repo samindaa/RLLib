@@ -35,7 +35,7 @@ class Predictor
     virtual ~Predictor()
     {
     }
-    virtual double predict(const Vector<T>* x) const =0;
+    virtual T predict(const Vector<T>* x) const =0;
 };
 
 template<class T>
@@ -45,7 +45,7 @@ class OnPolicyTD: public Predictor<T>, public LinearLearner<T>
     virtual ~OnPolicyTD()
     {
     }
-    virtual double update(const Vector<T>* x_t, const Vector<T>* x_tp1, double r_tp1) =0;
+    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, T r_tp1) =0;
 };
 
 template<class T>
@@ -55,8 +55,8 @@ class OffPolicyTD: public Predictor<T>, public LinearLearner<T>
     virtual ~OffPolicyTD()
     {
     }
-    virtual double update(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& rho_t,
-        double r_tp1, double z_tp1) =0;
+    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& rho_t, T r_tp1,
+        T z_tp1) =0;
 
 };
 
@@ -67,8 +67,8 @@ class GVF: public OffPolicyTD<T>
     virtual ~GVF()
     {
     }
-    virtual double update(const Vector<T>* x_t, const Vector<T>* x_tp1, const double& gamma_tp1,
-        const double& lambda_tp1, const double& rho_t, const double& r_tp1, const double& z_tp1) =0;
+    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& gamma_tp1,
+        const T& lambda_tp1, const T& rho_t, const T& r_tp1, const T& z_tp1) =0;
 };
 
 } // namespace RLLib

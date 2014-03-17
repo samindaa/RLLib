@@ -25,7 +25,7 @@ RLLIB_TEST_MAKE(MountainCarTest)
 
 void MountainCarTest::testSarsaTabularActionMountainCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new UNH(1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -65,7 +65,7 @@ void MountainCarTest::testSarsaTabularActionMountainCar()
 
 void MountainCarTest::testOnPolicyBoltzmannRTraceTabularActionCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new UNH(1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -120,7 +120,7 @@ void MountainCarTest::testOnPolicyBoltzmannRTraceTabularActionCar()
 
 void MountainCarTest::testSarsaMountainCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<float>::srand(0);
   RLProblem<float>* problem = new MountainCar<float>;
   Hashing* hashing = new UNH(10000);
   Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10, 10,
@@ -155,7 +155,7 @@ void MountainCarTest::testSarsaMountainCar()
 
 void MountainCarTest::testSarsaTrueMountainCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<float>* problem = new MountainCar<float>;
   Hashing* hashing = new MurmurHashing(10000);
   Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10, 10,
@@ -191,7 +191,7 @@ void MountainCarTest::testSarsaTrueMountainCar()
 
 void MountainCarTest::testSarsaAdaptiveMountainCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new UNH(10000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 9, 10,
@@ -263,7 +263,7 @@ void MountainCarTest::testExpectedSarsaMountainCar()
 
 void MountainCarTest::testGreedyGQOnPolicyMountainCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new UNH(10000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -302,7 +302,7 @@ void MountainCarTest::testGreedyGQOnPolicyMountainCar()
 
 void MountainCarTest::testGreedyGQMountainCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -345,7 +345,7 @@ void MountainCarTest::testGreedyGQMountainCar()
 
 void MountainCarTest::testSoftmaxGQOnMountainCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -385,7 +385,7 @@ void MountainCarTest::testSoftmaxGQOnMountainCar()
 
 void MountainCarTest::testOffPACMountainCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<float>::srand(0);
   RLProblem<float>* problem = new MountainCar<float>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10, 10,
@@ -444,7 +444,7 @@ void MountainCarTest::testOffPACMountainCar()
 
 void MountainCarTest::testOffPACOnPolicyMountainCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -500,7 +500,7 @@ void MountainCarTest::testOffPACOnPolicyMountainCar()
 void MountainCarTest::testOnPolicyContinousActionCar(const int& nbMemory, const double& lambda,
     const double& gamma, double alpha_v, double alpha_u)
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(nbMemory);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -552,7 +552,7 @@ void MountainCarTest::testOnPolicyContinousActionCar(const int& nbMemory, const 
 
 void MountainCarTest::testOnPolicyBoltzmannATraceCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(10000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -603,7 +603,7 @@ void MountainCarTest::testOnPolicyBoltzmannATraceCar()
 
 void MountainCarTest::testOnPolicyBoltzmannRTraceCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(10000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -659,7 +659,7 @@ void MountainCarTest::testOnPolicyContinousActionCar()
 
 void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing* hashing = new MurmurHashing(10000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,

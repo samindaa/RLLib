@@ -45,7 +45,7 @@ class NoisyInputSum: public PredictionProblem<double>
       for (int i = 0; i < w->dimension(); i++)
       {
         if (i < nbNonZeroWeights)
-          w->setEntry(i, Probabilistic::nextDouble() > 0.5f ? 1.0f : -1.0f);
+          w->setEntry(i, Probabilistic<double>::nextReal() > 0.5f ? 1.0f : -1.0f);
       }
     }
 
@@ -58,7 +58,7 @@ class NoisyInputSum: public PredictionProblem<double>
   private:
     void changeWeight()
     {
-      const int i = Probabilistic::nextInt(nbChangingWeights);
+      const int i = Probabilistic<int>::nextInt(nbChangingWeights);
       w->setEntry(i, w->getEntry(i) * -1.0f);
     }
 
@@ -70,7 +70,7 @@ class NoisyInputSum: public PredictionProblem<double>
         changeWeight();
       inputs->clear();
       for (int i = 0; i < inputs->dimension(); i++)
-        inputs->setEntry(i, Probabilistic::nextNormalGaussian());
+        inputs->setEntry(i, Probabilistic<double>::nextNormalGaussian());
       target = w->dot(inputs);
       return true;
     }

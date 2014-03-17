@@ -447,7 +447,7 @@ RLLIB_TEST_MAKE(SVectorTests)
 SVectorTests::SVectorTests() :
     vectorTest(new SVectorTest)
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
 }
 
 SVectorTests::~SVectorTests()
@@ -484,9 +484,9 @@ Vector<double>* SVectorTest::newPrototypeVector(const int& size)
 SVector<double>* SVectorTest::createRandomSVector(const int& maxActive, const int& size)
 {
   SVector<double>* result = (SVector<double>*) newVector(size);
-  int nbActive = Probabilistic::nextInt(maxActive);
+  int nbActive = Probabilistic<int>::nextInt(maxActive);
   for (int i = 0; i < nbActive; i++)
-    result->setEntry(Probabilistic::nextInt(size), Probabilistic::nextDouble() * 2 - 1);
+    result->setEntry(Probabilistic<int>::nextInt(size), Probabilistic<double>::nextReal() * 2 - 1);
   Assert::checkConsistency(result);
   return result;
 }
@@ -500,7 +500,7 @@ void SVectorTest::checkVectorOperation(SVector<double>* a, Vector<double>* b)
   Assert::assertEquals(pa->addToSelf(pb), a->addToSelf(b));
   Assert::assertEquals(pa->subtractToSelf(pb), a->subtractToSelf(b));
   Assert::assertEquals(pa->ebeMultiplyToSelf(pb), a->ebeMultiplyToSelf(b));
-  float factor = Probabilistic::nextFloat();
+  float factor = Probabilistic<float>::nextReal();
   Assert::assertEquals(pa->addToSelf(factor, pb), a->addToSelf(factor, b));
 }
 
@@ -564,7 +564,7 @@ void SVectorTest::testFullVector()
   cout << v << endl;
   for (int i = 0; i < v.dimension(); i++)
   {
-    double k = Probabilistic::nextDouble();
+    double k = Probabilistic<double>::nextReal();
     v[i] = k;
     cout << k << " ";
   }

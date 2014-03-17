@@ -68,7 +68,7 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
 {
   Timer timer;
   timer.start();
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RandomWalk* problem = new RandomWalk;
 
   Policy<double>* behaviorPolicy = RandomWalk::newPolicy(problem->getActions(),

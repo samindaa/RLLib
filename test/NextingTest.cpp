@@ -34,7 +34,7 @@ void NextingProblem::step(const Action<double>* action)
 void NextingProblem::updateRTStep()
 {
   for (int i = 0; i < dimension(); i++)
-    output->o_tp1->at(i) = Probabilistic::nextDouble();
+    output->o_tp1->at(i) = Probabilistic<double>::nextReal();
   output->updateRTStep(r(), z(), endOfEpisode());
 }
 
@@ -43,12 +43,12 @@ bool NextingProblem::endOfEpisode() const
   return false;
 }
 
-float NextingProblem::r() const
+double NextingProblem::r() const
 {
   return 0;
 }
 
-float NextingProblem::z() const
+double NextingProblem::z() const
 {
   return 0;
 }

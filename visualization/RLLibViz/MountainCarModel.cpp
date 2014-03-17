@@ -13,7 +13,7 @@ MountainCarModel::MountainCarModel(QObject *parent) :
     ModelBase(parent)
 {
   // RLLib:
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   behaviourEnvironment = new MountainCar<double>;
   evaluationEnvironment = new MountainCar<double>;
   hashing = new MurmurHashing(1000000);

@@ -155,7 +155,7 @@ void OnOffPolicyPredictionTest::clearTDFactories()
 
 void OnOffPolicyPredictionTest::testOnLineProblem()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   registerTDFactories();
 
   for (std::vector<OnPolicyTDFactory*>::iterator iter = onPolicyTDFactoryVector.begin();
@@ -167,7 +167,7 @@ void OnOffPolicyPredictionTest::testOnLineProblem()
 
 void OnOffPolicyPredictionTest::testOnLineProblemWithLambda()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   registerTDFactories();
 
   for (std::vector<OnPolicyTDFactory*>::iterator iter = onPolicyTDFactoryVector.begin();
@@ -183,7 +183,7 @@ void OnOffPolicyPredictionTest::testOnLineProblemWithLambda()
 
 void OnOffPolicyPredictionTest::testOnRandomWalkProblem()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   registerTDFactories();
 
   for (std::vector<OnPolicyTDFactory*>::iterator iter = onPolicyTDFactoryVector.begin();
@@ -196,7 +196,7 @@ void OnOffPolicyPredictionTest::testOnRandomWalkProblem()
 
 void OnOffPolicyPredictionTest::testOnRandomWalkProblemWithLambda()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   registerTDFactories();
 
   for (std::vector<OnPolicyTDFactory*>::iterator iter = onPolicyTDFactoryVector.begin();
@@ -212,7 +212,7 @@ void OnOffPolicyPredictionTest::testOnRandomWalkProblemWithLambda()
 
 void OnOffPolicyPredictionTest::testOffPolicy()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   registerTDFactories();
 
   for (std::vector<OffPolicyTDFactory*>::iterator iter = offPolicyTDFactoryVector.begin();
@@ -228,7 +228,7 @@ void OnOffPolicyPredictionTest::testOffPolicy()
 
 void OnOffPolicyPredictionTest::testOffPolicyWithLambda()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   registerTDFactories();
 
   for (std::vector<OffPolicyTDFactory*>::iterator iter = offPolicyTDFactoryVector.begin();

@@ -121,14 +121,14 @@ class CartPole: public RLProblem<T>
       return !(xRange->in(x) || thetaRange->in(theta));
     }
 
-    float r() const
+    T r() const
     {
       return cos(theta);
     }
 
-    float z() const
+    T z() const
     {
-      return 0;
+      return 0.0f;
     }
 
 };

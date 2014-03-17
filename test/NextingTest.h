@@ -107,8 +107,8 @@ class NextingProblem: public RLProblem<double>
     void step(const Action<double>* action);
     void updateRTStep();
     bool endOfEpisode() const;
-    float r() const;
-    float z() const;
+    double r() const;
+    double z() const;
 };
 
 class NextingProjector: public Projector<double>

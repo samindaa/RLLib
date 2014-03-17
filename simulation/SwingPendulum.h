@@ -118,13 +118,13 @@ class SwingPendulum: public RLProblem<T>
       return false;
       //return upTime + 1 >= requiredUpTime / stepTime; // 1000 steps
     }
-    float r() const
+    T r() const
     {
       return cos(theta);
     }
-    float z() const
+    T z() const
     {
-      return 0.0;
+      return 0.0f;
     }
 
 };

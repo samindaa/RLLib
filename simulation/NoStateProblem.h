@@ -10,7 +10,7 @@
 
 #include "RL.h"
 
-class NoStateProblem: public RLProblem<>
+class NoStateProblem: public RLProblem<double>
 {
   protected:
     double mu;
@@ -19,7 +19,7 @@ class NoStateProblem: public RLProblem<>
     double currentA;
   public:
     NoStateProblem(const double& mu, const double& sigma, const Range<double>* range = 0) :
-        RLProblem<>(1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
+        RLProblem<double>(1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
     {
       discreteActions->push_back(0, 0);
       continuousActions->push_back(0, 0);
@@ -49,12 +49,12 @@ class NoStateProblem: public RLProblem<>
       return false;
     }
 
-    float r() const
+    double r() const
     {
-      return Probabilistic::gaussianProbability(currentA, mu, sigma);
+      return Probabilistic<double>::gaussianProbability(currentA, mu, sigma);
     }
 
-    float z() const
+    double z() const
     {
       return 0;
     }

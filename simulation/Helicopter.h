@@ -346,7 +346,7 @@ class HelicopterDynamics
 
       for (int i = 0; i < 6; ++i)
         noise[i] = noise_memory * noise[i]
-            + (1.0 - noise_memory) * Probabilistic::nextNormalGaussian() * noise_std[i]
+            + (1.0 - noise_memory) * Probabilistic<double>::nextNormalGaussian() * noise_std[i]
                 * noise_mult;
 
       for (int t = 0; t < 10; ++t)
@@ -466,7 +466,7 @@ class Helicopter: public RLProblem<T>
       return heliDynamics.isCrashed() || step_time == episodeLength;
     }
 
-    float r() const
+    T r() const
     {
       if (heliDynamics.isCrashed())
         return computeTerminalReward();
@@ -486,7 +486,7 @@ class Helicopter: public RLProblem<T>
       return reward;
     }
 
-    float z() const
+    T z() const
     {
       return 0;
     }

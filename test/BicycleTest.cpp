@@ -99,7 +99,7 @@ int BicycleProjector::dimension() const
 
 void BicycleTest::testBicycleBalance()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RandlovBike<double>* problem = new RandlovBike<double>(false);
   Projector<double>* projector = new BicycleProjector(problem->dimension());
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -134,7 +134,7 @@ void BicycleTest::testBicycleBalance()
 
 void BicycleTest::testBicycleGoToTarget()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RandlovBike<double>* problem = new RandlovBike<double>(true);
   Projector<double>* projector = new BicycleProjector(problem->dimension());
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -170,7 +170,7 @@ void BicycleTest::testBicycleGoToTarget()
 
 void BicycleTest::testBicycleGoToTargetEvaluate()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RandlovBike<double>* problem = new RandlovBike<double>(true);
   Projector<double>* projector = new BicycleProjector(problem->dimension());
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,

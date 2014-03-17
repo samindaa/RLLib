@@ -77,9 +77,9 @@ class MountainCar3D: public RLProblem<T>
     void set_initial_position_random()
     {
       xposition = positionRange->min()
-          + Probabilistic::nextFloat() * ((positionRange->max() - 0.2) - positionRange->min());
+          + Probabilistic<T>::nextReal() * ((positionRange->max() - 0.2f) - positionRange->min());
       yposition = positionRange->min()
-          + Probabilistic::nextFloat() * ((positionRange->max() - 0.2) - positionRange->min());
+          + Probabilistic<T>::nextReal() * ((positionRange->max() - 0.2f) - positionRange->min());
       xvelocity = 0.0;
       yvelocity = 0.0;
     }
@@ -169,14 +169,14 @@ class MountainCar3D: public RLProblem<T>
       return ((xposition >= targetPosition) && (yposition >= targetPosition));
     }
 
-    float r() const
+    T r() const
     {
-      return -1.0;
+      return -1.0f;
     }
 
-    float z() const
+    T z() const
     {
-      return 0;
+      return 0.0f;
     }
 
 };

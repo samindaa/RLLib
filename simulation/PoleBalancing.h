@@ -43,11 +43,11 @@ void mvnrnd(const MatrixBase<Derived1>& mu, const MatrixBase<Derived2>& Sigma,
   MatrixXd R = Sigma.llt().matrixL()/*cholcov*/;
   int size = mu.rows();
   for (int i = 0; i < size; i++)
-    r(i) = RLLib::Probabilistic::nextNormalGaussian();
+    r(i) = RLLib::Probabilistic<double>::nextNormalGaussian();
   r = mu + R * r;
 }
 
-class PoleBalancing: public RLProblem<>
+class PoleBalancing: public RLProblem<double>
 {
   protected:
     double tau, veta, g;
@@ -65,7 +65,7 @@ class PoleBalancing: public RLProblem<>
 
   public:
     PoleBalancing() :
-        RLProblem<>(4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
+        RLProblem<double>(4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
     {
       // No discrete actions
 
@@ -136,13 +136,13 @@ class PoleBalancing: public RLProblem<>
       return fabs((double) x(0)) >= 1.5 || fabs((double) x(2)) >= M_PI / 6.0;
     }
 
-    float r() const
+    double r() const
     {
       VectorXd r_xt_ut = x.transpose() * Q * x + u.transpose() * R * u;
       return (float) r_xt_ut(0);
     }
 
-    float z() const
+    double z() const
     {
       return 0.0;
     }

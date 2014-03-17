@@ -47,16 +47,17 @@ class Boundedness
     template<class T>
     inline static bool checkDistribution(const Vector<T>* distribution)
     {
-      double sum = 0.0;
+      T sum = T(0);
       for (int i = 0; i < distribution->dimension(); i++)
         sum += distribution->getEntry(i);
-      bool bvalue = ::fabs(1.0 - sum) < 10e-8;
+      bool bvalue = ::fabs(T(1) - sum) < 10e-8;
       assert(bvalue);
       return bvalue;
     }
 };
 
 // Important distributions
+template<class T>
 class Probabilistic
 {
   public:
@@ -78,56 +79,50 @@ class Probabilistic
     }
 
     // [0..1]
-    inline static float nextFloat()
+    inline static T nextReal()
     {
-      return float(rand()) * (1.0f / static_cast<float>(RAND_MAX));
-    }
-
-    // [0..1]
-    inline static double nextDouble()
-    {
-      return double(rand()) / RAND_MAX;
+      return T(rand()) / static_cast<T>(RAND_MAX);
     }
 
     // A gaussian random deviate
-    inline static double nextNormalGaussian()
+    inline static T nextNormalGaussian()
     {
-      double r, v1, v2;
+      T r, v1, v2;
       do
       {
-        v1 = 2.0 * nextDouble() - 1.0;
-        v2 = 2.0 * nextDouble() - 1.0;
+        v1 = T(2) * nextReal() - T(1);
+        v2 = T(2) * nextReal() - T(1);
         r = v1 * v1 + v2 * v2;
       } while (r >= 1.0 || r == 0);
-      const double fac(sqrt(-2.0 * log(r) / r));
+      const T fac(sqrt(-T(2) * log(r) / r));
       return v1 * fac;
     }
 
-    inline static double gaussianProbability(const float& x, const float& m, const float& s)
+    inline static T gaussianProbability(const T& x, const T& m, const T& s)
     {
-      return exp(-0.5 * pow((x - m) / s, 2)) / (s * sqrt(2.0 * M_PI));
+      return exp(-0.5f * pow((x - m) / s, 2)) / (s * sqrt(2.0f * M_PI));
     }
 
     // http://en.literateprograms.org/Box-Muller_transform_(C)
-    inline static double nextGaussian(const double& mean, const double& stddev)
+    inline static T nextGaussian(const T& mean, const T& stddev)
     {
-      static double n2 = 0.0;
+      static T n2 = T(0);
       static int n2_cached = 0;
       if (!n2_cached)
       {
-        double x, y, r;
+        T x, y, r;
         do
         {
-          x = 2.0 * nextDouble() - 1;
-          y = 2.0 * nextDouble() - 1;
+          x = T(2) * nextReal() - T(1);
+          y = T(2) * nextReal() - T(1);
 
           r = x * x + y * y;
-        } while (r == 0.0 || r > 1.0);
+        } while (r == T(0) || r > T(1));
         {
-          double d = sqrt(-2.0 * log(r) / r);
-          double n1 = x * d;
+          T d = sqrt(-T(2) * log(r) / r);
+          T n1 = x * d;
           n2 = y * d;
-          double result = n1 * stddev + mean;
+          T result = n1 * stddev + mean;
           n2_cached = 1;
           return result;
         }
@@ -139,19 +134,6 @@ class Probabilistic
       }
     }
 
-    inline float sampleNormalDistribution(float b)
-    {
-      float result(0.0f);
-      for (int i = 0; i < 12; i++)
-        result += 2.0f * ((nextFloat() - 0.5f) * b);
-      return result / 2.0f;
-    }
-
-    inline float sampleTriangularDistribution(float b)
-    {
-      float randResult = 2.0f * ((nextFloat() - 0.5f) * b) + 2.0f * ((nextFloat() - 0.5f) * b);
-      return (sqrt(6.0f) / 2.0f) * randResult;
-    }
 };
 
 // Helper class for range management for testing environments
@@ -195,12 +177,12 @@ class Range
 
     T center() const
     {
-      return min() + (length() / 2.0);
+      return min() + (length() / 2.0f);
     }
 
     T chooseRandom() const
     {
-      return Probabilistic::nextFloat() * length() + min();
+      return Probabilistic<T>::nextReal() * length() + min();
     }
 
     // Unit output [0,1]

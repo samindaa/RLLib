@@ -37,7 +37,7 @@ void NAOTest::testTrain()
 {
   // OffLine
   {
-    Probabilistic::srand(0);
+    Probabilistic<float>::srand(0);
     RLProblem<float>* problem = new MountainCar<float>;
     Hashing* hashing = new MurmurHashing(1000000);
     Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10,
@@ -89,7 +89,7 @@ void NAOTest::testTrain()
   }
   // OnLine
   {
-    Probabilistic::srand(0);
+    Probabilistic<double>::srand(0);
     RLProblem<double>* problem = new SwingPendulum<double>;
     Hashing* hashing = new MurmurHashing(1000);
     Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10,
@@ -150,7 +150,7 @@ void NAOTest::testTrain()
 void NAOTest::testEvaluate()
 {
   {
-    Probabilistic::srand(0);
+    Probabilistic<float>::srand(0);
     RLProblem<float>* problem = new MountainCar<float>;
     Hashing* hashing = new MurmurHashing(1000000);
     Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10, 10,
@@ -197,7 +197,7 @@ void NAOTest::testEvaluate()
   }
   // OnLine
   {
-    Probabilistic::srand(0);
+    Probabilistic<double>::srand(0);
     RLProblem<double>* problem = new SwingPendulum<double>;
     Hashing* hashing = new MurmurHashing(1000);
     Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10,

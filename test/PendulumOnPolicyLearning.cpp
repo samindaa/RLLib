@@ -99,7 +99,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::deleteObjects()
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
 {
-  Probabilistic::srand(time(0));
+  Probabilistic<double>::srand(time(0));
   alpha_v = alpha_u = alpha_r = gamma = lambda = 0;
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
   actor = new Actor<double>(alpha_u, policyDistribution);
@@ -114,7 +114,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
 {
-  Probabilistic::srand(time(0));
+  Probabilistic<double>::srand(time(0));
   gamma = 1.0;
   alpha_v = 0.5 / projector->vectorNorm();
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
@@ -131,7 +131,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblity()
 {
-  Probabilistic::srand(time(0));
+  Probabilistic<double>::srand(time(0));
   gamma = 1.0;
   lambda = 0.5;
   alpha_v = 0.1 / projector->vectorNorm();

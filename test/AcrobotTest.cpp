@@ -9,7 +9,7 @@
 
 void AcrobotTest::testAcrobotOnPolicy()
 {
-  Probabilistic::srand(time(0));
+  Probabilistic<double>::srand(time(0));
   RLProblem<double>* problem = new Acrobot<double>(false);
   Projector<double>* projector = new AcrobotProjector<double>(problem->dimension(),
       problem->getDiscreteActions()->dimension(), 8);

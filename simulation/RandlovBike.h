@@ -152,7 +152,7 @@ class RandlovBike: public RLProblem<Type>
 
       T = 2 * ((action / 3) - 1);
       d = 0.02 * ((action % 3) - 1);
-      d = d + 0.04 * (0.5 - Probabilistic::nextDouble()); /* Max noise is 2 cm */
+      d = d + 0.04 * (0.5 - Probabilistic<Type>::nextReal()); /* Max noise is 2 cm */
 
       switch (to_do)
       {
@@ -293,11 +293,11 @@ class RandlovBike: public RLProblem<Type>
     {
       return isTerminal;
     }
-    float r() const
+    Type r() const
     {
       return reinforcement;
     }
-    float z() const
+    Type z() const
     {
       return reinforcement;
     }

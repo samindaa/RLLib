@@ -25,7 +25,7 @@ RLLIB_TEST_MAKE(ExtendedProblemsTest)
 
 void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar3D<double>;
   //Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
   Projector<double>* projector = new MountainCar3DTilesProjector<double>();
@@ -78,7 +78,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
 
 void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar3D<double>;
   Projector<double>* projector = new MountainCar3DTilesProjector<double>();
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -124,7 +124,7 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 // 3D
 void ExtendedProblemsTest::testSarsaMountainCar3D()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar3D<double>;
   Projector<double>* projector = new MountainCar3DTilesProjector<double>();
   //Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
@@ -160,7 +160,7 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
 
 void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new MountainCar3D<double>;
   Hashing* hashing = new UNH(100000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -214,7 +214,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 
 void ExtendedProblemsTest::testOffPACAcrobot()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new Acrobot<double>;
   Projector<double>* projector = new AcrobotTilesProjector<double>();
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -270,7 +270,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
 
 void ExtendedProblemsTest::testGreedyGQAcrobot()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new Acrobot<double>;
   Projector<double>* projector = new AcrobotTilesProjector<double>();
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -312,7 +312,7 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
 
 void ExtendedProblemsTest::testPoleBalancingPlant()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   PoleBalancing poleBalancing;
   VectorXd x(4);
   VectorXd k(4);
@@ -334,7 +334,7 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
 
       // **** action ***
       VectorXd noise(1);
-      noise(0) = Probabilistic::nextNormalGaussian() * 0.1;
+      noise(0) = Probabilistic<double>::nextNormalGaussian() * 0.1;
       VectorXd u = k.transpose() * x + noise;
       actions->update(0, 0, (float) u(0));
 
@@ -348,10 +348,10 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
 
 void ExtendedProblemsTest::testPersistResurrect()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   SVector<float> a(20);
   for (int i = 0; i < 10; i++)
-    a.insertEntry(i, Probabilistic::nextDouble());
+    a.insertEntry(i, Probabilistic<double>::nextReal());
   cout << a << endl;
   a.persist(string("testsv.dat"));
 
@@ -361,7 +361,7 @@ void ExtendedProblemsTest::testPersistResurrect()
 
   PVector<float> d(20);
   for (int i = 0; i < 10; i++)
-    d[i] = Probabilistic::nextDouble();
+    d[i] = Probabilistic<double>::nextReal();
   cout << d << endl;
   d.persist(string("testdv.dat"));
 
@@ -437,7 +437,7 @@ void ExtendedProblemsTest::testSupervisedProjector()
    pause -1 "Hit return to continue"
 
    */
-  Probabilistic::srand(time(0));
+  Probabilistic<double>::srand(time(0));
   // Parameters:
   int memory = 512 / 4;
   int nbTilings = 8;
@@ -457,10 +457,11 @@ void ExtendedProblemsTest::testSupervisedProjector()
   // Training set: [sin(x), sinc(x), line(x)]
   for (int i = 0; i < trainX.rows(); i++)
   {
-    trainX(i) = -M_PI + 2 * M_PI * Probabilistic::nextDouble();
-    trainY(i, 0) = sin(trainX(i)) + Probabilistic::nextNormalGaussian();
-    trainY(i, 1) = sin(M_PI * trainX(i)) / (M_PI * trainX(i)) + Probabilistic::nextNormalGaussian();
-    trainY(i, 2) = trainX(i) / M_PI + Probabilistic::nextNormalGaussian();
+    trainX(i) = -M_PI + 2 * M_PI * Probabilistic<double>::nextReal();
+    trainY(i, 0) = sin(trainX(i)) + Probabilistic<double>::nextNormalGaussian();
+    trainY(i, 1) = sin(M_PI * trainX(i)) / (M_PI * trainX(i))
+        + Probabilistic<double>::nextNormalGaussian();
+    trainY(i, 2) = trainX(i) / M_PI + Probabilistic<double>::nextNormalGaussian();
   }
 
   std::vector<LearningAlgorithm<double>*> predictors;

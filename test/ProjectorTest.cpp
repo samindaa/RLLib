@@ -25,7 +25,7 @@ RLLIB_TEST_MAKE(ProjectorTest)
 
 void ProjectorTest::testProjector()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   int numObservations = 2;
   int memorySize = 512;
   double gridResolution = 4;
@@ -33,14 +33,14 @@ void ProjectorTest::testProjector()
   bool bias = true;
   SVector<double> w(memorySize + bias);
   for (int t = 0; t < 50; t++)
-    w.insertEntry(Probabilistic::nextInt(memorySize), Probabilistic::nextDouble());
+    w.insertEntry(Probabilistic<int>::nextInt(memorySize), Probabilistic<double>::nextReal());
   UNH hashing(memorySize);
   TileCoderHashing<double> coder(&hashing, numObservations, gridResolution, numTilings, bias);
   PVector<double> x(numObservations);
   for (int p = 0; p < 5; p++)
   {
     for (int o = 0; o < numObservations; o++)
-      x[o] = Probabilistic::nextDouble();
+      x[o] = Probabilistic<double>::nextReal();
     const Vector<double>* vect = coder.project(&x);
     cout << w << endl;
     cout << *(const SVector<double>*) vect << endl;

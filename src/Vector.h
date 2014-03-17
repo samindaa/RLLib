@@ -68,10 +68,10 @@ class Vector
     // Some operations
     virtual int dimension() const =0;
     virtual bool empty() const =0;
-    virtual double maxNorm() const =0;
-    virtual double l1Norm() const =0;
-    virtual double l2Norm() const =0;
-    virtual double sum() const =0;
+    virtual T maxNorm() const =0;
+    virtual T l1Norm() const =0;
+    virtual T l2Norm() const =0;
+    virtual T sum() const =0;
 
     // Return the data as an array
     virtual T* getValues() =0;
@@ -80,7 +80,7 @@ class Vector
     // Get elements
     virtual T getEntry(const int& index) const =0;
     // Dot product
-    virtual double dot(const Vector<T>* that) const =0;
+    virtual T dot(const Vector<T>* that) const =0;
 
     // Mutable Vector<T>
     virtual void clear() =0;
@@ -88,16 +88,16 @@ class Vector
     virtual void setEntry(const int& index, const T& value) =0;
     // This method only reset the value at index to T(0)
     virtual void removeEntry(const int& index) =0;
-    virtual Vector<T>* addToSelf(const double& value) =0;
-    virtual Vector<T>* addToSelf(const double& factor, const Vector<T>* that) =0;
+    virtual Vector<T>* addToSelf(const T& value) =0;
+    virtual Vector<T>* addToSelf(const T& factor, const Vector<T>* that) =0;
     virtual Vector<T>* addToSelf(const Vector<T>* that) =0;
     virtual Vector<T>* subtractToSelf(const Vector<T>* that) =0;
-    virtual Vector<T>* mapMultiplyToSelf(const double& factor) = 0;
+    virtual Vector<T>* mapMultiplyToSelf(const T& factor) = 0;
     virtual Vector<T>* ebeMultiplyToSelf(const Vector<T>* that) =0;
     virtual Vector<T>* ebeDivideToSelf(const Vector<T>* that) =0;
     virtual Vector<T>* set(const Vector<T>* that) =0;
     virtual Vector<T>* set(const Vector<T>* that, const int& offset) =0;
-    virtual Vector<T>* set(const double& value) =0;
+    virtual Vector<T>* set(const T& value) =0;
 
     // This is a deep copy of Vector<T>.
     // The copied object exists even after the parent object is deleted.
@@ -171,9 +171,9 @@ class DenseVector: public Vector<T>
       return (dimension() == 0);
     }
 
-    double maxNorm() const
+    T maxNorm() const
     {
-      double maxv = capacity > 0 ? fabs(data[0]) : 0.0;
+      T maxv = capacity > 0 ? fabs(data[0]) : 0.0;
       if (capacity > 0)
       {
         for (int i = 1; i < capacity; i++)
@@ -185,17 +185,17 @@ class DenseVector: public Vector<T>
       return maxv;
     }
 
-    double l1Norm() const
+    T l1Norm() const
     {
-      double result = 0.0;
+      T result = T(0);
       for (int i = 0; i < capacity; i++)
         result += std::fabs(data[i]);
       return result;
     }
 
-    double sum() const
+    T sum() const
     {
-      return std::accumulate(data, data + capacity, 0.0f);
+      return std::accumulate(data, data + capacity, T(0));
     }
 
     // Return the data as an array
@@ -254,14 +254,14 @@ class DenseVector: public Vector<T>
       this->at(index) = T(0);
     }
 
-    Vector<T>* addToSelf(const double& value)
+    Vector<T>* addToSelf(const T& value)
     {
       for (int i = 0; i < capacity; i++)
         data[i] += value;
       return this;
     }
 
-    Vector<T>* mapMultiplyToSelf(const double& d)
+    Vector<T>* mapMultiplyToSelf(const T& d)
     {
       for (T* i = data; i < data + capacity; ++i)
         *i *= d;
@@ -288,7 +288,7 @@ class DenseVector: public Vector<T>
       return this;
     }
 
-    Vector<T>* set(const double& value)
+    Vector<T>* set(const T& value)
     {
       std::fill(data, data + capacity, value);
       return this;
@@ -310,7 +310,8 @@ class DenseVector: public Vector<T>
           Vector<T>::write(of, data[j]);
         of.close();
         std::cout << "## DenseVector (sum=" << sum() << ", l1Norm=" << l1Norm() << ", maxNorm="
-            << maxNorm() << ") persisted=" << f << std::endl;
+            << maxNorm() << ") persisted=" << f;
+        std::cout << std::endl;
       }
       else
         std::cerr << "ERROR! (persist) file=" << f << std::endl;
@@ -337,7 +338,8 @@ class DenseVector: public Vector<T>
           Vector<T>::read(ifs, data[j]);
         ifs.close();
         std::cout << "## DenseVector (sum=" << sum() << ", l1Norm=" << l1Norm() << ", maxNorm="
-            << maxNorm() << ") resurrected=" << f << std::endl;
+            << maxNorm() << ") resurrected=" << f;
+        std::cout << std::endl;
       }
       else
       {
@@ -525,9 +527,9 @@ class SparseVector: public Vector<T>
       nbActive = 0;
     }
 
-    double sum() const
+    T sum() const
     {
-      return std::accumulate(values, values + nbActive, 0.0);
+      return std::accumulate(values, values + nbActive, T(0));
     }
 
     const int* nonZeroIndexes() const
@@ -555,9 +557,9 @@ class SparseVector: public Vector<T>
       return (dimension() == 0);
     }
 
-    double maxNorm() const
+    T maxNorm() const
     {
-      double maxv = nbActive > 0 ? fabs(values[0]) : 0.0;
+      T maxv = nbActive > 0 ? fabs(values[0]) : T(0);
       if (nbActive > 0)
       {
         for (int position = 1; position < nbActive; position++)
@@ -569,9 +571,9 @@ class SparseVector: public Vector<T>
       return maxv;
     }
 
-    double l1Norm() const
+    T l1Norm() const
     {
-      double result = 0.0;
+      T result = T(0);
       for (int position = 0; position < nbActive; position++)
         result += fabs(values[position]);
       return result;
@@ -587,15 +589,15 @@ class SparseVector: public Vector<T>
       return values;
     }
 
-    double dotData(const T* data) const
+    T dotData(const T* data) const
     {
-      double result = 0.0f;
+      T result = T(0);
       for (int position = 0; position < nbActive; position++)
         result += data[activeIndexes[position]] * values[position];
       return result;
     }
 
-    void addToData(const double& factor, T* data) const
+    void addToData(const T& factor, T* data) const
     {
       for (int position = 0; position < nbActive; position++)
         data[activeIndexes[position]] += factor * values[position];
@@ -631,7 +633,8 @@ class SparseVector: public Vector<T>
           Vector<T>::write(of, values[position]);
         of.close();
         std::cout << "## SparseVector (sum=" << sum() << ", l1Norm=" << l1Norm() << ", maxNorm="
-            << maxNorm() << ") persisted=" << f << std::endl;
+            << maxNorm() << ") persisted=" << f;
+        std::cout << std::endl;
       }
       else
         std::cerr << "ERROR! (persist) file=" << f << std::endl;
@@ -672,7 +675,8 @@ class SparseVector: public Vector<T>
 
         delete[] ractiveIndexes;
         std::cout << "## SparseVector (sum=" << sum() << ", l1Norm=" << l1Norm() << ", maxNorm"
-            << maxNorm() << ") resurrected=" << f << std::endl;
+            << maxNorm() << ") resurrected=" << f;
+        std::cout << std::endl;
       }
       else
       {
@@ -718,7 +722,7 @@ class PVector: public DenseVector<T>
     {
     }
 
-    PVector<T>& operator*(const double& d)
+    PVector<T>& operator*(const T& d)
     {
       for (T* i = Base::data; i < Base::data + this->dimension(); ++i)
         *i *= d;
@@ -726,7 +730,7 @@ class PVector: public DenseVector<T>
     }
 
     // Dot product
-    double dot(const Vector<T>* that) const
+    T dot(const Vector<T>* that) const
     {
       assert(this->dimension() == that->dimension());
 
@@ -734,7 +738,7 @@ class PVector: public DenseVector<T>
       if (other)
         return other->dotData(this->getValues());
 
-      double result = 0;
+      T result = T(0);
       for (int i = 0; i < this->dimension(); i++)
         result += Base::data[i] * that->getEntry(i);
       return result;
@@ -784,7 +788,7 @@ class PVector: public DenseVector<T>
       return *this;
     }
 
-    Vector<T>* addToSelf(const double& factor, const Vector<T>* that)
+    Vector<T>* addToSelf(const T& factor, const Vector<T>* that)
     {
       assert(this->dimension() == that->dimension());
 
@@ -844,7 +848,7 @@ class PVector: public DenseVector<T>
       return set(that, 0);
     }
 
-    double l2Norm() const
+    T l2Norm() const
     {
       return sqrt(this->dot(this));
     }
@@ -893,26 +897,26 @@ class SVector: public SparseVector<T>
       return *this;
     }
 
-    double dot(const Vector<T>* that) const
+    T dot(const Vector<T>* that) const
     {
       const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
       if (other && other->nonZeroElements() < this->nonZeroElements())
         return other->dot(this);
 
-      double result = 0.0;
+      T result = T(0);
       for (int position = 0; position < Base::nbActive; position++)
         result += that->getEntry(Base::activeIndexes[position]) * Base::values[position];
       return result;
     }
 
-    Vector<T>* addToSelf(const double& value)
+    Vector<T>* addToSelf(const T& value)
     {
       for (int index = 0; index < Base::indexesPositionLength; index++)
         this->setNonZeroEntry(index, value + this->getEntry(index));
       return this;
     }
 
-    Vector<T>* addToSelf(const double& factor, const Vector<T>* that)
+    Vector<T>* addToSelf(const T& factor, const Vector<T>* that)
     {
       const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
       if (other)
@@ -941,7 +945,7 @@ class SVector: public SparseVector<T>
       return addToSelf(-1.0f, that);
     }
 
-    Vector<T>* mapMultiplyToSelf(const double& factor)
+    Vector<T>* mapMultiplyToSelf(const T& factor)
     {
       if (factor == 0)
       {
@@ -1017,7 +1021,7 @@ class SVector: public SparseVector<T>
       return this;
     }
 
-    Vector<T>* set(const double& value)
+    Vector<T>* set(const T& value)
     {
       // This will set 'value' to all the elements
       for (int index = 0; index < Base::indexesPositionLength; index++)
@@ -1025,7 +1029,7 @@ class SVector: public SparseVector<T>
       return this;
     }
 
-    double l2Norm() const
+    T l2Norm() const
     {
       return sqrt(this->dot(this));
     }
@@ -1219,8 +1223,8 @@ class Vectors
       }
     }
 
-    inline static void multiplySelfByExponential(SparseVector<T>* result, const double& factor,
-        const SparseVector<T>* other, const double& min)
+    inline static void multiplySelfByExponential(SparseVector<T>* result, const T& factor,
+        const SparseVector<T>* other, const T& min)
     {
       const int* activeIndexes = other->nonZeroIndexes();
       for (int i = 0; i < other->nonZeroElements(); i++)
@@ -1231,8 +1235,8 @@ class Vectors
       }
     }
 
-    static void multiplySelfByExponential(DenseVector<T>* result, const double& factor,
-        const SparseVector<T>* other, const double& min)
+    static void multiplySelfByExponential(DenseVector<T>* result, const T& factor,
+        const SparseVector<T>* other, const T& min)
     {
       const int* activeIndexes = other->nonZeroIndexes();
       T* resultValues = result->getValues();
@@ -1245,8 +1249,8 @@ class Vectors
       }
     }
 
-    static void multiplySelfByExponential(DenseVector<T>* result, const double& factor,
-        const Vector<T>* other, const double& min)
+    static void multiplySelfByExponential(DenseVector<T>* result, const T& factor,
+        const Vector<T>* other, const T& min)
     {
       const SparseVector<T>* that = dynamic_cast<const SparseVector<T>*>(other);
       if (that)
@@ -1259,8 +1263,8 @@ class Vectors
       }
     }
 
-    static void multiplySelfByExponential(Vector<T>* result, const double& factor,
-        const Vector<T>* other, const double& min)
+    static void multiplySelfByExponential(Vector<T>* result, const T& factor,
+        const Vector<T>* other, const T& min)
     {
       SparseVector<T>* sresult = dynamic_cast<SparseVector<T>*>(result);
       if (sresult)
@@ -1272,7 +1276,7 @@ class Vectors
       }
     }
 
-    static void multiplySelfByExponential(DenseVector<T>* result, const double& factor,
+    static void multiplySelfByExponential(DenseVector<T>* result, const T& factor,
         const Vector<T>* other)
     {
       multiplySelfByExponential(result, factor, other, 0);
@@ -1327,7 +1331,7 @@ template<class T>
 class Filters
 {
   public:
-    static Vector<T>* mapMultiplyToSelf(Vector<T>* result, const double& d, const Vector<T>* filter)
+    static Vector<T>* mapMultiplyToSelf(Vector<T>* result, const T& d, const Vector<T>* filter)
     {
       const SparseVector<T>* sfilter = dynamic_cast<const SparseVector<T>*>(filter);
       if (sfilter)

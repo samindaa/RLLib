@@ -25,7 +25,7 @@ RLLIB_TEST_MAKE(SwingPendulumTest)
 
 void SwingPendulumTest::testOffPACSwingPendulum()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -80,7 +80,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
 
 void SwingPendulumTest::testOnPolicySwingPendulum()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -142,7 +142,7 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
 
 void SwingPendulumTest::testOffPACSwingPendulum2()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -199,7 +199,7 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
 
 void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -250,7 +250,7 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
 
 void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum()
 {
-  Probabilistic::srand(0);
+  Probabilistic<double>::srand(0);
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,

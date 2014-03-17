@@ -21,7 +21,7 @@
 
 #ifndef TRACE_H_
 #define TRACE_H_
-#include <iostream>
+
 #include "Vector.h"
 #include "Math.h"
 
@@ -35,7 +35,7 @@ class Trace
     virtual ~Trace()
     {
     }
-    virtual void update(const double& lambda, const Vector<T>* phi, const double& factor = 1.0f) =0;
+    virtual void update(const T& lambda, const Vector<T>* phi, const T& factor = T(1)) =0;
     virtual void clear() =0;
     virtual Vector<T>* vect() const =0;
 };
@@ -44,11 +44,11 @@ template<class T>
 class ATrace: public Trace<T>
 {
   protected:
-    double defaultThreshold;
-    double threshold;
+    T defaultThreshold;
+    T threshold;
     Vector<T>* vector;
   public:
-    ATrace(const int& numFeatures, const double& threshold = 1e-8) :
+    ATrace(const int& numFeatures, const T& threshold = T(1e-8)) :
         defaultThreshold(threshold), threshold(threshold), vector(new SVector<T>(numFeatures))
     {
     }
@@ -76,13 +76,13 @@ class ATrace: public Trace<T>
     }
 
   public:
-    virtual void updateVector(const double& lambda, const Vector<T>* phi, const double& factor)
+    virtual void updateVector(const T& lambda, const Vector<T>* phi, const T& factor)
     {
       vector->mapMultiplyToSelf(lambda);
       vector->addToSelf(factor, phi);
     }
 
-    void update(const double& lambda, const Vector<T>* phi, const double& factor = 1.0f)
+    void update(const T& lambda, const Vector<T>* phi, const T& factor = T(1))
     {
       updateVector(lambda, phi, factor);
       adjustUpdate();
@@ -111,7 +111,7 @@ template<class T>
 class RTrace: public ATrace<T>
 {
   public:
-    RTrace(const int& capacity, const double& threshold = 1e-8) :
+    RTrace(const int& capacity, const T& threshold = T(1e-8)) :
         ATrace<T>(capacity, threshold)
     {
     }
@@ -121,7 +121,7 @@ class RTrace: public ATrace<T>
     }
 
   private:
-    void replaceWith(const Vector<T>* x, const double& factor)
+    void replaceWith(const Vector<T>* x, const T& factor)
     { // FixMe:
       const SparseVector<T>* phi = dynamic_cast<const SparseVector<T>*>(x);
       const int* indexes = phi->nonZeroIndexes();
@@ -129,7 +129,7 @@ class RTrace: public ATrace<T>
         ATrace<T>::vector->setEntry(*index, factor * phi->getEntry(*index));
     }
   public:
-    virtual void updateVector(const double& lambda, const Vector<T>* phi, const double& factor)
+    virtual void updateVector(const T& lambda, const Vector<T>* phi, const T& factor)
     {
       ATrace<T>::vector->mapMultiplyToSelf(lambda);
       replaceWith(phi, factor);
@@ -141,9 +141,9 @@ template<class T>
 class AMaxTrace: public ATrace<T>
 {
   protected:
-    double maximumValue;
+    T maximumValue;
   public:
-    AMaxTrace(const int& capacity, const double& threshold = 1e-8, const double& maximumValue = 1.0) :
+    AMaxTrace(const int& capacity, const T& threshold = T(1e-8), const T& maximumValue = T(1)) :
         ATrace<T>(capacity, threshold), maximumValue(maximumValue)
     {
     }
@@ -226,7 +226,7 @@ class MaxLengthTrace: public Trace<T>
 
   public:
 
-    void update(const double& lambda, const Vector<T>* phi, const double& factor = 1.0f)
+    void update(const T& lambda, const Vector<T>* phi, const T& factor = T(1))
     {
       trace->update(lambda, phi, factor);
       controlLength();

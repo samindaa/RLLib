@@ -111,14 +111,14 @@ class MountainCar: public RLProblem<T>
       return (position >= targetPosition);
     }
 
-    float r() const
+    T r() const
     {
-      return -1.0;
+      return -1.0f;
     }
 
-    float z() const
+    T z() const
     {
-      return 0;
+      return 0.0f;
     }
 
 };
