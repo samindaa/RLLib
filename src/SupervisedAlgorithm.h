@@ -213,7 +213,7 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
       w->addToSelf(alphasDeltaX);
       Vector<T>* alphasX2YMinusOneMinusY =
           pool->newVector(x_t)->ebeMultiplyToSelf(x_t)->ebeMultiplyToSelf(alphas)->ebeMultiplyToSelf(
-              hs)->mapMultiplyToSelf(y_tp1)->mapMultiplyToSelf(1.0 - y_tp1);
+              hs)->mapMultiplyToSelf(y_tp1)->mapMultiplyToSelf(1.0f - y_tp1);
       hs->addToSelf(-1.0f, alphasX2YMinusOneMinusY);
       hs->addToSelf(alphasDeltaX);
       return delta;
@@ -279,7 +279,7 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
       alphas->clear();
       betas->clear();
       hs->clear();
-      betas->set(std::log(0.1));
+      betas->set(std::log(0.1f));
     }
 
   private:
@@ -294,13 +294,13 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
         for (int i = 0; i < sresult->nonZeroElements(); i++)
         {
           int index = activeIndexes[i];
-          piX2->setEntry(index, std::max(0.0, 1.0 - piX2->getEntry(index)));
+          piX2->setEntry(index, std::max(0.0f, 1.0f - piX2->getEntry(index)));
         }
       }
       else
       {
         for (int index = 0; index < piX2->dimension(); index++)
-          piX2->setEntry(index, std::max(0.0, 1.0 - piX2->getEntry(index)));
+          piX2->setEntry(index, std::max(0.0f, 1.0f - piX2->getEntry(index)));
       }
       Vector<T>* piDeltaXPiX2 = pool->newVector(piX)->mapMultiplyToSelf(delta)->ebeMultiplyToSelf(
           piX2);
@@ -317,7 +317,7 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
       Vector<T>* x2 = pool->newVector(x_t)->ebeMultiplyToSelf(x_t);
       Vector<T>* alphasX2 = pool->newVector(x2)->ebeMultiplyToSelf(alphas);
       T pnorm = alphasX2->sum();
-      Vector<T>* pi = pool->newVector(alphas)->mapMultiplyToSelf(1.0 / (1.0 + pnorm));
+      Vector<T>* pi = pool->newVector(alphas)->mapMultiplyToSelf(1.0f / (1.0f + pnorm));
       Vector<T>* piX = pool->newVector(x_t)->ebeMultiplyToSelf(pi);
       w->addToSelf(delta, piX);
       updateHS(x_t, x2, pi, piX, delta);
@@ -415,7 +415,7 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
       Vector<T>* alphasDeltaX = deltaX->ebeMultiplyToSelf(alphas);
       w->addToSelf(alphasDeltaX);
       Vector<T>* x2AlphasH = x2->ebeMultiplyToSelf(alphas)->ebeMultiplyToSelf(h);
-      h->addToSelf(-1.0, x2AlphasH)->addToSelf(alphasDeltaX);
+      h->addToSelf(-1.0f, x2AlphasH)->addToSelf(alphasDeltaX);
       return delta;
     }
 

@@ -45,12 +45,6 @@ template<class T> std::ostream& operator<<(std::ostream& out, const DenseVector<
 template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that);
 
 /**
- * The return value of some functions are real-valued. It is either single or double precision.
- * The configuration is defined here.
- */
-#define OUTPUT_REAL_VALUE double
-
-/**
  * This is used in parameter representation in a given vector space for
  * Machine Learning purposes. This implementation is specialized for sparse
  * vector representation, that is much common in Reinforcement Learning.
@@ -68,7 +62,7 @@ class Vector
     virtual bool empty() const =0;
     virtual T maxNorm() const =0;
     virtual T l1Norm() const =0;
-    virtual OUTPUT_REAL_VALUE l2Norm() const =0;
+    virtual T l2Norm() const =0;
     virtual T sum() const =0;
 
     // Return the data as an array
@@ -844,7 +838,7 @@ class PVector: public DenseVector<T>
       return set(that, 0);
     }
 
-    OUTPUT_REAL_VALUE l2Norm() const
+    T l2Norm() const
     {
       return sqrt(this->dot(this));
     }
@@ -1025,7 +1019,7 @@ class SVector: public SparseVector<T>
       return this;
     }
 
-    OUTPUT_REAL_VALUE l2Norm() const
+    T l2Norm() const
     {
       return sqrt(this->dot(this));
     }
