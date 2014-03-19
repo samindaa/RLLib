@@ -45,14 +45,6 @@ template<class T> std::ostream& operator<<(std::ostream& out, const DenseVector<
 template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that);
 
 /**
- * RLLib::Vector<T> is restricted to int, float, and double types.
- */
-template<class T> struct VectorType  { enum { value = false }; };
-template<> struct VectorType<int>    { enum { value = true  }; };
-template<> struct VectorType<float>  { enum { value = true  }; };
-template<> struct VectorType<double> { enum { value = true  }; };
-
-/**
  * The return value of some functions are real-valued. It is either single or double precision.
  * The configuration is defined here.
  */
@@ -138,7 +130,6 @@ class DenseVector: public Vector<T>
     DenseVector(const int& capacity = 1) :
         capacity(capacity), data(new T[capacity])
     {
-      assert(VectorType<T>::value);
       std::fill(data, data + capacity, 0);
     }
 
@@ -381,7 +372,6 @@ class SparseVector: public Vector<T>
             new int[indexesPositionLength]), activeIndexes(new int[activeIndexesLength]), values(
             new T[activeIndexesLength])
     {
-      assert(VectorType<T>::value);
       std::fill(indexesPosition, indexesPosition + capacity, -1);
     }
 
