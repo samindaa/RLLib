@@ -22,12 +22,6 @@
 #ifndef POLICY_H_
 #define POLICY_H_
 
-#include <cstdlib>
-#include <cmath>
-#include <vector>
-#include <algorithm>
-#include <limits>
-
 #include "Vector.h"
 #include "Action.h"
 #include "Predictor.h"
@@ -135,7 +129,7 @@ class NormalDistribution: public PolicyDistribution<T>
     void update(const Representations<T>* phi)
     {
       // N(mu,var) for single action, single representation only
-      assert((phi->dimension() == 1) && (actions->dimension() == 1));
+      ASSERT((phi->dimension() == 1) && (actions->dimension() == 1));
       x->set(phi->at(actions->at(defaultAction)));
       mean = u_mean->dot(x) + initialMean;
       stddev = exp(u_stddev->dot(x)) * initialStddev + 10e-8;
@@ -172,7 +166,7 @@ class NormalDistribution: public PolicyDistribution<T>
 
     const Vectors<T>& computeGradLog(const Representations<T>* phi, const Action<T>* action)
     {
-      assert((phi->dimension() == 1) && (actions->dimension() == 1));
+      ASSERT((phi->dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
       x->set(phi->at(actions->at(defaultAction)));
       gradMean->set(x)->mapMultiplyToSelf(meanStep);
@@ -398,7 +392,7 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
 
     void update(const Representations<T>* phi)
     {
-      assert(Base::actions->dimension() == phi->dimension());
+      ASSERT(Base::actions->dimension() == phi->dimension());
       Base::distribution->clear();
       avg->clear();
       T sum = T(0);
@@ -481,7 +475,7 @@ class SoftMax: public StochasticPolicy<T>
 
     void update(const Representations<T>* phi)
     {
-      assert(Base::actions->dimension() == phi->dimension());
+      ASSERT(Base::actions->dimension() == phi->dimension());
       Base::distribution->clear();
       T sum = T(0);
       // The exponential function may become very large and overflow.
@@ -544,7 +538,7 @@ class RandomPolicy: public Policy<T>
     }
     const Action<T>* sampleBestAction()
     {
-      assert(false);
+      ASSERT(false);
       return actions->at(0);
     }
 };
@@ -611,7 +605,7 @@ class RandomBiasPolicy: public Policy<T>
     }
     const Action<T>* sampleBestAction()
     {
-      assert(false);
+      ASSERT(false);
       return actions->at(0);
     }
 };
@@ -736,7 +730,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
 
     void update(const Representations<T>* phis)
     {
-      assert(actions->dimension() == phis->dimension());
+      ASSERT(actions->dimension() == phis->dimension());
       distribution->clear();
       T sum = T(0);
       // The exponential function may become very large and overflow.
@@ -802,7 +796,7 @@ class SingleActionPolicy: public Policy<T>
     SingleActionPolicy(Actions<T>* actions) :
         actions(actions)
     {
-      assert(actions->dimension() == 1);
+      ASSERT(actions->dimension() == 1);
     }
 
     void update(const Representations<T>* phis)
@@ -834,7 +828,7 @@ class ConstantPolicy: public StochasticPolicy<T>
     ConstantPolicy(Actions<T>* actions, const Vector<T>* distribution) :
         StochasticPolicy<T>(actions)
     {
-      assert(actions->dimension() == distribution->dimension());
+      ASSERT(actions->dimension() == distribution->dimension());
       for (int i = 0; i < distribution->dimension(); i++)
         Base::distribution->at(i) = distribution->getEntry(i);
     }

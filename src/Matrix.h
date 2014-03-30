@@ -24,14 +24,8 @@
 
 #include <vector>
 #include <iostream>
-#include <cassert>
 
-#ifdef DEBUG
-#define ASSERT(b) { if (! (b)) { char msg[256]; sprintf(msg, "ASSERT failed in file %s, line %d", __FILE__, __LINE__); throw msg; } }
-// #define ASSERT(b) { if (! (b)) {*((int*)(NULL)) = 0; } }   // trap the debugger
-#else
-#define ASSERT(b) { }
-#endif
+#include "Assert.h"
 
 namespace RLLib
 {

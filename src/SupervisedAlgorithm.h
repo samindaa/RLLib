@@ -294,13 +294,13 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
         for (int i = 0; i < sresult->nonZeroElements(); i++)
         {
           int index = activeIndexes[i];
-          piX2->setEntry(index, std::max(0.0f, 1.0f - piX2->getEntry(index)));
+          piX2->setEntry(index, std::max(0.0, 1.0 - piX2->getEntry(index)));
         }
       }
       else
       {
         for (int index = 0; index < piX2->dimension(); index++)
-          piX2->setEntry(index, std::max(0.0f, 1.0f - piX2->getEntry(index)));
+          piX2->setEntry(index, std::max(0.0, 1.0 - piX2->getEntry(index)));
       }
       Vector<T>* piDeltaXPiX2 = pool->newVector(piX)->mapMultiplyToSelf(delta)->ebeMultiplyToSelf(
           piX2);

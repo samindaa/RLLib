@@ -148,7 +148,7 @@ class StateActionTilings: public StateToStateAction<T>
 
     const Representations<T>* stateActions(const Vector<T>* x)
     {
-      assert(actions->dimension() == phis->dimension());
+      ASSERT(actions->dimension() == phis->dimension());
       if (x->empty())
       {
         phis->clear();
@@ -215,7 +215,7 @@ class TabularAction: public StateToStateAction<T>
 
     const Representations<T>* stateActions(const Vector<T>* x)
     {
-      assert(actions->dimension() == phis->dimension());
+      ASSERT(actions->dimension() == phis->dimension());
       for (typename Actions<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
         phis->set(stateAction(x, *a), *a);
       return phis;

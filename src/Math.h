@@ -23,9 +23,8 @@
 #define MATH_H_
 
 #include <cmath>
-#include <cassert>
 #include <limits>
-#include <vector>
+
 #include "Vector.h"
 
 namespace RLLib
@@ -40,7 +39,7 @@ class Boundedness
     inline static bool checkValue(const T& value)
     {
       bool bvalue = !isnan(value) && !isinf(value);
-      assert(bvalue);
+      ASSERT(bvalue);
       return bvalue;
     }
 
@@ -51,7 +50,7 @@ class Boundedness
       for (int i = 0; i < distribution->dimension(); i++)
         sum += distribution->getEntry(i);
       bool bvalue = ::fabs(T(1) - sum) < 10e-8;
-      assert(bvalue);
+      ASSERT(bvalue);
       return bvalue;
     }
 };

@@ -62,7 +62,7 @@ class TD: public OnPolicyTD<T>
     virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1,
         const T& gamma_tp1)
     {
-      assert(initialized);
+      ASSERT(initialized);
       delta_t = r_tp1 + gamma_tp1 * v->dot(x_tp1) - v->dot(x_t);
       v->addToSelf(alpha_v * delta_t, x_t);
       return delta_t;
@@ -70,7 +70,7 @@ class TD: public OnPolicyTD<T>
 
     T update(const Vector<T>* x_t, const Vector<T>* x_tp1, T r_tp1)
     {
-      assert(initialized);
+      ASSERT(initialized);
       return update(x_t, x_tp1, r_tp1, gamma);
     }
 
@@ -155,7 +155,7 @@ class TDLambda: public TDLambdaAbstract<T>
     T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1,
         const T& gamma_tp1)
     {
-      assert(TD<T>::initialized);
+      ASSERT(TD<T>::initialized);
 
       TD<T>::delta_t = r_tp1 + gamma_tp1 * TD<T>::v->dot(x_tp1) - TD<T>::v->dot(x_t);
       Base::e->update(Base::lambda * Base::gamma_t, x_t, TD<T>::alpha_v);
@@ -199,7 +199,7 @@ class TDLambdaTrue: public TDLambdaAbstract<T>
     T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1,
         const T& gamma_tp1)
     {
-      assert(TD<T>::initialized);
+      ASSERT(TD<T>::initialized);
       if (!initializedVt)
         initialize(x_t);
       v_tp1 = TD<T>::v->dot(x_tp1);
@@ -254,7 +254,7 @@ class TDLambdaAlphaBound: public TDLambdaAbstract<T>
     T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1,
         const T& gamma_tp1)
     {
-      assert(TD<T>::initialized);
+      ASSERT(TD<T>::initialized);
 
       TD<T>::delta_t = r_tp1 + gamma_tp1 * TD<T>::v->dot(x_tp1) - TD<T>::v->dot(x_t);
       Base::e->update(Base::lambda * Base::gamma_t, x_t);
@@ -298,7 +298,7 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
 
     virtual T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, T r_tp1)
     {
-      assert(initialized);
+      ASSERT(initialized);
 
       v_t = q->dot(phi_t);
       v_tp1 = q->dot(phi_tp1);
@@ -368,7 +368,7 @@ class SarsaTrue: public Sarsa<T>
 
     T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, T r_tp1)
     {
-      assert(Base::initialized);
+      ASSERT(Base::initialized);
       if (!initializedVt)
         initialize(phi_t);
       Base::v_tp1 = Base::q->dot(phi_tp1);
@@ -422,7 +422,7 @@ class SarsaAlphaBound: public Sarsa<T>
   public:
     T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, T r_tp1)
     {
-      assert(Base::initialized);
+      ASSERT(Base::initialized);
 
       Base::v_t = Base::q->dot(phi_t);
       Base::v_tp1 = Base::q->dot(phi_tp1);
@@ -473,7 +473,7 @@ class GQ: public Predictor<T>, public LinearLearner<T>
     T update(const Vector<T>* phi_t, const Vector<T>* phi_bar_tp1, const T& rho_t,
         T r_tp1, T z_tp1)
     {
-      assert(initialized);
+      ASSERT(initialized);
       delta_t = r_tp1 + beta_tp1 * z_tp1 + (T(1) - beta_tp1) * v->dot(phi_bar_tp1) - v->dot(phi_t);
       e->update((T(1) - beta_tp1) * lambda_t * rho_t, phi_t); // paper says beta_t ?
       // v

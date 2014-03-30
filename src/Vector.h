@@ -23,15 +23,17 @@
 #define VECTOR_H_
 
 #include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vector>
+//
 #include <functional>
 #include <numeric>
 #include <cmath>
-#include <cassert>
-#include <cstdio>
+//
+#include <iostream>
+#include <fstream>
+#include <sstream>
+//
+#include "Assert.h"
 
 namespace RLLib
 {
@@ -203,13 +205,13 @@ class DenseVector: public Vector<T>
     // Get elements
     T& operator[](const int& index)
     {
-      assert(index >= 0 && index < capacity);
+      ASSERT(index >= 0 && index < capacity);
       return data[index];
     }
 
     const T& operator[](const int& index) const
     {
-      assert(index >= 0 && index < capacity);
+      ASSERT(index >= 0 && index < capacity);
       return data[index];
     }
 
@@ -225,7 +227,7 @@ class DenseVector: public Vector<T>
 
     T getEntry(const int& index) const
     {
-      assert(index >= 0 && index < capacity);
+      ASSERT(index >= 0 && index < capacity);
       return data[index];
     }
 
@@ -261,7 +263,7 @@ class DenseVector: public Vector<T>
 
     Vector<T>* ebeMultiplyToSelf(const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
       for (int i = 0; i < this->dimension(); i++)
         data[i] *= that->getEntry(i);
       return this;
@@ -269,7 +271,7 @@ class DenseVector: public Vector<T>
 
     Vector<T>* ebeDivideToSelf(const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
       for (int i = 0; i < this->dimension(); i++)
       {
         const T& thatValue = that->getEntry(i);
@@ -317,11 +319,11 @@ class DenseVector: public Vector<T>
         // Read vector type;
         int vectorType;
         Vector<T>::read(ifs, vectorType);
-        assert(vectorType == 0);
+        ASSERT(vectorType == 0);
         // Read capacity
         int rcapacity;
         Vector<T>::read(ifs, rcapacity);
-        assert(capacity == rcapacity);
+        ASSERT(capacity == rcapacity);
         clear();
         printf("vectorType=%i rcapacity=%i \n", vectorType, rcapacity);
         // Read data
@@ -639,14 +641,14 @@ class SparseVector: public Vector<T>
         // Read vector type;
         int vectorType;
         Vector<T>::read(ifs, vectorType);
-        assert(vectorType == 1);
+        ASSERT(vectorType == 1);
         // Read indexesPositionLength
         int rcapacity;
         Vector<T>::read(ifs, rcapacity);
         // Read numActive
         int rnbActive;
         Vector<T>::read(ifs, rnbActive);
-        assert(indexesPositionLength == rcapacity);
+        ASSERT(indexesPositionLength == rcapacity);
         clear();
         // Verbose
         printf("vectorType=%i rcapacity=%i rnbActive=%i\n", vectorType, rcapacity, rnbActive);
@@ -722,7 +724,7 @@ class PVector: public DenseVector<T>
     // Dot product
     T dot(const Vector<T>* that) const
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
 
       const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
       if (other)
@@ -736,7 +738,7 @@ class PVector: public DenseVector<T>
 
     PVector<T>& operator-(const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
 
       const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
       if (other)
@@ -752,7 +754,7 @@ class PVector: public DenseVector<T>
 
     PVector<T>& operator+(const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
 
       const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
       if (other)
@@ -768,7 +770,7 @@ class PVector: public DenseVector<T>
 
     PVector<T>& operator/(const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
       for (int i = 0; i < this->dimension(); i++)
       {
         const T& thatValue = that->getEntry(i);
@@ -780,7 +782,7 @@ class PVector: public DenseVector<T>
 
     Vector<T>* addToSelf(const T& factor, const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
 
       const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
       if (other)
@@ -801,7 +803,7 @@ class PVector: public DenseVector<T>
 
     Vector<T>* subtractToSelf(const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
 
       const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
       if (other)
@@ -817,7 +819,7 @@ class PVector: public DenseVector<T>
 
     Vector<T>* set(const Vector<T>* that, const int& offset)
     { // FixMe:
-      //assert(this->dimension() == that->dimension());
+      //ASSERT(this->dimension() == that->dimension());
 
       const DenseVector<T>* other = dynamic_cast<const DenseVector<T>*>(that);
       if (other)
@@ -834,7 +836,7 @@ class PVector: public DenseVector<T>
 
     Vector<T>* set(const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
       return set(that, 0);
     }
 
@@ -950,7 +952,7 @@ class SVector: public SparseVector<T>
 
     Vector<T>* ebeMultiplyToSelf(const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
       int position = 0;
       while (position < Base::nbActive)
       {
@@ -979,7 +981,7 @@ class SVector: public SparseVector<T>
 
     Vector<T>* set(const Vector<T>* that)
     {
-      assert(this->dimension() == that->dimension());
+      ASSERT(this->dimension() == that->dimension());
       this->clear();
       const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
       if (other)
@@ -1298,7 +1300,7 @@ class Vectors
 
     static Vector<T>* toBinary(Vector<T>* result, const Vector<T>* v)
     {
-      assert(result->dimension() == v->dimension());
+      ASSERT(result->dimension() == v->dimension());
       result->clear();
       const SparseVector<T>* sv = dynamic_cast<const SparseVector<T>*>(v);
       if (sv)

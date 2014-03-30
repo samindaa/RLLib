@@ -22,8 +22,6 @@
 #ifndef CONTROLALGORITHM_H_
 #define CONTROLALGORITHM_H_
 
-#include <vector>
-
 #include "Control.h"
 #include "Action.h"
 #include "Policy.h"
@@ -145,7 +143,7 @@ class ExpectedSarsaControl: public SarsaControl<T>
         T pi = Base::acting->pi(*a);
         if (pi == 0)
         {
-          assert((*a)->id() != a_tp1->id());
+          ASSERT((*a)->id() != a_tp1->id());
           continue;
         }
         phi_bar_tp1->addToSelf(pi, phi_tp1->at(*a));
@@ -377,7 +375,7 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T>
     void update(const Representations<T>* phi_t, const Action<T>* a_t, T const& rho_t,
         const T& delta_t)
     {
-      assert(Base::initialized);
+      ASSERT(Base::initialized);
       const Vectors<T>& gradLog = Base::targetPolicy->computeGradLog(phi_t, a_t);
       for (int i = 0; i < e_u->dimension(); i++)
       {
@@ -525,7 +523,7 @@ class Actor: public ActorOnPolicy<T>
 
     void update(const Representations<T>* phi_t, const Action<T>* a_t, T delta)
     {
-      assert(initialized);
+      ASSERT(initialized);
       const Vectors<T>& gradLog = policyDistribution->computeGradLog(phi_t, a_t);
       for (int i = 0; i < gradLog.dimension(); i++)
         u->at(i)->addToSelf(alpha_u * delta, gradLog[i]);
@@ -566,7 +564,7 @@ class ActorLambda: public Actor<T>
         PolicyDistribution<T>* policyDistribution, Traces<T>* e) :
         Actor<T>(alpha_u, policyDistribution), gamma(gamma), lambda(lambda), e(e)
     {
-      assert(e->dimension() == Base::u->dimension());
+      ASSERT(e->dimension() == Base::u->dimension());
     }
 
     void initialize(const Vector<T>* x)
@@ -583,7 +581,7 @@ class ActorLambda: public Actor<T>
 
     void update(const Representations<T>* phi_t, const Action<T>* a_t, T delta)
     {
-      assert(Base::initialized);
+      ASSERT(Base::initialized);
       const Vectors<T>& gradLog = Base::policy()->computeGradLog(phi_t, a_t);
       for (int i = 0; i < Base::u->dimension(); i++)
       {
@@ -618,7 +616,7 @@ class ActorNatural: public Actor<T>
 
     void update(const Representations<T>* phi_t, const Action<T>* a_t, T delta)
     {
-      assert(Base::initialized);
+      ASSERT(Base::initialized);
       const Vectors<T>& gradLog = Base::policy()->computeGradLog(phi_t, a_t);
       T advantageValue = T(0);
       // Calculate the advantage function
