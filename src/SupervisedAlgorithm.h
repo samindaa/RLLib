@@ -216,6 +216,7 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
               hs)->mapMultiplyToSelf(y_tp1)->mapMultiplyToSelf(1.0f - y_tp1);
       hs->addToSelf(-1.0f, alphasX2YMinusOneMinusY);
       hs->addToSelf(alphasDeltaX);
+      pool->releaseAll();
       return delta;
     }
 
@@ -416,6 +417,7 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
       w->addToSelf(alphasDeltaX);
       Vector<T>* x2AlphasH = x2->ebeMultiplyToSelf(alphas)->ebeMultiplyToSelf(h);
       h->addToSelf(-1.0f, x2AlphasH)->addToSelf(alphasDeltaX);
+      pool->releaseAll();
       return delta;
     }
 
