@@ -3,7 +3,7 @@ RLLib
 (C++ Template Library to Predict, Control,  Learn Behaviors, and Represent Learnable Knowledge using On/Off Policy Reinforcement Learning)
 ----------------------------------------------------------------------------------------------------------------------
 
-RLLib is a lightweight C++ template library that implements `incremental`, `standard`, and `gradient temporal-difference` learning algorithms in Reinforcement Learning.It is an optimized library for robotic applications and embedded devices that operates under fast duty cycles (e.g., < 30 ms). RLLib has been tested and evaluated on RoboCup 3D soccer simulation agents,  physical NAO V4 humanoid robots, and Tiva C series launchpad microcontrollers  to predict, control, learn behaviors, and represent learnable knowledge.  The implementation of the RLLib library is inspired by the RLPark API, which is a library of temporal-difference learning algorithms written in Java. 
+RLLib is a lightweight C++ template library that implements `incremental`, `standard`, and `gradient temporal-difference` learning algorithms in Reinforcement Learning. It is an optimized library for robotic applications and embedded devices that operates under fast duty cycles (e.g., < 30 ms). RLLib has been tested and evaluated on RoboCup 3D soccer simulation agents,  physical NAO V4 humanoid robots, and Tiva C series launchpad microcontrollers  to predict, control, learn behaviors, and represent learnable knowledge.  The implementation of the RLLib library is inspired by the RLPark API, which is a library of temporal-difference learning algorithms written in Java. 
 
 Features
 --------
