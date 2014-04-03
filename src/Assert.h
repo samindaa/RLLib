@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Saminda Abeyruwan (saminda@cs.miami.edu)
+ * Copyright 2014 Saminda Abeyruwan (saminda@cs.miami.edu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,12 +45,8 @@
 #endif /* NDEBUG */
 
 
-static inline void __ASSERT(const char *__func, const char *__file, int __lineno,
-    const char *__sexp)
-{
-  printf("Failed assertion! __func=%s __file=%s  __lineno=%u __sexp=%s \n", __func, __file,
-      __lineno, __sexp);
+#define __ASSERT(__func, __file, __lineno, __sexp)                                                              \
+  printf("Failed assertion! __func=%s __file=%s  __lineno=%u __sexp=%s \n", __func, __file, __lineno, __sexp);  \
   abort();
-}
 
 #endif /* RLLIB_ASSERT_H_ */
