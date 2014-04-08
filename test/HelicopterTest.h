@@ -46,8 +46,8 @@ class HelicopterTest: public HelicopterTestBase
     void testCrash()
     {
       Helicopter<double> helicopter;
-      assert(4 == helicopter.getContinuousActions()->at(0)->dimension());
-      assert(12 == helicopter.dimension());
+      ASSERT(4 == helicopter.getContinuousActions()->at(0)->dimension());
+      ASSERT(12 == helicopter.dimension());
 
       for (int nb = 0; nb < 100; nb++)
       {
@@ -55,9 +55,9 @@ class HelicopterTest: public HelicopterTestBase
         while (!helicopter.endOfEpisode())
         {
           helicopter.step(helicopter.getContinuousActions()->at(0));
-          assert(helicopter.r() <= 0);
+          ASSERT(helicopter.r() <= 0);
           for (int i = 0; i < helicopter.dimension(); i++)
-            assert(
+            ASSERT(
                 helicopter.heliDynamics.ObservationRanges[i].in(
                     helicopter.getObservations()->getEntry(i)));
         }
@@ -67,14 +67,14 @@ class HelicopterTest: public HelicopterTestBase
     void testEndEpisode()
     {
       Helicopter<double> helicopter(2);
-      assert(4 == helicopter.getContinuousActions()->at(0)->dimension());
+      ASSERT(4 == helicopter.getContinuousActions()->at(0)->dimension());
       helicopter.initialize();
       while (!helicopter.endOfEpisode())
       {
         helicopter.step(helicopter.getContinuousActions()->at(0));
-        assert(helicopter.r() <= 0);
+        ASSERT(helicopter.r() <= 0);
       }
-      assert(2 == helicopter.step_time);
+      ASSERT(2 == helicopter.step_time);
     }
 
 };

@@ -4,7 +4,7 @@ echo "RLLibVizContinuousGridworld"
 
 qmake RLLibVizContinuousGridworld.pro
 
-make 
+make $1  
 
 make clean
 
@@ -12,7 +12,7 @@ echo "RLLibVizMountainCar"
 
 qmake RLLibVizMountainCar.pro
 
-make 
+make $1
 
 make clean
 
@@ -20,13 +20,13 @@ echo "RLLibVizSwingPendulum"
 
 qmake RLLibVizSwingPendulum.pro
 
-make 
+make  $1
 
 make clean
 
 qmake RLLibVizSwingPendulum2.pro
 
-make 
+make  $1
 
 make clean
 

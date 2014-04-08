@@ -128,7 +128,7 @@ class NoStateProblemStateToStateAction: public StateToStateAction<double>
 
     const Representations<double>* stateActions(const Vector<double>* x)
     {
-      assert(actions->dimension() == phis->dimension());
+      ASSERT(actions->dimension() == phis->dimension());
       if (x->empty())
       {
         phis->clear();

@@ -44,7 +44,7 @@ RLLibTestRegistry* RLLibTestRegistry::getInstance()
 
 void RLLibTestRegistry::deleteInstance()
 {
-  assert(instance);
+  ASSERT(instance);
   delete instance;
 }
 

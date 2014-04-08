@@ -83,7 +83,7 @@ void ActorCriticOnPolicyOnStateTest::checkDistribution(
   sim->run();
   double discReward = sim->episodeR / sim->timeStep;
   std::cout << discReward << std::endl;
-  assert(discReward > rewardRequired);
+  ASSERT(discReward > rewardRequired);
   deleteObjects();
 }
 
@@ -128,7 +128,7 @@ void ActorCriticOnPolicyOnStateTest::testNormalDistributionWithEligibility()
   sim->run();
   double discReward = sim->episodeR / sim->timeStep;
   std::cout << discReward << std::endl;
-  assert(discReward > rewardRequired);
+  ASSERT(discReward > rewardRequired);
   deleteObjects();
 }
 

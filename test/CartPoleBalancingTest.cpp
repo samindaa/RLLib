@@ -129,7 +129,7 @@ const Action<double>* CMAESAgent::initialize(const TRStep<double>* step)
       nbPopEvaluations = 0;
     }
 
-    assert(nbPopEvaluations < lambda);
+    ASSERT(nbPopEvaluations < lambda);
     double const *nextX = pop[nbPopEvaluations];
     for (int j = 0; j < x->dimension(); j++)
       x->setEntry(j, nextX[j]);

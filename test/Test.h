@@ -274,58 +274,58 @@ class Assert
     template<class T>
     static void assertEquals(const Vector<T>* a, const Vector<T>* b)
     {
-      assert(VectorsTestsUtils::checkConsistency(a));
-      assert(VectorsTestsUtils::checkConsistency(b));
-      assert(VectorsTestsUtils::checkVectorEquals(a, b, std::numeric_limits<float>::epsilon()));
+      ASSERT(VectorsTestsUtils::checkConsistency(a));
+      ASSERT(VectorsTestsUtils::checkConsistency(b));
+      ASSERT(VectorsTestsUtils::checkVectorEquals(a, b, std::numeric_limits<float>::epsilon()));
     }
 
     template<class T>
     static void assertEquals(const Vector<T>* a, const Vector<T>* b, double margin)
     {
-      assert(VectorsTestsUtils::checkConsistency(a));
-      assert(VectorsTestsUtils::checkConsistency(b));
-      assert(VectorsTestsUtils::checkVectorEquals(a, b, margin));
+      ASSERT(VectorsTestsUtils::checkConsistency(a));
+      ASSERT(VectorsTestsUtils::checkConsistency(b));
+      ASSERT(VectorsTestsUtils::checkVectorEquals(a, b, margin));
     }
 
     template<class T>
     static void checkConsistency(const Vector<T>* v)
     {
-      assert(VectorsTestsUtils::checkConsistency(v));
+      ASSERT(VectorsTestsUtils::checkConsistency(v));
     }
 
     template<class T>
     static void checkValues(const Vector<T>* v)
     {
-      assert(VectorsTestsUtils::checkValues(v));
+      ASSERT(VectorsTestsUtils::checkValues(v));
     }
 
     static void assertPasses(const bool& condition)
     {
-      assert(condition);
+      ASSERT(condition);
     }
 
     static void assertFails(const bool& condition)
     {
-      assert(!condition);
+      ASSERT(!condition);
     }
 
     template<class T1, class T2>
     static void assertObjectEquals(const T1& a, const T2& b)
     {
-      assert(a == b);
+      ASSERT(a == b);
     }
 
     template<class T1, class T2>
     static void assertObjectEquals(const T1& a, const T2& b, const double& margin)
     {
       double tmp = std::fabs(a - b);
-      assert(tmp <= margin);
+      ASSERT(tmp <= margin);
     }
 
     template<class T>
     static void assertNotSame(const Vector<T>* a, const Vector<T>* b)
     {
-      assert(a != b);
+      ASSERT(a != b);
     }
 };
 

@@ -106,7 +106,7 @@ const Vector<double>* NextingProjector::project(const Vector<double>* x, const i
   vector->clear();
   if (x->empty())
     return vector;
-  assert(false);
+  ASSERT(false);
   return vector;
 }
 

@@ -139,27 +139,115 @@ class MurmurHashing: public AbstractHashing
 
   public:
     /**
-     * MurmurHashNeutral2, by Austin Appleby
-     * https://sites.google.com/site/murmurhash/
-     * https://sites.google.com/site/murmurhash/MurmurHashNeutral2.cpp?attredirects=0
-     * Same as MurmurHash2, but endian- and alignment-neutral.
-     * Half the speed though, alas.
+     * https://code.google.com/p/smhasher/
+     *
+     * The main implementations of Murmur are written to be as clear as possible at the expense
+     * of some cross-platform compatibility. Shane Day offered to put together an implementation
+     * of Murmur3_x86_32 that should compile on virtually any platform and which passes the Murmur3
+     * verification test, and I've now merged his code into the repository.
      */
-    unsigned int murmurHashNeutral2(const void* key, int len, unsigned int seed)
+
+    // Block read - if your platform needs to do endian-swapping or can only
+    // handle aligned reads, do the conversion here
+    uint32_t getblock32(const uint32_t * p, int i)
     {
-      // 'm' and 'r' are mixing constants generated off-line.
-      // They're not really 'magic', they just happen to work well.
+      return p[i];
+    }
 
-      const static unsigned int m = 0x5bd1e995;
-      const static int r = 24;
+    uint32_t rotl32(uint32_t x, int8_t r)
+    {
+      return (x << r) | (x >> (32 - r));
+    }
 
-      unsigned int h = seed ^ len;
+    // Finalization mix - force all bits of a hash block to avalanche
+    uint32_t fmix32(uint32_t h)
+    {
+      h ^= h >> 16;
+      h *= 0x85ebca6b;
+      h ^= h >> 13;
+      h *= 0xc2b2ae35;
+      h ^= h >> 16;
 
-      const unsigned char* data = (const unsigned char*) key;
+      return h;
+    }
+
+    uint32_t MurmurHash3_x86_32(const void * key, int len, uint32_t seed)
+    {
+      const uint8_t * data = (const uint8_t*) key;
+      const int nblocks = len / 4;
+
+      uint32_t h1 = seed;
+
+      const uint32_t c1 = 0xcc9e2d51;
+      const uint32_t c2 = 0x1b873593;
+
+      //----------
+      // body
+
+      const uint32_t * blocks = (const uint32_t *) (data + nblocks * 4);
+
+      for (int i = -nblocks; i; i++)
+      {
+        uint32_t k1 = getblock32(blocks, i);
+
+        k1 *= c1;
+        k1 = rotl32(k1, 15);
+        k1 *= c2;
+
+        h1 ^= k1;
+        h1 = rotl32(h1, 13);
+        h1 = h1 * 5 + 0xe6546b64;
+      }
+
+      //----------
+      // tail
+
+      const uint8_t * tail = (const uint8_t*) (data + nblocks * 4);
+
+      uint32_t k1 = 0;
+
+      switch (len & 3)
+      {
+      case 3:
+        k1 ^= tail[2] << 16;
+      case 2:
+        k1 ^= tail[1] << 8;
+      case 1:
+        k1 ^= tail[0];
+        k1 *= c1;
+        k1 = rotl32(k1, 15);
+        k1 *= c2;
+        h1 ^= k1;
+      };
+
+      //----------
+      // finalization
+
+      h1 ^= len;
+
+      h1 = fmix32(h1);
+
+      return h1;
+    }
+
+    //-----------------------------------------------------------------------------
+    // MurmurHashNeutral2, by Austin Appleby
+
+    // Same as MurmurHash2, but endian- and alignment-neutral.
+    // Half the speed though, alas.
+
+    uint32_t MurmurHashNeutral2(const void * key, int len, uint32_t seed)
+    {
+      const uint32_t m = 0x5bd1e995;
+      const int r = 24;
+
+      uint32_t h = seed ^ len;
+
+      const unsigned char * data = (const unsigned char *) key;
 
       while (len >= 4)
       {
-        unsigned int k;
+        uint32_t k;
 
         k = data[0];
         k |= data[1] << 8;
@@ -198,17 +286,17 @@ class MurmurHashing: public AbstractHashing
   private:
     void pack(const uint32_t& val, uint8_t* dest)
     {
-      dest[0] = (val & 0xff000000) >> 24;
-      dest[1] = (val & 0x00ff0000) >> 16;
-      dest[2] = (val & 0x0000ff00) >> 8;
-      dest[3] = (val & 0x000000ff);
+      dest[3] = (val & 0xff000000) >> 24;
+      dest[2] = (val & 0x00ff0000) >> 16;
+      dest[1] = (val & 0x0000ff00) >> 8;
+      dest[0] = (val & 0x000000ff);
     }
   public:
     int hash(int* ints/*coordinates*/, int num_ints)
     {
       for (int i = 0; i < num_ints; i++)
         pack((uint32_t) ints[i], &key[i * 4]);
-      return (int) (murmurHashNeutral2(key, (num_ints * 4), seed) % memorySize);
+      return (int) (MurmurHash3_x86_32(key, (num_ints * 4), seed) % memorySize);
     }
 
 };

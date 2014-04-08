@@ -367,7 +367,7 @@ void VectorTest::testMultiplySelfByExponential()
   const double v3Values[] = { -10000.0, -10000.0, -10000.0, -100000.0, -10000.0 };
   Vectors<double>::multiplySelfByExponential(v1, 1.0,
       newVector(v3Values, Arrays::length(v3Values)));
-  assert(Vectors<double>::isNull(v1));
+  ASSERT(Vectors<double>::isNull(v1));
 }
 
 void VectorTest::testMultiplySelfByExponentialBounded()
@@ -384,7 +384,7 @@ void VectorTest::testMultiplySelfByExponentialBounded()
   const double v3Values[] = { -10000.0, -10000.0, -10000.0, -100000.0, -10000.0 };
   Vectors<double>::multiplySelfByExponential(v1, 1.0, newVector(v3Values, Arrays::length(v3Values)),
       0.1);
-  assert(!Vectors<double>::isNull(v1));
+  ASSERT(!Vectors<double>::isNull(v1));
 }
 
 void VectorTest::testAbs()

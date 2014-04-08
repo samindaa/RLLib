@@ -108,7 +108,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
   sim = new Simulator<double>(agent, problem, 5000, 50, 5);
   sim->run();
 
-  assert(evaluate() < 0.0);
+  ASSERT(evaluate() < 0.0);
   deleteObjects();
 }
 
@@ -125,7 +125,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
   sim = new Simulator<double>(agent, problem, 5000, 50, 5);
   sim->run();
   sim->computeValueFunction();
-  assert(evaluate() > 0.75);
+  ASSERT(evaluate() > 0.75);
   deleteObjects();
 }
 
@@ -143,7 +143,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblit
   sim = new Simulator<double>(agent, problem, 5000, 50, 5);
   sim->run();
   sim->computeValueFunction();
-  assert(evaluate() > 0.75);
+  ASSERT(evaluate() > 0.75);
   deleteObjects();
 }
 

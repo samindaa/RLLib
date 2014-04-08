@@ -126,25 +126,25 @@ class Matrix
 
     inline double& operator ()(unsigned int y, unsigned int x)
     {
-      assert(y < m_rows && x < m_rows);
+      ASSERT(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 
     inline const double& operator ()(unsigned int y, unsigned int x) const
     {
-      assert(y < m_rows && x < m_rows);
+      ASSERT(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 
     inline double& at(unsigned int y, unsigned int x)
     {
-      assert(y < m_rows && x < m_rows);
+      ASSERT(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 
     inline const double& at(unsigned int y, unsigned int x) const
     {
-      assert(y < m_rows && x < m_rows);
+      ASSERT(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 

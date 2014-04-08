@@ -19,9 +19,9 @@ void MurmurHash2Test::testChangingSeed()
   for (unsigned int i = 0; i < Arrays::length(expected); i++)
   {
     unsigned int expectedHash = expected[i];
-    unsigned int hash = murmurHashing->murmurHashNeutral2(key, Arrays::length(key), i);
+    unsigned int hash = murmurHashing->MurmurHashNeutral2(key, Arrays::length(key), i);
     std::cout << "i=" << i << " " << expectedHash << " " << hash << std::endl;
-    assert(expectedHash == hash);
+    ASSERT(expectedHash == hash);
   }
 
   delete murmurHashing;
@@ -41,9 +41,9 @@ void MurmurHash2Test::testChangingKey()
   {
     setKey(key, Arrays::length(key), i);
     unsigned int expectedHash = expected[i];
-    unsigned int hash = murmurHashing->murmurHashNeutral2(key, Arrays::length(key), 0x1234ABCD);
+    unsigned int hash = murmurHashing->MurmurHashNeutral2(key, Arrays::length(key), 0x1234ABCD);
     std::cout << "i=" << i << " " << expectedHash << " " << hash << std::endl;
-    assert(expectedHash == hash);
+    ASSERT(expectedHash == hash);
   }
   delete murmurHashing;
 }
@@ -61,9 +61,9 @@ void MurmurHash2Test::testChangingKeyLength()
     std::fill(key, key + i, 0);
     setKey(key, i, i);
     unsigned int expectedHash = expected[i];
-    unsigned int hash = murmurHashing->murmurHashNeutral2(key, i, 0x7870AAFF);
+    unsigned int hash = murmurHashing->MurmurHashNeutral2(key, i, 0x7870AAFF);
     std::cout << "i=" << i << " " << expectedHash << " " << hash << std::endl;
-    assert(expectedHash == hash);
+    ASSERT(expectedHash == hash);
   }
   delete murmurHashing;
 }
