@@ -118,23 +118,17 @@ class UNH: public AbstractHashing
 class MurmurHashing: public AbstractHashing
 {
   protected:
-    unsigned int seed;
-    uint8_t* key;
+    uint32_t seed;
+    uint32_t out;
+
   public:
     MurmurHashing(const int& memorySize) :
-        AbstractHashing(memorySize)
+        AbstractHashing(memorySize), seed((uint32_t) rand()), out(0)
     {
-      // Constant seed
-      //srand(0);
-      seed = (unsigned int) rand();
-      //srand(time(0));
-      key = new uint8_t[(MAX_NUM_VARS * 2 + 1) * 4]; //<< Arbitrary
-      ::memset(key, 0, (MAX_NUM_VARS * 2 + 1) * 4);
     }
 
     virtual ~MurmurHashing()
     {
-      delete[] key;
     }
 
   public:
@@ -154,7 +148,7 @@ class MurmurHashing: public AbstractHashing
       return p[i];
     }
 
-    uint32_t rotl32(uint32_t x, int8_t r)
+    uint32_t ROTL32(uint32_t x, int8_t r)
     {
       return (x << r) | (x >> (32 - r));
     }
@@ -171,7 +165,7 @@ class MurmurHashing: public AbstractHashing
       return h;
     }
 
-    uint32_t MurmurHash3_x86_32(const void * key, int len, uint32_t seed)
+    void MurmurHash3_x86_32(const void * key, int len, uint32_t seed, void * out)
     {
       const uint8_t * data = (const uint8_t*) key;
       const int nblocks = len / 4;
@@ -191,11 +185,11 @@ class MurmurHashing: public AbstractHashing
         uint32_t k1 = getblock32(blocks, i);
 
         k1 *= c1;
-        k1 = rotl32(k1, 15);
+        k1 = ROTL32(k1, 15);
         k1 *= c2;
 
         h1 ^= k1;
-        h1 = rotl32(h1, 13);
+        h1 = ROTL32(h1, 13);
         h1 = h1 * 5 + 0xe6546b64;
       }
 
@@ -215,7 +209,7 @@ class MurmurHashing: public AbstractHashing
       case 1:
         k1 ^= tail[0];
         k1 *= c1;
-        k1 = rotl32(k1, 15);
+        k1 = ROTL32(k1, 15);
         k1 *= c2;
         h1 ^= k1;
       };
@@ -227,7 +221,7 @@ class MurmurHashing: public AbstractHashing
 
       h1 = fmix32(h1);
 
-      return h1;
+      *(uint32_t*) out = h1;
     }
 
     //-----------------------------------------------------------------------------
@@ -283,20 +277,11 @@ class MurmurHashing: public AbstractHashing
       return h;
     }
 
-  private:
-    void pack(const uint32_t& val, uint8_t* dest)
-    {
-      dest[3] = (val & 0xff000000) >> 24;
-      dest[2] = (val & 0x00ff0000) >> 16;
-      dest[1] = (val & 0x0000ff00) >> 8;
-      dest[0] = (val & 0x000000ff);
-    }
   public:
     int hash(int* ints/*coordinates*/, int num_ints)
     {
-      for (int i = 0; i < num_ints; i++)
-        pack((uint32_t) ints[i], &key[i * 4]);
-      return (int) (MurmurHash3_x86_32(key, (num_ints * 4), seed) % memorySize);
+      MurmurHash3_x86_32(((const uint8_t*) ints), (num_ints * 4), seed, &out);
+      return out % memorySize;
     }
 
 };

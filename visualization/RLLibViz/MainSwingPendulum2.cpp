@@ -14,7 +14,6 @@
 #include "ModelThread.h"
 #include "Window.h"
 
-
 using namespace RLLibViz;
 using namespace RLLib;
 
@@ -29,11 +28,10 @@ int main(int argc, char *argv[])
 
   RLLibViz::ViewBase* behaviorView = new RLLibViz::SwingPendulumView;
   RLLibViz::ViewBase* targetView = new RLLibViz::SwingPendulumView;
-  RLLibViz::ViewBase* behaviorPlot = new RLLibViz::PlotView;
-  RLLibViz::ViewBase* targetPlot = new RLLibViz::PlotView;
+  RLLibViz::ViewBase* behaviorPlot = new RLLibViz::PlotView("Behavior Policy");
+  RLLibViz::ViewBase* targetPlot = new RLLibViz::PlotView("Target Policy");
   RLLibViz::ViewBase* valueFunctionNULLView = new RLLibViz::NULLView;
   RLLibViz::ViewBase* valueFunctionView = new RLLibViz::ValueFunctionView;
-
 
   RLLibViz::Window* window = new RLLibViz::Window;
   window->addView(behaviorView);
@@ -55,5 +53,4 @@ int main(int argc, char *argv[])
 
   return a.exec();
 }
-
 

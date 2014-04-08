@@ -19,10 +19,11 @@ void MurmurHash3Test::verificationTest()
 
   uint8_t * key = new uint8_t[256];
   uint8_t * hashes = new uint8_t[hashbytes * 256];
-  uint32_t verification = 0;
+  uint8_t * final = new uint8_t[hashbytes];
 
   memset(key, 0, 256);
   memset(hashes, 0, hashbytes * 256);
+  memset(final, 0, hashbytes);
 
   // Hash keys of the form {0}, {0,1}, {0,1,2}... up to N=255,using 256-N as
   // the seed
@@ -30,25 +31,23 @@ void MurmurHash3Test::verificationTest()
   for (int i = 0; i < 256; i++)
   {
     key[i] = (uint8_t) i;
-    uint32_t val = hash->MurmurHash3_x86_32(key, i, 256 - i);
-    // unpack
-    hashes[i * hashbytes + 3] = (val & 0xff000000) >> 24;
-    hashes[i * hashbytes + 2] = (val & 0x00ff0000) >> 16;
-    hashes[i * hashbytes + 1] = (val & 0x0000ff00) >> 8;
-    hashes[i * hashbytes + 0] = (val & 0x000000ff);
+
+    hash->MurmurHash3_x86_32(key, i, 256 - i, &hashes[i * hashbytes]);
   }
 
   // Then hash the result array
 
-  verification = hash->MurmurHash3_x86_32(hashes, hashbytes * 256, 0);
+  hash->MurmurHash3_x86_32(hashes, hashbytes * 256, 0, final);
 
   // The first four bytes of that hash, interpreted as a little-endian integer, is our
   // verification value
 
+  uint32_t verification = (final[0] << 0) | (final[1] << 8) | (final[2] << 16) | (final[3] << 24);
+
   delete hash;
   delete[] key;
   delete[] hashes;
-
+  delete[] final;
   //----------
 
   if (expected != verification)

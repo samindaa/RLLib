@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
 
   RLLibViz::ViewBase* behaviorView = new RLLibViz::ContinuousGridworldView;
   RLLibViz::ViewBase* targetView = new RLLibViz::ContinuousGridworldView;
-  RLLibViz::ViewBase* behaviorPlot = new RLLibViz::PlotView;
-  RLLibViz::ViewBase* targetPlot = new RLLibViz::PlotView;
+  RLLibViz::ViewBase* behaviorPlot = new RLLibViz::PlotView("Behavior Policy");
+  RLLibViz::ViewBase* targetPlot = new RLLibViz::PlotView("Target Policy");
   RLLibViz::ViewBase* valueFunctionNULLView = new RLLibViz::NULLView;
   RLLibViz::ViewBase* valueFunctionView = new RLLibViz::ValueFunctionView;
 

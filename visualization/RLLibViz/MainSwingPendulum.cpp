@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
   qRegisterMetaType<Matrix>();
 
   RLLibViz::ViewBase* actingView = new RLLibViz::SwingPendulumView;
-  RLLibViz::ViewBase* actingPlot = new RLLibViz::PlotView;
+  RLLibViz::ViewBase* actingPlot = new RLLibViz::PlotView("Target Policy");
   RLLibViz::ViewBase* valueFunctionView = new RLLibViz::ValueFunctionView;
 
   RLLibViz::Window* window = new RLLibViz::Window;

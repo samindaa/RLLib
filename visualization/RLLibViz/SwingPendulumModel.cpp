@@ -81,7 +81,7 @@ void SwingPendulumModel::doWork()
   simulator->step();
   if (simulator->isEndingOfEpisode())
   {
-    emit signal_add(window->plots[0], Vec(simulator->episodeR, 0), Vec(0.0, 0.0, 0.0, 1.0));
+    emit signal_add(window->plots[0], Vec(simulator->timeStep, 0), Vec(simulator->episodeR, 0));
     emit signal_draw(window->plots[0]);
   }
 

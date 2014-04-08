@@ -9,28 +9,42 @@
 
 using namespace RLLibViz;
 
-PlotView::PlotView(QWidget* parent) :
-    ViewBase(parent)
+PlotView::PlotView(const QString& title, QWidget* parent) :
+    ViewBase(parent), y2MinAvg(0), y2MaxAvg(0)
 {
   grid = new QHBoxLayout(this);
   plot = new QCustomPlot(this);
   plot->setGeometry(0, 0, sizeHint().width(), sizeHint().height());
   grid->addWidget(plot);
 
-  x.resize(sizeHint().width());
-  yOne.resize(sizeHint().width());
-  yTwo.resize(sizeHint().width());
-  for (int i = 0; i < x.size(); i++)
+  xR1.resize(sizeHint().width());
+  for (int i = 0; i < xR1.size(); i++)
+    xR1[i] = i;
+
+  globalColors.push_back(Qt::darkRed);
+  globalColors.push_back(Qt::darkGreen);
+
+  for (int i = 0; i < 2; i++)
   {
-    x[i] = i;
-    yOne[i] = yTwo[i] = 0.0f;
+    yR2.push_back(QVector<double>());
+    yR2[i].resize(sizeHint().width());
+    for (int j = 0; j < sizeHint().width(); j++)
+      yR2[i][j] = 0.0f;
   }
+
   // create graph and assign data to it:
-  plot->addGraph();
-  plot->addGraph();
-  plot->graph(1)->setPen(QPen(Qt::red));
+  for (int i = 0; i < 2; i++)
+    plot->addGraph();
+
+  for (int i = 0; i < 2; i++)
+    plot->graph(i)->setPen(QPen(globalColors[i]));
+
   plot->xAxis->setLabel("Episodes");
-  plot->yAxis->setLabel("Rewards");
+  plot->yAxis->setLabel("Steps");
+  plot->yAxis2->setLabel("Rewards");
+  plot->xAxis2->setLabel(title);
+  plot->xAxis2->setVisible(true);
+  plot->yAxis2->setVisible(true);
   setLayout(grid);
 }
 
@@ -47,33 +61,21 @@ void PlotView::draw(QWidget* that)
 {
   if (this != that)
     return;
-  // find min and max
-  for (QVector<double>::iterator i = yOne.begin(); i != yOne.end(); ++i)
+
+  for (int i = 0; i < 2; i++)
   {
-    double tmp = (*i);
-    if (tmp > graphOne.y)
-      graphOne.y = tmp;
-    if (tmp < graphOne.x)
-      graphOne.x = tmp;
+    plot->graph(i)->setData(xR1, yR2[i]);
+    plot->graph(i)->rescaleAxes();
+    plot->xAxis->setRange(xR1[0], xR1[xR1.size() - 1]);
+    plot->xAxis2->setRange(xR1[0], xR1[xR1.size() - 1]);
+    plot->yAxis->setRange(yR2[0][0], yR2[0][yR2[0].size() - 1]);
+
+    y2MinAvg += 0.01 * (yR2[1][0] - y2MinAvg);
+    y2MaxAvg += 0.01 * (yR2[1][yR2[1].size() - 1] - y2MaxAvg);
+    plot->yAxis2->setRange(std::ceil(y2MinAvg), std::ceil(y2MaxAvg));
   }
 
-  for (QVector<double>::iterator i = yTwo.begin(); i != yTwo.end(); ++i)
-  {
-    double tmp = (*i);
-    if (tmp > graphTwo.y)
-      graphTwo.y = tmp;
-    if (tmp < graphTwo.x)
-      graphTwo.x = tmp;
-  }
-
-  double minY = std::min(graphOne.x, graphTwo.x);
-  double maxY = std::max(graphOne.y, graphTwo.y);
-  plot->xAxis->setRange(0, x.size());
-  plot->yAxis->setRange(minY, maxY);
-  plot->graph(0)->setData(x, yOne);
-  plot->graph(1)->setData(x, yTwo);
-  plot->graph(0)->rescaleAxes();
-  plot->graph(1)->rescaleAxes();
+  plot->rescaleAxes();
   plot->replot();
 }
 
@@ -81,14 +83,19 @@ void PlotView::add(QWidget* that, const Vec& graphOneP, const Vec& graphTwoP)
 {
   if (this != that)
     return;
+
   // O(N)
-  for (size_t i = 1; i < yOne.size(); i++)
+  for (size_t i = 0; i < yR2.size(); i++)
   {
-    yOne[i - 1] = yOne[i];
-    yTwo[i - 1] = yTwo[i];
+    for (int j = 1; j < yR2[i].size(); j++)
+      yR2[i][j - 1] = yR2[i][j];
   }
-  yOne[yOne.size() - 1] = graphOneP.x;
-  yTwo[yTwo.size() - 1] = graphTwoP.x;
+
+  yR2[0][yR2[0].size() - 1] = graphOneP.x;
+  yR2[1][yR2[1].size() - 1] = graphTwoP.x;
+  for (int i = 1; i < xR1.size(); i++)
+    xR1[i - 1] = xR1[i];
+  ++xR1[xR1.size() - 1];
 }
 
 void PlotView::add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV)

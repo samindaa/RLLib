@@ -9,9 +9,11 @@
 #define PLOTVIEW_H_
 
 #include <vector>
+#include <cmath>
 
 #include <QHBoxLayout>
 #include <QVector>
+#include <QString>
 #include "ViewBase.h"
 #include "Mat.h"
 #include "plot/qcustomplot.h"
@@ -25,11 +27,16 @@ class PlotView: public ViewBase
   private:
     QHBoxLayout* grid;
     QCustomPlot* plot;
-    QVector<double> x, yOne, yTwo;
+    QVector<double> xR1;
+    std::vector<QVector<double> > yR2;
     Vec graphOne;
     Vec graphTwo;
+    std::vector<Qt::GlobalColor> globalColors;
+    double y2MinAvg;
+    double y2MaxAvg;
+
   public:
-    PlotView(QWidget *parent = 0);
+    PlotView(const QString& title, QWidget *parent = 0);
     virtual ~PlotView();
     void initialize();
 
