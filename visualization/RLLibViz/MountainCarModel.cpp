@@ -13,7 +13,7 @@ MountainCarModel::MountainCarModel(QObject *parent) :
     ModelBase(parent)
 {
   // RLLib:
-  Probabilistic<double>::srand(0);
+  random = new Random<double>;
   behaviourEnvironment = new MountainCar<double>;
   evaluationEnvironment = new MountainCar<double>;
   hashing = new MurmurHashing(1000000);
@@ -31,15 +31,15 @@ MountainCarModel::MountainCarModel(QObject *parent) :
 
   alpha_u = 1.0 / projector->vectorNorm();
 
-  target = new BoltzmannDistribution<double>(projector->dimension(),
-      behaviourEnvironment->getDiscreteActions());
+  target = new BoltzmannDistribution<double>(random, behaviourEnvironment->getDiscreteActions(),
+      projector->dimension());
 
   actore = new ATrace<double>(projector->dimension());
   actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target, actoreTraces);
 
-  behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActions());
+  behavior = new RandomPolicy<double>(random, behaviourEnvironment->getDiscreteActions());
   control = new OffPAC<double>(behavior, critic, actor, toStateAction, projector);
 
   learningAgent = new LearnerAgent<double>(control);
@@ -59,6 +59,7 @@ MountainCarModel::MountainCarModel(QObject *parent) :
 
 MountainCarModel::~MountainCarModel()
 {
+  delete random;
   delete behaviourEnvironment;
   delete evaluationEnvironment;
   delete hashing;

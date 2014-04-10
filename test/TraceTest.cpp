@@ -23,8 +23,8 @@
 
 RLLIB_TEST_MAKE(TraceTest)
 
-void TraceTest::runTest(RLProblem<double>* problem, Projector<double>* projector,
-    Trace<double>* trace)
+void TraceTest::runTest(Random<double>* random, RLProblem<double>* problem,
+    Projector<double>* projector, Trace<double>* trace)
 {
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
@@ -33,7 +33,8 @@ void TraceTest::runTest(RLProblem<double>* problem, Projector<double>* projector
   double lambda = 0.3;
   double epsilon = 0.01;
   Sarsa<double>* sarsa = new Sarsa<double>(alpha, gamma, lambda, trace);
-  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
+  Policy<double>* acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa,
+      epsilon);
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
@@ -54,23 +55,25 @@ void TraceTest::runTest(RLProblem<double>* problem, Projector<double>* projector
 
 void TraceTest::testSarsaOnMountainCarSVectorTraces()
 {
-  RLProblem<double>* problem = new MountainCar<double>;
+  Random<double>* random = new Random<double>;
+  RLProblem<double>* problem = new MountainCar<double>(random);
   Hashing* hashing = new MurmurHashing(30000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 9, 10,
       false);
 
   Trace<double>* e = new ATrace<double>(projector->dimension());
-  runTest(problem, projector, e);
+  runTest(random, problem, projector, e);
   delete e;
 
   e = new AMaxTrace<double>(projector->dimension());
-  runTest(problem, projector, e);
+  runTest(random, problem, projector, e);
   delete e;
 
   e = new RTrace<double>(projector->dimension());
-  runTest(problem, projector, e);
+  runTest(random, problem, projector, e);
   delete e;
 
+  delete random;
   delete problem;
   delete hashing;
   delete projector;
@@ -79,28 +82,30 @@ void TraceTest::testSarsaOnMountainCarSVectorTraces()
 
 void TraceTest::testSarsaOnMountainCarMaxLengthTraces()
 {
-  RLProblem<double>* problem = new MountainCar<double>;
+  Random<double>* random = new Random<double>;
+  RLProblem<double>* problem = new MountainCar<double>(random);
   Hashing* hashing = new MurmurHashing(10000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       false);
   Trace<double>* e = new ATrace<double>(projector->dimension());
   Trace<double>* trace = new MaxLengthTrace<double>(e, 100);
-  runTest(problem, projector, e);
+  runTest(random, problem, projector, e);
   delete trace;
   delete e;
 
   e = new AMaxTrace<double>(projector->dimension());
   trace = new MaxLengthTrace<double>(e, 100);
-  runTest(problem, projector, e);
+  runTest(random, problem, projector, e);
   delete trace;
   delete e;
 
   e = new RTrace<double>(projector->dimension());
   trace = new MaxLengthTrace<double>(e, 100);
-  runTest(problem, projector, e);
+  runTest(random, problem, projector, e);
   delete trace;
   delete e;
 
+  delete random;
   delete problem;
   delete hashing;
   delete projector;

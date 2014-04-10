@@ -70,11 +70,11 @@ class RandlovBike: public RLProblem<Type>
         *psiRange;
 
   public:
-    RandlovBike(const bool& goToTarget) :
-        RLProblem<Type>((goToTarget ? 1 : 0) + 5, 9, 0), goToTarget(goToTarget), x_goal(1000.0f), y_goal(
-            0), radius_goal(10.0f), reinforcement(0), isTerminal(false), omega(0), omega_dot(0), omega_d_dot(
-            0), theta(0), theta_dot(0), theta_d_dot(0), xf(0), yf(0), xb(0), yb(0), psi_goal(0), rCM(
-            0), rf(0), rb(0), T(0), d(0), phi(0), psi(0), R1(-1.0), R2(0.0), R3(+1.0), R_FACTOR(
+    RandlovBike(Random<Type>* random, const bool& goToTarget) :
+        RLProblem<Type>(random, (goToTarget ? 1 : 0) + 5, 9, 0), goToTarget(goToTarget), x_goal(
+            1000.0f), y_goal(0), radius_goal(10.0f), reinforcement(0), isTerminal(false), omega(0), omega_dot(
+            0), omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(0), yf(0), xb(0), yb(0), psi_goal(
+            0), rCM(0), rf(0), rb(0), T(0), d(0), phi(0), psi(0), R1(-1.0), R2(0.0), R3(+1.0), R_FACTOR(
             0.00001), dt(0.01), v(10.0 / 3.6), g(9.82), dCM(0.3), c(0.66), h(0.94), Mc(15.0), Md(
             1.7), Mp(60.0), M(Mc + Mp), R(0.34),
         /* tyre radius */
@@ -152,7 +152,7 @@ class RandlovBike: public RLProblem<Type>
 
       T = 2 * ((action / 3) - 1);
       d = 0.02 * ((action % 3) - 1);
-      d = d + 0.04 * (0.5 - Probabilistic<Type>::nextReal()); /* Max noise is 2 cm */
+      d = d + 0.04 * (0.5 - Base::random->nextReal()); /* Max noise is 2 cm */
 
       switch (to_do)
       {

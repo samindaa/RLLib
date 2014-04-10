@@ -102,7 +102,12 @@ class PVectorTests: public PVectorTestsBase
 
 class SVectorTest: public VectorTest
 {
+  private:
+    Random<double>* random;
+
   public:
+    SVectorTest();
+    virtual ~SVectorTest();
     void initialize();
     Vector<double>* newPrototypeVector(const int& size);
 

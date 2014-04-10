@@ -162,7 +162,8 @@ class TraceTest: public TraceTestBase
         }
     };
 
-    void runTest(RLProblem<double>* problem, Projector<double>* projector, Trace<double>* trace);
+    void runTest(Random<double>* random, RLProblem<double>* problem, Projector<double>* projector,
+        Trace<double>* trace);
     void testSarsaOnMountainCarSVectorTraces();
     void testSarsaOnMountainCarMaxLengthTraces();
 

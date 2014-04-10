@@ -20,7 +20,8 @@ void FiniteStateGraphTest::testSimpleProblemTrajectory()
 
 void FiniteStateGraphTest::testRandomWalkRightTrajectory()
 {
-  RandomWalk sp;
+  Random<double> random;
+  RandomWalk sp(&random);
   sp.enableOnlyRightPolicy();
   Assert::assertObjectEquals(FiniteStateGraph::StepData(0, sp.O, sp.X, sp.C, 0.0, sp.Right), sp.step());
   Assert::assertObjectEquals(FiniteStateGraph::StepData(1, sp.C, sp.Right, sp.D, 0.0, sp.Right), sp.step());
@@ -32,7 +33,8 @@ void FiniteStateGraphTest::testRandomWalkRightTrajectory()
 
 void FiniteStateGraphTest::testRandomWalkLeftTrajectory()
 {
-  RandomWalk sp;
+  Random<double> random;
+  RandomWalk sp(&random);
   sp.enableOnlyLeftPolicy();
   Assert::assertObjectEquals(FiniteStateGraph::StepData(0, sp.O, sp.X, sp.C, 0.0, sp.Left), sp.step());
   Assert::assertObjectEquals(FiniteStateGraph::StepData(1, sp.C, sp.Left, sp.B, 0.0, sp.Left), sp.step());
@@ -44,7 +46,8 @@ void FiniteStateGraphTest::testRandomWalkLeftTrajectory()
 
 void FiniteStateGraphTest::testComputeSolution()
 {
-  RandomWalk sp;
+  Random<double> random;
+  RandomWalk sp(&random);
   FSGAgentState state(&sp);
   const PVector<double> solution = state.computeSolution(sp.policy(), 0.9, 0.0);
   Assert::assertEquals(sp.expectedDiscountedSolution(), &solution, 0.1);

@@ -37,8 +37,8 @@ class ContinuousGridworld: public RLProblem<T>
     std::ofstream outpath;
 
   public:
-    ContinuousGridworld() :
-        RLProblem<T>(2, 2 * 2 + 1, 1), observationRange(new Range<T>(0, 1.0)), actionRange(
+    ContinuousGridworld(Random<T>* random) :
+        RLProblem<T>(random, 2, 2 * 2 + 1, 1), observationRange(new Range<T>(0, 1.0)), actionRange(
             new Range<T>(-0.05, 0.05)), absoluteNoise(0.025)
     {
       // discrete actions
@@ -84,7 +84,7 @@ class ContinuousGridworld: public RLProblem<T>
 
     void step(const Action<T>* action)
     {
-      float noise = Probabilistic<float>::nextReal() * absoluteNoise - (absoluteNoise / 2.0f);
+      float noise = Base::random->nextReal() * absoluteNoise - (absoluteNoise / 2.0f);
       for (int i = 0; i < Base::observations->dimension(); i++)
         Base::observations->at(i) = observationRange->bound(
             Base::observations->at(i) + actionRange->bound(action->at(i) + noise));
@@ -102,7 +102,7 @@ class ContinuousGridworld: public RLProblem<T>
 
     float N(const float& p, const float& mu, const float& sigma) const
     {
-      return Probabilistic<float>::gaussianProbability(p, mu, sigma);
+      return Base::random->gaussianProbability(p, mu, sigma);
     }
 
     T r() const

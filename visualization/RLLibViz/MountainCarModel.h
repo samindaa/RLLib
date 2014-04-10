@@ -41,6 +41,7 @@ class MountainCarModel: public ModelBase
 
   protected:
     // RLLib
+    Random<double>* random;
     RLProblem<double>* behaviourEnvironment;
     RLProblem<double>* evaluationEnvironment;
     Hashing* hashing;

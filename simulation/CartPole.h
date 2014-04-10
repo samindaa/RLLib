@@ -37,7 +37,6 @@ class CartPole: public RLProblem<T>
 {
     typedef RLProblem<T> Base;
   protected:
-    bool random;
     float gravity;
     float massCart;
     float massPole;
@@ -53,8 +52,8 @@ class CartPole: public RLProblem<T>
     Range<float>* forceRange;
     Range<T> *xRange, *thetaRange;
   public:
-    CartPole(const bool& random = false) :
-        RLProblem<T>(4, 3, 1), random(random), gravity(9.8), massCart(1.0), massPole(0.1), totalMass(
+    CartPole(Random<T>* random) :
+        RLProblem<T>(random, 4, 3, 1), gravity(9.8), massCart(1.0), massPole(0.1), totalMass(
             massPole + massCart), length(0.5), poleMassLength(massPole * length), forceMag(10.0), tau(
             0.02), fourthirds(4.0f / 3.0f), twelveRadians(-12.0f / 180.0f * M_PI), x(0), x_dot(0), theta(
             0), theta_dot(0), forceRange(new Range<float>(-forceMag, forceMag)), xRange(
@@ -98,13 +97,13 @@ class CartPole: public RLProblem<T>
     // Profiles
     void initialize()
     {
-      if (random)
+      if (Base::random)
       {
-        Range<float> xs2(-0.2, 0.2);
-        Range<float> thetas2(-0.2, 0.2);
+        Range<T> xs2(-0.2, 0.2);
+        Range<T> thetas2(-0.2, 0.2);
         x_dot = theta_dot = 0;
-        x = xs2.chooseRandom();
-        theta = thetas2.chooseRandom();
+        x = xs2.choose(Base::random);
+        theta = thetas2.choose(Base::random);
       }
       else
         x = x_dot = theta = theta_dot = 0; //<< fixMe with noise

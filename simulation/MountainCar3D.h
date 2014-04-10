@@ -66,9 +66,10 @@ class MountainCar3D: public RLProblem<T>
     Range<T>* velocityRange;
 
   public:
-    MountainCar3D() :
-        RLProblem<T>(4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(0), targetPosition(
-            0.5), positionRange(new Range<T>(-1.2, 0.5)), velocityRange(new Range<T>(-0.07, 0.07))
+    MountainCar3D(Random<T>* random) :
+        RLProblem<T>(random, 4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(
+            0), targetPosition(0.5), positionRange(new Range<T>(-1.2, 0.5)), velocityRange(
+            new Range<T>(-0.07, 0.07))
     {
 
       for (int a = 0; a < Base::discreteActions->dimension(); a++)
@@ -91,9 +92,9 @@ class MountainCar3D: public RLProblem<T>
     void set_initial_position_random()
     {
       xposition = positionRange->min()
-          + Probabilistic<T>::nextReal() * ((positionRange->max() - 0.2f) - positionRange->min());
+          + Base::random->nextReal() * ((positionRange->max() - 0.2f) - positionRange->min());
       yposition = positionRange->min()
-          + Probabilistic<T>::nextReal() * ((positionRange->max() - 0.2f) - positionRange->min());
+          + Base::random->nextReal() * ((positionRange->max() - 0.2f) - positionRange->min());
       xvelocity = 0.0;
       yvelocity = 0.0;
     }

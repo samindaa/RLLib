@@ -68,12 +68,12 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
 {
   Timer timer;
   timer.start();
-  Probabilistic<double>::srand(0);
-  RandomWalk* problem = new RandomWalk;
+  Random<double>* random = new Random<double>;
+  RandomWalk* problem = new RandomWalk(random);
 
-  Policy<double>* behaviorPolicy = RandomWalk::newPolicy(problem->getActions(),
+  Policy<double>* behaviorPolicy = RandomWalk::newPolicy(random, problem->getActions(),
       behaviourLeftProbability);
-  Policy<double>* targetPolicy = RandomWalk::newPolicy(problem->getActions(), targetLeftProbability);
+  Policy<double>* targetPolicy = RandomWalk::newPolicy(random, problem->getActions(), targetLeftProbability);
   problem->setPolicy(behaviorPolicy);
   FSGAgentState* agentState = new FSGAgentState(problem);
   OffPolicyControlLearner<double>* learner = learnerFactory->createLearner(problem->getActions(),
@@ -113,6 +113,7 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
   printVector(vFun);
   printVector(v);
 
+  delete random;
   delete targetPolicy;
   delete agentState;
   delete problem;

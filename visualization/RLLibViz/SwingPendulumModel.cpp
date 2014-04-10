@@ -12,7 +12,7 @@ using namespace RLLibViz;
 SwingPendulumModel::SwingPendulumModel(QObject *parent) :
     ModelBase(parent)
 {
-  Probabilistic<double>::srand(0);
+  random = new Random<double>;
   problem = new SwingPendulum<double>;
   hashing = new MurmurHashing(1000);
   projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10, false);
@@ -27,8 +27,8 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
   critice = new ATrace<double>(projector->dimension());
   critic = new TDLambda<double>(alpha_v, gamma, lambda, critice);
 
-  policyDistribution = new NormalDistributionScaled<double>(0, 1.0, projector->dimension(),
-      problem->getContinuousActions());
+  policyDistribution = new NormalDistributionScaled<double>(random, problem->getContinuousActions(),
+      0, 1.0, projector->dimension());
   policyRange = new Range<double>(-2.0, 2.0);
   problemRange = new Range<double>(-2.0, 2.0);
   acting = new ScaledPolicyDistribution<double>(problem->getContinuousActions(), policyDistribution,
@@ -51,6 +51,7 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
 
 SwingPendulumModel::~SwingPendulumModel()
 {
+  delete random;
   delete problem;
   delete hashing;
   delete projector;

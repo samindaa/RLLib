@@ -13,7 +13,12 @@
 RLLIB_TEST(AdalineTest)
 class AdalineTest: public AdalineTestBase
 {
+  private:
+    Random<double>* random;
+
   public:
+    AdalineTest();
+    virtual ~AdalineTest();
     void run();
 
   private:

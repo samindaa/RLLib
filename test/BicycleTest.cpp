@@ -99,8 +99,8 @@ int BicycleProjector::dimension() const
 
 void BicycleTest::testBicycleBalance()
 {
-  Probabilistic<double>::srand(0);
-  RandlovBike<double>* problem = new RandlovBike<double>(false);
+  Random<double>* random = new Random<double>;
+  RandlovBike<double>* problem = new RandlovBike<double>(random, false);
   Projector<double>* projector = new BicycleProjector(problem->dimension());
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
@@ -110,7 +110,8 @@ void BicycleTest::testBicycleBalance()
   double lambda = 0.96;
   Sarsa<double>* sarsa = new SarsaTrue<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
-  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
+  Policy<double>* acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa,
+      epsilon);
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
@@ -121,6 +122,7 @@ void BicycleTest::testBicycleBalance()
   control->resurrect("visualization/bicycle_balance.dat");
   sim->runEvaluate(10);
 
+  delete random;
   delete problem;
   delete projector;
   delete toStateAction;
@@ -134,8 +136,8 @@ void BicycleTest::testBicycleBalance()
 
 void BicycleTest::testBicycleGoToTarget()
 {
-  Probabilistic<double>::srand(0);
-  RandlovBike<double>* problem = new RandlovBike<double>(true);
+  Random<double>* random = new Random<double>;
+  RandlovBike<double>* problem = new RandlovBike<double>(random, true);
   Projector<double>* projector = new BicycleProjector(problem->dimension());
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
@@ -145,7 +147,8 @@ void BicycleTest::testBicycleGoToTarget()
   double lambda = 0.9;
   Sarsa<double>* sarsa = new SarsaAlphaBound<double>(alpha, gamma, lambda, e);
   double epsilon = 0.01;
-  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
+  Policy<double>* acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa,
+      epsilon);
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
@@ -156,6 +159,7 @@ void BicycleTest::testBicycleGoToTarget()
   control->resurrect("visualization/bicycle_goToTarget.dat");
   sim->runEvaluate(10);
 
+  delete random;
   delete problem;
   delete projector;
   delete toStateAction;
@@ -170,14 +174,14 @@ void BicycleTest::testBicycleGoToTarget()
 
 void BicycleTest::testBicycleGoToTargetEvaluate()
 {
-  Probabilistic<double>::srand(0);
-  RandlovBike<double>* problem = new RandlovBike<double>(true);
+  Random<double>* random = new Random<double>;
+  RandlovBike<double>* problem = new RandlovBike<double>(random, true);
   Projector<double>* projector = new BicycleProjector(problem->dimension());
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension());
   Sarsa<double>* sarsa = new SarsaTrue<double>(0, 0, 0, e);
-  Policy<double>* acting = new Greedy<double>(sarsa, problem->getDiscreteActions());
+  Policy<double>* acting = new Greedy<double>(problem->getDiscreteActions(), sarsa);
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
   control->reset();
   control->resurrect("visualization/bicycle_goToTarget.dat");
@@ -186,6 +190,7 @@ void BicycleTest::testBicycleGoToTargetEvaluate()
   Simulator<double>* sim = new Simulator<double>(agent, problem, 100000, 10, 1);
   sim->run();
 
+  delete random;
   delete problem;
   delete projector;
   delete toStateAction;

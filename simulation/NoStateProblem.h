@@ -31,12 +31,17 @@ class NoStateProblem: public RLProblem<double>
     double sigma;
     const Range<double>* range;
     double currentA;
+
   public:
-    NoStateProblem(const double& mu, const double& sigma, const Range<double>* range = 0) :
-        RLProblem<double>(1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
+    NoStateProblem(Random<double>* random, const double& mu, const double& sigma, const Range<double>* range = 0) :
+        RLProblem<double>(random,1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
     {
       discreteActions->push_back(0, 0);
       continuousActions->push_back(0, 0);
+    }
+
+    virtual ~NoStateProblem()
+    {
     }
 
     void initialize()
@@ -65,7 +70,7 @@ class NoStateProblem: public RLProblem<double>
 
     double r() const
     {
-      return Probabilistic<double>::gaussianProbability(currentA, mu, sigma);
+      return random->gaussianProbability(currentA, mu, sigma);
     }
 
     double z() const

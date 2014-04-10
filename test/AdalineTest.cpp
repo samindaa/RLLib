@@ -8,6 +8,16 @@
 #include "AdalineTest.h"
 
 RLLIB_TEST_MAKE(AdalineTest)
+AdalineTest::AdalineTest() :
+    random(new Random<double>)
+{
+}
+
+AdalineTest::~AdalineTest()
+{
+  delete random;
+}
+
 void AdalineTest::run()
 {
   testAdaline();
@@ -16,7 +26,7 @@ void AdalineTest::run()
 
 void AdalineTest::testAdaline()
 {
-  Probabilistic<double>::srand(0);
+  random->reseed(0);
   PVector<double> targetWeights(2);
   targetWeights[0] = 1.0;
   targetWeights[1] = 2.0;
@@ -30,7 +40,7 @@ void AdalineTest::testAdaline()
 void AdalineTest::testAdalineOnTracking()
 {
   {
-    Probabilistic<double>::srand(0);
+    random->reseed(0);
     NoisyInputSumEvaluation noisyInputSumEvaluation;
     Adaline<double> adaline(noisyInputSumEvaluation.nbInputs, 0.0);
     double error = noisyInputSumEvaluation.evaluateLearner(&adaline);
@@ -38,7 +48,7 @@ void AdalineTest::testAdalineOnTracking()
     Assert::assertObjectEquals(noisyInputSumEvaluation.nbNonZeroWeights, error, 0.2);
   }
   {
-    Probabilistic<double>::srand(0);
+    random->reseed(0);
     NoisyInputSumEvaluation noisyInputSumEvaluation;
     Adaline<double> adaline(noisyInputSumEvaluation.nbInputs, 0.03);
     double error = noisyInputSumEvaluation.evaluateLearner(&adaline);
@@ -50,7 +60,7 @@ void AdalineTest::testAdalineOnTracking()
 void AdalineTest::updateFeatures(Vector<double>* features)
 {
   for (int i = 0; i < features->dimension(); i++)
-    features->setEntry(i, Probabilistic<double>::nextReal());
+    features->setEntry(i, random->nextReal());
 }
 
 void AdalineTest::learnTarget(const Vector<double>* targetWeights, Adaline<double>* learner)

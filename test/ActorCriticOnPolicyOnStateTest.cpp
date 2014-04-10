@@ -10,7 +10,8 @@
 ActorCriticOnPolicyOnStateTest::ActorCriticOnPolicyOnStateTest() :
     gamma(0.9), rewardRequired(0.6), mu(0.2), sigma(0.5)
 {
-  problem = new NoStateProblem(mu, sigma);
+  random = new Random<double>();
+  problem = new NoStateProblem(random, mu, sigma);
   projector = new NoStateProblemProjector();
   toStateAction = new NoStateProblemStateToStateAction(projector, problem->getContinuousActions());
 
@@ -30,6 +31,7 @@ ActorCriticOnPolicyOnStateTest::ActorCriticOnPolicyOnStateTest() :
 
 ActorCriticOnPolicyOnStateTest::~ActorCriticOnPolicyOnStateTest()
 {
+  delete random;
   delete problem;
   delete projector;
   delete toStateAction;
@@ -89,15 +91,15 @@ void ActorCriticOnPolicyOnStateTest::checkDistribution(
 
 void ActorCriticOnPolicyOnStateTest::testNormalDistribution()
 {
-  policyDistribution = new NormalDistribution<double>(0.5, 1.0, projector->dimension(),
-      problem->getContinuousActions());
+  policyDistribution = new NormalDistribution<double>(random, problem->getContinuousActions(), 0.5,
+      1.0, projector->dimension());
   checkDistribution(policyDistribution);
 }
 
 void ActorCriticOnPolicyOnStateTest::testNormalDistributionMeanAdjusted()
 {
-  policyDistribution = new NormalDistributionSkewed<double>(0.5, 1.0, projector->dimension(),
-      problem->getContinuousActions());
+  policyDistribution = new NormalDistributionSkewed<double>(random, problem->getContinuousActions(),
+      0.5, 1.0, projector->dimension());
   checkDistribution(policyDistribution);
 }
 
@@ -117,8 +119,8 @@ void ActorCriticOnPolicyOnStateTest::testNormalDistributionWithEligibility()
 
   alpha_u = 0.1 / projector->vectorNorm();
 
-  policyDistribution = new NormalDistribution<double>(0.5, 1.0, projector->dimension(),
-      problem->getContinuousActions());
+  policyDistribution = new NormalDistribution<double>(random, problem->getContinuousActions(), 0.5,
+      1.0, projector->dimension());
 
   actor = new ActorLambda<double>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
   control = new ActorCritic<double>(critic, actor, projector, toStateAction);

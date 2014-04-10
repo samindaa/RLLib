@@ -37,7 +37,6 @@ class NonMarkovPoleBalancing: public RLProblem<T>
     typedef RLProblem<T> Base;
   protected:
     int nbPoles;
-    bool random;
     float stepTime; // s
     float x; // m
     float xDot; // ms^{-1}
@@ -62,9 +61,9 @@ class NonMarkovPoleBalancing: public RLProblem<T>
     Vector<float>* mup; // coefficient of friction of i^{th} pole's hinge
 
   public:
-    NonMarkovPoleBalancing(const int& nbPoles = 1, const bool& random = false) :
-        RLProblem<T>((1 + nbPoles) * 2, 3, 1), nbPoles(nbPoles), random(random), stepTime(0.02), x(
-            0), xDot(0), g(-9.81), M(1.0), muc(0), threeFourth(3.0f / 4.0f), fifteenRadian(
+    NonMarkovPoleBalancing(Random<T>* random, const int& nbPoles = 1) :
+        RLProblem<T>(random, (1 + nbPoles) * 2, 3, 1), nbPoles(nbPoles), stepTime(0.02), x(0), xDot(
+            0), g(-9.81), M(1.0), muc(0), threeFourth(3.0f / 4.0f), fifteenRadian(
             15.0f / 180.0f * M_PI), twelveRadian(12.0f / 180.0f * M_PI), xRange(
             new Range<float>(-2.4f, 2.4f)), actionRange(new Range<float>(-10.0f, 10.0f)), theta(
             new PVector<float>(nbPoles)), thetaDot(new PVector<float>(nbPoles)), length(
@@ -149,17 +148,17 @@ class NonMarkovPoleBalancing: public RLProblem<T>
 
     void initialize()
     {
-      if (random)
+      if (Base::random)
       {
-        Range<float> xs1(-2, 2);
-        Range<float> thetas1(-0.6, 0.6);
-        Range<float> xs2(-0.2, 0.2);
-        Range<float> thetas2(-0.2, 0.2);
+        Range<T> xs1(-2, 2);
+        Range<T> thetas1(-0.6, 0.6);
+        Range<T> xs2(-0.2, 0.2);
+        Range<T> thetas2(-0.2, 0.2);
 
         //<<FixMe: S2
-        x = xs2.chooseRandom();
+        x = xs2.choose(Base::random);
         for (int i = 0; i < nbPoles; i++)
-          theta->setEntry(i, thetas2.chooseRandom());
+          theta->setEntry(i, thetas2.choose(Base::random));
       }
       else
       {

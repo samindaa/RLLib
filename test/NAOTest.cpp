@@ -37,8 +37,8 @@ void NAOTest::testTrain()
 {
   // OffLine
   {
-    Probabilistic<float>::srand(0);
-    RLProblem<float>* problem = new MountainCar<float>;
+    Random<float>* random = new Random<float>;
+    RLProblem<float>* problem = new MountainCar<float>(random);
     Hashing* hashing = new MurmurHashing(1000000);
     Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10,
         10);
@@ -52,8 +52,8 @@ void NAOTest::testTrain()
     Trace<float>* critice = new ATrace<float>(projector->dimension());
     OffPolicyTD<float>* critic = new GTDLambda<float>(alpha_v, alpha_w, gamma, lambda, critice);
     double alpha_u = 1.0 / projector->vectorNorm();
-    PolicyDistribution<float>* target = new BoltzmannDistribution<float>(projector->dimension(),
-        problem->getDiscreteActions());
+    PolicyDistribution<float>* target = new BoltzmannDistribution<float>(random,
+        problem->getDiscreteActions(), projector->dimension());
 
     Trace<float>* actore = new ATrace<float>(projector->dimension());
     Traces<float>* actoreTraces = new Traces<float>();
@@ -61,7 +61,7 @@ void NAOTest::testTrain()
     ActorOffPolicy<float>* actor = new ActorLambdaOffPolicy<float>(alpha_u, gamma, lambda, target,
         actoreTraces);
 
-    Policy<float>* behavior = new RandomPolicy<float>(problem->getDiscreteActions());
+    Policy<float>* behavior = new RandomPolicy<float>(random, problem->getDiscreteActions());
 
     OffPolicyControlLearner<float>* control = new OffPAC<float>(behavior, critic, actor,
         toStateAction, projector);
@@ -72,6 +72,7 @@ void NAOTest::testTrain()
     sim->run();
     control->persist("NAOTest_x32_M.bin");
 
+    delete random;
     delete problem;
     delete hashing;
     delete projector;
@@ -89,8 +90,8 @@ void NAOTest::testTrain()
   }
   // OnLine
   {
-    Probabilistic<double>::srand(0);
-    RLProblem<double>* problem = new SwingPendulum<double>;
+    Random<double>* random = new Random<double>;
+    RLProblem<double>* problem = new SwingPendulum<double>(random);
     Hashing* hashing = new MurmurHashing(1000);
     Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10,
         10, false);
@@ -106,8 +107,8 @@ void NAOTest::testTrain()
     Trace<double>* critice = new ATrace<double>(projector->dimension());
     TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda, critice);
 
-    PolicyDistribution<double>* policyDistribution = new NormalDistributionScaled<double>(0, 1.0,
-        projector->dimension(), problem->getContinuousActions());
+    PolicyDistribution<double>* policyDistribution = new NormalDistributionScaled<double>(random,
+        problem->getContinuousActions(), 0, 1.0, projector->dimension());
     Range<double> policyRange(-2.0, 2.0);
     Range<double> problemRange(-2.0, 2.0);
     PolicyDistribution<double>* acting = new ScaledPolicyDistribution<double>(
@@ -129,6 +130,7 @@ void NAOTest::testTrain()
     sim->run();
     control->persist("NAOTest_x32_S.bin");
 
+    delete random;
     delete problem;
     delete hashing;
     delete projector;
@@ -150,8 +152,8 @@ void NAOTest::testTrain()
 void NAOTest::testEvaluate()
 {
   {
-    Probabilistic<float>::srand(0);
-    RLProblem<float>* problem = new MountainCar<float>;
+    Random<float>* random = new Random<float>;
+    RLProblem<float>* problem = new MountainCar<float>(random);
     Hashing* hashing = new MurmurHashing(1000000);
     Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10, 10,
         true);
@@ -160,15 +162,15 @@ void NAOTest::testEvaluate()
 
     Trace<float>* critice = new ATrace<float>(projector->dimension());
     OffPolicyTD<float>* critic = new GTDLambda<float>(0, 0, 0, 0, critice);
-    PolicyDistribution<float>* target = new BoltzmannDistribution<float>(projector->dimension(),
-        problem->getDiscreteActions());
+    PolicyDistribution<float>* target = new BoltzmannDistribution<float>(random,
+        problem->getDiscreteActions(), projector->dimension());
 
     Trace<float>* actore = new ATrace<float>(projector->dimension());
     Traces<float>* actoreTraces = new Traces<float>();
     actoreTraces->push_back(actore);
     ActorOffPolicy<float>* actor = new ActorLambdaOffPolicy<float>(0, 0, 0, target, actoreTraces);
 
-    Policy<float>* behavior = new RandomPolicy<float>(problem->getDiscreteActions());
+    Policy<float>* behavior = new RandomPolicy<float>(random, problem->getDiscreteActions());
 
     OffPolicyControlLearner<float>* control = new OffPAC<float>(behavior, critic, actor,
         toStateAction, projector);
@@ -180,6 +182,7 @@ void NAOTest::testEvaluate()
     control->resurrect("NAOTest_x32_M.bin");
     sim->runEvaluate(10, 10);
 
+    delete random;
     delete problem;
     delete hashing;
     delete projector;
@@ -197,8 +200,8 @@ void NAOTest::testEvaluate()
   }
   // OnLine
   {
-    Probabilistic<double>::srand(0);
-    RLProblem<double>* problem = new SwingPendulum<double>;
+    Random<double>* random = new Random<double>;
+    RLProblem<double>* problem = new SwingPendulum<double>(random);
     Hashing* hashing = new MurmurHashing(1000);
     Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10,
         10, false);
@@ -208,8 +211,8 @@ void NAOTest::testEvaluate()
     Trace<double>* critice = new ATrace<double>(projector->dimension());
     TDLambda<double>* critic = new TDLambda<double>(0, 0, 0, critice);
 
-    PolicyDistribution<double>* policyDistribution = new NormalDistributionScaled<double>(0, 1.0,
-        projector->dimension(), problem->getContinuousActions());
+    PolicyDistribution<double>* policyDistribution = new NormalDistributionScaled<double>(random,
+        problem->getContinuousActions(), 0, 1.0, projector->dimension());
     Range<double> policyRange(-2.0, 2.0);
     Range<double> problemRange(-2.0, 2.0);
     PolicyDistribution<double>* acting = new ScaledPolicyDistribution<double>(
@@ -232,6 +235,7 @@ void NAOTest::testEvaluate()
     control->resurrect("NAOTest_x32_S.bin");
     sim->run();
 
+    delete random;
     delete problem;
     delete hashing;
     delete projector;

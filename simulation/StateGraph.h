@@ -318,6 +318,9 @@ class LineProblem: public FiniteStateGraph
 
 class RandomWalk: public FiniteStateGraph
 {
+  private:
+    Random<double>* random;
+
   public:
     const double Gamma;
     Actions<double>* actions;
@@ -336,10 +339,10 @@ class RandomWalk: public FiniteStateGraph
 
     Policy<double>* acting;
 
-    RandomWalk() :
-        FiniteStateGraph(), Gamma(0.9), actions(new ActionArray<double>(2)), states(
-            new std::vector<GraphState*>()), solution(new PVector<double>(5)), Left(
-            actions->at(0)), Right(actions->at(1))
+    RandomWalk(Random<double>* random) :
+        FiniteStateGraph(), random(random),Gamma(0.9), actions(
+            new ActionArray<double>(2)), states(new std::vector<GraphState*>()), solution(
+            new PVector<double>(5)), Left(actions->at(0)), Right(actions->at(1))
     {
       TL = new GraphState("TL", 0.0);
       A = new GraphState("A", 0.0);
@@ -361,7 +364,7 @@ class RandomWalk: public FiniteStateGraph
       for (int i = 0; i < distribution.dimension(); i++)
         distribution[i] = 1.0 / actions->dimension();
 
-      acting = new ConstantPolicy<double>(actions, &distribution);
+      acting = new ConstantPolicy<double>(random, actions, &distribution);
 
       int stateIndex = 0;
       for (std::vector<GraphState*>::iterator i = states->begin(); i != states->end(); ++i)
@@ -444,12 +447,13 @@ class RandomWalk: public FiniteStateGraph
       acting = new SingleActionPolicy<double>(actions);
     }
 
-    static Policy<double>* newPolicy(Actions<double>* actionList, const double& leftProbability)
+    static Policy<double>* newPolicy(Random<double>* random, Actions<double>* actionList,
+        const double& leftProbability)
     {
       PVector<double> distribution(actionList->dimension());
       distribution[0] = leftProbability;
       distribution[1] = 1.0f - leftProbability;
-      return new ConstantPolicy<double>(actionList, &distribution);
+      return new ConstantPolicy<double>(random, actionList, &distribution);
     }
 };
 

@@ -20,6 +20,7 @@ class ActorCriticOnPolicyOnStateTest: public ActorCriticOnPolicyOnStateTestBase
     double mu;
     double sigma;
 
+    Random<double>* random;
     RLProblem<double>* problem;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;

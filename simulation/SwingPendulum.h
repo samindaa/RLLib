@@ -40,14 +40,14 @@ class SwingPendulum: public RLProblem<T>
     float mass, length, g, requiredUpTime, upRange;
 
     int upTime;
-    bool random;
   public:
-    SwingPendulum(const bool& random = false) :
-        RLProblem<T>(2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(0), maxVelocity(
+    SwingPendulum(Random<T>* random = 0) :
+        RLProblem<T>(random, 2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(
+            0), maxVelocity(
         M_PI_4 / stepTime), actionRange(new Range<float>(-uMax, uMax)), thetaRange(
             new Range<T>(-M_PI, M_PI)), velocityRange(new Range<T>(-maxVelocity, maxVelocity)), mass(
             1.0), length(1.0), g(9.8), requiredUpTime(10.0 /*seconds*/), upRange(
-            M_PI_4 /*seconds*/), upTime(0), random(random)
+        M_PI_4 /*seconds*/), upTime(0)
     {
 
       Base::discreteActions->push_back(0, actionRange->min());
@@ -92,8 +92,8 @@ class SwingPendulum: public RLProblem<T>
     void initialize()
     {
       upTime = 0;
-      if (random)
-        theta = thetaRange->chooseRandom();
+      if (Base::random)
+        theta = thetaRange->choose(Base::random);
       else
         theta = M_PI_2;
       velocity = 0.0;

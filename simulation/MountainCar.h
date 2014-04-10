@@ -65,10 +65,10 @@ class MountainCar: public RLProblem<T>
     float throttleFactor;
 
   public:
-    MountainCar() :
-        RLProblem<T>(2, 3, 1), position(0), velocity(0), positionRange(new Range<T>(-1.2, 0.6)), velocityRange(
-            new Range<T>(-0.07, 0.07)), actionRange(new Range<float>(-1.0, 1.0)), targetPosition(
-            positionRange->max()), throttleFactor(1.0)
+    MountainCar(Random<T>* random = 0) :
+        RLProblem<T>(random, 2, 3, 1), position(0), velocity(0), positionRange(
+            new Range<T>(-1.2, 0.6)), velocityRange(new Range<T>(-0.07, 0.07)), actionRange(
+            new Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(1.0)
     {
       Base::discreteActions->push_back(0, actionRange->min());
       Base::discreteActions->push_back(1, 0.0);
@@ -103,8 +103,16 @@ class MountainCar: public RLProblem<T>
     // Profiles
     void initialize()
     {
-      position = -0.5;
-      velocity = 0.0;
+      if (Base::random)
+      {
+        position = positionRange->choose(Base::random);
+        velocity = velocityRange->choose(Base::random);
+      }
+      else
+      {
+        position = -0.5;
+        velocity = 0.0;
+      }
       updateRTStep();
     }
 

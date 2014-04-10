@@ -13,7 +13,8 @@ SwingPendulumModel2::SwingPendulumModel2(QObject *parent) :
     ModelBase(parent)
 {
   // RLLib:
-  behaviourEnvironment = new SwingPendulum<double>(true);
+  random = new Random<double>;
+  behaviourEnvironment = new SwingPendulum<double>(random);
   evaluationEnvironment = new SwingPendulum<double>;
   hashing = new MurmurHashing(1000000);
   projector = new TileCoderHashing<double>(hashing, behaviourEnvironment->dimension(), 10, 10,
@@ -30,15 +31,15 @@ SwingPendulumModel2::SwingPendulumModel2(QObject *parent) :
   critice = new ATrace<double>(projector->dimension());
   critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
 
-  target = new BoltzmannDistribution<double>(projector->dimension(),
-      behaviourEnvironment->getDiscreteActions());
+  target = new BoltzmannDistribution<double>(random, behaviourEnvironment->getDiscreteActions(),
+      projector->dimension());
 
   actore = new ATrace<double>(projector->dimension());
   actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target, actoreTraces);
 
-  behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActions());
+  behavior = new RandomPolicy<double>(random, behaviourEnvironment->getDiscreteActions());
   control = new OffPAC<double>(behavior, critic, actor, toStateAction, projector);
 
   learningAgent = new LearnerAgent<double>(control);
@@ -58,6 +59,7 @@ SwingPendulumModel2::SwingPendulumModel2(QObject *parent) :
 
 SwingPendulumModel2::~SwingPendulumModel2()
 {
+  delete random;
   delete behaviourEnvironment;
   delete evaluationEnvironment;
   delete hashing;

@@ -25,7 +25,7 @@ RLLIB_TEST_MAKE(SwingPendulumTest)
 
 void SwingPendulumTest::testOffPACSwingPendulum()
 {
-  Probabilistic<double>::srand(0);
+  Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -41,8 +41,8 @@ void SwingPendulumTest::testOffPACSwingPendulum()
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
   double alpha_u = 0.5 / projector->vectorNorm();
-  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
-      problem->getDiscreteActions());
+  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(random,
+      problem->getDiscreteActions(), projector->dimension());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
@@ -50,7 +50,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
   ActorOffPolicy<double>* actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target,
       actoreTraces);
 
-  Policy<double>* behavior = new RandomPolicy<double>(problem->getDiscreteActions());
+  Policy<double>* behavior = new RandomPolicy<double>(random, problem->getDiscreteActions());
   /*Policy<double>* behavior = new RandomBiasPolicy<double>(
    &problem->getDiscreteActions());*/
   OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic, actor,
@@ -62,6 +62,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
   sim->run();
   sim->computeValueFunction();
 
+  delete random;
   delete problem;
   delete hashing;
   delete projector;
@@ -80,7 +81,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
 
 void SwingPendulumTest::testOnPolicySwingPendulum()
 {
-  Probabilistic<double>::srand(0);
+  Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -97,8 +98,8 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda, critice);
 
-  PolicyDistribution<double>* policyDistribution = new NormalDistributionScaled<double>(0, 1.0,
-      projector->dimension(), problem->getContinuousActions());
+  PolicyDistribution<double>* policyDistribution = new NormalDistributionScaled<double>(random,
+      problem->getContinuousActions(), 0, 1.0, projector->dimension());
   Range<double> policyRange(-2.0, 2.0);
   Range<double> problemRange(-2.0, 2.0);
   PolicyDistribution<double>* acting = new ScaledPolicyDistribution<double>(
@@ -123,6 +124,7 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
   sim->runEvaluate(100);
   sim->computeValueFunction();
 
+  delete random;
   delete problem;
   delete hashing;
   delete projector;
@@ -142,7 +144,7 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
 
 void SwingPendulumTest::testOffPACSwingPendulum2()
 {
-  Probabilistic<double>::srand(0);
+  Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -157,8 +159,8 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
   Trace<double>* criticeML = new MaxLengthTrace<double>(critice, 1000);
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, 0.4, criticeML);
   double alpha_u = 0.5 / projector->vectorNorm();
-  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(projector->dimension(),
-      problem->getDiscreteActions());
+  PolicyDistribution<double>* target = new BoltzmannDistribution<double>(random,
+      problem->getDiscreteActions(), projector->dimension());
 
   Trace<double>* actore = new AMaxTrace<double>(projector->dimension());
   Trace<double>* actoreML = new MaxLengthTrace<double>(actore, 1000);
@@ -169,8 +171,8 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
 
   /*Policy<double>* behavior = new RandomPolicy<double>(
    &problem->getActions());*/
-  Policy<double>* behavior = new BoltzmannDistribution<double>(projector->dimension(),
-      problem->getDiscreteActions());
+  Policy<double>* behavior = new BoltzmannDistribution<double>(random,
+      problem->getDiscreteActions(), projector->dimension());
   OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic, actor,
       toStateAction, projector);
 
@@ -179,6 +181,7 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
 
+  delete random;
   delete problem;
   delete hashing;
   delete projector;
@@ -199,7 +202,7 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
 
 void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
 {
-  Probabilistic<double>::srand(0);
+  Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -215,8 +218,8 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   GTDLambda<double>* critic = new GTDLambda<double>(alpha_v, alpha_w, gamma, lambda, critice);
   double alpha_u = 0.5 / projector->vectorNorm();
-  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(projector->dimension(),
-      problem->getDiscreteActions());
+  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(random,
+      problem->getDiscreteActions(), projector->dimension());
 
   Trace<double>* actore = new ATrace<double>(projector->dimension());
   Traces<double>* actoreTraces = new Traces<double>();
@@ -233,6 +236,7 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
   sim->run();
   sim->computeValueFunction();
 
+  delete random;
   delete problem;
   delete hashing;
   delete projector;
@@ -250,7 +254,7 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
 
 void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendulum()
 {
-  Probabilistic<double>::srand(0);
+  Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
   Hashing* hashing = new MurmurHashing(1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
@@ -266,8 +270,8 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
   Trace<double>* critice = new ATrace<double>(projector->dimension());
   TDLambda<double>* critic = new TDLambda<double>(alpha_v, gamma, lambda, critice);
 
-  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(projector->dimension(),
-      problem->getDiscreteActions());
+  PolicyDistribution<double>* acting = new BoltzmannDistribution<double>(random,
+      problem->getDiscreteActions(), projector->dimension());
 
   ActorOnPolicy<double>* actor = new ActorNatural<double>(alpha_u, alpha_v, acting);
   OnPolicyControlLearner<double>* control = new ActorCritic<double>(critic, actor, projector,
@@ -278,6 +282,7 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
   sim->run();
   sim->computeValueFunction();
 
+  delete random;
   delete problem;
   delete hashing;
   delete projector;

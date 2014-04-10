@@ -28,6 +28,7 @@ RLLIB_TEST_MAKE(ActorCriticOnPolicyControlLearnerPendulumTest)
 
 ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearnerPendulumTest()
 {
+  random = new Random<double>();
   problem = new SwingPendulum<double>;
   hashing = new UNH(1000);
   projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10, true);
@@ -38,8 +39,8 @@ ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearner
   criticE = new ATrace<double>(projector->dimension());
   critic = 0;
 
-  policyDistribution = new NormalDistributionScaled<double>(0, 1.0, projector->dimension(),
-      problem->getContinuousActions());
+  policyDistribution = new NormalDistributionScaled<double>(random, problem->getContinuousActions(),
+      0, 1.0, projector->dimension());
 
   actorMuE = new ATrace<double>(projector->dimension());
   actorSigmaE = new ATrace<double>(projector->dimension());
@@ -55,6 +56,7 @@ ActorCriticOnPolicyControlLearnerPendulumTest::ActorCriticOnPolicyControlLearner
 
 ActorCriticOnPolicyControlLearnerPendulumTest::~ActorCriticOnPolicyControlLearnerPendulumTest()
 {
+  delete random;
   delete problem;
   delete hashing;
   delete projector;
@@ -99,7 +101,6 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::deleteObjects()
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
 {
-  Probabilistic<double>::srand(time(0));
   alpha_v = alpha_u = alpha_r = gamma = lambda = 0;
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
   actor = new Actor<double>(alpha_u, policyDistribution);
@@ -114,7 +115,6 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
 {
-  Probabilistic<double>::srand(time(0));
   gamma = 1.0;
   alpha_v = 0.5 / projector->vectorNorm();
   critic = new TD<double>(alpha_v, gamma, projector->dimension());
@@ -131,7 +131,6 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
 
 void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblity()
 {
-  Probabilistic<double>::srand(time(0));
   gamma = 1.0;
   lambda = 0.5;
   alpha_v = 0.1 / projector->vectorNorm();

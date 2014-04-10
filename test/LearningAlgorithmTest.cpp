@@ -24,6 +24,16 @@
 
 RLLIB_TEST_MAKE(SupervisedAlgorithmTest)
 
+SupervisedAlgorithmTest::SupervisedAlgorithmTest() :
+    random(new Random<double>)
+{
+}
+
+SupervisedAlgorithmTest::~SupervisedAlgorithmTest()
+{
+  delete random;
+}
+
 void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
 {
   // simple sine curve estimation
@@ -31,7 +41,7 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
   multimap<double, double> X;
   for (int i = 0; i < 100; i++)
   {
-    double x = -M_PI_2 + 2 * M_PI * Probabilistic<double>::nextReal(); // @@>> input noise?
+    double x = -M_PI_2 + 2 * M_PI * random->nextReal(); // @@>> input noise?
     double y = sin(2 * x); // @@>> output noise?
     X.insert(make_pair(x, y));
   }
@@ -98,7 +108,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
   double minValue = 0, maxValue = 0;
   for (int i = 0; i < 50; i++)
   {
-    double x = Probabilistic<double>::nextGaussian(0.25, 0.2); // @@>> input noise?
+    double x = random->nextGaussian(0.25, 0.2); // @@>> input noise?
     double y = 0; // @@>> output noise?
     X.insert(make_pair(x, y));
     if (x < minValue)
@@ -109,7 +119,7 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
 
   for (int i = 50; i < 100; i++)
   {
-    double x = Probabilistic<double>::nextGaussian(0.75, 0.2); // @@>> input noise?
+    double x = random->nextGaussian(0.75, 0.2); // @@>> input noise?
     double y = 1; // @@>> output noise?
     X.insert(make_pair(x, y));
     if (x < minValue)
@@ -175,7 +185,7 @@ void SupervisedAlgorithmTest::linearRegressionWithRegularFeatures()
   multimap<double, double> X;
   for (int i = 0; i < 100; i++)
   {
-    double x = -M_PI_2 + 2 * M_PI * Probabilistic<double>::nextReal(); // @@>> input noise?
+    double x = -M_PI_2 + 2 * M_PI * random->nextReal(); // @@>> input noise?
     double y = sin(2 * x); // @@>> output noise?
     X.insert(make_pair(x, y));
   }
@@ -233,14 +243,14 @@ void SupervisedAlgorithmTest::logisticRegressionWithRegularFeatures()
   multimap<double, double> X;
   for (int i = 0; i < 50; i++)
   {
-    double x = Probabilistic<double>::nextGaussian(0.25, 0.2); // @@>> input noise?
+    double x = random->nextGaussian(0.25, 0.2); // @@>> input noise?
     double y = 0; // @@>> output noise?
     X.insert(make_pair(x, y));
   }
 
   for (int i = 50; i < 100; i++)
   {
-    double x = Probabilistic<double>::nextGaussian(0.75, 0.2); // @@>> input noise?
+    double x = random->nextGaussian(0.75, 0.2); // @@>> input noise?
     double y = 1; // @@>> output noise?
     X.insert(make_pair(x, y));
   }

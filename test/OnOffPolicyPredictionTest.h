@@ -76,6 +76,7 @@ class OnOffPolicyPredictionTest: public OnOffPolicyPredictionTestBase
   protected:
     std::vector<OnPolicyTDFactory*> onPolicyTDFactoryVector;
     std::vector<OffPolicyTDFactory*> offPolicyTDFactoryVector;
+    Random<double>* random;
     LineProblem* lineProblem;
     RandomWalk* randomWalkProblem;
 

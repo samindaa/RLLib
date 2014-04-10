@@ -7,8 +7,8 @@
 
 #include "NextingTest.h"
 
-NextingProblem::NextingProblem() :
-    RLProblem<double>(
+NextingProblem::NextingProblem(Random<double>* random) :
+    RLProblem<double>(random, //
         10/*IRDistance*/+ 4/*Light*/+ 8/*IRLight*/+ 4/*Thermal*/+ 1/*RotationalVelocity*/+ 3/*Mag*/
         + 3/*Accel*/+ 3/*MortorSpeed*/+ 3/*MotorVoltate*/+ 3/*MotorCurrent*/+ 3/*MotorTemperature*/
         + 1/*OverheatingFlag*/+ 3/*LastAction*/, 1, 1)
@@ -34,7 +34,7 @@ void NextingProblem::step(const Action<double>* action)
 void NextingProblem::updateRTStep()
 {
   for (int i = 0; i < dimension(); i++)
-    output->o_tp1->at(i) = Probabilistic<double>::nextReal();
+    output->o_tp1->at(i) = random->nextReal();
   output->updateRTStep(r(), z(), endOfEpisode());
 }
 
@@ -267,11 +267,12 @@ int NextingProjector::dimension() const
 
 void NextingTest::testNexting()
 {
-  RLProblem<double>* problem = new NextingProblem;
+  Random<double>* random = new Random<double>;
+  RLProblem<double>* problem = new NextingProblem(random);
   Projector<double>* projector = new NextingProjector;
   StateToStateAction<double>* toStateAction = new TabularAction<double>(projector,
       problem->getDiscreteActions(), true);
-  Policy<double>* policy = new RandomPolicy<double>(problem->getDiscreteActions());
+  Policy<double>* policy = new RandomPolicy<double>(random, problem->getDiscreteActions());
   OnPolicyControlLearner<double>* control = new PolicyBasedControl<double>(policy, toStateAction);
   Horde<double>* horde = new Horde<double>(projector);
   RLAgent<double>* hordeAgent = new HordeAgent<double>(control, horde);
@@ -291,6 +292,7 @@ void NextingTest::testNexting()
   }
   sim->run();
 
+  delete random;
   delete problem;
   delete projector;
   delete toStateAction;

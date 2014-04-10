@@ -323,12 +323,12 @@ void VectorTest::testMax()
 
 void VectorTest::testPositiveMax()
 {
-  const double a1Values[] = {2, -1, 1, 3, 1};
-  const double sa2Values[] = {1, 0, -2, 0, -3};
+  const double a1Values[] = { 2, -1, 1, 3, 1 };
+  const double sa2Values[] = { 1, 0, -2, 0, -3 };
   Vector<double>* a1 = newVector(a1Values, Arrays::length(a1Values));
   Vector<double>* sa2 = newSVector(sa2Values, Arrays::length(sa2Values));
   Vector<double>* pa2 = newPVector(sa2Values, Arrays::length(sa2Values));
-  const double expectedValues[] = {2, 0, 1, 3, 1};
+  const double expectedValues[] = { 2, 0, 1, 3, 1 };
   Vector<double>* expected = newPVector(expectedValues, Arrays::length(expectedValues));
   Vectors<double>::positiveMaxToSelf(sa2, a1);
   Vectors<double>::positiveMaxToSelf(pa2, a1);
@@ -447,7 +447,6 @@ RLLIB_TEST_MAKE(SVectorTests)
 SVectorTests::SVectorTests() :
     vectorTest(new SVectorTest)
 {
-  Probabilistic<double>::srand(0);
 }
 
 SVectorTests::~SVectorTests()
@@ -468,6 +467,16 @@ void SVectorTests::run()
   vectorTest->testSVector();
 }
 
+SVectorTest::SVectorTest() :
+    random(new Random<double>())
+{
+}
+
+SVectorTest::~SVectorTest()
+{
+  delete random;
+}
+
 void SVectorTest::initialize()
 {
   const double aValues[] = { 0.0, 3.0, 2.0, 0.0, 1.0 };
@@ -484,9 +493,9 @@ Vector<double>* SVectorTest::newPrototypeVector(const int& size)
 SVector<double>* SVectorTest::createRandomSVector(const int& maxActive, const int& size)
 {
   SVector<double>* result = (SVector<double>*) newVector(size);
-  int nbActive = Probabilistic<int>::nextInt(maxActive);
+  int nbActive = random->nextInt(maxActive);
   for (int i = 0; i < nbActive; i++)
-    result->setEntry(Probabilistic<int>::nextInt(size), Probabilistic<double>::nextReal() * 2 - 1);
+    result->setEntry(random->nextInt(size), random->nextReal() * 2 - 1);
   Assert::checkConsistency(result);
   return result;
 }
@@ -500,7 +509,7 @@ void SVectorTest::checkVectorOperation(SVector<double>* a, Vector<double>* b)
   Assert::assertEquals(pa->addToSelf(pb), a->addToSelf(b));
   Assert::assertEquals(pa->subtractToSelf(pb), a->subtractToSelf(b));
   Assert::assertEquals(pa->ebeMultiplyToSelf(pb), a->ebeMultiplyToSelf(b));
-  float factor = Probabilistic<float>::nextReal();
+  float factor = random->nextReal();
   Assert::assertEquals(pa->addToSelf(factor, pb), a->addToSelf(factor, b));
 }
 
@@ -564,7 +573,7 @@ void SVectorTest::testFullVector()
   cout << v << endl;
   for (int i = 0; i < v.dimension(); i++)
   {
-    double k = Probabilistic<double>::nextReal();
+    double k = random->nextReal();
     v[i] = k;
     cout << k << " ";
   }

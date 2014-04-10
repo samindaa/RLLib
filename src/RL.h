@@ -171,14 +171,16 @@ template<class T>
 class RLProblem
 {
   protected:
+    Random<T>* random;
     DenseVector<T>* observations;
     TRStep<T>* output;
     Actions<T>* discreteActions;
     Actions<T>* continuousActions;
     Ranges<T>* observationRanges;
+
   public:
-    RLProblem(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
-        observations(new PVector<T>(nbVars)), output(new TRStep<T>(nbVars)), discreteActions(
+    RLProblem(Random<T>* random, int nbVars, int nbDiscreteActions, int nbContinuousActions) :
+        random(random), observations(new PVector<T>(nbVars)), output(new TRStep<T>(nbVars)), discreteActions(
             new ActionArray<T>(nbDiscreteActions)), continuousActions(
             new ActionArray<T>(nbContinuousActions)), observationRanges(new Ranges<T>())
     {

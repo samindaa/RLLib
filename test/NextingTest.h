@@ -101,7 +101,7 @@ template<class T> int Thread<T>::start()
 class NextingProblem: public RLProblem<double>
 {
   public:
-    NextingProblem();
+    NextingProblem(Random<double>* random);
     virtual ~NextingProblem();
     void initialize();
     void step(const Action<double>* action);

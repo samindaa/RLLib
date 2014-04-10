@@ -45,7 +45,8 @@ class HelicopterTest: public HelicopterTestBase
 
     void testCrash()
     {
-      Helicopter<double> helicopter;
+      Random<double> random;
+      Helicopter<double> helicopter(&random);
       ASSERT(4 == helicopter.getContinuousActions()->at(0)->dimension());
       ASSERT(12 == helicopter.dimension());
 
@@ -66,7 +67,8 @@ class HelicopterTest: public HelicopterTestBase
 
     void testEndEpisode()
     {
-      Helicopter<double> helicopter(2);
+      Random<double> random;
+      Helicopter<double> helicopter(&random, 2);
       ASSERT(4 == helicopter.getContinuousActions()->at(0)->dimension());
       helicopter.initialize();
       while (!helicopter.endOfEpisode())

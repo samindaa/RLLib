@@ -325,7 +325,7 @@ class HelicopterDynamics
       return observation;
     }
 
-    void step(const Action<double>* agentAction)
+    void step(Random<double>* random, const Action<double>* agentAction)
     {
       static double a[4];
       // saturate all the actions, b/c the actuators are limited:
@@ -346,8 +346,7 @@ class HelicopterDynamics
 
       for (int i = 0; i < 6; ++i)
         noise[i] = noise_memory * noise[i]
-            + (1.0 - noise_memory) * Probabilistic<double>::nextNormalGaussian() * noise_std[i]
-                * noise_mult;
+            + (1.0 - noise_memory) * random->nextNormalGaussian() * noise_std[i] * noise_mult;
 
       for (int t = 0; t < 10; ++t)
       {
@@ -408,8 +407,8 @@ class Helicopter: public RLProblem<T>
     HelicopterDynamics heliDynamics;
 
   public:
-    Helicopter(const int episodeLength = 6000) :
-        RLProblem<T>(12, 0, 1), episodeLength(episodeLength), step_time(0)
+    Helicopter(Random<double>* random, const int episodeLength = 6000) :
+        RLProblem<T>(random, 12, 0, 1), episodeLength(episodeLength), step_time(0)
     {
       // Discrete actions are not setup for this problem.
       for (unsigned int i = 0; i < 4/*four values in the action*/; i++)
@@ -454,9 +453,9 @@ class Helicopter: public RLProblem<T>
       Base::output->updateRTStep(r(), z(), endOfEpisode());
     }
 
-    void step(const Action<double>* action)
+    void step(const Action<T>* action)
     {
-      heliDynamics.step(action);
+      heliDynamics.step(Base::random, action);
       ++step_time;
       updateRTStep();
     }

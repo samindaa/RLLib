@@ -13,8 +13,9 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
     ModelBase(parent)
 {
   // RLLib:
-  behaviourEnvironment = new ContinuousGridworld<double>;
-  evaluationEnvironment = new ContinuousGridworld<double>;
+  random = new Random<double>;
+  behaviourEnvironment = new ContinuousGridworld<double>(random);
+  evaluationEnvironment = new ContinuousGridworld<double>(random);
   hashing = new MurmurHashing(1000000);
   projector = new TileCoderHashing<double>(hashing, behaviourEnvironment->dimension(), 10, 10,
       true);
@@ -30,15 +31,15 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
 
   alpha_u = 0.001 / projector->vectorNorm();
 
-  target = new BoltzmannDistribution<double>(projector->dimension(),
-      behaviourEnvironment->getDiscreteActions());
+  target = new BoltzmannDistribution<double>(random, behaviourEnvironment->getDiscreteActions(),
+      projector->dimension());
 
   actore = new ATrace<double>(projector->dimension());
   actoreTraces = new Traces<double>();
   actoreTraces->push_back(actore);
   actor = new ActorLambdaOffPolicy<double>(alpha_u, gamma, lambda, target, actoreTraces);
 
-  behavior = new RandomPolicy<double>(behaviourEnvironment->getDiscreteActions());
+  behavior = new RandomPolicy<double>(random, behaviourEnvironment->getDiscreteActions());
   control = new OffPAC<double>(behavior, critic, actor, toStateAction, projector);
 
   learningAgent = new LearnerAgent<double>(control);
@@ -58,6 +59,7 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
 
 ContinuousGridworldModel::~ContinuousGridworldModel()
 {
+  delete random;
   delete behaviourEnvironment;
   delete evaluationEnvironment;
   delete hashing;

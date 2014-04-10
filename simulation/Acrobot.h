@@ -37,16 +37,14 @@ class Acrobot: public RLProblem<T>
     float targetPosition;
     float theta1, theta2, theta1Dot, theta2Dot;
     float transitionNoise;
-    bool random;
 
   public:
-    Acrobot(const bool& random = false) :
-        RLProblem<T>(4, 3, 1), thetaRange(new Range<T>(-M_PI, M_PI)), theta1DotRange(
+    Acrobot(Random<T>* random) :
+        RLProblem<T>(random, 4, 3, 1), thetaRange(new Range<T>(-M_PI, M_PI)), theta1DotRange(
             new Range<T>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
             new Range<T>(-9.0 * M_PI, 9.0 * M_PI)), actionRange(new Range<float>(-1.0, 1.0)), m1(
             1.0), m2(1.0), l1(1.0), l2(1.0), lc1(0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), targetPosition(
-            1.0), theta1(0), theta2(0), theta1Dot(0), theta2Dot(0), transitionNoise(0), random(
-            random)
+            1.0), theta1(0), theta2(0), theta1Dot(0), theta2Dot(0), transitionNoise(0)
     {
       Base::discreteActions->push_back(0, actionRange->min());
       Base::discreteActions->push_back(1, 0.0);
@@ -70,14 +68,14 @@ class Acrobot: public RLProblem<T>
 
     void initialize()
     {
-      if (random) // random
+      if (Base::random) // random
       {
-        theta1 = (Probabilistic < T > ::nextReal() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
-        theta2 = (Probabilistic < T > ::nextReal() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
-        theta1Dot = (Probabilistic < T
-            > ::nextReal() * (theta1DotRange->max() * 2.0f) - theta1DotRange->max()) * 0.1f;
-        theta2Dot = (Probabilistic < T
-            > ::nextReal() * (theta2DotRange->max() * 2.0f) - theta1DotRange->max()) * 0.1f;
+        theta1 = (Base::random->nextReal() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
+        theta2 = (Base::random->nextReal() * (M_PI + fabs(-M_PI)) + (-M_PI)) * 0.1f;
+        theta1Dot = (Base::random->nextReal() * (theta1DotRange->max() * 2.0f)
+            - theta1DotRange->max()) * 0.1f;
+        theta2Dot = (Base::random->nextReal() * (theta2DotRange->max() * 2.0f)
+            - theta1DotRange->max()) * 0.1f;
       }
       else
         theta1 = theta2 = theta1Dot = theta2Dot = 0.0; // not random
@@ -108,7 +106,7 @@ class Acrobot: public RLProblem<T>
 
       //torque is in [-1,1]
       //We'll make noise equal to at most +/- 1
-      float theNoise = transitionNoise * 2.0 * (Probabilistic<T>::nextReal() - 0.5);
+      float theNoise = Base::random ? transitionNoise * 2.0 * (Base::random->nextReal() - 0.5) : 0;
 
       torque += theNoise;
 

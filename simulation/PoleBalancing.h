@@ -37,13 +37,13 @@ using Eigen::MatrixBase;
  * Multivariate normal random number. Based on Matlab mvnrnd function.
  */
 template<class Derived1, class Derived2, class Derived3>
-void mvnrnd(const MatrixBase<Derived1>& mu, const MatrixBase<Derived2>& Sigma,
-    MatrixBase<Derived3>& r)
+void mvnrnd(Random<double>* random, const MatrixBase<Derived1>& mu,
+    const MatrixBase<Derived2>& Sigma, MatrixBase<Derived3>& r)
 {
   MatrixXd R = Sigma.llt().matrixL()/*cholcov*/;
   int size = mu.rows();
   for (int i = 0; i < size; i++)
-    r(i) = RLLib::Probabilistic<double>::nextNormalGaussian();
+    r(i) = random->nextNormalGaussian();
   r = mu + R * r;
 }
 
@@ -64,8 +64,8 @@ class PoleBalancing: public RLProblem<double>
     VectorXd R;
 
   public:
-    PoleBalancing() :
-        RLProblem<double>(4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
+    PoleBalancing(Random<double>* random) :
+        RLProblem<double>(random, 4, 1, 1), tau(1.0 / 60.0), veta(13.2), g(9.81)
     {
       // No discrete actions
 
@@ -108,7 +108,7 @@ class PoleBalancing: public RLProblem<double>
 
     void initialize()
     {
-      mvnrnd(mu0, Sigma0, x);
+      mvnrnd(random, mu0, Sigma0, x);
       updateRTStep();
     }
 
@@ -127,7 +127,7 @@ class PoleBalancing: public RLProblem<double>
     {
       u(0) = action->at(0);
       mu = A * x + b * u;
-      mvnrnd(mu, SigmaT, x);
+      mvnrnd(random, mu, SigmaT, x);
       updateRTStep();
     }
 

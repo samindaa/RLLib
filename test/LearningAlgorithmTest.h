@@ -30,15 +30,12 @@ RLLIB_TEST(SupervisedAlgorithmTest)
 
 class SupervisedAlgorithmTest: public SupervisedAlgorithmTestBase
 {
-  public:
-    SupervisedAlgorithmTest()
-    {
-      srand(time(0));
-    }
+  private:
+    Random<double>* random;
 
-    virtual ~SupervisedAlgorithmTest()
-    {
-    }
+  public:
+    SupervisedAlgorithmTest();
+    virtual ~SupervisedAlgorithmTest();
     void run();
 
     void linearRegressionWithTileFeatures();

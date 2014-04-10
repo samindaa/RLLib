@@ -33,6 +33,7 @@ class SwingPendulumModel: public ModelBase
     Q_OBJECT
 
   protected:
+    Random<double>* random;
     RLProblem<double>* problem;
     Hashing* hashing;
     Projector<double>* projector;

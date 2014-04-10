@@ -9,8 +9,8 @@
 
 void AcrobotTest::testAcrobotOnPolicy()
 {
-  Probabilistic<double>::srand(time(0));
-  RLProblem<double>* problem = new Acrobot<double>(false);
+  Random<double>* random = new Random<double>;
+  RLProblem<double>* problem = new Acrobot<double>(0);
   Projector<double>* projector = new AcrobotProjector<double>(problem->dimension(),
       problem->getDiscreteActions()->dimension(), 8);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -21,7 +21,8 @@ void AcrobotTest::testAcrobotOnPolicy()
   double lambda = 0.9;
   Sarsa<double>* sarsa = new SarsaTrue<double>(alpha, gamma, lambda, e);
   double epsilon = 0.0;
-  Policy<double>* acting = new EpsilonGreedy<double>(sarsa, problem->getDiscreteActions(), epsilon);
+  Policy<double>* acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa,
+      epsilon);
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
@@ -33,6 +34,7 @@ void AcrobotTest::testAcrobotOnPolicy()
   control->resurrect("visualization/Acrobot.dat");
   sim->runEvaluate(10);
 
+  delete random;
   delete problem;
   delete projector;
   delete toStateAction;

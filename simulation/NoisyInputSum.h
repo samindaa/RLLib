@@ -50,16 +50,18 @@ class NoisyInputSum: public PredictionProblem<double>
     int nbSteps;
     Vector<double>* inputs;
     Vector<double>* w;
+    Random<double>* random;
 
   public:
     NoisyInputSum(const int& nbNonZeroWeights, const int& nbInputs) :
         target(0), nbChangingWeights(nbNonZeroWeights), changePeriod(20), nbSteps(0), inputs(
-            new PVector<double>(nbInputs)), w(new PVector<double>(nbInputs))
+            new PVector<double>(nbInputs)), w(new PVector<double>(nbInputs)), random(
+            new Random<double>())
     {
       for (int i = 0; i < w->dimension(); i++)
       {
         if (i < nbNonZeroWeights)
-          w->setEntry(i, Probabilistic<double>::nextReal() > 0.5f ? 1.0f : -1.0f);
+          w->setEntry(i, random->nextReal() > 0.5f ? 1.0f : -1.0f);
       }
     }
 
@@ -67,12 +69,13 @@ class NoisyInputSum: public PredictionProblem<double>
     {
       delete inputs;
       delete w;
+      delete random;
     }
 
   private:
     void changeWeight()
     {
-      const int i = Probabilistic<int>::nextInt(nbChangingWeights);
+      const int i = random->nextInt(nbChangingWeights);
       w->setEntry(i, w->getEntry(i) * -1.0f);
     }
 
@@ -84,7 +87,7 @@ class NoisyInputSum: public PredictionProblem<double>
         changeWeight();
       inputs->clear();
       for (int i = 0; i < inputs->dimension(); i++)
-        inputs->setEntry(i, Probabilistic<double>::nextNormalGaussian());
+        inputs->setEntry(i, random->nextNormalGaussian());
       target = w->dot(inputs);
       return true;
     }
