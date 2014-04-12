@@ -10,7 +10,8 @@
 // Based on https://code.google.com/p/smhasher/
 void MurmurHash3Test::verificationTest()
 {
-  MurmurHashing* hash = new MurmurHashing(0);
+  Random<double>* random = new Random<double>;
+  MurmurHashing<double>* hash = new MurmurHashing<double>(random, 0);
 
   const int hashbits = 32;
   uint32_t expected = 0xB0F57EE3;
@@ -44,6 +45,7 @@ void MurmurHash3Test::verificationTest()
 
   uint32_t verification = (final[0] << 0) | (final[1] << 8) | (final[2] << 16) | (final[3] << 24);
 
+  delete random;
   delete hash;
   delete[] key;
   delete[] hashes;

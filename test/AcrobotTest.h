@@ -27,7 +27,8 @@ class AcrobotProjector: public Projector<T>
     int nbTilings;
     int memory;
     Vector<T>* vector;
-    Hashing* hashing;
+    Random<T>* random;
+    Hashing<T>* hashing;
     Tiles<T>* tiles;
   public:
     AcrobotProjector(const int& nbVars, const int& nbActions, const int& toHash)
@@ -41,14 +42,16 @@ class AcrobotProjector: public Projector<T>
        */
       nbTilings = nbVars * (4 + 4 + 4 + 4);
       memory = nbVars * (4 * 4 + 4 * 4 * 4 + 4 * 4 * 4 + 4 * 4 * 4) * nbActions * toHash;
-      vector = new SVector<double>(memory + 1/*bias unit*/, nbTilings + 1/*bias unit*/);
-      hashing = new MurmurHashing(memory);
-      tiles = new Tiles<double>(hashing);
+      vector = new SVector<T>(memory + 1/*bias unit*/, nbTilings + 1/*bias unit*/);
+      random = new Random<T>;
+      hashing = new MurmurHashing<T>(random, memory);
+      tiles = new Tiles<T>(hashing);
     }
 
     virtual ~AcrobotProjector()
     {
       delete vector;
+      delete random;
       delete hashing;
       delete tiles;
     }

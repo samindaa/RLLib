@@ -24,6 +24,7 @@
 
 #include <cmath>
 #include <limits>
+#include <limits.h>
 #include <stdint.h>
 
 #include "Vector.h"
@@ -171,6 +172,11 @@ class Random
     {
       //return ::rand();
       return xorshift.rand_u32() % RAND_MAX;
+    }
+
+    inline uint32_t randu32(void)
+    {
+      return xorshift.rand_u32();
     }
 
     // [0 .. size)

@@ -23,11 +23,12 @@
 #define HASHING_H_
 
 #include <limits.h>
-#include "Assert.h"
+#include "Math.h"
 
 namespace RLLib
 {
 
+template<class T>
 class Hashing
 {
   public:
@@ -42,14 +43,16 @@ class Hashing
     virtual int getMemorySize() const =0;
 };
 
-class AbstractHashing: public Hashing
+template<class T>
+class AbstractHashing: public Hashing<T>
 {
   protected:
+    Random<T>* random;
     int memorySize;
 
   public:
-    AbstractHashing(const int& memorySize) :
-        memorySize(memorySize)
+    AbstractHashing(Random<T>* random, const int& memorySize) :
+        random(random), memorySize(memorySize)
     {
     }
 
@@ -63,15 +66,19 @@ class AbstractHashing: public Hashing
     }
 };
 
-class UNH: public AbstractHashing
+template<class T>
+class UNH: public AbstractHashing<T>
 {
+  private:
+    typedef AbstractHashing<T> Base;
+
   protected:
     int increment;
     unsigned int rndseq[16384]; // 2^14 (16384)  {old: 2048}
 
   public:
-    UNH(const int& memorySize) :
-        AbstractHashing(memorySize), increment(470)
+    UNH(Random<T>* random, const int& memorySize) :
+        AbstractHashing<T>(random, memorySize), increment(470)
     {
       /*First call to hashing, initialize table of random numbers */
       //printf("inside tiles \n");
@@ -80,7 +87,7 @@ class UNH: public AbstractHashing
       {
         rndseq[k] = 0;
         for (int i = 0; i < int(sizeof(int)); ++i)
-          rndseq[k] = (rndseq[k] << 8) | (rand() & 0xff);
+          rndseq[k] = (rndseq[k] << 8) | (random->randu32() & 0xff);
       }
       //srand(time(0));
     }
@@ -106,24 +113,28 @@ class UNH: public AbstractHashing
         /* add selected random number to sum */
         sum += (long) rndseq[(int) index];
       }
-      index = (int) (sum % memorySize);
+      index = (int) (sum % Base::memorySize);
       while (index < 0)
-        index += memorySize;
+        index += Base::memorySize;
 
       /* printf("index is %d \n", index); */
       return (index);
     }
 };
 
-class MurmurHashing: public AbstractHashing
+template<class T>
+class MurmurHashing: public AbstractHashing<T>
 {
+  private:
+    typedef AbstractHashing<T> Base;
+
   protected:
     uint32_t seed;
     uint32_t out;
 
   public:
-    MurmurHashing(const int& memorySize) :
-        AbstractHashing(memorySize), seed((uint32_t) rand()), out(0)
+    MurmurHashing(Random<T>* random, const int& memorySize) :
+        AbstractHashing<T>(random, memorySize), seed(random->randu32()), out(0)
     {
     }
 
@@ -281,17 +292,18 @@ class MurmurHashing: public AbstractHashing
     int hash(int* ints/*coordinates*/, int num_ints)
     {
       MurmurHash3_x86_32(((const uint8_t*) ints), (num_ints * 4), seed, &out);
-      return out % memorySize;
+      return out % Base::memorySize;
     }
 
 };
 
-class ColisionDetection: public Hashing
+template<class T>
+class ColisionDetection: public Hashing<T>
 {
   protected:
-    Hashing* hashing;
-    Hashing* referenceHashing;
-    Hashing* referenceHashing2;
+    Hashing<T>* hashing;
+    Hashing<T>* referenceHashing;
+    Hashing<T>* referenceHashing2;
     int safe;
     long calls;
     long clearhits;
@@ -300,9 +312,9 @@ class ColisionDetection: public Hashing
     long m;
 
   public:
-    ColisionDetection(Hashing* hashing, const int& size, const int& safety) :
-        hashing(hashing), referenceHashing(new UNH(INT_MAX)), referenceHashing2(
-            new UNH(INT_MAX / 4)), safe(safe), calls(0), clearhits(0), collisions(0), m(size)
+    ColisionDetection(Hashing<T>* hashing, const int& size, const int& safety) :
+        hashing(hashing), referenceHashing(new UNH<T>(INT_MAX)), referenceHashing2(
+            new UNH<T>(INT_MAX / 4)), safe(safe), calls(0), clearhits(0), collisions(0), m(size)
     {
       if (size % 2 != 0)
       {

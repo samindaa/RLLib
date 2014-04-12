@@ -56,20 +56,20 @@ template<class T>
 class Tiles
 {
   protected:
-    int qstate[Hashing::MAX_NUM_VARS];
-    int base[Hashing::MAX_NUM_VARS];
-    int wrap_widths_times_num_tilings[Hashing::MAX_NUM_VARS];
-    int coordinates[Hashing::MAX_NUM_VARS * 2 + 1]; /* one interval number per relevant dimension */
+    int qstate[Hashing<T>::MAX_NUM_VARS];
+    int base[Hashing<T>::MAX_NUM_VARS];
+    int wrap_widths_times_num_tilings[Hashing<T>::MAX_NUM_VARS];
+    int coordinates[Hashing<T>::MAX_NUM_VARS * 2 + 1]; /* one interval number per relevant dimension */
 
-    Hashing* hashing; /*The has function*/
+    Hashing<T>* hashing; /*The has function*/
 
     Vector<int>* i_tmp_arr;
     Vector<T>* f_tmp_arr;
 
   public:
-    Tiles(Hashing* hashing) :
-        hashing(hashing), i_tmp_arr(new PVector<int>(Hashing::MAX_NUM_VARS)), f_tmp_arr(
-            new PVector<T>(Hashing::MAX_NUM_VARS))
+    Tiles(Hashing<T>* hashing) :
+        hashing(hashing), i_tmp_arr(new PVector<int>(Hashing<T>::MAX_NUM_VARS)), f_tmp_arr(
+            new PVector<T>(Hashing<T>::MAX_NUM_VARS))
     {
     }
 

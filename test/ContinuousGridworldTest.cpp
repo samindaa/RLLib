@@ -27,7 +27,7 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new ContinuousGridworld<double>(random);
-  Hashing* hashing = new MurmurHashing(1000000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -71,7 +71,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new ContinuousGridworld<double>(random);
-  Hashing* hashing = new MurmurHashing(1000000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -131,7 +131,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new ContinuousGridworld<double>(random);
-  Hashing* hashing = new MurmurHashing(1000000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -191,7 +191,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new ContinuousGridworld<double>(random);
-  Hashing* hashing = new MurmurHashing(1000000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -252,7 +252,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new ContinuousGridworld<double>(random);
-  Hashing* hashing = new MurmurHashing(1000000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,

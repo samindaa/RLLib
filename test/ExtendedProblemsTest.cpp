@@ -28,7 +28,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new MountainCar3D<double>(random);
   //Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
-  Projector<double>* projector = new MountainCar3DTilesProjector<double>();
+  Projector<double>* projector = new MountainCar3DTilesProjector<double>(random);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -81,7 +81,7 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new MountainCar3D<double>(random);
-  Projector<double>* projector = new MountainCar3DTilesProjector<double>();
+  Projector<double>* projector = new MountainCar3DTilesProjector<double>(random);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
@@ -129,7 +129,7 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new MountainCar3D<double>(random);
-  Projector<double>* projector = new MountainCar3DTilesProjector<double>();
+  Projector<double>* projector = new MountainCar3DTilesProjector<double>(random);
   //Projector<double>* projector = new TileCoderHashing<double>(100000, 10, true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
@@ -167,7 +167,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new MountainCar3D<double>(random);
-  Hashing* hashing = new UNH(100000);
+  Hashing<double>* hashing = new UNH<double>(random, 100000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -222,7 +222,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new Acrobot<double>(random);
-  Projector<double>* projector = new AcrobotTilesProjector<double>();
+  Projector<double>* projector = new AcrobotTilesProjector<double>(random);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
 
@@ -279,7 +279,7 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new Acrobot<double>(random);
-  Projector<double>* projector = new AcrobotTilesProjector<double>();
+  Projector<double>* projector = new AcrobotTilesProjector<double>(random);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
   Trace<double>* e = new ATrace<double>(projector->dimension(), 0.001);
@@ -457,7 +457,7 @@ void ExtendedProblemsTest::testSupervisedProjector()
   int nbTraingExamples = 200;
   int nbRuns = 8;
   Range<double>* inputRange = new Range<double>(-M_PI, M_PI);
-  Hashing* hashing = new MurmurHashing(memory);
+  Hashing<double>* hashing = new MurmurHashing<double>(&random, memory);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, nbInputs, gridResolution,
       nbTilings, true);
 

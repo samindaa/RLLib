@@ -35,7 +35,7 @@ class SwingPendulumModel: public ModelBase
   protected:
     Random<double>* random;
     RLProblem<double>* problem;
-    Hashing* hashing;
+    Hashing<double>* hashing;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;
 

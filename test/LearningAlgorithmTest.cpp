@@ -51,7 +51,8 @@ void SupervisedAlgorithmTest::linearRegressionWithTileFeatures()
   double gridResolution = 8;
   int memorySize = 512;
   int nbTilings = 16;
-  UNH hashing(memorySize);
+  Random<double> random;
+  UNH<double> hashing(&random, memorySize);
   Range<double> inputRange(-M_PI_2, M_PI_2);
   TileCoderHashing<double> coder(&hashing, nbInputs, gridResolution, nbTilings, true);
   PVector<double> x(nbInputs);
@@ -134,7 +135,8 @@ void SupervisedAlgorithmTest::logisticRegressionWithTileFeatures()
   double gridResolution = 10;
   int nbTilings = 16;
   PVector<double> x(nbInputs);
-  UNH hashing(memorySize);
+  Random<double> random;
+  UNH<double> hashing(&random, memorySize);
   Range<double> inputRange(minValue, maxValue);
   TileCoderHashing<double> coder(&hashing, nbInputs, gridResolution, nbTilings, true);
   SemiLinearIDBD<double> semiLinearIdbd(coder.dimension(), 0.001 / x.dimension()); // This value looks good

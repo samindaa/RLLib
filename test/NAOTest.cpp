@@ -39,7 +39,7 @@ void NAOTest::testTrain()
   {
     Random<float>* random = new Random<float>;
     RLProblem<float>* problem = new MountainCar<float>(random);
-    Hashing* hashing = new MurmurHashing(1000000);
+    Hashing<float>* hashing = new MurmurHashing<float>(random, 1000000);
     Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10,
         10);
     StateToStateAction<float>* toStateAction = new StateActionTilings<float>(projector,
@@ -92,7 +92,7 @@ void NAOTest::testTrain()
   {
     Random<double>* random = new Random<double>;
     RLProblem<double>* problem = new SwingPendulum<double>(random);
-    Hashing* hashing = new MurmurHashing(1000);
+    Hashing<double>* hashing = new MurmurHashing<double>(random, 1000);
     Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10,
         10, false);
     StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -154,7 +154,7 @@ void NAOTest::testEvaluate()
   {
     Random<float>* random = new Random<float>;
     RLProblem<float>* problem = new MountainCar<float>(random);
-    Hashing* hashing = new MurmurHashing(1000000);
+    Hashing<float>* hashing = new MurmurHashing<float>(random, 1000000);
     Projector<float>* projector = new TileCoderHashing<float>(hashing, problem->dimension(), 10, 10,
         true);
     StateToStateAction<float>* toStateAction = new StateActionTilings<float>(projector,
@@ -202,7 +202,7 @@ void NAOTest::testEvaluate()
   {
     Random<double>* random = new Random<double>;
     RLProblem<double>* problem = new SwingPendulum<double>(random);
-    Hashing* hashing = new MurmurHashing(1000);
+    Hashing<double>* hashing = new MurmurHashing<double>(random, 1000);
     Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10,
         10, false);
     StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,

@@ -42,7 +42,7 @@ class SwingPendulumModel2: public ModelBase
     Random<double>* random;
     RLProblem<double>* behaviourEnvironment;
     RLProblem<double>* evaluationEnvironment;
-    Hashing* hashing;
+    Hashing<double>* hashing;
     Projector<double>* projector;
     StateToStateAction<double>* toStateAction;
 

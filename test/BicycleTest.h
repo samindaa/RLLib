@@ -28,7 +28,8 @@ class BicycleProjector: public Projector<double>
     int nbTiles;
     int memory;
     Vector<double>* vector;
-    Hashing* hashing;
+    Random<double>* random;
+    Hashing<double>* hashing;
     Tiles<double>* tiles;
   public:
     BicycleProjector(const int& nbVars);

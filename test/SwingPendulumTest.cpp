@@ -27,7 +27,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
-  Hashing* hashing = new MurmurHashing(1000000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -83,7 +83,7 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
-  Hashing* hashing = new MurmurHashing(1000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       false);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -146,7 +146,7 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
-  Hashing* hashing = new MurmurHashing(1000000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -204,7 +204,7 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
-  Hashing* hashing = new MurmurHashing(1000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
@@ -256,7 +256,7 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new SwingPendulum<double>;
-  Hashing* hashing = new MurmurHashing(1000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       true);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,

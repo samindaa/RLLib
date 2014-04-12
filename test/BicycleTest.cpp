@@ -21,7 +21,8 @@ BicycleProjector::BicycleProjector(const int& nbVars)
   memory = nbVars * (8 * 8 + 4 * 4 + 4 * 4 * 4 + 4 * 4 * 4 + 4 * 4 * 4) * 9/*nbActions*/
   * 8/*to hash*/;
   vector = new SVector<double>(memory + 1/*bias unit*/, nbTiles + 1/*bias unit*/);
-  hashing = new MurmurHashing(memory);
+  random = new Random<double>;
+  hashing = new MurmurHashing<double>(random, memory);
   tiles = new Tiles<double>(hashing);
 
   std::cout << "nbTiles=" << nbTiles << " memory=" << vector->dimension() << std::endl;
@@ -30,6 +31,7 @@ BicycleProjector::BicycleProjector(const int& nbVars)
 BicycleProjector::~BicycleProjector()
 {
   delete vector;
+  delete random;
   delete hashing;
   delete tiles;
 }

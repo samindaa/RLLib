@@ -89,14 +89,15 @@ NextingProjector::NextingProjector()
   std::cout << "memory=" << memory << std::endl;
 
   vector = new SVector<double>(memory + 1/*bias unit*/);
-
-  hashing = new MurmurHashing(memory);
+  random = new Random<double>;
+  hashing = new MurmurHashing<double>(random, memory);
   tiles = new Tiles<double>(hashing);
 }
 
 NextingProjector::~NextingProjector()
 {
   delete vector;
+  delete random;
   delete hashing;
   delete tiles;
 }

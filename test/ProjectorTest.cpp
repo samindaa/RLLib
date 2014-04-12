@@ -34,7 +34,7 @@ void ProjectorTest::testProjector()
   SVector<double> w(memorySize + bias);
   for (int t = 0; t < 50; t++)
     w.insertEntry(random.nextInt(memorySize), random.nextReal());
-  UNH hashing(memorySize);
+  UNH<double> hashing(&random, memorySize);
   TileCoderHashing<double> coder(&hashing, numObservations, gridResolution, numTilings, bias);
   PVector<double> x(numObservations);
   for (int p = 0; p < 5; p++)

@@ -57,7 +57,7 @@ void TraceTest::testSarsaOnMountainCarSVectorTraces()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new MountainCar<double>(random);
-  Hashing* hashing = new MurmurHashing(30000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 30000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 9, 10,
       false);
 
@@ -84,7 +84,7 @@ void TraceTest::testSarsaOnMountainCarMaxLengthTraces()
 {
   Random<double>* random = new Random<double>;
   RLProblem<double>* problem = new MountainCar<double>(random);
-  Hashing* hashing = new MurmurHashing(10000);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 10000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
       false);
   Trace<double>* e = new ATrace<double>(projector->dimension());

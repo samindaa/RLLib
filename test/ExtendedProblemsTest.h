@@ -124,14 +124,14 @@ template<class T>
 class AdvancedTilesProjector: public Projector<T>
 {
   protected:
-    Hashing* hashing;
+    Hashing<T>* hashing;
     Tiles<T>* tiles;
     Vector<T>* vector;
     T gridResolution;
 
   public:
-    AdvancedTilesProjector() :
-        hashing(new MurmurHashing(1000000)), tiles(new Tiles<T>(hashing)), vector(
+    AdvancedTilesProjector(Random<T>* random) :
+        hashing(new MurmurHashing<T>(random, 1000000)), tiles(new Tiles<T>(hashing)), vector(
             new SVector<T>(hashing->getMemorySize() + 1)), gridResolution(6)
     {
     }
@@ -253,6 +253,10 @@ template<class T>
 class MountainCar3DTilesProjector: public AdvancedTilesProjector<T>
 {
   public:
+    MountainCar3DTilesProjector(Random<T>* random) :
+        AdvancedTilesProjector<T>(random)
+    {
+    }
 };
 
 // ====================== Acrobot projector ===================================
@@ -261,6 +265,10 @@ template<class T>
 class AcrobotTilesProjector: public AdvancedTilesProjector<T>
 {
   public:
+    AcrobotTilesProjector(Random<T>* random) :
+        AdvancedTilesProjector<T>(random)
+    {
+    }
 };
 
 #endif /* EXTENDEDPROBLEMSTEST_H_ */
