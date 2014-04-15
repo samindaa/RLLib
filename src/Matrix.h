@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <iostream>
+#include <string.h>
 
 #include "Assert.h"
 
@@ -32,31 +33,33 @@ namespace RLLib
 
 class Matrix
 {
-  protected:
-    // thread-safe comparison predicate for indices
-    class CmpIndex
-    {
-      public:
-        CmpIndex(const Matrix& lambda, std::vector<unsigned int>& index) :
-            m_lambda(lambda), m_index(index)
-        {
-        }
-
-        bool operator ()(unsigned int i1, unsigned int i2) const
-        {
-          return (m_lambda(i1) > m_lambda(i2));
-        }
-
-      protected:
-        const Matrix& m_lambda;
-        std::vector<unsigned int>& m_index;
-    };
-
-    unsigned int m_rows;
-    unsigned int m_cols;
-    std::vector<double> m_data;
-
   public:
+    Matrix()
+    {
+      resize(0, 0);
+    }
+
+    explicit Matrix(unsigned int rows, unsigned int cols = 1)
+    {
+      resize(rows, cols);
+    }
+
+    Matrix(const Matrix& other)
+    {
+      operator =(other);
+    }
+
+    Matrix(double* data, unsigned int rows, unsigned int cols = 1)
+    {
+      resize(rows, cols);
+      if (size() > 0)
+        memcpy(&m_data[0], data, size() * sizeof(double));
+    }
+
+    virtual ~Matrix()
+    {
+    }
+
     inline bool isValid() const
     {
       return (m_data.size() > 0);
@@ -98,7 +101,7 @@ class Matrix
     }
 
     // type cast for 1x1 matrices
-    operator double() const
+    inline operator double() const
     {
       ASSERT(m_rows == 1 && m_cols == 1);
       return m_data[0];
@@ -109,6 +112,7 @@ class Matrix
       ASSERT(index < m_data.size());
       return m_data[index];
     }
+
     inline const double& operator [](unsigned int index) const
     {
       ASSERT(index < m_data.size());
@@ -119,6 +123,7 @@ class Matrix
     {
       return operator [](index);
     }
+
     inline const double& operator ()(unsigned int index) const
     {
       return operator [](index);
@@ -126,25 +131,21 @@ class Matrix
 
     inline double& operator ()(unsigned int y, unsigned int x)
     {
-      ASSERT(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 
     inline const double& operator ()(unsigned int y, unsigned int x) const
     {
-      ASSERT(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 
     inline double& at(unsigned int y, unsigned int x)
     {
-      ASSERT(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 
     inline const double& at(unsigned int y, unsigned int x) const
     {
-      ASSERT(y < m_rows && x < m_rows);
       return operator [](y * m_cols + x);
     }
 
@@ -240,6 +241,7 @@ class Matrix
       for (i = 0; i < ic; i++)
         m_data[i] += other[i];
     }
+
     void operator -=(const Matrix& other)
     {
       ASSERT(m_rows == other.rows());
@@ -260,7 +262,7 @@ class Matrix
     {
       unsigned int i, ic = size();
       for (i = 0; i < ic; i++)
-        m_data[i] /= scalar; // TODO: check for stability
+        m_data[i] /= scalar;
     }
 
     friend Matrix operator *(double scalar, const Matrix& mat)
@@ -279,12 +281,12 @@ class Matrix
       return ret;
     }
 
-    static Matrix zeros(unsigned int rows, unsigned int cols = 1)
+    static Matrix zeros(unsigned int rows, unsigned int cols)
     {
       return Matrix(rows, cols);
     }
 
-    static Matrix ones(unsigned int rows, unsigned int cols = 1)
+    static Matrix ones(unsigned int rows, unsigned int cols)
     {
       Matrix m(rows, cols);
       unsigned int i, ic = rows * cols;
@@ -563,14 +565,17 @@ class Matrix
     {
       return pow(e);
     }
+
     inline Matrix sqrt() const
     {
       return pow(0.5);
     }
+
     inline Matrix inv() const
     {
       return pow(-1.0);
     }
+
     double det() const
     {
       Matrix U;
@@ -704,31 +709,29 @@ class Matrix
 
     friend std::ostream& operator<<(std::ostream& out, const Matrix& that);
 
-    Matrix()
+  protected:
+    // thread-safe comparison predicate for indices
+    class CmpIndex
     {
-      resize(0, 0);
-    }
+      public:
+        CmpIndex(const Matrix& lambda, std::vector<unsigned int>& index) :
+            m_lambda(lambda), m_index(index)
+        {
+        }
 
-    explicit Matrix(unsigned int rows, unsigned int cols = 1)
-    {
-      resize(rows, cols);
-    }
+        bool operator ()(unsigned int i1, unsigned int i2) const
+        {
+          return (m_lambda(i1) > m_lambda(i2));
+        }
 
-    Matrix(const Matrix& other)
-    {
-      operator =(other);
-    }
+      protected:
+        const Matrix& m_lambda;
+        std::vector<unsigned int>& m_index;
+    };
 
-    Matrix(double* data, unsigned int rows, unsigned int cols = 1)
-    {
-      resize(rows, cols);
-      if (size() > 0)
-        memcpy(&m_data[0], data, size() * sizeof(double));
-    }
-
-    virtual ~Matrix()
-    {
-    }
+    unsigned int m_rows;
+    unsigned int m_cols;
+    std::vector<double> m_data;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const Matrix& that)
