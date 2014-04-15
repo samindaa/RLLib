@@ -281,12 +281,12 @@ class Matrix
       return ret;
     }
 
-    static Matrix zeros(unsigned int rows, unsigned int cols)
+    static Matrix zeros(unsigned int rows, unsigned int cols = 1)
     {
       return Matrix(rows, cols);
     }
 
-    static Matrix ones(unsigned int rows, unsigned int cols)
+    static Matrix ones(unsigned int rows, unsigned int cols = 1)
     {
       Matrix m(rows, cols);
       unsigned int i, ic = rows * cols;
