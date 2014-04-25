@@ -59,10 +59,10 @@ Features
 * **Visualization**:
  We provide a Qt4 based application to visualize benchmark problems.  
 
-Experimental
+Extension
 -----
 
-On MSP-EXP430G2 LaunchPad, and EK-TM4C123GXL (TivaC) LaunchPad.
+Extension for Tiva C Series EK-TM4C123GXL LaunchPad, and Tiva C Series TM4C129 Connected LaunchPad microcontrollers.
 
 Tiva C series launchpad microcontrollers: [https://github.com/samindaa/csc688](https://github.com/samindaa/csc688)
 
