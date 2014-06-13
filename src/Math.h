@@ -303,88 +303,89 @@ template<class T>
 class Ranges
 {
   protected:
-    typename std::vector<Range<T>*>* ranges;
+    typename std::vector<Range<T>*> ranges;
   public:
     typedef typename std::vector<Range<T>*>::iterator iterator;
     typedef typename std::vector<Range<T>*>::const_iterator const_iterator;
 
-    Ranges() :
-        ranges(new std::vector<Range<T>*>())
+    Ranges()
     {
     }
 
     ~Ranges()
     {
-      ranges->clear();
-      delete ranges;
+      ranges.clear();
     }
 
-    Ranges(const Range<T>& that) :
-        ranges(new std::vector<Range<T>*>())
+    Ranges(const Range<T>& that)
     {
       for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
-        ranges->push_back(*iter);
+        ranges.push_back(*iter);
     }
 
     Ranges<T>& operator=(const Ranges<T>& that)
     {
       if (this != that)
       {
-        ranges->clear();
+        ranges.clear();
         for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
-          ranges->push_back(*iter);
+          ranges.push_back(*iter);
       }
       return *this;
     }
 
     void push_back(Range<T>* range)
     {
-      ranges->push_back(range);
+      ranges.push_back(range);
     }
 
     iterator begin()
     {
-      return ranges->begin();
+      return ranges.begin();
     }
 
     const_iterator begin() const
     {
-      return ranges->begin();
+      return ranges.begin();
     }
 
     iterator end()
     {
-      return ranges->end();
+      return ranges.end();
     }
 
     const_iterator end() const
     {
-      return ranges->end();
+      return ranges.end();
     }
 
     int dimension() const
     {
-      return ranges->size();
+      return ranges.size();
     }
 
     Range<T>& operator[](const int& index)
     {
-      return *ranges->at(index);
+      ASSERT(index < static_cast<int>(ranges.size()));
+      return *ranges[index];
     }
 
     const Range<T>& operator[](const int& index) const
     {
-      return *ranges->at(index);
+      ASSERT(index < static_cast<int>(ranges.size()));
+      return *ranges[index];
     }
 
     Range<T>* at(const int& index)
     {
-      return ranges->at(index);
+      ASSERT(index < static_cast<int>(ranges.size()));
+      return ranges[index];
     }
 
     const Range<T>* at(const int& index) const
     {
-      return ranges->at(index);
+      ASSERT(index < static_cast<int>(ranges.size()));
+      return ranges[index];
     }
 };
 
