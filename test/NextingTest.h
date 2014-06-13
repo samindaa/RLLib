@@ -344,11 +344,11 @@ class PolicyBasedControl: public OnPolicyControlLearner<T>
       return 0;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
     }
 

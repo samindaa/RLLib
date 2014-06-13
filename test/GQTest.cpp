@@ -73,7 +73,8 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
 
   Policy<double>* behaviorPolicy = RandomWalk::newPolicy(random, problem->getActions(),
       behaviourLeftProbability);
-  Policy<double>* targetPolicy = RandomWalk::newPolicy(random, problem->getActions(), targetLeftProbability);
+  Policy<double>* targetPolicy = RandomWalk::newPolicy(random, problem->getActions(),
+      targetLeftProbability);
   problem->setPolicy(behaviorPolicy);
   FSGAgentState* agentState = new FSGAgentState(problem);
   OffPolicyControlLearner<double>* learner = learnerFactory->createLearner(problem->getActions(),
@@ -103,7 +104,8 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
   Assert::assertPasses(nbEpisode > 100);
 
   const Predictor<double>* predictor = learner->predictor();
-  const LinearLearner<double>* gqLearner = dynamic_cast<const LinearLearner<double>*>(predictor);
+  const LinearLearner<double>* gqLearner =
+      static_cast<const LinearLearner<double>*>(static_cast<const GQ<double>*>(predictor));
   const Vector<double>* v = gqLearner->weights();
   Assert::checkValues(v);
 

@@ -363,20 +363,20 @@ void ExtendedProblemsTest::testPersistResurrect()
   for (int i = 0; i < 10; i++)
     a.insertEntry(i, random.nextReal());
   cout << a << endl;
-  a.persist(string("testsv.dat"));
+  a.persist("testsv.dat");
 
   SVector<float> b(20);
-  b.resurrect(string("testsv.dat"));
+  b.resurrect("testsv.dat");
   cout << b << endl;
 
   PVector<float> d(20);
   for (int i = 0; i < 10; i++)
     d[i] = random.nextReal();
   cout << d << endl;
-  d.persist(string("testdv.dat"));
+  d.persist("testdv.dat");
 
   PVector<float> e(20);
-  e.resurrect(string("testdv.dat"));
+  e.resurrect("testdv.dat");
   cout << e << endl;
 }
 

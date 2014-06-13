@@ -22,18 +22,20 @@
 #ifndef VECTOR_H_
 #define VECTOR_H_
 
-#include <algorithm>
-#include <vector>
-//
-#include <functional>
-#include <numeric>
-#include <cmath>
-//
+#include "Assert.h"
+
+#if !defined(EMBEDDED_MODE)
 #include <iostream>
 #include <fstream>
 #include <sstream>
-//
-#include "Assert.h"
+#endif
+
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <cmath>
+#include <vector>
+#include <cstdio>
 
 namespace RLLib
 {
@@ -41,11 +43,12 @@ namespace RLLib
 /**
  * Forward declarations
  */
+#if !defined(EMBEDDED_MODE)
 template<class T> class DenseVector;
 template<class T> class SparseVector;
 template<class T> std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that);
 template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that);
-
+#endif
 /**
  * This is used in parameter representation in a given vector space for
  * Machine Learning purposes. This implementation is specialized for sparse
@@ -55,6 +58,25 @@ template<class T>
 class Vector
 {
   public:
+    /**
+     * Using this to cast is faster that using dynamic_cast<>
+     */
+    enum VectorType
+    {
+      BASE_VECTOR,
+      DENSE_VECTOR,
+      SPARSE_VECTOR
+    };
+
+  private:
+    VectorType vectorType;
+
+  public:
+    Vector(const VectorType& vectorType) :
+        vectorType(vectorType)
+    {
+    }
+
     virtual ~Vector()
     {
     }
@@ -98,10 +120,17 @@ class Vector
     virtual Vector<T>* copy() const =0;
     virtual Vector<T>* newInstance(const int& dimension) const =0;
     // Storage management
-    virtual void persist(const std::string& f) const =0;
-    virtual void resurrect(const std::string& f) =0;
+    virtual void persist(const char* f) const =0;
+    virtual void resurrect(const char* f) =0;
+
+    // Return the type of the vector for alternative dynamic checks.
+    virtual VectorType getVectorType() const
+    {
+      return vectorType;
+    }
 
   protected:
+#if !defined(EMBEDDED_MODE)
     template<class U> void write(std::ostream &o, U& value) const
     {
       char *s = (char *) &value;
@@ -113,6 +142,7 @@ class Vector
       char *s = (char *) &value;
       i.read(s, sizeof(value));
     }
+#endif
 };
 
 template<class T>
@@ -124,7 +154,7 @@ class DenseVector: public Vector<T>
 
   public:
     DenseVector(const int& capacity = 1) :
-        capacity(capacity), data(new T[capacity])
+        Vector<T>(Vector<T>::DENSE_VECTOR), capacity(capacity), data(new T[capacity])
     {
       std::fill(data, data + capacity, 0);
     }
@@ -136,7 +166,7 @@ class DenseVector: public Vector<T>
 
     // Implementation details for copy constructor and operator
     DenseVector(const DenseVector<T>& that) :
-        capacity(that.capacity), data(new T[that.capacity])
+        Vector<T>(Vector<T>::DENSE_VECTOR), capacity(that.capacity), data(new T[that.capacity])
     {
       std::copy(that.data, that.data + that.capacity, data);
     }
@@ -287,10 +317,11 @@ class DenseVector: public Vector<T>
       return this;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
+#if !defined(EMBEDDED_MODE)
       std::ofstream of;
-      of.open(f.c_str(), std::ofstream::out);
+      of.open(f, std::ofstream::out);
       if (of.is_open())
       {
         // write vector type (int)
@@ -308,12 +339,14 @@ class DenseVector: public Vector<T>
       }
       else
         std::cerr << "ERROR! (persist) file=" << f << std::endl;
+#endif
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
+#if !defined(EMBEDDED_MODE)
       std::ifstream ifs;
-      ifs.open(f.c_str(), std::ifstream::in);
+      ifs.open(f, std::ifstream::in);
       if (ifs.is_open())
       {
         // Read vector type;
@@ -323,10 +356,7 @@ class DenseVector: public Vector<T>
         // Read capacity
         int rcapacity;
         Vector<T>::read(ifs, rcapacity);
-        //ASSERT(capacity == rcapacity);
-        delete[] data;
-        capacity = rcapacity;
-        data = new T[capacity];
+        ASSERT(capacity == rcapacity);
         clear();
         printf("vectorType=%i rcapacity=%i \n", vectorType, rcapacity);
         // Read data
@@ -342,10 +372,13 @@ class DenseVector: public Vector<T>
         std::cerr << "ERROR! (resurrect) file=" << f << std::endl;
         exit(-1);
       }
+#endif
     }
 
+#if !defined(EMBEDDED_MODE)
     template<class O> friend std::ostream& operator<<(std::ostream& out,
         const DenseVector<O>& that);
+#endif
 
 };
 
@@ -364,14 +397,14 @@ class SparseVector: public Vector<T>
     int* indexesPosition;
     int* activeIndexes;
     T* values;
-  public:
 
+  public:
     SparseVector(const int& capacity = 1, const int& activeIndexesLength = 10) :
-        indexesPositionLength(capacity), activeIndexesLength(activeIndexesLength), nbActive(0), indexesPosition(
-            new int[indexesPositionLength]), activeIndexes(new int[activeIndexesLength]), values(
-            new T[activeIndexesLength])
+        Vector<T>(Vector<T>::SPARSE_VECTOR), indexesPositionLength(capacity), activeIndexesLength(
+            activeIndexesLength), nbActive(0), indexesPosition(new int[indexesPositionLength]), activeIndexes(
+            new int[activeIndexesLength]), values(new T[activeIndexesLength])
     {
-      std::fill(indexesPosition, indexesPosition + indexesPositionLength, -1);
+      std::fill(indexesPosition, indexesPosition + capacity, -1);
     }
 
     virtual ~SparseVector()
@@ -382,7 +415,7 @@ class SparseVector: public Vector<T>
     }
 
     SparseVector(const SparseVector<T>& that) :
-        indexesPositionLength(that.indexesPositionLength), activeIndexesLength(
+        Vector<T>(Vector<T>::SPARSE_VECTOR), indexesPositionLength(that.indexesPositionLength), activeIndexesLength(
             that.activeIndexesLength), nbActive(that.nbActive), indexesPosition(
             new int[that.indexesPositionLength]), activeIndexes(new int[that.activeIndexesLength]), values(
             new T[that.activeIndexesLength])
@@ -604,10 +637,11 @@ class SparseVector: public Vector<T>
         data[activeIndexes[position]] -= values[position];
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
+#if !defined(EMBEDDED_MODE)
       std::ofstream of;
-      of.open(f.c_str(), std::ofstream::out);
+      of.open(f, std::ofstream::out);
       if (of.is_open())
       {
         // Write vector type (int)
@@ -633,12 +667,14 @@ class SparseVector: public Vector<T>
       }
       else
         std::cerr << "ERROR! (persist) file=" << f << std::endl;
+#endif
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
+#if !defined(EMBEDDED_MODE)
       std::ifstream ifs;
-      ifs.open(f.c_str(), std::ifstream::in);
+      ifs.open(f, std::ifstream::in);
       if (ifs.is_open())
       {
         // Read vector type;
@@ -651,11 +687,7 @@ class SparseVector: public Vector<T>
         // Read numActive
         int rnbActive;
         Vector<T>::read(ifs, rnbActive);
-        //ASSERT(indexesPositionLength == rcapacity);
-        indexesPositionLength = rcapacity;
-        delete[] indexesPosition;
-        indexesPosition = new int[indexesPositionLength];
-        std::fill(indexesPosition, indexesPosition + indexesPositionLength, -1);
+        ASSERT(indexesPositionLength == rcapacity);
         clear();
         // Verbose
         printf("vectorType=%i rcapacity=%i rnbActive=%i\n", vectorType, rcapacity, rnbActive);
@@ -682,11 +714,49 @@ class SparseVector: public Vector<T>
         std::cerr << "ERROR! (resurrect) file=" << f << std::endl;
         exit(-1);
       }
+#endif
     }
 
+#if !defined(EMBEDDED_MODE)
     template<class O> friend std::ostream& operator<<(std::ostream& out,
         const SparseVector<O>& that);
+#endif
 
+};
+
+/**
+ * RLLibs' dynamic_cast<> alternative to support multiple architectures.
+ */
+template<class T>
+class RTTI
+{
+  public:
+    static SparseVector<T>* sparseVector(Vector<T>* that)
+    {
+      return
+          that->getVectorType() == Vector<T>::SPARSE_VECTOR ?
+              static_cast<SparseVector<T>*>(that) : 0;
+    }
+
+    static const SparseVector<T>* constSparseVector(const Vector<T>* that)
+    {
+      return
+          that->getVectorType() == Vector<T>::SPARSE_VECTOR ?
+              static_cast<const SparseVector<T>*>(that) : 0;
+    }
+
+    static DenseVector<T>* denseVector(Vector<T>* that)
+    {
+      return
+          that->getVectorType() == Vector<T>::DENSE_VECTOR ? static_cast<DenseVector<T>*>(that) : 0;
+    }
+
+    static const DenseVector<T>* constDenseVector(const Vector<T>* that)
+    {
+      return
+          that->getVectorType() == Vector<T>::DENSE_VECTOR ?
+              static_cast<const DenseVector<T>*>(that) : 0;
+    }
 };
 
 template<class T>
@@ -732,8 +802,7 @@ class PVector: public DenseVector<T>
     T dot(const Vector<T>* that) const
     {
       ASSERT(this->dimension() == that->dimension());
-
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
         return other->dotData(this->getValues());
 
@@ -746,8 +815,7 @@ class PVector: public DenseVector<T>
     PVector<T>& operator-(const Vector<T>* that)
     {
       ASSERT(this->dimension() == that->dimension());
-
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
         other->subtractToSelfT(this->getValues());
@@ -762,8 +830,7 @@ class PVector: public DenseVector<T>
     PVector<T>& operator+(const Vector<T>* that)
     {
       ASSERT(this->dimension() == that->dimension());
-
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
         other->addToSelfT(this->getValues());
@@ -790,8 +857,7 @@ class PVector: public DenseVector<T>
     Vector<T>* addToSelf(const T& factor, const Vector<T>* that)
     {
       ASSERT(this->dimension() == that->dimension());
-
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
         other->addToData(factor, this->getValues());
@@ -811,8 +877,7 @@ class PVector: public DenseVector<T>
     Vector<T>* subtractToSelf(const Vector<T>* that)
     {
       ASSERT(this->dimension() == that->dimension());
-
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
         other->subtractToData(this->getValues());
@@ -826,9 +891,9 @@ class PVector: public DenseVector<T>
 
     Vector<T>* set(const Vector<T>* that, const int& offset)
     { // FixMe:
-      //ASSERT(this->dimension() == that->dimension());
+      //assert(this->dimension() == that->dimension());
 
-      const DenseVector<T>* other = dynamic_cast<const DenseVector<T>*>(that);
+      const DenseVector<T>* other = RTTI<T>::constDenseVector(that);
       if (other)
       {
         std::copy(other->getValues() + offset, other->getValues() + this->dimension(),
@@ -898,7 +963,7 @@ class SVector: public SparseVector<T>
 
     T dot(const Vector<T>* that) const
     {
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other && other->nonZeroElements() < this->nonZeroElements())
         return other->dot(this);
 
@@ -917,7 +982,7 @@ class SVector: public SparseVector<T>
 
     Vector<T>* addToSelf(const T& factor, const Vector<T>* that)
     {
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
         for (int position = 0; position < other->nonZeroElements(); position++)
@@ -990,7 +1055,7 @@ class SVector: public SparseVector<T>
     {
       ASSERT(this->dimension() == that->dimension());
       this->clear();
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
         for (int i = 0; i < other->nonZeroElements(); i++)
@@ -1007,7 +1072,7 @@ class SVector: public SparseVector<T>
     {
       // Dimension check is relaxed.
       this->clear();
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
         for (int i = 0; i < other->nonZeroElements(); i++)
@@ -1129,16 +1194,17 @@ class Vectors
 
     Vector<T>* at(const int& index)
     {
-      return vectors.at(index);
+      return vectors[index];
     }
 
     const Vector<T>* at(const int& index) const
     {
-      return vectors.at(index);
+      return vectors[index];
     }
 
-    void persist(std::string f) const
+    void persist(const char* f) const
     {
+#if !defined(EMBEDDED_MODE)
       int i = 0;
       for (typename Vectors<T>::const_iterator iter = begin(); iter != end(); ++iter)
       {
@@ -1146,13 +1212,15 @@ class Vectors
         std::stringstream ss;
         ss << "." << i;
         fi.append(ss.str());
-        (*iter)->persist(fi);
+        (*iter)->persist(fi.c_str());
         ++i;
       }
+#endif
     }
 
-    void resurrect(std::string f) const
+    void resurrect(const char* f) const
     {
+#if !defined(EMBEDDED_MODE)
       int i = 0;
       for (typename Vectors<T>::const_iterator iter = begin(); iter != end(); ++iter)
       {
@@ -1160,15 +1228,16 @@ class Vectors
         std::stringstream ss;
         ss << "." << i;
         fi.append(ss.str());
-        (*iter)->resurrect(fi);
+        (*iter)->resurrect(fi.c_str());
         ++i;
       }
+#endif
     }
 
     // Static
     inline static Vector<T>* absToSelf(Vector<T>* other)
     {
-      SparseVector<T>* that = dynamic_cast<SparseVector<T>*>(other);
+      SparseVector<T>* that = RTTI<T>::sparseVector(other);
       if (that)
       {
         T* values = that->getValues();
@@ -1186,7 +1255,7 @@ class Vectors
 
     inline static void positiveMaxToSelf(Vector<T>* result, const Vector<T>* that)
     {
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
         const int* activeIndexes = other->nonZeroIndexes();
@@ -1205,7 +1274,7 @@ class Vectors
 
     inline static void expToSelf(Vector<T>* result, const Vector<T>* that)
     {
-      const SparseVector<T>* other = dynamic_cast<const SparseVector<T>*>(that);
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
         const int* activeIndexes = other->nonZeroIndexes();
@@ -1251,7 +1320,7 @@ class Vectors
     static void multiplySelfByExponential(DenseVector<T>* result, const T& factor,
         const Vector<T>* other, const T& min)
     {
-      const SparseVector<T>* that = dynamic_cast<const SparseVector<T>*>(other);
+      const SparseVector<T>* that = RTTI<T>::constSparseVector(other);
       if (that)
         multiplySelfByExponential(result, factor, that, min);
       else
@@ -1265,12 +1334,12 @@ class Vectors
     static void multiplySelfByExponential(Vector<T>* result, const T& factor,
         const Vector<T>* other, const T& min)
     {
-      SparseVector<T>* sresult = dynamic_cast<SparseVector<T>*>(result);
+      SparseVector<T>* sresult = RTTI<T>::sparseVector(result);
       if (sresult)
         multiplySelfByExponential(sresult, factor, other, min);
       else
       {
-        DenseVector<T>* dresult = dynamic_cast<DenseVector<T>*>(result);
+        DenseVector<T>* dresult = RTTI<T>::denseVector(result);
         multiplySelfByExponential(dresult, factor, other, min);
       }
     }
@@ -1285,7 +1354,7 @@ class Vectors
     {
       if (!v)
         return true;
-      const SparseVector<T>* that = dynamic_cast<const SparseVector<T>*>(v);
+      const SparseVector<T>* that = RTTI<T>::constSparseVector(v);
       if (that)
         return that->nonZeroElements() == 0;
       const T* values = v->getValues();
@@ -1309,7 +1378,7 @@ class Vectors
     {
       ASSERT(result->dimension() == v->dimension());
       result->clear();
-      const SparseVector<T>* sv = dynamic_cast<const SparseVector<T>*>(v);
+      const SparseVector<T>* sv = RTTI<T>::constSparseVector(v);
       if (sv)
       {
         for (int i = 0; i < sv->nonZeroElements(); i++)
@@ -1332,7 +1401,7 @@ class Filters
   public:
     static Vector<T>* mapMultiplyToSelf(Vector<T>* result, const T& d, const Vector<T>* filter)
     {
-      const SparseVector<T>* sfilter = dynamic_cast<const SparseVector<T>*>(filter);
+      const SparseVector<T>* sfilter = RTTI<T>::constSparseVector(filter);
       if (sfilter)
       {
         for (int i = 0; i < sfilter->nonZeroElements(); i++)
@@ -1350,31 +1419,30 @@ template<class T>
 class VectorPool
 {
   protected:
-    std::vector<Vector<T>*>* stackedVectors;
+    std::vector<Vector<T>*> stackedVectors;
     int nbAllocation;
     int dimension;
   public:
     VectorPool(const int& dimension) :
-        stackedVectors(new std::vector<Vector<T>*>()), nbAllocation(0), dimension(dimension)
+        nbAllocation(0), dimension(dimension)
     {
     }
 
     ~VectorPool()
     {
-      for (typename std::vector<Vector<T>*>::iterator iter = stackedVectors->begin();
-          iter != stackedVectors->end(); ++iter)
+      for (typename std::vector<Vector<T>*>::iterator iter = stackedVectors.begin();
+          iter != stackedVectors.end(); ++iter)
         delete *iter;
-      stackedVectors->clear();
-      delete stackedVectors;
+      stackedVectors.clear();
     }
 
   public:
     Vector<T>* newVector(const Vector<T>* v)
     {
       ++nbAllocation;
-      if (nbAllocation > static_cast<int>(stackedVectors->size()))
-        stackedVectors->push_back(v->newInstance(dimension));
-      return stackedVectors->at(nbAllocation - 1)->set(v);
+      if (nbAllocation > static_cast<int>(stackedVectors.size()))
+        stackedVectors.push_back(v->newInstance(dimension));
+      return stackedVectors[nbAllocation - 1]->set(v);
     }
 
     void releaseAll()
@@ -1383,6 +1451,7 @@ class VectorPool
     }
 };
 
+#if !defined(EMBEDDED_MODE)
 // Global implementations
 template<class T>
 std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that)
@@ -1410,7 +1479,7 @@ std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that)
 template<class T>
 static void printVector(const Vector<T>* other)
 {
-  const SparseVector<T>* that = dynamic_cast<const SparseVector<T>*>(other);
+  const SparseVector<T>* that = RTTI<T>::constSparseVector(other);
   if (that)
   {
     std::cout << "SparseVector(" << that->nonZeroElements() << ") index=";
@@ -1424,7 +1493,7 @@ static void printVector(const Vector<T>* other)
     std::cout << std::endl;
   }
 
-  const DenseVector<T>* theOther = dynamic_cast<const DenseVector<T>*>(other);
+  const DenseVector<T>* theOther = RTTI<T>::constDenseVector(other);
   if (theOther)
   {
     std::cout << "DenseVector(" << theOther->dimension() << ") ";
@@ -1433,6 +1502,7 @@ static void printVector(const Vector<T>* other)
     std::cout << std::endl;
   }
 }
+#endif
 
 } // namespace RLLib
 

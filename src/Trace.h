@@ -61,7 +61,7 @@ class ATrace: public Trace<T>
   private:
     virtual void clearBelowThreshold()
     {
-      SparseVector<T>* svector = dynamic_cast<SparseVector<T>*>(vector);
+      SparseVector<T>* svector = RTTI<T>::sparseVector(vector);
       const T* values = svector->getValues();
       const int* indexes = svector->nonZeroIndexes();
       int i = 0;
@@ -123,7 +123,7 @@ class RTrace: public ATrace<T>
   private:
     void replaceWith(const Vector<T>* x, const T& factor)
     { // FixMe:
-      const SparseVector<T>* phi = dynamic_cast<const SparseVector<T>*>(x);
+      const SparseVector<T>* phi = RTTI<T>::constSparseVector(x);
       const int* indexes = phi->nonZeroIndexes();
       for (const int* index = indexes; index < indexes + phi->nonZeroElements(); ++index)
         ATrace<T>::vector->setEntry(*index, factor * phi->getEntry(*index));
@@ -170,7 +170,7 @@ class AMaxTrace: public ATrace<T>
     virtual void adjustUpdate()
     {
       T* data = ATrace<T>::vector->getValues();
-      SparseVector<T>* svector = dynamic_cast<SparseVector<T>*>(ATrace<T>::vector);
+      SparseVector<T>* svector = RTTI<T>::sparseVector(ATrace<T>::vector);
       int size = 0;
       if (svector)
         size = svector->nonZeroElements();
@@ -192,8 +192,10 @@ class MaxLengthTrace: public Trace<T>
         trace(trace), maximumLength(maximumLength)
     {
       const SparseVector<T>* v = (const SparseVector<T>*) trace->vect();
+#if !defined(EMBEDDED_MODE)
       if (!v)
         std::cerr << "MaxLengthTraces supports only traces SparseVector<T>" << std::endl;
+#endif
     }
 
     virtual ~MaxLengthTrace()

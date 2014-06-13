@@ -23,6 +23,7 @@
 #define ACTION_H_
 
 #include <vector>
+#include "Assert.h"
 
 namespace RLLib
 {
@@ -32,42 +33,44 @@ class Action
 {
   private:
     int actionID;
-    std::vector<T>* values;
+    std::vector<T> values;
 
   public:
     explicit Action(const int& actionID) :
-        actionID(actionID), values(new std::vector<T>())
+        actionID(actionID)
     {
     }
 
     ~Action()
     {
-      delete values;
     }
 
     void push_back(const T& value)
     {
-      values->push_back(value);
+      values.push_back(value);
     }
 
     T at(const int& i = 0 /*default to a single action*/)
     {
-      return values->at(i);
+      ASSERT(i < static_cast<int>(values.size()));
+      return values[i];
     }
 
     const T at(const int& i = 0 /*default to a single action*/) const
     {
-      return values->at(i);
+      ASSERT(i < static_cast<int>(values.size()));
+      return values[i];
     }
 
     int dimension() const
     {
-      return values->size();
+      return values.size();
     }
 
     void update(const int& i, const T& value)
     {
-      values->at(i) = value;
+      ASSERT(i < static_cast<int>(values.size()));
+      values[i] = value;
     }
 
     bool operator==(const Action<T>& that) const
@@ -92,17 +95,15 @@ template<class T>
 class Actions
 {
   protected:
-    std::vector<Action<T>*>* actions;
+    std::vector<Action<T>*> actions;
 
   public:
-    Actions() :
-        actions(new std::vector<Action<T>*>())
+    Actions()
     {
     }
 
     virtual ~Actions()
     {
-      delete actions;
     }
 
     virtual int dimension() const =0;
@@ -117,22 +118,22 @@ class Actions
 
     iterator begin()
     {
-      return actions->begin();
+      return actions.begin();
     }
 
     const_iterator begin() const
     {
-      return actions->begin();
+      return actions.begin();
     }
 
     iterator end()
     {
-      return actions->end();
+      return actions.end();
     }
 
     const_iterator end() const
     {
-      return actions->end();
+      return actions.end();
     }
 
 };
@@ -147,40 +148,43 @@ class ActionArray: public Actions<T>
         Actions<T>()
     {
       for (int i = 0; i < nbActions; i++)
-        Base::actions->push_back(new Action<T>(i));
+        Base::actions.push_back(new Action<T>(i));
     }
 
     virtual ~ActionArray()
     {
-      for (typename std::vector<Action<T>*>::iterator iter = Base::actions->begin();
-          iter != Base::actions->end(); ++iter)
+      for (typename std::vector<Action<T>*>::iterator iter = Base::actions.begin();
+          iter != Base::actions.end(); ++iter)
         delete *iter;
-      Base::actions->clear();
+      Base::actions.clear();
     }
 
     const Action<T>* operator[](const int& index) const
     {
-      return Base::actions->at(index);
+      ASSERT(index < static_cast<int>(Base::actions.size()));
+      return Base::actions[index];
     }
 
     const Action<T>* at(const int& index) const
     {
-      return Base::actions->at(index);
+      ASSERT(index < static_cast<int>(Base::actions.size()));
+      return Base::actions[index];
     }
 
     void push_back(const int& index, const T& value)
     {
-      Base::actions->at(index)->push_back(value);
+      ASSERT(index < static_cast<int>(Base::actions.size()));
+      Base::actions[index]->push_back(value);
     }
 
     void erase(const int& index)
     {
-      typename std::vector<Action<T>*>::iterator iter = Base::actions->begin();
-      while (iter != Base::actions->end())
+      typename std::vector<Action<T>*>::iterator iter = Base::actions.begin();
+      while (iter != Base::actions.end())
       {
         if ((*iter)->id() == index)
         {
-          Base::actions->erase(iter);
+          Base::actions.erase(iter);
           break;
         }
         else
@@ -190,12 +194,13 @@ class ActionArray: public Actions<T>
 
     void update(const int& actionIndex, const int& vectorIndex, const T& value)
     {
-      Base::actions->at(actionIndex)->update(vectorIndex, value);
+      ASSERT(actionIndex < static_cast<int>(Base::actions.size()));
+      Base::actions[actionIndex]->update(vectorIndex, value);
     }
 
     int dimension() const
     {
-      return Base::actions->size();
+      return Base::actions.size();
     }
 };
 

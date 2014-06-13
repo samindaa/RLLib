@@ -51,7 +51,7 @@ class Boundedness
       T sum = T(0);
       for (int i = 0; i < distribution->dimension(); i++)
         sum += distribution->getEntry(i);
-      bool bvalue = ::fabs(T(1) - sum) < 10e-8;
+      bool bvalue = ::fabs(1.0f - sum) < 1e-6;/*for stability*/
       ASSERT(bvalue);
       return bvalue;
     }
@@ -162,13 +162,13 @@ class Random
     {
     }
 
-    inline void reseed(const uint32_t& seed)
+    inline  void reseed(const uint32_t& seed)
     {
       //::srand(seed);
       xorshift.reseed(seed);
     }
 
-    inline int rand()
+    inline  int rand()
     {
       //return ::rand();
       return xorshift.rand_u32() % RAND_MAX;
@@ -180,37 +180,38 @@ class Random
     }
 
     // [0 .. size)
-    inline int nextInt(const int& size)
+    inline  int nextInt(const int& size)
     {
       return rand() % size;
     }
 
     // [0..1)
-    inline T nextReal()
+    inline  T nextReal()
     {
       return T(rand()) / static_cast<T>(RAND_MAX);
     }
 
     // A gaussian random deviate
-    inline T nextNormalGaussian()
+    inline  T nextNormalGaussian()
     {
-      T v, w, rsq;
+      T r, v1, v2;
       do
       {
-        v = T(2) * nextReal() - T(1);
-        w = T(2) * nextReal() - T(1);
-        rsq = v * v + w * w;
-      } while (rsq >= T(1) || rsq == T(0));
-      return w * sqrt(-T(2) * log(rsq) / rsq);
+        v1 = T(2) * nextReal() - T(1);
+        v2 = T(2) * nextReal() - T(1);
+        r = v1 * v1 + v2 * v2;
+      } while (r >= 1.0 || r == 0);
+      const T fac(sqrt(-T(2) * log(r) / r));
+      return v1 * fac;
     }
 
-    inline T gaussianProbability(const T& x, const T& m, const T& s) const
+    inline  T gaussianProbability(const T& x, const T& m, const T& s) const
     {
       return exp(-0.5f * pow((x - m) / s, 2)) / (s * sqrt(2.0f * M_PI));
     }
 
     // http://en.literateprograms.org/Box-Muller_transform_(C)
-    inline T nextGaussian(const T& mean, const T& stddev)
+    inline  T nextGaussian(const T& mean, const T& stddev)
     {
       static T n2 = T(0);
       static int n2_cached = 0;

@@ -84,17 +84,17 @@ class TD: public OnPolicyTD<T>
       return v->dot(x);
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       v->persist(f);
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       v->resurrect(f);
     }
 
-    const Vector<T>* weights() const
+    Vector<T>* weights() const
     {
       return v;
     }
@@ -156,7 +156,6 @@ class TDLambda: public TDLambdaAbstract<T>
         const T& gamma_tp1)
     {
       ASSERT(TD<T>::initialized);
-
       TD<T>::delta_t = r_tp1 + gamma_tp1 * TD<T>::v->dot(x_tp1) - TD<T>::v->dot(x_t);
       Base::e->update(Base::lambda * Base::gamma_t, x_t, TD<T>::alpha_v);
       TD<T>::v->addToSelf(TD<T>::delta_t, Base::e->vect());
@@ -255,7 +254,6 @@ class TDLambdaAlphaBound: public TDLambdaAbstract<T>
         const T& gamma_tp1)
     {
       ASSERT(TD<T>::initialized);
-
       TD<T>::delta_t = r_tp1 + gamma_tp1 * TD<T>::v->dot(x_tp1) - TD<T>::v->dot(x_t);
       Base::e->update(Base::lambda * Base::gamma_t, x_t);
       updateAlpha(x_t, x_tp1, gamma_tp1);
@@ -299,7 +297,6 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
     virtual T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, T r_tp1)
     {
       ASSERT(initialized);
-
       v_t = q->dot(phi_t);
       v_tp1 = q->dot(phi_tp1);
       e->update(gamma * lambda, phi_t, alpha);
@@ -320,17 +317,17 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
       return q->dot(phi_sa);
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       q->persist(f);
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       q->resurrect(f);
     }
 
-    const Vector<T>* weights() const
+    Vector<T>* weights() const
     {
       return q;
     }
@@ -423,7 +420,6 @@ class SarsaAlphaBound: public Sarsa<T>
     T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, T r_tp1)
     {
       ASSERT(Base::initialized);
-
       Base::v_t = Base::q->dot(phi_t);
       Base::v_tp1 = Base::q->dot(phi_tp1);
       Base::e->update(Base::gamma * Base::lambda, phi_t);
@@ -504,16 +500,16 @@ class GQ: public Predictor<T>, public LinearLearner<T>
       return v->dot(phi_sa);
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       v->persist(f);
     }
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       v->resurrect(f);
     }
 
-    const Vector<T>* weights() const
+    Vector<T>* weights() const
     {
       return v;
     }
@@ -603,17 +599,17 @@ class GTDLambda: public OnPolicyTD<T>, public GVF<T>
       return v->dot(phi);
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       v->persist(f);
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       v->resurrect(f);
     }
 
-    const Vector<T>* weights() const
+    Vector<T>* weights() const
     {
       return v;
     }

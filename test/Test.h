@@ -208,7 +208,7 @@ class VectorsTestsUtils
     template<class T>
     static bool checkConsistency(const Vector<T>* v)
     {
-      const SparseVector<T>* vec = dynamic_cast<const SparseVector<T>*>(v);
+      const SparseVector<T>* vec = RTTI<T>::constSparseVector(v);
       if (!vec)
         return true;
       else
@@ -218,7 +218,7 @@ class VectorsTestsUtils
     template<class T>
     static bool checkValues(const Vector<T>* x)
     {
-      const SparseVector<T>* v = dynamic_cast<const SparseVector<T>*>(x);
+      const SparseVector<T>* v = RTTI<T>::constSparseVector(x);
       const T* values = x->getValues();
       int nbChecks = 0;
       if (v)

@@ -25,6 +25,7 @@
 #include "Vector.h"
 #include "Math.h"
 #include "Supervised.h"
+#include "Timer.h"
 
 namespace RLLib
 {

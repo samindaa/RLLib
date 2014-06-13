@@ -318,8 +318,10 @@ class ColisionDetection: public Hashing<T>
     {
       if (size % 2 != 0)
       {
+#if !defined(EMBEDDED_MODE)
         std::cerr << "Size of collision table must be power of 2 " << size << std::endl;
         exit(0);
+#endif
       }
       data = new long[size];
       for (long* i = data; i < data + size; ++i)
@@ -346,28 +348,34 @@ class ColisionDetection: public Hashing<T>
 
     void print()
     {
+#if !defined(EMBEDDED_MODE)
       printf("Collision table: Safety : %d Usage : %d Size : %ld Calls : %ld Collisions : %ld\n",
           this->safe, this->usage(), this->m, this->calls, this->collisions);
+#endif
     }
 
     void save(int file)
     {
+#if !defined(EMBEDDED_MODE)
       ASSERT(write(file, (char * ) &m, sizeof(long)));
       ASSERT(write(file, (char * ) &safe, sizeof(int)));
       ASSERT(write(file, (char * ) &calls, sizeof(long)));
       ASSERT(write(file, (char * ) &clearhits, sizeof(long)));
       ASSERT(write(file, (char * ) &collisions, sizeof(long)));
       ASSERT(write(file, (char * ) data, m * sizeof(long)));
+#endif
     }
 
     void restore(int file)
     {
+#if !defined(EMBEDDED_MODE)
       ASSERT(read(file, (char * ) &m, sizeof(long)));
       ASSERT(read(file, (char * ) &safe, sizeof(int)));
       ASSERT(read(file, (char * ) &calls, sizeof(long)));
       ASSERT(read(file, (char * ) &clearhits, sizeof(long)));
       ASSERT(read(file, (char * ) &collisions, sizeof(long)));
       ASSERT(read(file, (char * ) data, m * sizeof(long)));
+#endif
     }
 
     void save(const char *filename)
@@ -408,7 +416,9 @@ class ColisionDetection: public Hashing<T>
           /*printf("collision (%d) \n",j);*/
           if (i > this->m)
           {
+#if !defined(EMBEDDED_MODE)
             printf("\nTiles: Collision table out of Memory");
+#endif
             break/*exit(0) <<@ Sam Abeyruwan*/;
           }
           if (ccheck == data[j])

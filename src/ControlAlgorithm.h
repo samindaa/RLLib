@@ -100,11 +100,11 @@ class SarsaControl: public OnPolicyControlLearner<T>
       return sarsa;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       sarsa->persist(f);
     }
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       sarsa->resurrect(f);
     }
@@ -206,8 +206,8 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       return target->pi(a_t) / behavior->pi(a_t);
     }
 
-    void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
-        const T& r_tp1, const T& z_tp1)
+    void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1, const T& r_tp1,
+        const T& z_tp1)
     {
       const Representations<T>* xas_t = toStateAction->stateActions(x_t);
       target->update(xas_t);
@@ -262,12 +262,12 @@ class GreedyGQ: public OffPolicyControlLearner<T>
       return gq;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       gq->persist(f);
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       gq->resurrect(f);
     }
@@ -335,11 +335,11 @@ class AbstractActorOffPolicy: public ActorOffPolicy<T>
       return targetPolicy->pi(a);
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       u->persist(f);
     }
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       u->resurrect(f);
     }
@@ -354,8 +354,8 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T>
     Traces<T>* e_u;
     typedef AbstractActorOffPolicy<T> Base;
   public:
-    ActorLambdaOffPolicy(const T& alpha_u, const T& gamma/*not used*/,
-        const T& lambda, PolicyDistribution<T>* targetPolicy, Traces<T>* e) :
+    ActorLambdaOffPolicy(const T& alpha_u, const T& gamma/*not used*/, const T& lambda,
+        PolicyDistribution<T>* targetPolicy, Traces<T>* e) :
         AbstractActorOffPolicy<T>(targetPolicy), alpha_u(alpha_u), gamma(gamma), lambda(lambda), e_u(
             e)
     {
@@ -429,8 +429,8 @@ class OffPAC: public OffPolicyControlLearner<T>
       return a;
     }
 
-    void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
-        const T& r_tp1, const T& z_tp1)
+    void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1, const T& r_tp1,
+        const T& z_tp1)
     {
       const Representations<T>* xas_t = toStateAction->stateActions(x_t);
       actor->policy()->update(xas_t);
@@ -473,24 +473,28 @@ class OffPAC: public OffPolicyControlLearner<T>
       return critic;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
+#if !defined(EMBEDDED_MODE)
       std::string fcritic(f);
       fcritic.append(".critic");
-      critic->persist(fcritic);
+      critic->persist(fcritic.c_str());
       std::string factor(f);
       factor.append(".actor");
-      actor->persist(factor);
+      actor->persist(factor.c_str());
+#endif
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
+#if !defined(EMBEDDED_MODE)
       std::string fcritic(f);
       fcritic.append(".critic");
-      critic->resurrect(fcritic);
+      critic->resurrect(fcritic.c_str());
       std::string factor(f);
       factor.append(".actor");
-      actor->resurrect(factor);
+      actor->resurrect(factor.c_str());
+#endif
     }
 };
 
@@ -540,11 +544,11 @@ class Actor: public ActorOnPolicy<T>
       return policyDistribution->sampleBestAction();
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       u->persist(f);
     }
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       u->resurrect(f);
     }
@@ -599,8 +603,7 @@ class ActorNatural: public Actor<T>
     Vectors<T>* w;
     T alpha_v;
   public:
-    ActorNatural(const T& alpha_u, const T& alpha_v,
-        PolicyDistribution<T>* policyDistribution) :
+    ActorNatural(const T& alpha_u, const T& alpha_v, PolicyDistribution<T>* policyDistribution) :
         Actor<T>(alpha_u, policyDistribution), w(new Vectors<T>()), alpha_v(alpha_v)
     {
       for (int i = 0; i < Base::u->dimension(); i++)
@@ -719,24 +722,28 @@ class AbstractActorCritic: public OnPolicyControlLearner<T>
       return critic;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
+#if !defined(EMBEDDED_MODE)
       std::string fcritic(f);
       fcritic.append(".critic");
-      critic->persist(fcritic);
+      critic->persist(fcritic.c_str());
       std::string factor(f);
       factor.append(".actor");
-      actor->persist(factor);
+      actor->persist(factor.c_str());
+#endif
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
+#if !defined(EMBEDDED_MODE)
       std::string fcritic(f);
       fcritic.append(".critic");
-      critic->resurrect(fcritic);
+      critic->resurrect(fcritic.c_str());
       std::string factor(f);
       factor.append(".actor");
-      actor->resurrect(factor);
+      actor->resurrect(factor.c_str());
+#endif
     }
 
 };

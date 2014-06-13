@@ -22,7 +22,7 @@
 #ifndef STATETOSTATEACTION_H_
 #define STATETOSTATEACTION_H_
 
-#include <map>
+#include <vector>
 #include "Action.h"
 #include "Vector.h"
 #include "Projector.h"
@@ -33,74 +33,53 @@ namespace RLLib
 template<class T>
 class Representations
 {
-  public:
-    typedef typename std::map<int, Vector<T>*>::iterator iterator;
-    typedef typename std::map<int, Vector<T>*>::const_iterator const_iterator;
-
   protected:
-    std::map<int, Vector<T>*>* phis;
+    std::vector<Vector<T>*> phis;
+
   public:
-    Representations(const int& numFeatures, const Actions<T>* actions) :
-        phis(new std::map<int, Vector<T>*>())
+    Representations(const int& numFeatures, const Actions<T>* actions)
     {
       for (typename Actions<T>::const_iterator iter = actions->begin(); iter != actions->end();
           ++iter)
-        phis->insert(std::make_pair((*iter)->id(), new SVector<T>(numFeatures)));
+        phis.push_back(new SVector<T>(numFeatures));
     }
+
     ~Representations()
     {
-      for (typename std::map<int, Vector<T>*>::iterator iter = phis->begin(); iter != phis->end();
+      for (typename std::vector<Vector<T>*>::iterator iter = phis.begin(); iter != phis.end();
           ++iter)
-        delete iter->second;
-      phis->clear();
-      delete phis;
+        delete *iter;
+      phis.clear();
     }
 
     int dimension() const
     {
-      return phis->size();
+      return phis.size();
     }
 
     void set(const Vector<T>* phi, const Action<T>* action)
     {
-      phis->at(action->id())->set(phi);
+      ASSERT(action->id() < static_cast<int>(phis.size()));
+      phis[action->id()]->set(phi);
     }
 
     Vector<T>* at(const Action<T>* action)
     {
-      return phis->at(action->id());
+      ASSERT(action->id() < static_cast<int>(phis.size()));
+      return phis[action->id()];
     }
 
     const Vector<T>* at(const Action<T>* action) const
     {
-      return phis->at(action->id());
-    }
-
-    iterator begin()
-    {
-      return phis->begin();
-    }
-
-    iterator end()
-    {
-      return phis->end();
-    }
-
-    const_iterator begin() const
-    {
-      return phis->begin();
-    }
-
-    const_iterator end() const
-    {
-      return phis->end();
+      ASSERT(action->id() < static_cast<int>(phis.size()));
+      return phis[action->id()];
     }
 
     void clear()
     {
-      for (typename std::map<int, Vector<T>*>::iterator iter = phis->begin(); iter != phis->end();
+      for (typename std::vector<Vector<T>*>::iterator iter = phis.begin(); iter != phis.end();
           ++iter)
-        iter->second->clear();
+        (*iter)->clear();
     }
 };
 

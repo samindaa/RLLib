@@ -65,17 +65,17 @@ class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
       return delta;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       w->persist(f);
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       w->resurrect(f);
     }
 
-    const Vector<T>* weights() const
+    Vector<T>* weights() const
     {
       return w;
     }
@@ -142,17 +142,17 @@ class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
       return delta;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       w->persist(f);
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       w->resurrect(f);
     }
 
-    const Vector<T>* weights() const
+    Vector<T>* weights() const
     {
       return w;
     }
@@ -220,17 +220,17 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
       return delta;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       w->persist(f);
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       w->resurrect(f);
     }
 
-    const Vector<T>* weights() const
+    Vector<T>* weights() const
     {
       return w;
     }
@@ -288,7 +288,7 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
         const Vector<T>* piX, const T& delta)
     {
       Vector<T>* piX2 = pool->newVector(x2)->ebeMultiplyToSelf(pi);
-      const SparseVector<T>* sresult = dynamic_cast<const SparseVector<T>*>(piX2);
+      const SparseVector<T>* sresult = RTTI<T>::constSparseVector(piX2);
       if (sresult)
       {
         const int* activeIndexes = sresult->nonZeroIndexes();
@@ -326,17 +326,17 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
       return delta;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       w->persist(f);
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       w->resurrect(f);
     }
 
-    const Vector<T>* weights() const
+    Vector<T>* weights() const
     {
       return w;
     }
@@ -384,7 +384,7 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
           x2)->ebeMultiplyToSelf(alphas);
       v->addToSelf(1.0f / tau, vUpdate);
       Vectors<T>::positiveMaxToSelf(v, absDeltaXH);
-      Vectors<T>::multiplySelfByExponential(dynamic_cast<DenseVector<T>*>(alphas), kappa,
+      Vectors<T>::multiplySelfByExponential(RTTI<T>::denseVector(alphas), kappa,
           deltaXH->ebeDivideToSelf(v), minimumStepsize);
       Vector<T>* x2ByAlphas = pool->newVector(x2)->ebeMultiplyToSelf(alphas);
       T sum = x2ByAlphas->sum();
@@ -421,17 +421,17 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
       return delta;
     }
 
-    void persist(const std::string& f) const
+    void persist(const char* f) const
     {
       w->persist(f);
     }
 
-    void resurrect(const std::string& f)
+    void resurrect(const char* f)
     {
       w->resurrect(f);
     }
 
-    const Vector<T>* weights() const
+    Vector<T>* weights() const
     {
       return w;
     }

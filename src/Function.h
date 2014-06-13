@@ -34,8 +34,8 @@ class ParameterizedFunction
     virtual ~ParameterizedFunction()
     {
     }
-    virtual void persist(const std::string& f) const =0;
-    virtual void resurrect(const std::string& f) =0;
+    virtual void persist(const char* f) const =0;
+    virtual void resurrect(const char* f) =0;
 };
 
 template<class T>
@@ -47,7 +47,7 @@ class LinearLearner: public ParameterizedFunction<T>
     }
     virtual T initialize() =0;
     virtual void reset() =0;
-    virtual const Vector<T>* weights() const =0;
+    virtual Vector<T>* weights() const =0;
 };
 
 template<class T>
