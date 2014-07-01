@@ -356,7 +356,10 @@ class DenseVector: public Vector<T>
         // Read capacity
         int rcapacity;
         Vector<T>::read(ifs, rcapacity);
-        ASSERT(capacity == rcapacity);
+        //ASSERT(capacity == rcapacity);
+        delete[] data;
+        capacity = rcapacity;
+        data = new T[capacity];
         clear();
         printf("vectorType=%i rcapacity=%i \n", vectorType, rcapacity);
         // Read data
@@ -687,7 +690,11 @@ class SparseVector: public Vector<T>
         // Read numActive
         int rnbActive;
         Vector<T>::read(ifs, rnbActive);
-        ASSERT(indexesPositionLength == rcapacity);
+        //ASSERT(indexesPositionLength == rcapacity);
+        indexesPositionLength = rcapacity;
+        delete[] indexesPosition;
+        indexesPosition = new int[indexesPositionLength];
+        std::fill(indexesPosition, indexesPosition + indexesPositionLength, -1);
         clear();
         // Verbose
         printf("vectorType=%i rcapacity=%i rnbActive=%i\n", vectorType, rcapacity, rnbActive);
