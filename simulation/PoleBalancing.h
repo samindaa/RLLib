@@ -109,10 +109,10 @@ class PoleBalancing: public RLProblem<double>
     void initialize()
     {
       mvnrnd(random, mu0, Sigma0, x);
-      updateRTStep();
+      updateTRStep();
     }
 
-    void updateRTStep()
+    void updateTRStep()
     {
       DenseVector<double>& vars = *output->o_tp1;
       for (int i = 0; i < vars.dimension(); i++)
@@ -120,7 +120,7 @@ class PoleBalancing: public RLProblem<double>
         observations->at(i) = x[i];
         vars[i] = x[i];
       }
-      output->updateRTStep(r(), z(), endOfEpisode());
+      output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action<double>* action)
@@ -128,7 +128,7 @@ class PoleBalancing: public RLProblem<double>
       u(0) = action->at(0);
       mu = A * x + b * u;
       mvnrnd(random, mu, SigmaT, x);
-      updateRTStep();
+      updateTRStep();
     }
 
     bool endOfEpisode() const

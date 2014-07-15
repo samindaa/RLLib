@@ -22,27 +22,6 @@
 #ifndef MOUNTAINCAR_H_
 #define MOUNTAINCAR_H_
 
-/*
- * Copyright 2013 Saminda Abeyruwan (saminda@cs.miami.edu)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * MCar2D.h
- *
- *  Created on: Jun 29, 2012
- *      Author: sam
- */
-
 #include "RL.h"
 
 using namespace RLLib;
@@ -88,12 +67,12 @@ class MountainCar: public RLProblem<T>
       delete actionRange;
     }
 
-    void updateRTStep()
+    void updateTRStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
       vars[0] = positionRange->toUnit(position);
       vars[1] = velocityRange->toUnit(velocity);
-      Base::output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateTRStep(r(), z(), endOfEpisode());
 
       Base::observations->at(0) = position;
       Base::observations->at(1) = velocity;
@@ -113,7 +92,7 @@ class MountainCar: public RLProblem<T>
         position = -0.5;
         velocity = 0.0;
       }
-      updateRTStep();
+      updateTRStep();
     }
 
     void step(const Action<T>* a)
@@ -125,7 +104,7 @@ class MountainCar: public RLProblem<T>
       if (position < positionRange->min())
         velocity = 0.0;
       position = positionRange->bound(position);
-      updateRTStep();
+      updateTRStep();
     }
 
     bool endOfEpisode() const

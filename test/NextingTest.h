@@ -105,7 +105,7 @@ class NextingProblem: public RLProblem<double>
     virtual ~NextingProblem();
     void initialize();
     void step(const Action<double>* action);
-    void updateRTStep();
+    void updateTRStep();
     bool endOfEpisode() const;
     double r() const;
     double z() const;

@@ -77,10 +77,10 @@ class CartPole: public RLProblem<T>
       delete thetaRange;
     }
 
-    void updateRTStep()
+    void updateTRStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
-      Base::output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateTRStep(r(), z(), endOfEpisode());
 
       Base::observations->at(0) = x;
       Base::observations->at(1) = x_dot;
@@ -107,7 +107,7 @@ class CartPole: public RLProblem<T>
       }
       else
         x = x_dot = theta = theta_dot = 0; //<< fixMe with noise
-      updateRTStep();
+      updateTRStep();
     }
 
     void step(const Action<T>* a)
@@ -126,7 +126,7 @@ class CartPole: public RLProblem<T>
       theta += tau * theta_dot;
       theta_dot += tau * thetaacc;
 
-      updateRTStep();
+      updateTRStep();
     }
 
     bool endOfEpisode() const

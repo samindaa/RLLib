@@ -21,21 +21,21 @@ NextingProblem::~NextingProblem()
 
 void NextingProblem::initialize()
 {
-  updateRTStep();
+  updateTRStep();
   for (int i = 0; i < dimension(); i++)
     output->o_tp1->clear();
 }
 
 void NextingProblem::step(const Action<double>* action)
 {
-  updateRTStep();
+  updateTRStep();
 }
 
-void NextingProblem::updateRTStep()
+void NextingProblem::updateTRStep()
 {
   for (int i = 0; i < dimension(); i++)
     output->o_tp1->at(i) = random->nextReal();
-  output->updateRTStep(r(), z(), endOfEpisode());
+  output->updateTRStep(r(), z(), endOfEpisode());
 }
 
 bool NextingProblem::endOfEpisode() const

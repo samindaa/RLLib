@@ -80,18 +80,18 @@ class Acrobot: public RLProblem<T>
       else
         theta1 = theta2 = theta1Dot = theta2Dot = 0.0; // not random
 
-      updateRTStep();
+      updateTRStep();
 
     }
 
-    void updateRTStep()
+    void updateTRStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
       vars[0] = thetaRange->toUnit(theta1);
       vars[1] = thetaRange->toUnit(theta2);
       vars[2] = theta1DotRange->toUnit(theta1Dot);
       vars[3] = theta2DotRange->toUnit(theta2Dot);
-      Base::output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateTRStep(r(), z(), endOfEpisode());
 
       Base::observations->at(0) = theta1;
       Base::observations->at(1) = theta2;
@@ -151,7 +151,7 @@ class Acrobot: public RLProblem<T>
         theta1Dot = 0;
       }
 
-      updateRTStep();
+      updateTRStep();
     }
 
     bool endOfEpisode() const

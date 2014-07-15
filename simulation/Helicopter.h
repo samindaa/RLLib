@@ -436,11 +436,11 @@ class Helicopter: public RLProblem<T>
     void initialize()
     {
       heliDynamics.reset();
-      updateRTStep();
+      updateTRStep();
       step_time = 0;
     }
 
-    void updateRTStep()
+    void updateTRStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
       const vector<double>& observation = heliDynamics.getObservation();
@@ -450,14 +450,14 @@ class Helicopter: public RLProblem<T>
         vars[i] = observation[i];
         // TODO: scaling?
       }
-      Base::output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action<T>* action)
     {
       heliDynamics.step(Base::random, action);
       ++step_time;
-      updateRTStep();
+      updateTRStep();
     }
 
     bool endOfEpisode() const

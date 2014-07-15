@@ -126,9 +126,9 @@ class NonMarkovPoleBalancing: public RLProblem<T>
     }
 
   public:
-    void updateRTStep()
+    void updateTRStep()
     {
-      Base::output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateTRStep(r(), z(), endOfEpisode());
       DenseVector<T>& vars = *Base::output->o_tp1;
 
       Base::observations->at(0) = xRange->bound(x);
@@ -172,7 +172,7 @@ class NonMarkovPoleBalancing: public RLProblem<T>
         thetaDot->setEntry(i, 0.0f);
 
       adjustTheta();
-      updateRTStep();
+      updateTRStep();
     }
 
     void step(const Action<T>* a)
@@ -214,7 +214,7 @@ class NonMarkovPoleBalancing: public RLProblem<T>
       }
 
       adjustTheta();
-      updateRTStep();
+      updateTRStep();
     }
 
     bool endOfEpisode() const

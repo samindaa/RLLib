@@ -148,7 +148,7 @@ class MountainCar3D: public RLProblem<T>
       yposition = positionRange->bound(yposition);
     }
 
-    void updateRTStep()
+    void updateTRStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
       vars[0] = positionRange->toUnit(xposition);
@@ -161,7 +161,7 @@ class MountainCar3D: public RLProblem<T>
       Base::observations->at(2) = xvelocity;
       Base::observations->at(3) = yvelocity;
 
-      Base::output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
 
   public:
@@ -169,14 +169,14 @@ class MountainCar3D: public RLProblem<T>
     {
 //      set_initial_position_at_bottom();
       set_initial_position_random();
-      updateRTStep();
+      updateTRStep();
     }
 
     void step(const Action<double>* a)
     {
       update_velocity(a);
       update_position();
-      updateRTStep();
+      updateTRStep();
     }
 
     bool endOfEpisode() const

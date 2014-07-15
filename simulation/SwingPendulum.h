@@ -78,7 +78,7 @@ class SwingPendulum: public RLProblem<T>
     }
 
   public:
-    void updateRTStep()
+    void updateTRStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
       vars[0] = thetaRange->toUnit(theta);
@@ -87,7 +87,7 @@ class SwingPendulum: public RLProblem<T>
       Base::observations->at(0) = theta;
       Base::observations->at(1) = velocity;
 
-      Base::output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
     void initialize()
     {
@@ -98,7 +98,7 @@ class SwingPendulum: public RLProblem<T>
         theta = M_PI_2;
       velocity = 0.0;
       adjustTheta();
-      updateRTStep();
+      updateTRStep();
     }
 
     void step(const Action<double>* a)
@@ -111,7 +111,7 @@ class SwingPendulum: public RLProblem<T>
       adjustTheta();
       upTime = fabs(theta) > upRange ? 0 : upTime + 1;
 
-      updateRTStep();
+      updateTRStep();
     }
     bool endOfEpisode() const
     {

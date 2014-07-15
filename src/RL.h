@@ -51,7 +51,7 @@ class TRStep
     {
     }
 
-    void updateRTStep(const T& r_tp1, const T& z_tp1, const bool& endOfEpisode)
+    void updateTRStep(const T& r_tp1, const T& z_tp1, const bool& endOfEpisode)
     {
       this->r_tp1 = r_tp1;
       this->z_tp1 = z_tp1;
@@ -201,27 +201,12 @@ class RLProblem
     }
 
   public:
-    virtual void initialize()
-    {
-    } //=0;
-    virtual void step(const Action<T>* action)
-    {
-    } //=0;
-    virtual void updateRTStep()
-    {
-    } //=0;
-    virtual bool endOfEpisode() const
-    {
-      return false;
-    } //=0;
-    virtual T r() const
-    {
-      return T(0);
-    } //=0;
-    virtual T z() const
-    {
-      return T(0);
-    } //=0;
+    virtual void initialize() =0;
+    virtual void step(const Action<T>* action) =0;
+    virtual void updateTRStep() =0;
+    virtual bool endOfEpisode() const =0;
+    virtual T r() const =0;
+    virtual T z() const =0;
 
     virtual void draw() const
     {/*To output useful information*/

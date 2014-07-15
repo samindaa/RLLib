@@ -127,7 +127,7 @@ class RandlovBike: public RLProblem<Type>
     }
 
   public:
-    void updateRTStep()
+    void updateTRStep()
     {
       DenseVector<Type>& vars = *Base::output->o_tp1;
       vars[0] = omegaRange->toUnit(omega);
@@ -144,7 +144,7 @@ class RandlovBike: public RLProblem<Type>
       Base::observations->at(4) = theta_dot;
       if (goToTarget)
         Base::observations->at(5) = psi_goal;
-      Base::output->updateRTStep(r(), z(), endOfEpisode());
+      Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     void bike(const int& to_do, const int& action = 0)
@@ -274,19 +274,17 @@ class RandlovBike: public RLProblem<Type>
           isTerminal = false;
         }
       }
-      updateRTStep();
+      updateTRStep();
     }
 
     void initialize()
     {
       bike(start);
-      updateRTStep();
     }
 
     void step(const Action<double>* action)
     {
       bike(execute_action, action->id());
-      updateRTStep();
     }
 
     bool endOfEpisode() const

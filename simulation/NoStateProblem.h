@@ -46,7 +46,7 @@ class NoStateProblem: public RLProblem<double>
 
     void initialize()
     {
-      updateRTStep();
+      updateTRStep();
     }
 
     void step(const Action<double>* action)
@@ -54,13 +54,13 @@ class NoStateProblem: public RLProblem<double>
       currentA = action->at(0);
       if (range != 0)
         currentA = range->bound(currentA);
-      updateRTStep();
+      updateTRStep();
     }
 
-    void updateRTStep()
+    void updateTRStep()
     {
       observations->at(0) = output->o_tp1->at(0) = 1.0;
-      output->updateRTStep(r(), z(), endOfEpisode());
+      output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     bool endOfEpisode() const
