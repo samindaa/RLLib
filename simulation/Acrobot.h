@@ -79,9 +79,6 @@ class Acrobot: public RLProblem<T>
       }
       else
         theta1 = theta2 = theta1Dot = theta2Dot = 0.0; // not random
-
-      updateTRStep();
-
     }
 
     void updateTRStep()
@@ -150,8 +147,6 @@ class Acrobot: public RLProblem<T>
         theta1 = thetaRange->bound(theta1);
         theta1Dot = 0;
       }
-
-      updateTRStep();
     }
 
     bool endOfEpisode() const

@@ -436,7 +436,6 @@ class Helicopter: public RLProblem<T>
     void initialize()
     {
       heliDynamics.reset();
-      updateTRStep();
       step_time = 0;
     }
 
@@ -457,7 +456,6 @@ class Helicopter: public RLProblem<T>
     {
       heliDynamics.step(Base::random, action);
       ++step_time;
-      updateTRStep();
     }
 
     bool endOfEpisode() const

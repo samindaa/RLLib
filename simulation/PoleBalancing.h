@@ -109,7 +109,6 @@ class PoleBalancing: public RLProblem<double>
     void initialize()
     {
       mvnrnd(random, mu0, Sigma0, x);
-      updateTRStep();
     }
 
     void updateTRStep()
@@ -128,7 +127,6 @@ class PoleBalancing: public RLProblem<double>
       u(0) = action->at(0);
       mu = A * x + b * u;
       mvnrnd(random, mu, SigmaT, x);
-      updateTRStep();
     }
 
     bool endOfEpisode() const

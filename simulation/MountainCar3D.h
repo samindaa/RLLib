@@ -169,14 +169,12 @@ class MountainCar3D: public RLProblem<T>
     {
 //      set_initial_position_at_bottom();
       set_initial_position_random();
-      updateTRStep();
     }
 
     void step(const Action<double>* a)
     {
       update_velocity(a);
       update_position();
-      updateTRStep();
     }
 
     bool endOfEpisode() const

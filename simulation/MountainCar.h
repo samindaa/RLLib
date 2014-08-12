@@ -92,7 +92,6 @@ class MountainCar: public RLProblem<T>
         position = -0.5;
         velocity = 0.0;
       }
-      updateTRStep();
     }
 
     void step(const Action<T>* a)
@@ -104,7 +103,6 @@ class MountainCar: public RLProblem<T>
       if (position < positionRange->min())
         velocity = 0.0;
       position = positionRange->bound(position);
-      updateTRStep();
     }
 
     bool endOfEpisode() const

@@ -274,7 +274,6 @@ class RandlovBike: public RLProblem<Type>
           isTerminal = false;
         }
       }
-      updateTRStep();
     }
 
     void initialize()

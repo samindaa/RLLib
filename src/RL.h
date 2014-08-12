@@ -201,6 +201,15 @@ class RLProblem
     }
 
   public:
+    /**
+     * When implementing a RL problem following methods must be implemented.
+     *  initialize   : initialize the problem.
+     *  step         : step through the problem.
+     *  updateTRStep : update the state variables to be used by agents.
+     *  endOfEpisode : end of an episode event.
+     *  r            : transient reward function.
+     *  z            : termination reward function.
+     */
     virtual void initialize() =0;
     virtual void step(const Action<T>* action) =0;
     virtual void updateTRStep() =0;
@@ -364,6 +373,9 @@ class Simulator
       {
         /*Initialize the problem*/
         problem->initialize();
+        /*Update the state variables*/
+        problem->updateTRStep();
+
         /*Statistic variables*/
         timeStep = 0;
         episodeR = 0;
@@ -377,6 +389,8 @@ class Simulator
       {
         /*Step through the problem*/
         problem->step(agentAction);
+        /*Update the state variables*/
+        problem->updateTRStep();
       }
 
       if (!agentAction)

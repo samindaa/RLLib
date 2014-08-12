@@ -86,9 +86,9 @@ class SwingPendulum: public RLProblem<T>
 
       Base::observations->at(0) = theta;
       Base::observations->at(1) = velocity;
-
       Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
+
     void initialize()
     {
       upTime = 0;
@@ -98,7 +98,6 @@ class SwingPendulum: public RLProblem<T>
         theta = M_PI_2;
       velocity = 0.0;
       adjustTheta();
-      updateTRStep();
     }
 
     void step(const Action<double>* a)
@@ -110,18 +109,19 @@ class SwingPendulum: public RLProblem<T>
       theta += velocity * stepTime;
       adjustTheta();
       upTime = fabs(theta) > upRange ? 0 : upTime + 1;
-
-      updateTRStep();
     }
+
     bool endOfEpisode() const
     {
       return false;
       //return upTime + 1 >= requiredUpTime / stepTime; // 1000 steps
     }
+
     T r() const
     {
       return cos(theta);
     }
+
     T z() const
     {
       return 0.0f;

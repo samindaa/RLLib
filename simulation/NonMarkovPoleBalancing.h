@@ -172,7 +172,6 @@ class NonMarkovPoleBalancing: public RLProblem<T>
         thetaDot->setEntry(i, 0.0f);
 
       adjustTheta();
-      updateTRStep();
     }
 
     void step(const Action<T>* a)
@@ -214,7 +213,6 @@ class NonMarkovPoleBalancing: public RLProblem<T>
       }
 
       adjustTheta();
-      updateTRStep();
     }
 
     bool endOfEpisode() const

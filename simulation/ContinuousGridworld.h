@@ -71,7 +71,6 @@ class ContinuousGridworld: public RLProblem<T>
     {
       Base::observations->at(0) = 0.2;
       Base::observations->at(1) = 0.4;
-      updateTRStep();
     }
 
     void updateTRStep()
@@ -88,7 +87,6 @@ class ContinuousGridworld: public RLProblem<T>
       for (int i = 0; i < Base::observations->dimension(); i++)
         Base::observations->at(i) = observationRange->bound(
             Base::observations->at(i) + actionRange->bound(action->at(i) + noise));
-      updateTRStep();
     }
 
     bool endOfEpisode() const

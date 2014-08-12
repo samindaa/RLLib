@@ -21,14 +21,13 @@ NextingProblem::~NextingProblem()
 
 void NextingProblem::initialize()
 {
-  updateTRStep();
   for (int i = 0; i < dimension(); i++)
     output->o_tp1->clear();
 }
 
 void NextingProblem::step(const Action<double>* action)
 {
-  updateTRStep();
+  /*do some work*/
 }
 
 void NextingProblem::updateTRStep()

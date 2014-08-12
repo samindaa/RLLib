@@ -107,7 +107,6 @@ class CartPole: public RLProblem<T>
       }
       else
         x = x_dot = theta = theta_dot = 0; //<< fixMe with noise
-      updateTRStep();
     }
 
     void step(const Action<T>* a)
@@ -125,8 +124,6 @@ class CartPole: public RLProblem<T>
       x_dot += tau * xacc;
       theta += tau * theta_dot;
       theta_dot += tau * thetaacc;
-
-      updateTRStep();
     }
 
     bool endOfEpisode() const
