@@ -78,7 +78,6 @@ class ContinuousGridworld: public RLProblem<T>
       // unit generalization
       for (int i = 0; i < Base::output->o_tp1->dimension(); i++)
         Base::output->o_tp1->at(i) = Base::observations->at(i);
-      Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action<T>* action)

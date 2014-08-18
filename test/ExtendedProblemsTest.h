@@ -37,8 +37,11 @@
 #include "RandlovBike.h"
 #include "PoleBalancing.h"
 #include "TorquedPendulum.h"
+#include "UnderwaterVehicle.h"
 
 #include "util/Spline.h"
+#include "util/RK4.h"
+
 using namespace std;
 RLLIB_TEST(ExtendedProblemsTest)
 
@@ -61,11 +64,47 @@ class ExtendedProblemsTest: public ExtendedProblemsTestBase
     void testOffPACAcrobot();
     void testGreedyGQAcrobot();
 
+    void testTrueSarsaUnderwaterVehicle();
+
     void testPoleBalancingPlant();
     void testPersistResurrect();
     void testMatrix();
     void testTorquedPendulum();
     void testSupervisedProjector();
+
+    void testFunction1RK4();
+    void testFunction2RK4();
+
+    // RK tests
+    class Function1: public RK4
+    {
+      public:
+        Function1(const int& m, const double& dt) :
+            RK4(m, dt)
+        {
+        }
+
+        void f(const double& t, const int& m, const double* u, double* u_dot)
+        {
+          u_dot[0] = u[0] * cos(t);
+        }
+
+    };
+
+    class Function2: public RK4
+    {
+      public:
+        Function2(const int& m, const double& dt) :
+            RK4(m, dt)
+        {
+        }
+
+        void f(const double& t, const int& m, const double* u, double* u_dot)
+        {
+          u_dot[0] = u[1];
+          u_dot[1] = -u[0];
+        }
+    };
 
 };
 

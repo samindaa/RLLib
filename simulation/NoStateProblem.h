@@ -58,7 +58,6 @@ class NoStateProblem: public RLProblem<double>
     void updateTRStep()
     {
       observations->at(0) = output->o_tp1->at(0) = 1.0;
-      output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     bool endOfEpisode() const

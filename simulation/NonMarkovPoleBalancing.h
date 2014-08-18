@@ -128,7 +128,6 @@ class NonMarkovPoleBalancing: public RLProblem<T>
   public:
     void updateTRStep()
     {
-      Base::output->updateTRStep(r(), z(), endOfEpisode());
       DenseVector<T>& vars = *Base::output->o_tp1;
 
       Base::observations->at(0) = xRange->bound(x);

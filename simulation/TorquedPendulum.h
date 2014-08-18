@@ -23,17 +23,17 @@
 #define TORQUEDPENDULUM_H_
 
 #include <cmath>
-#include "Dynamics.h"
+#include "util/RK4.h"
 
-class TorquedPendulum: public Dynamics
+class TorquedPendulum: public RK4
 {
   protected:
-    double m, l, mu, g, u;
+    double m, l, mu, g, force;
 
   public:
 
     TorquedPendulum(const double& m, const double& l, const double& mu, const double& dt) :
-        Dynamics(2, dt), m(m), l(l), mu(mu), g(9.8), u(0)
+        RK4(2, dt), m(m), l(l), mu(mu), g(9.8), force(0)
     {
     }
 
@@ -41,29 +41,15 @@ class TorquedPendulum: public Dynamics
     {
     }
 
-    void setu(const double& u)
+    void setForce(const double& force)
     {
-      this->u = u;
+      this->force = force;
     }
 
-    void derivs(const double& a, DenseVector<double>* o, DenseVector<double>* n)
+    void f(const double& t, const int& m, const double* u, double* u_dot)
     {
-      n->at(0) = o->at(1);
-      n->at(1) = ((-mu * o->at(1) + m * g * l * sin(o->at(0)) + u) / (m * l * l));
-    }
-
-    void nextcopy()
-    {
-      for (int i = 0; i < dimensions; i++)
-        x->at(i) = xout->at(i);
-
-      // Normalize
-      while (x->at(0) > M_PI)
-        x->at(0) -= 2.0 * M_PI;
-      while (x->at(0) < -M_PI)
-        x->at(0) += 2.0 * M_PI;
-
-      t += dt;
+      u_dot[0] = u[1];
+      u_dot[1] = ((-mu * u_dot[0] + m * g * l * sin(u[0]) + force) / (m * l * l));
     }
 
 };

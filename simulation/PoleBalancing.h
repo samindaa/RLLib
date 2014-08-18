@@ -119,7 +119,6 @@ class PoleBalancing: public RLProblem<double>
         observations->at(i) = x[i];
         vars[i] = x[i];
       }
-      output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action<double>* action)

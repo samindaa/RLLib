@@ -80,8 +80,6 @@ class CartPole: public RLProblem<T>
     void updateTRStep()
     {
       DenseVector<T>& vars = *Base::output->o_tp1;
-      Base::output->updateTRStep(r(), z(), endOfEpisode());
-
       Base::observations->at(0) = x;
       Base::observations->at(1) = x_dot;
       Base::observations->at(2) = theta;

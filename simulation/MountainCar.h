@@ -72,7 +72,6 @@ class MountainCar: public RLProblem<T>
       DenseVector<T>& vars = *Base::output->o_tp1;
       vars[0] = positionRange->toUnit(position);
       vars[1] = velocityRange->toUnit(velocity);
-      Base::output->updateTRStep(r(), z(), endOfEpisode());
 
       Base::observations->at(0) = position;
       Base::observations->at(1) = velocity;

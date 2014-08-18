@@ -34,7 +34,6 @@ void NextingProblem::updateTRStep()
 {
   for (int i = 0; i < dimension(); i++)
     output->o_tp1->at(i) = random->nextReal();
-  output->updateTRStep(r(), z(), endOfEpisode());
 }
 
 bool NextingProblem::endOfEpisode() const

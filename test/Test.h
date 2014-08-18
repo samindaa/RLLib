@@ -36,6 +36,7 @@
 #include <sstream>
 #include <algorithm>
 #include <limits>
+#include <iomanip>
 
 #include "Vector.h"
 #include "Trace.h"

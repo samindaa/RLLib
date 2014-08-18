@@ -86,7 +86,6 @@ class SwingPendulum: public RLProblem<T>
 
       Base::observations->at(0) = theta;
       Base::observations->at(1) = velocity;
-      Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     void initialize()

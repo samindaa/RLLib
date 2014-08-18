@@ -449,7 +449,6 @@ class Helicopter: public RLProblem<T>
         vars[i] = observation[i];
         // TODO: scaling?
       }
-      Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     void step(const Action<T>* action)

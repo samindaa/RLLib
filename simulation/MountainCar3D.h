@@ -160,8 +160,6 @@ class MountainCar3D: public RLProblem<T>
       Base::observations->at(1) = yposition;
       Base::observations->at(2) = xvelocity;
       Base::observations->at(3) = yvelocity;
-
-      Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
 
   public:

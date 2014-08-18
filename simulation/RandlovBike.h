@@ -144,7 +144,6 @@ class RandlovBike: public RLProblem<Type>
       Base::observations->at(4) = theta_dot;
       if (goToTarget)
         Base::observations->at(5) = psi_goal;
-      Base::output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     void bike(const int& to_do, const int& action = 0)

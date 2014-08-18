@@ -217,6 +217,12 @@ class RLProblem
     virtual T r() const =0;
     virtual T z() const =0;
 
+    void updateTuple()
+    {
+      updateTRStep();
+      output->updateTRStep(r(),z(), endOfEpisode());
+    }
+
     virtual void draw() const
     {/*To output useful information*/
     }
@@ -374,7 +380,7 @@ class Simulator
         /*Initialize the problem*/
         problem->initialize();
         /*Update the state variables*/
-        problem->updateTRStep();
+        problem->updateTuple();
 
         /*Statistic variables*/
         timeStep = 0;
@@ -390,7 +396,7 @@ class Simulator
         /*Step through the problem*/
         problem->step(agentAction);
         /*Update the state variables*/
-        problem->updateTRStep();
+        problem->updateTuple();
       }
 
       if (!agentAction)

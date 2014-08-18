@@ -88,7 +88,6 @@ class Acrobot: public RLProblem<T>
       vars[1] = thetaRange->toUnit(theta2);
       vars[2] = theta1DotRange->toUnit(theta1Dot);
       vars[3] = theta2DotRange->toUnit(theta2Dot);
-      Base::output->updateTRStep(r(), z(), endOfEpisode());
 
       Base::observations->at(0) = theta1;
       Base::observations->at(1) = theta2;

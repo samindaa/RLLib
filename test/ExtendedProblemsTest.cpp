@@ -319,6 +319,45 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
   delete sim;
 }
 
+void ExtendedProblemsTest::testTrueSarsaUnderwaterVehicle()
+{
+  Random<double>* random = new Random<double>;
+  RLProblem<double>* problem = new UnderwaterVehicle(random);
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 10000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActions());
+
+  Trace<double>* e = new ATrace<double>(projector->dimension());
+  double alpha = 0.4 / projector->vectorNorm();
+  double gamma = 0.99;
+  double lambda = 0.99;
+  Sarsa<double>* sarsa = new SarsaTrue<double>(alpha, gamma, lambda, e);
+  double epsilon = 0.01;
+  Policy<double>* acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa,
+      epsilon);
+  OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
+
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 1);
+  //sim->setTestEpisodesAfterEachRun(true);
+  sim->run();
+  //sim->computeValueFunction();
+
+  delete random;
+  delete problem;
+  delete hashing;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete sarsa;
+  delete acting;
+  delete control;
+  delete agent;
+  delete sim;
+}
+
 void ExtendedProblemsTest::testPoleBalancingPlant()
 {
   Random<double> random;
@@ -406,15 +445,15 @@ void ExtendedProblemsTest::testTorquedPendulum()
 
   TorquedPendulum torquedPendulum(m, l, mu, dt);
 
-  torquedPendulum.setu(d4);
-  torquedPendulum.setx(0, M_PI_2);
+  torquedPendulum.setForce(d4);
+  torquedPendulum(0) = 0.0f;
+  torquedPendulum(1) = M_PI_2;
 
-  while (torquedPendulum.gett() < d5)
+  while (torquedPendulum.getTime() < d5)
   {
-    cout << torquedPendulum.gett() << " " << torquedPendulum.getx(0) << " "
-        << torquedPendulum.getx(1) << endl;
-    torquedPendulum.nextstep();
-    torquedPendulum.nextcopy();
+    cout << torquedPendulum.getTime() << " " << torquedPendulum(0) << " " << torquedPendulum(1)
+        << endl;
+    torquedPendulum.step();
   }
 }
 
@@ -513,6 +552,87 @@ void ExtendedProblemsTest::testSupervisedProjector()
 
 }
 
+void ExtendedProblemsTest::testFunction1RK4()
+{
+  int n = 1;
+  double dt = 0.1;
+  double pi = 3.14159265;
+  double tmax = 12.0 * pi;
+
+  Function1 rk4(n, dt);
+  rk4(0) = 0.5;
+
+  printf("\n");
+  printf("testFunction1RK4\n");
+  printf("  RK4 takes one Runge Kutta step for a scalar ODE.\n");
+
+  printf("\n");
+  printf("          T          U[T]\n");
+  printf("\n");
+
+  while (true)
+  {
+    //
+    //  Print (T0,U0).
+    //
+    cout << "  " << rk4.getTime() << "  " << rk4(0) << "\n";
+    //
+    //  Stop if we've exceeded TMAX.
+    //
+    if (tmax <= rk4.getTime())
+      break;
+    //
+    //  Otherwise, advance to time T1, and have RK4 estimate
+    //  the solution U1 there.
+    //
+    rk4.step();
+    //
+    //  Shift the data to prepare for another step.
+    //
+  }
+
+}
+
+void ExtendedProblemsTest::testFunction2RK4()
+{
+  double dt = 0.2;
+  int n = 2;
+  double tmax = 12.0 * 3.141592653589793;
+  Function2 rk4(n, dt);
+  rk4(0) = 0.0f;
+  rk4(1) = 1.0f;
+
+  cout << "\n";
+  cout << "testFunction2RK4\n";
+  cout << "  RK4 takes a Runge Kutta step for a vector ODE.\n";
+
+  cout << "\n";
+  cout << "       T       U[0]       U[1]\n";
+  cout << "\n";
+
+  for (;;)
+  {
+    //
+    //  Print (T0,U0).
+    //
+    cout << "  " << setw(14) << rk4.getTime() << "  " << setw(14) << rk4(0) << "  " << setw(14)
+        << rk4(1) << "\n";
+    //
+    //  Stop if we've exceeded TMAX.
+    //
+    if (tmax <= rk4.getTime())
+      break;
+    //
+    //  Otherwise, advance to time T1, and have RK4 estimate
+    //  the solution U1 there.
+    //
+    rk4.step();
+    //
+    //  Shift the data to prepare for another step.
+    //
+  }
+}
+
 void ExtendedProblemsTest::run()
 {
   testOffPACMountainCar3D_1();
@@ -522,9 +642,14 @@ void ExtendedProblemsTest::run()
   testOffPACAcrobot();
   testGreedyGQAcrobot();
 
+  testTrueSarsaUnderwaterVehicle();
+
   testMatrix();
   testPoleBalancingPlant();
   testTorquedPendulum();
   testSupervisedProjector();
+
+  testFunction1RK4();
+  testFunction2RK4();
 }
 
