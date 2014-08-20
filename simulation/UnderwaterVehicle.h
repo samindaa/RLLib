@@ -27,28 +27,23 @@ class UnderwaterVehicle: public RLProblem<double>
   protected:
     class Dynammic: public RK4
     {
-      private:
-        double u; // acttion
 
       public:
         Dynammic(const double& dt) :
-            RK4(1, dt), u(0)
+            RK4(1, dt)
         {
         }
 
-        void setU(const double& u)
+        void f(const double& time, const Action<double>* action, const Vector<double>* x,
+            Vector<double>* x_dot)
         {
-          this->u = u;
-        }
-
-        void f(const double& t, const int& m, const double* x, double* x_dot)
-        {
-          const double v = x[0];
+          const double u = action->getEntry(0);
+          const double v = x->getEntry(0);
           const double abs_v = fabs(v);
           const double c_v = 1.2f + 0.2f * sin(abs_v);
           const double m_v = 3.0f + 1.5f * sin(abs_v);
           const double k_v_u = -0.5f * tanh((fabs(c_v * v * abs_v - u) - 30.0f) * 0.1f) + 0.5f;
-          x_dot[0] = (u * k_v_u - c_v * v * abs_v) / m_v;
+          x_dot->setEntry(0, (u * k_v_u - c_v * v * abs_v) / m_v);
         }
 
     };
@@ -91,20 +86,19 @@ class UnderwaterVehicle: public RLProblem<double>
     void initialize()
     {
       dynamic->initialize();
-      dynamic->at(0) = -4.0; // m/s // TODO random
+      dynamic->vec()->setEntry(0, -4.0); // m/s // TODO random
     }
 
     void step(const Action<double>* action)
     {
-      dynamic->setU(thrustRange->bound(action->at(/*default*/)));
       for (int i = 0; i < 2; i++)
-        dynamic->step();
+        dynamic->step(action);
     }
 
     void updateTRStep()
     {
-      output->o_tp1->setEntry(0, velocityRange->toUnit(dynamic->at(0)));
-      observations->at(0) = dynamic->at(0);
+      output->o_tp1->setEntry(0, velocityRange->toUnit(dynamic->vec()->getEntry(0)));
+      observations->at(0) = dynamic->vec()->getEntry(0);
       // TODO: only with one variable first
     }
 
@@ -115,7 +109,7 @@ class UnderwaterVehicle: public RLProblem<double>
 
     double r() const
     {
-      return fabs(setPoint - dynamic->at(0)) < mu ? 0.0f : -C;
+      return fabs(setPoint - dynamic->vec()->getEntry(0)) < mu ? 0.0f : -C;
     }
 
     double z() const

@@ -102,7 +102,7 @@ class SwingPendulum: public RLProblem<T>
     void step(const Action<double>* a)
     {
       //std::cout << a.at() << std::endl;
-      float torque = actionRange->bound(a->at(0));
+      float torque = actionRange->bound(a->getEntry(0));
       float thetaAcc = -stepTime * velocity + mass * g * length * sin(theta) + torque;
       velocity = velocityRange->bound(velocity + thetaAcc);
       theta += velocity * stepTime;

@@ -97,7 +97,7 @@ class Acrobot: public RLProblem<T>
 
     void step(const Action<double>* action)
     {
-      float torque = actionRange->bound(action->at(0));
+      float torque = actionRange->bound(action->getEntry(0));
       float d1, d2, phi2, phi1, theta2ddot, theta1ddot;
 
       //torque is in [-1,1]

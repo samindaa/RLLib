@@ -351,15 +351,16 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
     Vector<T>* h;
     Vector<T>* v;
     VectorPool<T>* pool;
-    T tau, minimumStepsize, kappa;
+    T tau, minimumStepsize, kappa, delta;
 
   public:
-    Autostep(const int& nbFeatures) :
+    Autostep(const int& nbFeatures, const T& kappa = 0.01f, const T& initStepsize = 1.0) :
         w(new PVector<T>(nbFeatures)), alphas(new PVector<T>(w->dimension())), h(
             new PVector<T>(w->dimension())), v(new PVector<T>(w->dimension())), pool(
-            new VectorPool<T>(nbFeatures)), tau(10000), minimumStepsize(1e-6), kappa(0.01f)
+            new VectorPool<T>(nbFeatures)), tau(10000), minimumStepsize(1e-6), kappa(kappa), delta(
+            0.0f)
     {
-      alphas->set(1.0);
+      alphas->set(initStepsize);
       v->set(1.0);
     }
 
@@ -409,7 +410,7 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
 
     T learn(const Vector<T>* x_t, const T& y_tp1)
     {
-      T delta = y_tp1 - predict(x_t);
+      delta = y_tp1 - predict(x_t);
       Vector<T>* deltaX = pool->newVector(x_t)->mapMultiplyToSelf(delta);
       Vector<T>* x2 = pool->newVector(x_t)->ebeMultiplyToSelf(x_t);
       updateAlphas(x_t, x2, deltaX);

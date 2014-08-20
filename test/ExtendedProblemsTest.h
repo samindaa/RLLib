@@ -84,9 +84,10 @@ class ExtendedProblemsTest: public ExtendedProblemsTestBase
         {
         }
 
-        void f(const double& t, const int& m, const double* u, double* u_dot)
+        void f(const double& time, const Action<double>* action, const Vector<double>* x,
+            Vector<double>* x_dot)
         {
-          u_dot[0] = u[0] * cos(t);
+          x_dot->setEntry(0, x->getEntry(0) * cos(time));
         }
 
     };
@@ -99,10 +100,11 @@ class ExtendedProblemsTest: public ExtendedProblemsTestBase
         {
         }
 
-        void f(const double& t, const int& m, const double* u, double* u_dot)
+        void f(const double& time, const Action<double>* action, const Vector<double>* x,
+            Vector<double>* x_dot)
         {
-          u_dot[0] = u[1];
-          u_dot[1] = -u[0];
+          x_dot->setEntry(0, +x->getEntry(1));
+          x_dot->setEntry(1, -x->getEntry(0));
         }
     };
 

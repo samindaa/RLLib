@@ -251,7 +251,7 @@ class LineProblem: public FiniteStateGraph
     LineProblem() :
         FiniteStateGraph(), Gamma(0.9), actions(new ActionArray<double>(1)), acting(
             new SingleActionPolicy<double>(actions)), states(new std::vector<GraphState*>()), solution(
-            new PVector<double>(3)), Move(actions->at(0))
+            new PVector<double>(3)), Move(actions->getEntry(0))
     {
       A = new GraphState("A", 0.0);
       B = new GraphState("B", 0.0);
@@ -340,9 +340,9 @@ class RandomWalk: public FiniteStateGraph
     Policy<double>* acting;
 
     RandomWalk(Random<double>* random) :
-        FiniteStateGraph(), random(random),Gamma(0.9), actions(
-            new ActionArray<double>(2)), states(new std::vector<GraphState*>()), solution(
-            new PVector<double>(5)), Left(actions->at(0)), Right(actions->at(1))
+        FiniteStateGraph(), random(random), Gamma(0.9), actions(new ActionArray<double>(2)), states(
+            new std::vector<GraphState*>()), solution(new PVector<double>(5)), Left(
+            actions->getEntry(0)), Right(actions->getEntry(1))
     {
       TL = new GraphState("TL", 0.0);
       A = new GraphState("A", 0.0);

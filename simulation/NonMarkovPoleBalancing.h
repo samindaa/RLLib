@@ -191,7 +191,7 @@ class NonMarkovPoleBalancing: public RLProblem<T>
         totalEffectiveMass += effectiveMass->getEntry(i);
       }
 
-      float torque = actionRange->bound(a->at(0));
+      float torque = actionRange->bound(a->getEntry(0));
       float xAcc = (torque - muc * Signum::valueOf(xDot) + totalEffectiveForce)
           / (M + totalEffectiveMass);
 

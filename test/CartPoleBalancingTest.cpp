@@ -149,7 +149,7 @@ const Action<double>* CMAESAgent::initialize(const TRStep<double>* step)
   }
 
   problem->getContinuousActions()->update(0, 0, x->dot(getPhi(step->o_tp1)));
-  return problem->getContinuousActions()->at(0);
+  return problem->getContinuousActions()->getEntry(0);
 }
 
 const Action<double>* CMAESAgent::getAtp1(const TRStep<double>* step)
@@ -157,7 +157,7 @@ const Action<double>* CMAESAgent::getAtp1(const TRStep<double>* step)
   if (!evaluation)
     arFunvals[nbPopEvaluations] -= fabs(step->r_tp1);
   problem->getContinuousActions()->update(0, 0, x->dot(getPhi(step->o_tp1)));
-  return problem->getContinuousActions()->at(0);
+  return problem->getContinuousActions()->getEntry(0);
 }
 
 void CMAESAgent::reset()

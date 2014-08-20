@@ -110,7 +110,7 @@ class CartPole: public RLProblem<T>
     void step(const Action<T>* a)
     {
       float xacc, thetaacc, force, costheta, sintheta, temp;
-      force = forceRange->bound(a->at(0));
+      force = forceRange->bound(a->getEntry(0));
       costheta = cos(theta);
       sintheta = sin(theta);
       temp = (force + poleMassLength * theta_dot * theta_dot * sintheta) / totalMass;

@@ -47,7 +47,7 @@ class HelicopterTest: public HelicopterTestBase
     {
       Random<double> random;
       Helicopter<double> helicopter(&random);
-      ASSERT(4 == helicopter.getContinuousActions()->at(0)->dimension());
+      ASSERT(4 == helicopter.getContinuousActions()->getEntry(0)->dimension());
       ASSERT(12 == helicopter.dimension());
 
       for (int nb = 0; nb < 100; nb++)
@@ -55,7 +55,7 @@ class HelicopterTest: public HelicopterTestBase
         helicopter.initialize();
         while (!helicopter.endOfEpisode())
         {
-          helicopter.step(helicopter.getContinuousActions()->at(0));
+          helicopter.step(helicopter.getContinuousActions()->getEntry(0));
           ASSERT(helicopter.r() <= 0);
           for (int i = 0; i < helicopter.dimension(); i++)
             ASSERT(
@@ -69,11 +69,11 @@ class HelicopterTest: public HelicopterTestBase
     {
       Random<double> random;
       Helicopter<double> helicopter(&random, 2);
-      ASSERT(4 == helicopter.getContinuousActions()->at(0)->dimension());
+      ASSERT(4 == helicopter.getContinuousActions()->getEntry(0)->dimension());
       helicopter.initialize();
       while (!helicopter.endOfEpisode())
       {
-        helicopter.step(helicopter.getContinuousActions()->at(0));
+        helicopter.step(helicopter.getContinuousActions()->getEntry(0));
         ASSERT(helicopter.r() <= 0);
       }
       ASSERT(2 == helicopter.step_time);

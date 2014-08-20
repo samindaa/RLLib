@@ -50,7 +50,7 @@ class NoStateProblem: public RLProblem<double>
 
     void step(const Action<double>* action)
     {
-      currentA = action->at(0);
+      currentA = action->getEntry(0);
       if (range != 0)
         currentA = range->bound(currentA);
     }

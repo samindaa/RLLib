@@ -387,7 +387,7 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
       VectorXd u = k.transpose() * x + noise;
       actions->update(0, 0, (float) u(0));
 
-      poleBalancing.step(actions->at(0));
+      poleBalancing.step(actions->getEntry(0));
       cout << "r=" << poleBalancing.r() << endl;
       ++round;
       cout << "round=" << round << endl;
@@ -444,16 +444,16 @@ void ExtendedProblemsTest::testTorquedPendulum()
   double d5 = 50;
 
   TorquedPendulum torquedPendulum(m, l, mu, dt);
-
-  torquedPendulum.setForce(d4);
-  torquedPendulum(0) = 0.0f;
-  torquedPendulum(1) = M_PI_2;
+  Action<double> force(0);
+  force.push_back(d4);
+  torquedPendulum.vec()->setEntry(0, 0.0f);
+  torquedPendulum.vec()->setEntry(1, M_PI_2);
 
   while (torquedPendulum.getTime() < d5)
   {
-    cout << torquedPendulum.getTime() << " " << torquedPendulum(0) << " " << torquedPendulum(1)
-        << endl;
-    torquedPendulum.step();
+    cout << torquedPendulum.getTime() << " " << torquedPendulum.vec()->getEntry(0) << " "
+        << torquedPendulum.vec()->getEntry(1) << endl;
+    torquedPendulum.step(&force);
   }
 }
 
@@ -560,7 +560,7 @@ void ExtendedProblemsTest::testFunction1RK4()
   double tmax = 12.0 * pi;
 
   Function1 rk4(n, dt);
-  rk4(0) = 0.5;
+  rk4.vec()->setEntry(0, 0.5f);
 
   printf("\n");
   printf("testFunction1RK4\n");
@@ -575,7 +575,7 @@ void ExtendedProblemsTest::testFunction1RK4()
     //
     //  Print (T0,U0).
     //
-    cout << "  " << rk4.getTime() << "  " << rk4(0) << "\n";
+    cout << "  " << rk4.getTime() << "  " << rk4.vec()->getEntry(0) << "\n";
     //
     //  Stop if we've exceeded TMAX.
     //
@@ -599,8 +599,8 @@ void ExtendedProblemsTest::testFunction2RK4()
   int n = 2;
   double tmax = 12.0 * 3.141592653589793;
   Function2 rk4(n, dt);
-  rk4(0) = 0.0f;
-  rk4(1) = 1.0f;
+  rk4.vec()->setEntry(0, 0.0f);
+  rk4.vec()->setEntry(1, 1.0f);
 
   cout << "\n";
   cout << "testFunction2RK4\n";
@@ -615,8 +615,8 @@ void ExtendedProblemsTest::testFunction2RK4()
     //
     //  Print (T0,U0).
     //
-    cout << "  " << setw(14) << rk4.getTime() << "  " << setw(14) << rk4(0) << "  " << setw(14)
-        << rk4(1) << "\n";
+    cout << "  " << setw(14) << rk4.getTime() << "  " << setw(14) << rk4.vec()->getEntry(0) << "  "
+        << setw(14) << rk4.vec()->getEntry(1) << "\n";
     //
     //  Stop if we've exceeded TMAX.
     //

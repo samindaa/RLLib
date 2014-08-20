@@ -23,87 +23,48 @@
 #define RK4_H_
 
 #include <algorithm>
+#include "Vector.h"
+#include "Action.h"
 
-// Runge-Kutta 4th Order ODE Solver
+// Runge-Kutta 4th Order ODE Solver for RL problems
 class RK4
 {
   private:
-    // int M, the spatial dimension.
-    int m;
-    double dt;
-    double* data;
+    Vector<double>* state;
+    VectorPool<double>* pool;
 
-    // Temporary variables
-    double *f0;
-    double *f1;
-    double *f2;
-    double *f3;
-
-    double *u1;
-    double *u2;
-    double *u3;
-    double *u0;
-
-    double t0;
+    double timeIncrement;
+    double time;
     int timeSteps;
 
   public:
-    RK4(const int& m, const double& dt) :
-        m(m), dt(dt), data(new double[m * 8])
+    RK4(const int& stateVariables, const double& timeIncrement) :
+        state(new PVector<double>(stateVariables)), pool(
+            new VectorPool<double>(state->dimension())), timeIncrement(timeIncrement)
     {
-      f0 = data + 0 * m;
-      f1 = data + 1 * m;
-      f2 = data + 2 * m;
-      f3 = data + 3 * m;
-
-      u1 = data + 4 * m;
-      u2 = data + 5 * m;
-      u3 = data + 6 * m;
-      u0 = data + 7 * m;
-
       initialize();
     }
 
     virtual ~RK4()
     {
-      delete data;
+      delete state;
+      delete pool;
     }
 
     void initialize()
     {
-      std::fill_n(data, m * 8, 0);
-      t0 = 0;
+      time = 0;
       timeSteps = 0;
     }
 
-    double& operator()(const int& i)
+    Vector<double>* vec()
     {
-      return *(u0 + i);
-    }
-
-    const double& operator()(const int& i) const
-    {
-      return *(u0 + i);
-    }
-
-    double& at(const int& i)
-    {
-      return *(u0 + i);
-    }
-
-    const double& at(const int& i) const
-    {
-      return *(u0 + i);
-    }
-
-    int size() const
-    {
-      return m;
+      return state;
     }
 
     double getTime() const
     {
-      return t0;
+      return time;
     }
 
     int getTimeSteps() const
@@ -115,63 +76,57 @@ class RK4
      * STEP takes one Runge-Kutta step for a vector ODE.
      *
      * Problem is given as
-     * x_dot = f(x, t)
+     * x_dot = f(x, action, t)
      * x(t_0) = x_0;
      *
-     * If the user can supply current values of t, x, dt, and a
-     * function to evaluate the derivative, this function can compute the
-     * fourth-order Runge Kutta estimate to the solution at time t+dt.
-     *
-     *  Inputs:
-     *    double T0, the current time.
-     *    double U0[M], the solution estimate at the current time.
-     *    double DT, the time step.
      */
-    void step()
+    void step(const Action<double>* action = 0)
     {
       //
       //  Get four sample values of the derivative.
       //
-      f(t0, m, u0, f0);
+      Vector<double>* f0 = pool->newVector(state);
+      f(time, action, state, f0);
 
-      double t1 = t0 + dt / 2.0;
+      Vector<double>* u1 = pool->newVector(state);
+      u1->addToSelf(timeIncrement / 2.0f, f0);
 
-      for (int i = 0; i < m; i++)
-        u1[i] = u0[i] + dt * f0[i] / 2.0;
+      Vector<double>* f1 = pool->newVector(u1);
+      f(time + timeIncrement / 2.0f, action, u1, f1);
 
-      f(t1, m, u1, f1);
+      Vector<double>* u2 = pool->newVector(state);
+      u2->addToSelf(timeIncrement / 2.0f, f1);
 
-      double t2 = t0 + dt / 2.0;
+      Vector<double>* f2 = pool->newVector(u2);
+      f(time + timeIncrement / 2.0f, action, u2, f2);
 
-      for (int i = 0; i < m; i++)
-        u2[i] = u0[i] + dt * f1[i] / 2.0;
+      Vector<double>* u3 = pool->newVector(state);
+      u3->addToSelf(timeIncrement, f2);
 
-      f(t2, m, u2, f2);
-
-      double t3 = t0 + dt;
-
-      for (int i = 0; i < m; i++)
-        u3[i] = u0[i] + dt * f2[i];
-
-      f(t3, m, u3, f3);
+      Vector<double>* f3 = pool->newVector(u3);
+      f(time + timeIncrement, action, u3, f3);
 
       //
       //  Combine them to estimate the solution.
       //
-      for (int i = 0; i < m; i++)
-        u0[i] += dt * (f0[i] + 2.0 * f1[i] + 2.0 * f2[i] + f3[i]) / 6.0;
+      state->addToSelf(timeIncrement / 6.0f, f0)->addToSelf(timeIncrement / 3.0f, f1)->addToSelf(
+          timeIncrement / 3.0f, f2)->addToSelf(timeIncrement / 6.0f, f3);
+
+      // Release pool
+      pool->releaseAll();
 
       // update time
-      t0 += dt;
+      time += timeIncrement;
       ++timeSteps;
     }
 
     /**
      * This method evaluates the derivative, or right hand side of the problem.
      *
-     * Output is the fourth-order Runge-Kutta solution estimate at time T0+DT.
+     * Output is the fourth-order Runge-Kutta solution estimate at time TIME + DT.
      */
-    virtual void f(const double& t, const int& m, const double* u, double* u_dot) =0;
+    virtual void f(const double& time, const Action<double>* action, const Vector<double>* x,
+        Vector<double>* x_dot) =0;
 };
 
 #endif /* RK4_H_ */

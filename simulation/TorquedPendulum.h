@@ -28,12 +28,12 @@
 class TorquedPendulum: public RK4
 {
   protected:
-    double m, l, mu, g, force;
+    double m, l, mu, g;
 
   public:
 
     TorquedPendulum(const double& m, const double& l, const double& mu, const double& dt) :
-        RK4(2, dt), m(m), l(l), mu(mu), g(9.8), force(0)
+        RK4(2, dt), m(m), l(l), mu(mu), g(9.8)
     {
     }
 
@@ -41,15 +41,13 @@ class TorquedPendulum: public RK4
     {
     }
 
-    void setForce(const double& force)
+    void f(const double& time, const Action<double>* action, const Vector<double>* x,
+        Vector<double>* x_dot)
     {
-      this->force = force;
-    }
-
-    void f(const double& t, const int& m, const double* u, double* u_dot)
-    {
-      u_dot[0] = u[1];
-      u_dot[1] = ((-mu * u_dot[0] + m * g * l * sin(u[0]) + force) / (m * l * l));
+      x_dot->setEntry(0, x->getEntry(1));
+      x_dot->setEntry(1,
+          (-mu * x_dot->getEntry(0) + m * g * l * sin(x->getEntry(0)) + action->getEntry(0))
+              / (m * l * l));
     }
 
 };

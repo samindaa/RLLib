@@ -123,7 +123,7 @@ class PoleBalancing: public RLProblem<double>
 
     void step(const Action<double>* action)
     {
-      u(0) = action->at(0);
+      u(0) = action->getEntry(0);
       mu = A * x + b * u;
       mvnrnd(random, mu, SigmaT, x);
     }

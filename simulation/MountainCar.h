@@ -95,7 +95,7 @@ class MountainCar: public RLProblem<T>
 
     void step(const Action<T>* a)
     {
-      float throttle = actionRange->bound(a->at()) * throttleFactor;
+      float throttle = actionRange->bound(a->getEntry()) * throttleFactor;
       velocity = velocityRange->bound(
           velocity + throttle * 0.001 + cos(3.0 * position) * (-0.0025));
       position += velocity;

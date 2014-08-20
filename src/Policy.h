@@ -132,7 +132,7 @@ class NormalDistribution: public PolicyDistribution<T>
     {
       // N(mu,var) for single action, single representation only
       ASSERT((phi->dimension() == 1) && (actions->dimension() == 1));
-      x->set(phi->at(actions->at(defaultAction)));
+      x->set(phi->at(actions->getEntry(defaultAction)));
       mean = u_mean->dot(x) + initialMean;
       stddev = exp(u_stddev->dot(x)) * initialStddev + 10e-8;
       Boundedness::checkValue(stddev);
@@ -142,7 +142,7 @@ class NormalDistribution: public PolicyDistribution<T>
 
     T pi(const Action<T>* a)
     {
-      return random->gaussianProbability(a->at(defaultAction), mean, stddev);
+      return random->gaussianProbability(a->getEntry(defaultAction), mean, stddev);
     }
 
   public:
@@ -150,7 +150,7 @@ class NormalDistribution: public PolicyDistribution<T>
     const Action<T>* sampleAction()
     {
       actions->update(defaultAction, defaultAction, random->nextNormalGaussian() * stddev + mean);
-      return actions->at(defaultAction);
+      return actions->getEntry(defaultAction);
     }
 
     const Action<T>* sampleBestAction()
@@ -160,7 +160,7 @@ class NormalDistribution: public PolicyDistribution<T>
 
     virtual void updateStep(const Action<T>* action)
     {
-      T a = action->at(defaultAction);
+      T a = action->getEntry(defaultAction);
       meanStep = (a - mean) / sigma2;
       stddevStep = (a - mean) * (a - mean) / sigma2 - 1.0;
     }
@@ -169,7 +169,7 @@ class NormalDistribution: public PolicyDistribution<T>
     {
       ASSERT((phi->dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
-      x->set(phi->at(actions->at(defaultAction)));
+      x->set(phi->at(actions->getEntry(defaultAction)));
       gradMean->set(x)->mapMultiplyToSelf(meanStep);
       gradStddev->set(x)->mapMultiplyToSelf(stddevStep);
       return *multigrad;
@@ -200,7 +200,7 @@ class NormalDistributionScaled: public NormalDistribution<T>
 
     virtual void updateStep(const Action<T>* action)
     {
-      T a = action->at(Base::defaultAction);
+      T a = action->getEntry(Base::defaultAction);
       Base::meanStep = (a - Base::mean);
       Base::stddevStep = (a - Base::mean) * (a - Base::mean) - Base::sigma2;
     }
@@ -226,7 +226,7 @@ class NormalDistributionSkewed: public NormalDistribution<T>
 
     virtual void updateStep(const Action<T>* action)
     {
-      T a = action->at(Base::defaultAction);
+      T a = action->getEntry(Base::defaultAction);
       Base::meanStep = (a - Base::mean);
       Base::stddevStep = (a - Base::mean) * (a - Base::mean) / Base::sigma2 - 1.0;
     }
@@ -294,13 +294,13 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
 
     T pi(const Action<T>* a)
     {
-      return policy->pi(problemToPolicy(a->at(0)));
+      return policy->pi(problemToPolicy(a->getEntry(0)));
     }
 
     const Action<T>* sampleAction()
     {
-      actions->update(0, 0, policyToProblem(policy->sampleAction()->at(0))->at(0));
-      return actions->at(0);
+      actions->update(0, 0, policyToProblem(policy->sampleAction()->getEntry(0))->getEntry(0));
+      return actions->getEntry(0);
     }
 
     const Action<T>* sampleBestAction()
@@ -310,7 +310,7 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
 
     const Vectors<T>& computeGradLog(const Representations<T>* phis, const Action<T>* action)
     {
-      return policy->computeGradLog(phis, problemToPolicy(action->at(0)));
+      return policy->computeGradLog(phis, problemToPolicy(action->getEntry(0)));
     }
 
     Vectors<T>* parameters() const
@@ -353,7 +353,7 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
         if (sum >= rand)
           return *a;
       }
-      return actions->at(actions->dimension() - 1);
+      return actions->getEntry(actions->dimension() - 1);
     }
 
     const Action<T>* sampleBestAction()
@@ -538,12 +538,12 @@ class RandomPolicy: public Policy<T>
     }
     const Action<T>* sampleAction()
     {
-      return actions->at(random->nextInt(actions->dimension()));
+      return actions->getEntry(random->nextInt(actions->dimension()));
     }
     const Action<T>* sampleBestAction()
     {
       ASSERT(false);
-      return actions->at(0);
+      return actions->getEntry(0);
     }
 };
 
@@ -650,11 +650,11 @@ class Greedy: public DiscreteActionPolicy<T>
 
     void findBestAction()
     {
-      bestAction = actions->at(0);
+      bestAction = actions->getEntry(0);
       for (int i = 1; i < actions->dimension(); i++)
       {
         if (actionValues[i] > actionValues[bestAction->id()])
-          bestAction = actions->at(i);
+          bestAction = actions->getEntry(i);
       }
     }
 
@@ -698,7 +698,7 @@ class EpsilonGreedy: public Greedy<T>
     const Action<T>* sampleAction()
     {
       if (random->nextReal() < epsilon)
-        return Greedy<T>::actions->at(random->nextInt(Greedy<T>::actions->dimension()));
+        return Greedy<T>::actions->getEntry(random->nextInt(Greedy<T>::actions->dimension()));
       else
         return Greedy<T>::bestAction;
     }
@@ -785,7 +785,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
         if (sum >= rand)
           return *a;
       }
-      return actions->at(actions->dimension() - 1);
+      return actions->getEntry(actions->dimension() - 1);
     }
 
     const Action<T>* sampleBestAction()
@@ -813,12 +813,12 @@ class SingleActionPolicy: public Policy<T>
 
     T pi(const Action<T>* a)
     {
-      return a->id() == actions->at(0)->id() ? T(1) : T(0);
+      return a->id() == actions->getEntry(0)->id() ? T(1) : T(0);
     }
 
     const Action<T>* sampleAction()
     {
-      return actions->at(0);
+      return actions->getEntry(0);
     }
 
     const Action<T>* sampleBestAction()

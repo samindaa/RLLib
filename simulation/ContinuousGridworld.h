@@ -85,7 +85,7 @@ class ContinuousGridworld: public RLProblem<T>
       float noise = Base::random->nextReal() * absoluteNoise - (absoluteNoise / 2.0f);
       for (int i = 0; i < Base::observations->dimension(); i++)
         Base::observations->at(i) = observationRange->bound(
-            Base::observations->at(i) + actionRange->bound(action->at(i) + noise));
+            Base::observations->at(i) + actionRange->bound(action->getEntry(i) + noise));
     }
 
     bool endOfEpisode() const

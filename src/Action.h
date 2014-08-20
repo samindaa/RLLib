@@ -50,13 +50,13 @@ class Action
       values.push_back(value);
     }
 
-    T at(const int& i = 0 /*default to a single action*/)
+    T getEntry(const int& i = 0 /*default to a single action*/)
     {
       ASSERT(i < static_cast<int>(values.size()));
       return values[i];
     }
 
-    const T at(const int& i = 0 /*default to a single action*/) const
+    const T getEntry(const int& i = 0 /*default to a single action*/) const
     {
       ASSERT(i < static_cast<int>(values.size()));
       return values[i];
@@ -107,8 +107,7 @@ class Actions
     }
 
     virtual int dimension() const =0;
-    virtual const Action<T>* operator[](const int& index) const =0;
-    virtual const Action<T>* at(const int& index) const =0;
+    virtual const Action<T>* getEntry(const int& index) const =0;
     virtual void push_back(const int& index, const T& value) =0;
     virtual void erase(const int& index) =0;
     virtual void update(const int& actionIndex, const int& vectorIndex, const T& value) =0;
@@ -159,13 +158,7 @@ class ActionArray: public Actions<T>
       Base::actions.clear();
     }
 
-    const Action<T>* operator[](const int& index) const
-    {
-      ASSERT(index < static_cast<int>(Base::actions.size()));
-      return Base::actions[index];
-    }
-
-    const Action<T>* at(const int& index) const
+    const Action<T>* getEntry(const int& index) const
     {
       ASSERT(index < static_cast<int>(Base::actions.size()));
       return Base::actions[index];
