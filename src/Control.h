@@ -92,7 +92,7 @@ class ActorOnPolicy: public ParameterizedFunction<T>
     }
     virtual void initialize() =0;
     virtual void reset() =0;
-    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, T delta) =0;
+    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, const T& delta_t) =0;
     virtual PolicyDistribution<T>* policy() const =0;
     virtual const Action<T>* proposeAction(const Representations<T>* phi) =0;
 };

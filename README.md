@@ -135,7 +135,7 @@ The test cases are executed using:
    * make
    * ./RLLib
    
-* To compile 32-bit binary on 64-bit machines:
+* To compile 32-bit binary on a 64-bit machine:
     * ./configure --march=m32
     * make
     * ./RLLib

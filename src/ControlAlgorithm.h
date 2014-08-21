@@ -525,12 +525,12 @@ class Actor: public ActorOnPolicy<T>
       initialized = false;
     }
 
-    void update(const Representations<T>* phi_t, const Action<T>* a_t, T delta)
+    void update(const Representations<T>* phi_t, const Action<T>* a_t, const T& delta_t)
     {
       ASSERT(initialized);
       const Vectors<T>* gradLog = policyDistribution->computeGradLog(phi_t, a_t);
       for (int i = 0; i < gradLog->dimension(); i++)
-        u->getEntry(i)->addToSelf(alpha_u * delta, gradLog->getEntry(i));
+        u->getEntry(i)->addToSelf(alpha_u * delta_t, gradLog->getEntry(i));
     }
 
     PolicyDistribution<T>* policy() const
