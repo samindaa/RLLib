@@ -1,62 +1,87 @@
 #!/bin/bash
-#----------------------------------------
-# RLLib configure
-# configure file is derived from the 
-# RoboCanes configuration.
-# Modified by: Sam Abeyruwan
-#----------------------------------------
+#-------------------------------------------------------------------------------
+#
+# Simple configure script / build system.
+# Version 1.03 (10/05/2013)
+#
+#-------------------------------------------------------------------------------
+
+# Parsing arguments:
+
+for i in "$@"
+do
+case $i in
+    --march=*)
+    MARCH="${i#*=}"
+
+    ;;
+    --debug=*)
+    DEBUG="${i#*=}"
+    ;;
+    --default)
+    DEFAULT=YES
+    ;;
+    *)
+            # unknown option
+    ;;
+esac
+done
+
+echo "Architecture: " $MARCH
+echo "Debug       : " $DEBUG 
 
 # Settings:
 
-targetname=""
-depends_on=""
+# makefile target for this configuration
+targetname="RLLib"
 
-builddir="build"
-bin="RLLibTest"
+builddir="build/RLLib"
+bin="RLLib"
 
+
+# list of needed libraries
 lib_list=""
+#list of needed external tools
 tool_list=""
-cxx="g++"
-optional_cflags=""
-optional_lflags=""
 
-sourcedirs="."
+# compiler and linker flags
+cxx="g++"
+optional_cflags="-I. -I./src -I./test -I./simulation \
+                 -$MARCH -$DEBUG -O3 \
+                 -Wno-deprecated -fPIC -fno-rtti -U_FORTIFY_SOURCE"
+optional_lflags="-lpthread"
+
 
 # Use single quotes around pattern with * to avoid early glob expansion. 
-ignore=""
-hideWarnings="util/cma/cmaes.c util/cma/boundary_transformation.c util/cma/example_restarts.c"
+# Ignored files:
+ignore="'visualization/*'"
+
+# List of files that are compiled with -fpermissive and -w:
+hideWarningsFilelist=""
+
+# ---------------------------------------
+#includedMakefiles="Makefile.QT4"
+#generatedFiles="map_lookup/MapLookup_moc.cpp color_naming/ColorNaming_moc.cpp"
 
 includedMakefiles=""
 generatedFiles=""
 
-#-------------------------------------------------------------------------------
+#----------------------------------------
 # Settings can be overidden by command line arguments
-
+#loop for all arguments
 for arg in "$@"
 do
   argname=`echo $arg | sed 's/\([^=]*\)=.*/\1/g'`
   argvalue=`echo $arg | sed 's/.*=\([^=]*\)/\1/g'`
   if [ "$argname" == "target" ]; then targetname=$argvalue; fi
-  if [ "$argname" == "depends_on" ]; then depends_on="$argvalue"; fi
-  if [ "$argname" == "builddir" ]; then builddir=$argvalue; fi
-  if [ "$argname" == "bin" ]; then bin=$argvalue; fi
-  if [ "$argname" == "lib_list" ]; then lib_list=$argvalue; fi
-  if [ "$argname" == "tool_list" ]; then tool_list=$argvalue; fi
   if [ "$argname" == "cxx" ]; then cxx=$argvalue; fi
   if [ "$argname" == "cflags" ]; then optional_cflags=$argvalue; fi
   if [ "$argname" == "lflags" ]; then optional_lflags=$argvalue; fi
-  if [ "$argname" == "sourcedirs" ]; then sourcedirs=$argvalue; fi
+  if [ "$argname" == "builddir" ]; then builddir=$argvalue; fi
+  if [ "$argname" == "bin" ]; then bin=$argvalue; fi
+  if [ "$argname" == "lib_list" ]; then lib_list=$argvalue; fi
   if [ "$argname" == "ignore" ]; then ignore="$ignore $argvalue"; fi
-  if [ "$argname" == "hideWarnings" ]; then hideWarnings="$hideWarnings $argvalue"; fi
 done
-
-# always append target name to build dir
-builddir="$builddir/$targetname"
-
-if [ "$targetname" == "" ]; then
-  echo no target defined;
-  exit 1
-fi
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -109,27 +134,17 @@ if [ "$missing_libs$missing_tools" != "00" ]; then
 #----------------------------------------
 #write Makefile
 
-echo Creating Makefile...
-
 src_list=$builddir/src_list
 dep_list=$builddir/dep_list
+
 cflags="$libflags_compiler -I. -Wall $optional_cflags"
 lflags="$libflags_linker $optional_lflags"
 
-#set link command, if binary has extension .a use ar to create static library
-linkCommand="\$(CXX) \$(CFLAGS) -o $bin \$(OBJ_$targetname) \$(LFLAGS)"
-if [[ `basename $bin` == *.so ]]; then
-  cflags="$cflags -fPIC -shared"
-elif [[ `basename $bin` == *.a ]]; then
-  linkCommand="rm $bin; ar csr $bin \$(OBJ_$targetname)"
-fi
-
+echo Creating Makefile...
 { # BEGIN printing Makefile
 # create new default target
 cat << EOC
 default: $targetname
-TARGETNAME=$targetname
-OBJ=\$(OBJ_$targetname)
 # --- BEGIN TARGETS
 # --- BEGIN $targetname
 $targetname: CXX=$cxx
@@ -139,12 +154,11 @@ $targetname: BIN=$bin
 $targetname: BUILDDIR=$builddir
 -include $src_list
 -include $dep_list
-$targetname: $depends_on \$(OBJ_$targetname) $builddir/linked
+$targetname: \$(OBJ_$targetname) link_$targetname
 	@echo $targetname compiled.
-$builddir/linked: $depends_on \$(OBJ_$targetname) $bin
+link_$targetname: \$(OBJ_$targetname)
 	@echo \$(YEL)Linking...\$(NOR)
-	@$linkCommand
-	@touch \$@
+	@\$(CXX) \$(CFLAGS) -o $bin \$(OBJ_$targetname) \$(LFLAGS)
 # --- END $targetname
 EOC
 #append all existing other targets
@@ -155,7 +169,6 @@ then
                | grep -E -v "^default:"
 else
   echo "ALLTARGETS=" 
-  echo "ALLBIN=" 
   echo "ALLOBJ="
 fi
 echo "# --- END TARGETS"
@@ -183,16 +196,11 @@ TUQ="$(ESC)[1;36m"
 WHT="$(ESC)[1;37m"
 NOR="$(ESC)[m"
 
-all: $(ALLTARGETS)
-
-$(ALLBIN):
-	@touch $@
+# --- compile all
+all: 
+	$(foreach target,$(ALLTARGETS),$(MAKE) $(MAKEFILE) $(target);)
 
 clean:
-	@rm -f $(OBJ)
-	@echo $(TARGETNAME) object files deleted.
-
-clean_all:
 	@rm -f $(ALLOBJ)
 	@echo All object files deleted.
 
@@ -203,10 +211,6 @@ mv Makefile.tmp Makefile
 if ! grep -q -E "^ALLTARGETS=.* $targetname .*\$" Makefile
 then
   sed -i -e "s/^\(ALLTARGETS=.*\)\$/\1 $targetname /g" Makefile  
-fi
-if ! grep -q -E "^ALLBIN=.* $bin .*\$" Makefile
-then
-  sed -i -e "s@^\(ALLBIN=.*\)\$@\1 $bin @g" Makefile  
 fi
 if ! grep -q -E "^ALLOBJ=.* \\\$\(OBJ_$targetname\) .*\$" Makefile
 then
@@ -220,7 +224,7 @@ echo Creating build directory...
 
 #create list with all src files
 allsrc=""
-for file in `find -L $sourcedirs -name \*.cpp -or -name \*.c | sed 's@^\./@@' | xargs` 
+for file in `find -L . -name \*.cpp -or -name \*.c | cut -c3- | xargs` 
 do
   fileIgnored=0
   for pattern in $ignore
@@ -277,7 +281,7 @@ do
 
   #check if file is on the no-warnings-list
   extraflags=""
-  for pattern in $hideWarnings
+  for pattern in $hideWarningsFilelist
   do
     pattern=${pattern//\'/}
     [[ $srcfile == $pattern ]] && extraflags="-fpermissive -w"
@@ -288,11 +292,11 @@ do
     if [ -f $srcfile ]  #if src file exists
     then
       echo -n "$objpath/"
-      $cxx $cflags -MM $srcfile 2> /dev/null
+      $cxx $cflags -M $srcfile 2> /dev/null
       #if there was an error, try again using -MG and add full path for files in generatedFiles
       if [ ! $? -eq 0 ]
       then
-        $cxx $cflags -MM -MG $srcfile | while read -r line
+        $cxx $cflags -M -MG $srcfile | while read -r line
         do
           for dependency in $line
           do
@@ -312,7 +316,7 @@ do
 	@echo \$(BLU)[\$(CXX)]\$(NOR) $srcfile
 	@\$(CXX) \$(CFLAGS) $extraflags -c $srcfile -o $objfile
 	@echo -n "$objpath/" > $depfile$filenamenew
-	@\$(CXX) \$(CFLAGS) -MM $srcfile >> $depfile$filenamenew
+	@\$(CXX) \$(CFLAGS) -M $srcfile >> $depfile$filenamenew
 	@tail -n6 $depfile >> $depfile$filenamenew
 	@mv $depfile$filenamenew $depfile
 EOC
@@ -326,3 +330,4 @@ wait
 
 
 echo Done.
+

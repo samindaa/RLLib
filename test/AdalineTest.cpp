@@ -76,7 +76,7 @@ void AdalineTest::learnTarget(const Vector<double>* targetWeights, Adaline<doubl
     updateFeatures(&features);
     target = targetWeights->dot(&features);
     double error = learner->predict(&features) - target;
-    Boundedness::checkValue(error);
+    ASSERT(Boundedness::checkValue(error));
     history.add(std::fabs(error));
     learner->learn(&features, target);
     ++nbUpdate;

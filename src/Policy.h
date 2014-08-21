@@ -135,9 +135,9 @@ class NormalDistribution: public PolicyDistribution<T>
       x->set(phi->at(actions->getEntry(defaultAction)));
       mean = u_mean->dot(x) + initialMean;
       stddev = exp(u_stddev->dot(x)) * initialStddev + 10e-8;
-      Boundedness::checkValue(stddev);
+      ASSERT(Boundedness::checkValue(stddev));
       sigma2 = stddev * stddev;
-      Boundedness::checkValue(sigma2);
+      ASSERT(Boundedness::checkValue(sigma2));
     }
 
     T pi(const Action<T>* a)
@@ -344,7 +344,7 @@ class StochasticPolicy: public virtual DiscreteActionPolicy<T>
 
     const Action<T>* sampleAction()
     {
-      Boundedness::checkDistribution(distribution);
+      ASSERT(Boundedness::checkDistribution(distribution));
       T rand = random->nextReal();
       T sum = T(0);
       for (typename Actions<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
@@ -415,7 +415,7 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       {
         const int id = (*a)->id();
         Base::distribution->at(id) = exp(u->dot(phi->at(*a)) - maxValue);
-        Boundedness::checkValue(Base::distribution->at(id));
+        ASSERT(Boundedness::checkValue(Base::distribution->at(id)));
         sum += Base::distribution->at(id);
         avg->addToSelf(Base::distribution->at(id), phi->at(*a));
       }
@@ -425,7 +425,7 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       {
         const int id = (*a)->id();
         Base::distribution->at(id) /= sum;
-        Boundedness::checkValue(Base::distribution->at(id));
+        ASSERT(Boundedness::checkValue(Base::distribution->at(id)));
       }
       avg->mapMultiplyToSelf(1.0 / sum);
     }
@@ -499,7 +499,7 @@ class SoftMax: public StochasticPolicy<T>
         const int id = (*a)->id();
         Base::distribution->at(id) = exp(
             (predictor->predict(phi->at(*a)) - maxValue) / temperature);
-        Boundedness::checkValue(Base::distribution->at(id));
+        ASSERT(Boundedness::checkValue(Base::distribution->at(id)));
         sum += Base::distribution->at(id);
       }
 
@@ -508,7 +508,7 @@ class SoftMax: public StochasticPolicy<T>
       {
         const int id = (*a)->id();
         Base::distribution->at(id) /= sum;
-        Boundedness::checkValue(Base::distribution->at(id));
+        ASSERT(Boundedness::checkValue(Base::distribution->at(id)));
       }
     }
 };
@@ -757,7 +757,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
         const int id = (*a)->id();
         T perturb = random->nextReal() < epsilon ? perturbation : T(0);
         distribution->at(id) = exp(u->dot(phis->at(*a)) + perturb - maxValue);
-        Boundedness::checkValue(distribution->at(id));
+        ASSERT(Boundedness::checkValue(distribution->at(id)));
         sum += distribution->at(id);
       }
 
@@ -765,7 +765,7 @@ class BoltzmannDistributionPerturbed: public Policy<T>
       {
         const int id = (*a)->id();
         distribution->at(id) /= sum;
-        Boundedness::checkValue(distribution->at(id));
+        ASSERT(Boundedness::checkValue(distribution->at(id)));
       }
 
     }

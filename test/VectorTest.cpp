@@ -248,12 +248,71 @@ void VectorTest::testMapTimes()
 }
 
 void VectorTest::testSubtractToSelf()
-{ // fixMe
+{
+  {
+    const double dValues[] = { 0.0, 2.0, 2.0, 0.0, 1.0 };
+    const double eValues[] = { 0.0, 1.0, 0.0, 0.0, 0.0 };
+
+    Assert::assertEquals(newVector(dValues, Arrays::length(dValues)),
+        newVector(a)->subtractToSelf(newPVector(eValues, Arrays::length(eValues))));
+  }
+
+  {
+    const double fValues[] = { 0.0, 2.0, 2.0, 0.0, 1.0 };
+    const double gValues[] = { 0.0, 1.0, 0.0, 0.0, 0.0 };
+
+    Assert::assertEquals(newVector(fValues, Arrays::length(fValues)),
+        newVector(a)->subtractToSelf(newSVector(gValues, Arrays::length(gValues))));
+  }
+
+  {
+    const double hValues[] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+    const double iValues[] = { 0.0, 3.0, 2.0, 0.0, 1.0 };
+
+    Assert::assertEquals(newVector(hValues, Arrays::length(hValues)),
+        newVector(a)->subtractToSelf(newSVector(iValues, Arrays::length(iValues))));
+  }
+
+  {
+    const double jValues[] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+    Assert::assertEquals(newVector(jValues, Arrays::length(jValues)),
+        newVector(a)->subtractToSelf(newVector(a)));
+  }
 }
 
 void VectorTest::testAddToSelf()
 {
-  // FixMe
+  {
+    const double dValues[] = { 0.0, 2.0, 2.0, 0.0, 1.0 };
+    const double eValues[] = { 0.0, -1.0, 0.0, 0.0, 0.0 };
+
+    Assert::assertEquals(newVector(dValues, Arrays::length(dValues)),
+        newVector(a)->addToSelf(newPVector(eValues, Arrays::length(eValues))));
+  }
+
+  {
+    const double fValues[] = { 0.0, 3.0, 2.0, 0.0, 0.0 };
+    const double gValues[] = { 0.0, 0.0, 0.0, 0.0, -1.0 };
+
+    Assert::assertEquals(newVector(fValues, Arrays::length(fValues)),
+        newVector(a)->addToSelf(newPVector(gValues, Arrays::length(gValues))));
+  }
+
+  {
+    const double hValues[] = { 0.0, 2.0, 2.0, 0.0, 1.0 };
+    const double iValues[] = { 0.0, -1.0, 0.0, 0.0, 0.0 };
+
+    Assert::assertEquals(newVector(hValues, Arrays::length(hValues)),
+        newVector(a)->addToSelf(newSVector(iValues, Arrays::length(iValues))));
+  }
+
+  {
+    const double jValues[] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+    Assert::assertEquals(newVector(jValues, Arrays::length(jValues)),
+        newVector(a)->addToSelf(newVector(a)->mapMultiplyToSelf(-1.0f)));
+  }
 }
 
 void VectorTest::testEbeMultiplySelf()
@@ -338,7 +397,12 @@ void VectorTest::testPositiveMax()
 
 void VectorTest::testCheckValue()
 {
-  // FixMe:
+  const double aValues[] = { 1.0, 1.0 };
+  Assert::assertPasses(VectorsTestsUtils::checkValues(newVector(aValues, Arrays::length(aValues))));
+  const double bValues[] = { 1.0, std::numeric_limits<double>::quiet_NaN() };
+  Assert::assertFails(VectorsTestsUtils::checkValues(newVector(bValues, Arrays::length(bValues))));
+  const double cValues[] = {1.0, std::numeric_limits<double>::infinity()};
+  Assert::assertFails(VectorsTestsUtils::checkValues(newVector(cValues, Arrays::length(cValues))));
 }
 
 void VectorTest::testAddToSelfWithFactor()

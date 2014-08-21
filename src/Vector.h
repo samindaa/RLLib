@@ -620,7 +620,7 @@ class SparseVector: public Vector<T>
       return values;
     }
 
-    T dotData(const T* data) const
+    T dotProduct(const T* data) const
     {
       T result = T(0);
       for (int position = 0; position < nbActive; position++)
@@ -628,13 +628,13 @@ class SparseVector: public Vector<T>
       return result;
     }
 
-    void addToData(const T& factor, T* data) const
+    void addSelfTo(const T& factor, T* data) const
     {
       for (int position = 0; position < nbActive; position++)
         data[activeIndexes[position]] += factor * values[position];
     }
 
-    void subtractToData(T* data) const
+    void subtractSelfTo(T* data) const
     {
       for (int position = 0; position < nbActive; position++)
         data[activeIndexes[position]] -= values[position];
@@ -811,12 +811,47 @@ class PVector: public DenseVector<T>
       ASSERT(this->dimension() == that->dimension());
       const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
-        return other->dotData(this->getValues());
+        return other->dotProduct(this->getValues());
 
       T result = T(0);
       for (int i = 0; i < this->dimension(); i++)
         result += Base::data[i] * that->getEntry(i);
       return result;
+    }
+
+    Vector<T>* addToSelf(const T& factor, const Vector<T>* that)
+    {
+      ASSERT(this->dimension() == that->dimension());
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
+      if (other)
+      {
+        other->addSelfTo(factor, this->getValues());
+        return this;
+      }
+
+      for (int i = 0; i < this->dimension(); i++)
+        Base::data[i] += factor * that->getEntry(i);
+      return this;
+    }
+
+    Vector<T>* addToSelf(const Vector<T>* that)
+    {
+      return addToSelf(1.0f, that);
+    }
+
+    Vector<T>* subtractToSelf(const Vector<T>* that)
+    {
+      ASSERT(this->dimension() == that->dimension());
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
+      if (other)
+      {
+        other->subtractSelfTo(this->getValues());
+        return this;
+      }
+
+      for (int i = 0; i < this->dimension(); i++)
+        Base::data[i] -= that->getEntry(i);
+      return this;
     }
 
     PVector<T>& operator-(const Vector<T>* that)
@@ -825,7 +860,7 @@ class PVector: public DenseVector<T>
       const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
-        other->subtractToSelfT(this->getValues());
+        other->subtractSelfTo(this->getValues());
         return *this;
       }
 
@@ -840,7 +875,7 @@ class PVector: public DenseVector<T>
       const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
       if (other)
       {
-        other->addToSelfT(this->getValues());
+        other->addSelfTo(T(1), this->getValues());
         return *this;
       }
 
@@ -861,40 +896,6 @@ class PVector: public DenseVector<T>
       return *this;
     }
 
-    Vector<T>* addToSelf(const T& factor, const Vector<T>* that)
-    {
-      ASSERT(this->dimension() == that->dimension());
-      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
-      if (other)
-      {
-        other->addToData(factor, this->getValues());
-        return this;
-      }
-
-      for (int i = 0; i < this->dimension(); i++)
-        Base::data[i] += factor * that->getEntry(i);
-      return this;
-    }
-
-    Vector<T>* addToSelf(const Vector<T>* that)
-    {
-      return addToSelf(1.0f, that);
-    }
-
-    Vector<T>* subtractToSelf(const Vector<T>* that)
-    {
-      ASSERT(this->dimension() == that->dimension());
-      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
-      if (other)
-      {
-        other->subtractToData(this->getValues());
-        return this;
-      }
-
-      for (int i = 0; i < this->dimension(); i++)
-        Base::data[i] -= that->getEntry(i);
-      return this;
-    }
 
     Vector<T>* set(const Vector<T>* that, const int& offset)
     { // FixMe:

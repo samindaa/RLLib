@@ -37,7 +37,7 @@
                              __ASSERT(__func__, __FILE__, __LINE__, #expr)    \
                          }                                                    \
                      }                                                        \
-                     while(0)
+                     while(0) /*I am forcing the user to put the ";"*/
 #endif /* NDEBUG */
 
 #if defined(EMBEDDED_MODE)

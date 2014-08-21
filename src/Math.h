@@ -40,9 +40,7 @@ class Boundedness
     template<class T>
     inline static bool checkValue(const T& value)
     {
-      bool bvalue = !isnan(value) && !isinf(value);
-      ASSERT(bvalue);
-      return bvalue;
+      return !isnan(value) && !isinf(value);
     }
 
     template<class T>
@@ -51,9 +49,7 @@ class Boundedness
       T sum = T(0);
       for (int i = 0; i < distribution->dimension(); i++)
         sum += distribution->getEntry(i);
-      bool bvalue = ::fabs(1.0f - sum) < 1e-6;/*for stability*/
-      ASSERT(bvalue);
-      return bvalue;
+      return ::fabs(1.0f - sum) < 1e-6;/*for stability*/
     }
 };
 
@@ -162,13 +158,13 @@ class Random
     {
     }
 
-    inline  void reseed(const uint32_t& seed)
+    inline void reseed(const uint32_t& seed)
     {
       //::srand(seed);
       xorshift.reseed(seed);
     }
 
-    inline  int rand()
+    inline int rand()
     {
       //return ::rand();
       return xorshift.rand_u32() % RAND_MAX;
@@ -180,19 +176,19 @@ class Random
     }
 
     // [0 .. size)
-    inline  int nextInt(const int& size)
+    inline int nextInt(const int& size)
     {
       return rand() % size;
     }
 
     // [0..1)
-    inline  T nextReal()
+    inline T nextReal()
     {
       return T(rand()) / static_cast<T>(RAND_MAX);
     }
 
     // A gaussian random deviate
-    inline  T nextNormalGaussian()
+    inline T nextNormalGaussian()
     {
       T r, v1, v2;
       do
@@ -205,13 +201,13 @@ class Random
       return v1 * fac;
     }
 
-    inline  T gaussianProbability(const T& x, const T& m, const T& s) const
+    inline T gaussianProbability(const T& x, const T& m, const T& s) const
     {
       return exp(-0.5f * pow((x - m) / s, 2)) / (s * sqrt(2.0f * M_PI));
     }
 
     // http://en.literateprograms.org/Box-Muller_transform_(C)
-    inline  T nextGaussian(const T& mean, const T& stddev)
+    inline T nextGaussian(const T& mean, const T& stddev)
     {
       static T n2 = T(0);
       static int n2_cached = 0;

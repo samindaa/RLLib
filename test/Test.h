@@ -319,8 +319,8 @@ class Assert
     template<class T1, class T2>
     static void assertObjectEquals(const T1& a, const T2& b, const double& margin)
     {
-      double tmp = std::fabs(a - b);
-      ASSERT(tmp <= margin);
+      //double tmp = std::fabs(a - b);
+      ASSERT(std::fabs(a - b) <= margin);
     }
 
     template<class T>

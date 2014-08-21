@@ -1,7 +1,0 @@
-#!/bin/bash
-
-./configure target="RLLibTestM32" \
-               cflags="-I. -I./src -I./test -I./simulation -m32 -O3 -Wno-deprecated -fPIC -fno-rtti" \
-               lflags="-lpthread" \
-               ignore="'visualization/*'" \
-               bin="RLLibTest"

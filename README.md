@@ -130,21 +130,20 @@ Test Configuration
 -------------------
 
 The test cases are executed using:
-   
-* 64-bit machines:
-    * ./configure_m64
-    * make
-    * ./RLLibTest
 
-* 32-bit machines:
-    * ./configure_m32
+   * ./configure
+   * make
+   * ./RLLib
+   
+* To compile 32-bit binary on 64-bit machines:
+    * ./configure --march=m32
     * make
-    * ./RLLibTest
+    * ./RLLib
 
 * Debugging:
-    * ./configure_debug
+    * ./configure --debug=ggdb
     * make
-    * ./RLLibTest
+    * ./RLLib
 
 Visualization
 -------------

@@ -134,13 +134,13 @@ class NoisyInputSumEvaluation
       {
         noisyInputSum.update();
         errors[i] = algorithm->learn(noisyInputSum.getInputs(), noisyInputSum.getTarget());
-        Boundedness::checkValue(errors[i]);
+        ASSERT(Boundedness::checkValue(errors[i]));
       }
       timer.stop();
       elapsedTime += timer.getElapsedTimeInMilliSec();
       std::cout << "Time=" << (elapsedTime / (learningEpisodes + evaluationEpisodes)) << std::endl;
       double mrse = errors.dot(&errors) / errors.dimension();
-      Boundedness::checkValue(mrse);
+      ASSERT(Boundedness::checkValue(mrse));
       return mrse;
     }
 

@@ -436,12 +436,12 @@ class OffPAC: public OffPolicyControlLearner<T>
       actor->policy()->update(xas_t);
       behavior->update(xas_t);
       rho_t = actor->pi(a_t) / behavior->pi(a_t);
-      Boundedness::checkValue(rho_t);
+      ASSERT(Boundedness::checkValue(rho_t));
 
       const Vector<T>* phi_tp1 = projector->project(x_tp1);
       delta_t = critic->update(phi_t, phi_tp1, rho_t, r_tp1, z_tp1);
       Vectors<T>::bufferedCopy(phi_tp1, phi_t);
-      Boundedness::checkValue(delta_t);
+      ASSERT(Boundedness::checkValue(delta_t));
       actor->update(xas_t, a_t, rho_t, delta_t);
     }
 
