@@ -1190,24 +1190,14 @@ class Vectors
       return vectors.size();
     }
 
-    Vector<T>* operator[](const int& index)
+    Vector<T>* getEntry(const int& index)
     {
       return vectors.at(index);
     }
 
-    const Vector<T>* operator[](const int& index) const
+    const Vector<T>* getEntry(const int& index) const
     {
       return vectors.at(index);
-    }
-
-    Vector<T>* at(const int& index)
-    {
-      return vectors[index];
-    }
-
-    const Vector<T>* at(const int& index) const
-    {
-      return vectors[index];
     }
 
     void persist(const char* f) const

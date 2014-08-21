@@ -376,12 +376,12 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T>
         const T& delta_t)
     {
       ASSERT(Base::initialized);
-      const Vectors<T>& gradLog = Base::targetPolicy->computeGradLog(phi_t, a_t);
+      const Vectors<T>* gradLog = Base::targetPolicy->computeGradLog(phi_t, a_t);
       for (int i = 0; i < e_u->dimension(); i++)
       {
-        e_u->at(i)->update(lambda, gradLog[i]);
-        e_u->at(i)->vect()->mapMultiplyToSelf(rho_t);
-        Base::u->at(i)->addToSelf(alpha_u * delta_t, e_u->at(i)->vect());
+        e_u->getEntry(i)->update(lambda, gradLog->getEntry(i));
+        e_u->getEntry(i)->vect()->mapMultiplyToSelf(rho_t);
+        Base::u->getEntry(i)->addToSelf(alpha_u * delta_t, e_u->getEntry(i)->vect());
       }
     }
 
@@ -528,9 +528,9 @@ class Actor: public ActorOnPolicy<T>
     void update(const Representations<T>* phi_t, const Action<T>* a_t, T delta)
     {
       ASSERT(initialized);
-      const Vectors<T>& gradLog = policyDistribution->computeGradLog(phi_t, a_t);
-      for (int i = 0; i < gradLog.dimension(); i++)
-        u->at(i)->addToSelf(alpha_u * delta, gradLog[i]);
+      const Vectors<T>* gradLog = policyDistribution->computeGradLog(phi_t, a_t);
+      for (int i = 0; i < gradLog->dimension(); i++)
+        u->getEntry(i)->addToSelf(alpha_u * delta, gradLog->getEntry(i));
     }
 
     PolicyDistribution<T>* policy() const
@@ -586,11 +586,11 @@ class ActorLambda: public Actor<T>
     void update(const Representations<T>* phi_t, const Action<T>* a_t, T delta)
     {
       ASSERT(Base::initialized);
-      const Vectors<T>& gradLog = Base::policy()->computeGradLog(phi_t, a_t);
+      const Vectors<T>* gradLog = Base::policy()->computeGradLog(phi_t, a_t);
       for (int i = 0; i < Base::u->dimension(); i++)
       {
-        e->at(i)->update(gamma * lambda, gradLog[i]);
-        Base::u->at(i)->addToSelf(Base::alpha_u * delta, e->at(i)->vect());
+        e->getEntry(i)->update(gamma * lambda, gradLog->getEntry(i));
+        Base::u->getEntry(i)->addToSelf(Base::alpha_u * delta, e->getEntry(i)->vect());
       }
     }
 };
@@ -607,7 +607,7 @@ class ActorNatural: public Actor<T>
         Actor<T>(alpha_u, policyDistribution), w(new Vectors<T>()), alpha_v(alpha_v)
     {
       for (int i = 0; i < Base::u->dimension(); i++)
-        w->push_back(new SVector<T>(Base::u->at(i)->dimension()));
+        w->push_back(new SVector<T>(Base::u->getEntry(i)->dimension()));
     }
 
     virtual ~ActorNatural()
@@ -620,17 +620,17 @@ class ActorNatural: public Actor<T>
     void update(const Representations<T>* phi_t, const Action<T>* a_t, T delta)
     {
       ASSERT(Base::initialized);
-      const Vectors<T>& gradLog = Base::policy()->computeGradLog(phi_t, a_t);
+      const Vectors<T>* gradLog = Base::policy()->computeGradLog(phi_t, a_t);
       T advantageValue = T(0);
       // Calculate the advantage function
       for (int i = 0; i < w->dimension(); i++)
-        advantageValue += gradLog[i]->dot(w->at(i));
+        advantageValue += gradLog->getEntry(i)->dot(w->getEntry(i));
       for (int i = 0; i < w->dimension(); i++)
       {
         // Update the weights of the advantage function
-        w->at(i)->addToSelf(alpha_v * (delta - advantageValue), gradLog[i]);
+        w->getEntry(i)->addToSelf(alpha_v * (delta - advantageValue), gradLog->getEntry(i));
         // Update the policy parameters
-        Base::u->at(i)->addToSelf(Base::alpha_u, w->at(i));
+        Base::u->getEntry(i)->addToSelf(Base::alpha_u, w->getEntry(i));
       }
     }
 

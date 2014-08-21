@@ -78,7 +78,7 @@ class PolicyDistribution: public virtual Policy<T>
     virtual ~PolicyDistribution()
     {
     }
-    virtual const Vectors<T>& computeGradLog(const Representations<T>* phis,
+    virtual const Vectors<T>* computeGradLog(const Representations<T>* phis,
         const Action<T>* action) =0;
     virtual Vectors<T>* parameters() const =0;
 };
@@ -165,14 +165,14 @@ class NormalDistribution: public PolicyDistribution<T>
       stddevStep = (a - mean) * (a - mean) / sigma2 - 1.0;
     }
 
-    const Vectors<T>& computeGradLog(const Representations<T>* phi, const Action<T>* action)
+    const Vectors<T>* computeGradLog(const Representations<T>* phi, const Action<T>* action)
     {
       ASSERT((phi->dimension() == 1) && (actions->dimension() == 1));
       updateStep(action);
       x->set(phi->at(actions->getEntry(defaultAction)));
       gradMean->set(x)->mapMultiplyToSelf(meanStep);
       gradStddev->set(x)->mapMultiplyToSelf(stddevStep);
-      return *multigrad;
+      return multigrad;
     }
 
     Vectors<T>* parameters() const
@@ -308,7 +308,7 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
       return sampleAction();
     }
 
-    const Vectors<T>& computeGradLog(const Representations<T>* phis, const Action<T>* action)
+    const Vectors<T>* computeGradLog(const Representations<T>* phis, const Action<T>* action)
     {
       return policy->computeGradLog(phis, problemToPolicy(action->getEntry(0)));
     }
@@ -430,11 +430,11 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
       avg->mapMultiplyToSelf(1.0 / sum);
     }
 
-    const Vectors<T>& computeGradLog(const Representations<T>* phi, const Action<T>* action)
+    const Vectors<T>* computeGradLog(const Representations<T>* phi, const Action<T>* action)
     {
       grad->set(phi->at(action));
       grad->subtractToSelf(avg);
-      return *multigrad;
+      return multigrad;
     }
 
     Vectors<T>* parameters() const

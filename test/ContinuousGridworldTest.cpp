@@ -216,7 +216,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
       target, actoreTraces);
 
   Policy<double>* behavior = new BoltzmannDistributionPerturbed<double>(random,
-      problem->getDiscreteActions(), target->parameters()->at(0), 0.01f, 1.0f);
+      problem->getDiscreteActions(), target->parameters()->getEntry(0), 0.01f, 1.0f);
   OffPolicyControlLearner<double>* control = new OffPAC<double>(behavior, critic, actor,
       toStateAction, projector);
 

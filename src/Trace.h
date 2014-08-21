@@ -310,12 +310,12 @@ class Traces
       return traces.size();
     }
 
-    Trace<T>* at(const int& index)
+    Trace<T>* getEntry(const int& index)
     {
       return traces.at(index);
     }
 
-    const Trace<T>* at(const int& index) const
+    const Trace<T>* getEntry(const int& index) const
     {
       return traces.at(index);
     }
