@@ -293,6 +293,11 @@ class Range
     {
       return (bound(value) - min()) / length();
     }
+
+    T toUnit(const T& value, const Range<T>* other) const
+    {
+      return ((bound(value) - min()) / length()) * other->length() + other->min();
+    }
 };
 
 template<class T>
