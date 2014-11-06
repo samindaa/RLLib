@@ -55,7 +55,7 @@ class CartPole: public RLProblem<T>
     CartPole(Random<T>* random) :
         RLProblem<T>(random, 4, 3, 1), gravity(9.8), massCart(1.0), massPole(0.1), totalMass(
             massPole + massCart), length(0.5), poleMassLength(massPole * length), forceMag(10.0), tau(
-            0.02), fourthirds(4.0f / 3.0f), twelveRadians(-12.0f / 180.0f * M_PI), x(0), x_dot(0), theta(
+            0.02), fourthirds(4.0f / 3.0f), twelveRadians(12.0f / 180.0f * M_PI), x(0), x_dot(0), theta(
             0), theta_dot(0), forceRange(new Range<float>(-forceMag, forceMag)), xRange(
             new Range<T>(-2.4, 2.4)), thetaRange(new Range<T>(-twelveRadians, twelveRadians))
     {
@@ -126,7 +126,7 @@ class CartPole: public RLProblem<T>
 
     bool endOfEpisode() const
     {
-      return !(xRange->in(x) || thetaRange->in(theta));
+      return !(xRange->in(x) && thetaRange->in(theta));
     }
 
     T r() const

@@ -10,7 +10,7 @@
 void AcrobotTest::testAcrobotOnPolicy()
 {
   Random<double>* random = new Random<double>;
-  RLProblem<double>* problem = new Acrobot<double>(0);
+  RLProblem<double>* problem = new Acrobot(0);
   Projector<double>* projector = new AcrobotProjector<double>(problem->dimension(),
       problem->getDiscreteActions()->dimension(), 8);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,

@@ -221,7 +221,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
 void ExtendedProblemsTest::testOffPACAcrobot()
 {
   Random<double>* random = new Random<double>;
-  RLProblem<double>* problem = new Acrobot<double>(random);
+  RLProblem<double>* problem = new Acrobot(random);
   Projector<double>* projector = new AcrobotTilesProjector<double>(random);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
@@ -278,7 +278,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
 void ExtendedProblemsTest::testGreedyGQAcrobot()
 {
   Random<double>* random = new Random<double>;
-  RLProblem<double>* problem = new Acrobot<double>(random);
+  RLProblem<double>* problem = new Acrobot(random);
   Projector<double>* projector = new AcrobotTilesProjector<double>(random);
   StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
       problem->getDiscreteActions());
