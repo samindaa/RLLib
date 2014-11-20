@@ -158,6 +158,171 @@ class ExpectedSarsaControl: public SarsaControl<T>
 
 };
 
+template<class T>
+class Q: public Predictor<T>, public LinearLearner<T>
+{
+  protected:
+    T alpha, gamma, lambda;
+    bool initialized;
+    T delta;
+    Trace<T>* e;
+    StateToStateAction<T>* toStateAction;
+    Vector<T>* q;
+    Greedy<T>* target;
+    Vector<T>* phi_sa_t;
+
+  public:
+    Q(const T& alpha, const T& gamma, const T& lambda, Trace<T>* e, Actions<T>* actions,
+        StateToStateAction<T>* toStateAction) :
+        alpha(alpha), gamma(gamma), lambda(lambda), initialized(false), delta(0.0f), e(e), toStateAction(
+            toStateAction), q(new PVector<T>(e->vect()->dimension())), target(
+            new Greedy<T>(actions, this)), phi_sa_t(0)
+    {
+    }
+
+    virtual ~Q()
+    {
+      delete q;
+      delete target;
+      if (phi_sa_t)
+        delete phi_sa_t;
+    }
+
+    T update(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1, const T& r_tp1)
+    {
+      ASSERT(initialized);
+      const Representations<T>* phi_t = toStateAction->stateActions(x_t);
+      Vectors<T>::bufferedCopy(phi_t->at(a_t), phi_sa_t);
+      target->update(phi_t);
+      const Action<T>* at_star = target->sampleBestAction();
+      const Representations<T>* phi_tp1 = toStateAction->stateActions(x_tp1);
+      target->update(phi_tp1);
+      delta = r_tp1 + gamma * target->sampleBestActionValue() - q->dot(phi_sa_t);
+      if (a_t->id() == at_star->id())
+        e->update(gamma * lambda, phi_sa_t);
+      else
+      {
+        e->clear();
+        e->update(T(0), phi_sa_t);
+      }
+      q->addToSelf(alpha * delta, e->vect());
+      return delta;
+    }
+
+    T predict(const Vector<T>* x) const
+    {
+      return q->dot(x);
+    }
+
+    T initialize()
+    {
+      e->clear();
+      initialized = true;
+      return T(0);
+    }
+
+    void reset()
+    {
+      e->clear();
+      q->clear();
+      initialized = false;
+    }
+
+    Vector<T>* weights() const
+    {
+      return q;
+    }
+
+    void persist(const char* f) const
+    {
+      q->persist(f);
+    }
+
+    void resurrect(const char* f)
+    {
+      q->resurrect(f);
+    }
+
+};
+
+// Gradient decent control
+template<class T>
+class QControl: public OffPolicyControlLearner<T>
+{
+  protected:
+    Policy<T>* behavior;
+    StateToStateAction<T>* toStateAction;
+    Q<T>* q;
+
+  public:
+    QControl(Policy<T>* behavior, StateToStateAction<T>* toStateAction, Q<T>* q) :
+        behavior(behavior), toStateAction(toStateAction), q(q)
+    {
+    }
+
+    virtual ~QControl()
+    {
+    }
+
+    const Action<T>* initialize(const Vector<T>* x)
+    {
+      q->initialize();
+      const Representations<T>* phi = toStateAction->stateActions(x);
+      behavior->update(phi);
+      return Policies::sampleAction(behavior, phi);
+    }
+
+    void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1, const T& r_tp1,
+        const T& z_tp1)
+    {
+      q->update(x_t, a_t, x_tp1, r_tp1);
+    }
+
+    const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
+        const T& r_tp1, const T& z_tp1)
+    {
+      learn(x_t, a_t, x_tp1, r_tp1, z_tp1);
+      return Policies::sampleAction(behavior, toStateAction->stateActions(x_tp1));
+    }
+
+    void reset()
+    {
+      q->reset();
+    }
+
+    const Action<T>* proposeAction(const Vector<T>* x)
+    {
+      return Policies::sampleBestAction(behavior, toStateAction->stateActions(x));
+    }
+
+    T computeValueFunction(const Vector<T>* x) const
+    {
+      const Representations<T>* phis = toStateAction->stateActions(x);
+      behavior->update(phis); // ?
+      T v_s = T(0);
+      // V(s) = \sum_{a \in A} \pi(s,a) * Q(s,a)
+      for (typename Actions<T>::const_iterator a = toStateAction->getActions()->begin();
+          a != toStateAction->getActions()->end(); ++a)
+        v_s += behavior->pi(*a) * q->predict(phis->at(*a));
+      return v_s;
+    }
+
+    const Predictor<T>* predictor() const
+    {
+      return q;
+    }
+
+    void persist(const char* f) const
+    {
+      q->persist(f);
+    }
+
+    void resurrect(const char* f)
+    {
+      q->resurrect(f);
+    }
+};
+
 // Gradient decent control
 template<class T>
 class GreedyGQ: public OffPolicyControlLearner<T>

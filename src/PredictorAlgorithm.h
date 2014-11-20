@@ -68,7 +68,7 @@ class TD: public OnPolicyTD<T>
       return delta_t;
     }
 
-    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, T r_tp1)
+    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1)
     {
       ASSERT(initialized);
       return update(x_t, x_tp1, r_tp1, gamma);
@@ -294,7 +294,7 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
       return T(0);
     }
 
-    virtual T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, T r_tp1)
+    virtual T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& r_tp1)
     {
       ASSERT(initialized);
       v_t = q->dot(phi_t);
@@ -363,7 +363,7 @@ class SarsaTrue: public Sarsa<T>
       initializedVt = true;
     }
 
-    T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, T r_tp1)
+    T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& r_tp1)
     {
       ASSERT(Base::initialized);
       if (!initializedVt)
@@ -417,7 +417,7 @@ class SarsaAlphaBound: public Sarsa<T>
     }
 
   public:
-    T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, T r_tp1)
+    T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& r_tp1)
     {
       ASSERT(Base::initialized);
       Base::v_t = Base::q->dot(phi_t);
@@ -467,7 +467,7 @@ class GQ: public Predictor<T>, public LinearLearner<T>
     }
 
     T update(const Vector<T>* phi_t, const Vector<T>* phi_bar_tp1, const T& rho_t,
-        T r_tp1, T z_tp1)
+        const T& r_tp1, const T& z_tp1)
     {
       ASSERT(initialized);
       delta_t = r_tp1 + beta_tp1 * z_tp1 + (T(1) - beta_tp1) * v->dot(phi_bar_tp1) - v->dot(phi_t);
@@ -576,12 +576,12 @@ class GTDLambda: public OnPolicyTD<T>, public GVF<T>
     }
 
     T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& rho_t,
-        T r_tp1, T z_tp1)
+        const T& r_tp1, const T& z_tp1)
     {
       return update(phi_t, phi_tp1, gamma_t, lambda_t, rho_t, r_tp1, z_tp1);
     }
 
-    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, T r_tp1)
+    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1)
     {
       return update(x_t, x_tp1, gamma_t, lambda_t, T(1), r_tp1, T(0));
     }

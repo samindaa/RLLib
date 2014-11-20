@@ -622,12 +622,13 @@ class Greedy: public DiscreteActionPolicy<T>
     Actions<T>* actions;
     Predictor<T>* predictor;
     T* actionValues;
+    T bestValue;
     const Action<T>* bestAction;
 
   public:
     Greedy(Actions<T>* actions, Predictor<T>* predictor) :
-        actions(actions), predictor(predictor), actionValues(new T[actions->dimension()]), bestAction(
-            0)
+        actions(actions), predictor(predictor), actionValues(new T[actions->dimension()]), bestValue(
+            0.0f), bestAction(0)
     {
     }
 
@@ -650,11 +651,15 @@ class Greedy: public DiscreteActionPolicy<T>
 
     void findBestAction()
     {
+      bestValue = actionValues[0];
       bestAction = actions->getEntry(0);
       for (int i = 1; i < actions->dimension(); i++)
       {
         if (actionValues[i] > actionValues[bestAction->id()])
+        {
+          bestValue = actionValues[i];
           bestAction = actions->getEntry(i);
+        }
       }
     }
 
@@ -679,6 +684,11 @@ class Greedy: public DiscreteActionPolicy<T>
     const Action<T>* sampleBestAction()
     {
       return bestAction;
+    }
+
+    T sampleBestActionValue() const
+    {
+      return bestValue;
     }
 
 };

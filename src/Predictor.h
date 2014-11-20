@@ -45,7 +45,7 @@ class OnPolicyTD: public Predictor<T>, public LinearLearner<T>
     virtual ~OnPolicyTD()
     {
     }
-    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, T r_tp1) =0;
+    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1) =0;
 };
 
 template<class T>
@@ -55,8 +55,8 @@ class OffPolicyTD: public Predictor<T>, public LinearLearner<T>
     virtual ~OffPolicyTD()
     {
     }
-    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& rho_t, T r_tp1,
-        T z_tp1) =0;
+    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& rho_t, const T& r_tp1,
+        const T& z_tp1) =0;
 
 };
 

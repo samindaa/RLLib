@@ -41,6 +41,7 @@ class MountainCarTest: public MountainCarTestBase
     void testSarsaTrueMountainCar();
     void testSarsaAdaptiveMountainCar();
     void testExpectedSarsaMountainCar();
+    void testQMountainCar();
     void testGreedyGQOnPolicyMountainCar();
     void testGreedyGQMountainCar();
     void testSoftmaxGQOnMountainCar();

@@ -272,6 +272,43 @@ void MountainCarTest::testExpectedSarsaMountainCar()
   delete sim;
 }
 
+void MountainCarTest::testQMountainCar()
+{
+  Random<double>* random = new Random<double>;
+  RLProblem<double>* problem = new MountainCar<double>;
+  Hashing<double>* hashing = new MurmurHashing<double>(random, 10000);
+  Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
+      true);
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActions());
+  Trace<double>* e = new ATrace<double>(projector->dimension());
+  double alpha = 0.15 / projector->vectorNorm();
+  double gamma = 0.99;
+  double lambda = 0.6;
+  Q<double>* q = new Q<double>(alpha, gamma, lambda, e, problem->getDiscreteActions(),
+      toStateAction);
+  Policy<double>* acting = new Greedy<double>(problem->getDiscreteActions(), q);
+  OffPolicyControlLearner<double>* control = new QControl<double>(acting, toStateAction, q);
+
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 1);
+  sim->setTestEpisodesAfterEachRun(true);
+  sim->run();
+  sim->computeValueFunction();
+
+  delete random;
+  delete problem;
+  delete hashing;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete q;
+  delete acting;
+  delete control;
+  delete agent;
+  delete sim;
+}
+
 void MountainCarTest::testGreedyGQOnPolicyMountainCar()
 {
   Random<double>* random = new Random<double>;
@@ -727,6 +764,7 @@ void MountainCarTest::run()
   testSarsaTrueMountainCar();
   testSarsaAdaptiveMountainCar();
   testExpectedSarsaMountainCar();
+  testQMountainCar();
 
   testGreedyGQMountainCar();
   testSoftmaxGQOnMountainCar();
@@ -741,6 +779,5 @@ void MountainCarTest::run()
 
   testSarsaTabularActionMountainCar();
   testOnPolicyBoltzmannRTraceTabularActionCar();
-
 }
 
