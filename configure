@@ -33,24 +33,25 @@ done
 echo "Architecture: " $MARCH
 echo "Debug       : " $DEBUG 
 
-targetname="RLLib"
+targetname="Release"
 depends_on=""
 
-builddir="build"
+builddir="build/RLLib"
 bin="RLLib"
 
 lib_list=""
 tool_list=""
 cxx="g++"
 optional_cflags="-I./src -I./test -I./simulation \
+		 -I./util -I./util/cma \
                  -$MARCH -$DEBUG -O3 \
                  -Wno-deprecated -fPIC -fno-rtti -U_FORTIFY_SOURCE"
 optional_lflags="-lpthread"
 
-sourcedirs="."
+sourcedirs="./test ./util/cma"
 
 # Use single quotes around pattern with * to avoid early glob expansion. 
-ignore="'visualization/*' 'doc/*'"
+ignore=""
 hideWarnings=""
 
 includedMakefiles=""
