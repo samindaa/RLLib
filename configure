@@ -10,6 +10,7 @@
 # Settings:
 MARCH=m64
 DEBUG=ggdb
+OPTIMIZE=O3
 
 for i in "$@"
 do
@@ -32,6 +33,7 @@ done
 
 echo "Architecture: " $MARCH
 echo "Debug       : " $DEBUG 
+echo "Optimize    : " $OPTIMIZE
 
 targetname="Release"
 depends_on=""
@@ -44,15 +46,17 @@ tool_list=""
 cxx="g++"
 optional_cflags="-I./src -I./test -I./simulation \
 		 -I./util -I./util/cma \
-                 -$MARCH -$DEBUG -O3 \
+                 -$MARCH -$DEBUG -$OPTIMIZE \
+                 -std=c++0x \
+		 -mmmx -msse -msse2 -msse3 -mssse3 \
                  -Wno-deprecated -fPIC -fno-rtti -U_FORTIFY_SOURCE"
 optional_lflags="-lpthread"
 
-sourcedirs="./test ./util/cma"
+sourcedirs="./test ./util/cma ./util/TreeFitted"
 
 # Use single quotes around pattern with * to avoid early glob expansion. 
 ignore=""
-hideWarnings=""
+hideWarnings="'util/cma/example_restarts.c'"
 
 includedMakefiles=""
 generatedFiles=""
