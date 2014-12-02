@@ -42,7 +42,10 @@
 #define _TILES_H_
 
 #include <fcntl.h>
+// Visual Studio 2013
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <stdint.h>
 #include <string.h>
 

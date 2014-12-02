@@ -196,13 +196,13 @@ class DenseVector: public Vector<T>
 
     T maxNorm() const
     {
-      T maxv = capacity > 0 ? fabs(data[0]) : 0.0;
+      T maxv = capacity > 0 ? std::abs(data[0]) : 0.0;
       if (capacity > 0)
       {
         for (int i = 1; i < capacity; i++)
         {
-          if (fabs(data[i]) > maxv)
-            maxv = fabs(data[i]);
+          if (std::abs(data[i]) > maxv)
+            maxv = std::abs(data[i]);
         }
       }
       return maxv;
@@ -212,7 +212,7 @@ class DenseVector: public Vector<T>
     {
       T result = T(0);
       for (int i = 0; i < capacity; i++)
-        result += std::fabs(data[i]);
+        result += std::abs(data[i]);
       return result;
     }
 
@@ -590,13 +590,13 @@ class SparseVector: public Vector<T>
 
     T maxNorm() const
     {
-      T maxv = nbActive > 0 ? fabs(values[0]) : T(0);
+      T maxv = nbActive > 0 ? std::abs(values[0]) : T(0);
       if (nbActive > 0)
       {
         for (int position = 1; position < nbActive; position++)
         {
-          if (fabs(values[position]) > maxv)
-            maxv = fabs(values[position]);
+          if (std::abs(values[position]) > maxv)
+            maxv = std::abs(values[position]);
         }
       }
       return maxv;
@@ -606,7 +606,7 @@ class SparseVector: public Vector<T>
     {
       T result = T(0);
       for (int position = 0; position < nbActive; position++)
-        result += fabs(values[position]);
+        result += std::abs(values[position]);
       return result;
     }
 
@@ -900,7 +900,7 @@ class PVector: public DenseVector<T>
     Vector<T>* set(const Vector<T>* that, const int& offset)
     { // FixMe:
       //assert(this->dimension() == that->dimension());
-
+      this->clear();
       const DenseVector<T>* other = RTTI<T>::constDenseVector(that);
       if (other)
       {
@@ -1076,7 +1076,7 @@ class SVector: public SparseVector<T>
       return this;
     }
 
-    Vector<T>* set(const Vector<T>* that, const int& start)
+    Vector<T>* set(const Vector<T>* that, const int& offset)
     {
       // Dimension check is relaxed.
       this->clear();
@@ -1084,12 +1084,12 @@ class SVector: public SparseVector<T>
       if (other)
       {
         for (int i = 0; i < other->nonZeroElements(); i++)
-          this->setNonZeroEntry(other->nonZeroIndexes()[i] + start, other->getValues()[i]);
+          this->setNonZeroEntry(other->nonZeroIndexes()[i] + offset, other->getValues()[i]);
         return this;
       }
 
       for (int i = 0; i < that->dimension(); i++)
-        this->setEntry(start + i, that->getEntry(i));
+        this->setEntry(i + offset, that->getEntry(i));
       return this;
     }
 
@@ -1098,6 +1098,23 @@ class SVector: public SparseVector<T>
       // This will set 'value' to all the elements
       for (int index = 0; index < Base::indexesPositionLength; index++)
         this->setNonZeroEntry(index, value);
+      return this;
+    }
+
+    Vector<T>* override(const Vector<T>* that, const T& value)
+    {
+      ASSERT(this->dimension() == that->dimension());
+      this->clear();
+      const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
+      if (other)
+      {
+        for (int i = 0; i < other->nonZeroElements(); i++)
+          this->setNonZeroEntry(other->nonZeroIndexes()[i], value);
+        return this;
+      }
+
+      for (int i = 0; i < that->dimension(); i++)
+        this->setEntry(i, value);
       return this;
     }
 
@@ -1240,13 +1257,13 @@ class Vectors
       {
         T* values = that->getValues();
         for (T* position = values; position < values + that->nonZeroElements(); ++position)
-          *position = fabs(*position);
+          *position = std::abs(*position);
       }
       else
       {
         T* values = other->getValues();
         for (T* position = values; position < values + other->dimension(); ++position)
-          *position = fabs(*position);
+          *position = std::abs(*position);
       }
       return other;
     }

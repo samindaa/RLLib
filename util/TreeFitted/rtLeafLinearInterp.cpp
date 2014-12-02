@@ -23,8 +23,7 @@
 
 using namespace PoliFitted;
 
-rtLeafLinearInterp::rtLeafLinearInterp() :
-    mCoeffs(0)
+rtLeafLinearInterp::rtLeafLinearInterp()
 {
 }
 
@@ -32,23 +31,20 @@ rtLeafLinearInterp::rtLeafLinearInterp() :
  * Basic constructor
  * @param val the value to store in the node
  */
-rtLeafLinearInterp::rtLeafLinearInterp(Dataset* data) :
-    mCoeffs(0)
+rtLeafLinearInterp::rtLeafLinearInterp(Dataset* data)
 {
   Fit(data);
 }
 
 rtLeafLinearInterp::~rtLeafLinearInterp()
 {
-  if (mCoeffs)
-    delete mCoeffs;
 }
 
 float rtLeafLinearInterp::Fit(Dataset* data)
 {
   unsigned int size = data->size();
   unsigned int input_size = data->GetInputSize() + 1;
-  mCoeffs = new RLLib::PVector<double>(input_size);
+  mCoeffs.setZero(input_size);
   // In case the samples are less than the unknowns
   if (size < input_size)
   {
@@ -58,9 +54,7 @@ float rtLeafLinearInterp::Fit(Dataset* data)
       result += data->at(i)->GetOutput();
     }
     result /= (float) data->size();
-    mCoeffs->setEntry(0, result);
-    for (unsigned int j = 1; j < input_size; j++)
-      mCoeffs->setEntry(j, 0);
+    mCoeffs(0) = result;
     return 0.0;
   }
   else
@@ -76,22 +70,18 @@ float rtLeafLinearInterp::Fit(Dataset* data)
         X(i, j) = data->at(i)->GetInput(j - 1);
     }
 
-    Eigen::VectorXd mCoeffsH = X.colPivHouseholderQr().solve(y); // Fit
-
-    for (int i = 0; i < mCoeffs->dimension(); i++)
-      mCoeffs->setEntry(i, (double) mCoeffsH(i));
-
+    mCoeffs = X.colPivHouseholderQr().solve(y); // Fit
     // The sum of squares of the residuals from the best-fit, \chi^2, is returned in chisq
-    return (y.array() - (X * mCoeffsH).array()).square().sum();
+    return (X * mCoeffs - y).array().square().sum();
   }
 }
 
 float rtLeafLinearInterp::getValue(Tuple* input)
 {
-  float result = mCoeffs->getEntry(0);
-  for (int i = 1; i < mCoeffs->dimension(); i++)
+  float result = mCoeffs(0);
+  for (unsigned int i = 1; i < mCoeffs.rows(); i++)
   {
-    result += mCoeffs->getEntry(i) * (*input)[i - 1];
+    result += mCoeffs(i) * (*input)[i - 1];
   }
 //  if (result < 0) result = 0;
   return result;
@@ -100,10 +90,10 @@ float rtLeafLinearInterp::getValue(Tuple* input)
 void rtLeafLinearInterp::WriteOnStream(ofstream& out)
 {
   out << "LLI" << endl;
-  out << mCoeffs->dimension() << endl;
-  for (int i = 0; i < mCoeffs->dimension(); i++)
+  out << mCoeffs.rows() << endl;
+  for (unsigned int i = 0; i < mCoeffs.rows(); i++)
   {
-    out << mCoeffs->getEntry(i) << " ";
+    out << mCoeffs(i) << " ";
   }
 }
 
@@ -113,14 +103,11 @@ void rtLeafLinearInterp::ReadFromStream(ifstream& in)
   double value;
   in >> size;
   assert(size > 0);
-  if (!mCoeffs)
-    mCoeffs = new RLLib::PVector<double>(size);
-  else
-    assert(size == mCoeffs->dimension());
+  mCoeffs.setZero(size);
   for (int i = 0; i < size; i++)
   {
     in >> value;
-    mCoeffs->setEntry(i, value);
+    mCoeffs(i) = value;
   }
 }
 

@@ -4,12 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui widgets printsupport
 
 TARGET = RLLibVizSwingPendulum2
 TEMPLATE = app
 
-INCLUDEPATH += ../../src \
+INCLUDEPATH += ../../include \
                ../../simulation
 
 SOURCES += MainSwingPendulum2.cpp\

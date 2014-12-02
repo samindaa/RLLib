@@ -67,7 +67,7 @@ class ATrace: public Trace<T>
       int i = 0;
       while (i < svector->nonZeroElements())
       {
-        T absValue = fabs(values[i]);
+        T absValue = std::abs(values[i]);
         if (absValue <= threshold)
           svector->removeEntry(indexes[i]);
         else
@@ -155,7 +155,7 @@ class AMaxTrace: public ATrace<T>
   private:
     void adjustValue(T& value) const
     {
-      if (fabs(value) > maximumValue)
+      if (std::abs(value) > maximumValue)
         value = Signum::valueOf(value) * maximumValue;
     }
 

@@ -28,7 +28,7 @@
  The original location of this file is /home/marcello/Projects/fitted/Developing/Regressor.cpp
  **************************************************************************/
 
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <stdlib.h>
 #include <assert.h>

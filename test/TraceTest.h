@@ -112,7 +112,7 @@ class TraceTest: public TraceTestBase
       Assert::assertObjectEquals(s02->nonZeroElements(),
           ((const SparseVector<double>*) trace.vect())->nonZeroElements());
       SVector<double> expectedVec(trace.vect()->dimension());
-      expectedVec.set(s02, expected);
+      expectedVec.override(s02, expected);
       Assert::assertEquals(trace.vect(), &expectedVec, 0.00001);
     }
 
@@ -156,7 +156,7 @@ class TraceTest: public TraceTestBase
           else
           {
             //std::cout << "[" << Simulator<T>::Event::episodeR << ","
-            //    << Simulator<T, O>::Event::averageTimePerStep << "] ";
+            //    << Simulator<T>::Event::averageTimePerStep << "] ";
             Assert::assertFails(Simulator<T>::Event::episodeR < minEpisodeReward);
           }
         }

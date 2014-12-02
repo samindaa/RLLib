@@ -22,6 +22,7 @@ class TreeFittedTest: public TreeFittedTestBase
     void testRosenbrock();
     void testRastrigin();
     void testCigar();
+    void testRegularizedLinearRegression();
 };
 
 #endif /* TEST_TREEFITTEDTEST_H_ */

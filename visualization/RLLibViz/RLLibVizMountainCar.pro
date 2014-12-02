@@ -4,12 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui widgets printsupport
 
 TARGET = RLLibVizMountainCar
 TEMPLATE = app
 
-INCLUDEPATH += ../../src \
+INCLUDEPATH += ../../include \
                ../../simulation
 
 SOURCES += MainMountainCar.cpp\

@@ -152,8 +152,7 @@ class TDLambda: public TDLambdaAbstract<T>
     }
 
   public:
-    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1,
-        const T& gamma_tp1)
+    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1, const T& gamma_tp1)
     {
       ASSERT(TD<T>::initialized);
       TD<T>::delta_t = r_tp1 + gamma_tp1 * TD<T>::v->dot(x_tp1) - TD<T>::v->dot(x_t);
@@ -195,8 +194,7 @@ class TDLambdaTrue: public TDLambdaAbstract<T>
       initializedVt = true;
     }
 
-    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1,
-        const T& gamma_tp1)
+    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1, const T& gamma_tp1)
     {
       ASSERT(TD<T>::initialized);
       if (!initializedVt)
@@ -242,7 +240,7 @@ class TDLambdaAlphaBound: public TDLambdaAbstract<T>
     void updateAlpha(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& gamma_tp1)
     {
       // Update the adaptive step-size
-      T b = std::fabs(
+      T b = std::abs(
           Base::e->vect()->dot(
               gammaXtp1MinusX->set(x_tp1)->mapMultiplyToSelf(gamma_tp1)->subtractToSelf(x_t)));
       if (b > 0.0f)
@@ -250,8 +248,7 @@ class TDLambdaAlphaBound: public TDLambdaAbstract<T>
     }
 
   public:
-    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1,
-        const T& gamma_tp1)
+    T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1, const T& gamma_tp1)
     {
       ASSERT(TD<T>::initialized);
       TD<T>::delta_t = r_tp1 + gamma_tp1 * TD<T>::v->dot(x_tp1) - TD<T>::v->dot(x_t);
@@ -408,7 +405,7 @@ class SarsaAlphaBound: public Sarsa<T>
     void updateAlpha(const Vector<T>* phi_t, const Vector<T>* phi_tp1)
     {
       // Update the adaptive step-size
-      T b = std::fabs(
+      T b = std::abs(
           Base::e->vect()->dot(
               gammaXtp1MinusX->set(phi_tp1)->mapMultiplyToSelf(Base::gamma)->subtractToSelf(
                   phi_t)));
@@ -445,8 +442,7 @@ class GQ: public Predictor<T>, public LinearLearner<T>
     Vector<T>* w;
 
   public:
-    GQ(const T& alpha_v, const T& alpha_w, const T& beta_tp1, const T& lambda_t,
-        Trace<T>* e) :
+    GQ(const T& alpha_v, const T& alpha_w, const T& beta_tp1, const T& lambda_t, Trace<T>* e) :
         delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), beta_tp1(beta_tp1), lambda_t(
             lambda_t), e(e), v(new PVector<T>(e->vect()->dimension())), w(
             new PVector<T>(e->vect()->dimension()))
@@ -466,8 +462,8 @@ class GQ: public Predictor<T>, public LinearLearner<T>
       return T(0);
     }
 
-    T update(const Vector<T>* phi_t, const Vector<T>* phi_bar_tp1, const T& rho_t,
-        const T& r_tp1, const T& z_tp1)
+    T update(const Vector<T>* phi_t, const Vector<T>* phi_bar_tp1, const T& rho_t, const T& r_tp1,
+        const T& z_tp1)
     {
       ASSERT(initialized);
       delta_t = r_tp1 + beta_tp1 * z_tp1 + (T(1) - beta_tp1) * v->dot(phi_bar_tp1) - v->dot(phi_t);
@@ -530,8 +526,7 @@ class GTDLambda: public OnPolicyTD<T>, public GVF<T>
     Vector<T>* w;
 
   public:
-    GTDLambda(const T& alpha_v, const T& alpha_w, const T& gamma_t,
-        const T& lambda_t, Trace<T>* e) :
+    GTDLambda(const T& alpha_v, const T& alpha_w, const T& gamma_t, const T& lambda_t, Trace<T>* e) :
         delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), gamma_t(gamma_t), lambda_t(
             lambda_t), e(e), v(new PVector<T>(e->vect()->dimension())), w(
             new PVector<T>(e->vect()->dimension()))
@@ -575,8 +570,8 @@ class GTDLambda: public OnPolicyTD<T>, public GVF<T>
       return delta_t;
     }
 
-    T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& rho_t,
-        const T& r_tp1, const T& z_tp1)
+    T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& rho_t, const T& r_tp1,
+        const T& z_tp1)
     {
       return update(phi_t, phi_tp1, gamma_t, lambda_t, rho_t, r_tp1, z_tp1);
     }

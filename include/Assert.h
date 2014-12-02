@@ -27,6 +27,13 @@
 #include <cstdlib>
 #endif
 
+// Visual Studio 2013
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#define _USE_MATH_DEFINES // for C++
+#define __func__ __FUNCTION__
+#endif
+
 #if defined(NDEBUG)
 #define ASSERT(expr)   ((void)0)
 #else

@@ -44,7 +44,7 @@ bin="RLLib"
 lib_list=""
 tool_list=""
 cxx="g++"
-optional_cflags="-I./src -I./test -I./simulation \
+optional_cflags="-I./include -I./test -I./simulation \
 		 -I./util -I./util/cma \
                  -$MARCH -$DEBUG -$OPTIMIZE \
                  -std=c++0x \

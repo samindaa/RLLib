@@ -12,6 +12,7 @@ Features
  * `GTD(lambda)`
  * `GQ(lambda)`
 * **Off-policy control algorithms**:  
+ * `Q(lambda)`
  * `Greedy-GQ(lambda)`
  * `Softmax-GQ(lambda)`
  * `Off-PAC (can be used in on-policy setting)`
@@ -75,7 +76,7 @@ Demo
 Usage
 -----
 
-RLLib is a C++ template library. The header files are located in the `src` directly. You can simply include this directory from your projects, e.g., `-I./src`, to access the algorithms.
+RLLib is a C++ template library. The header files are located in the `include` directly. You can simply include/add this directory from your projects, e.g., `-I./include`, to access the algorithms.
 
 To access the control algorithms:
     
@@ -148,7 +149,7 @@ The test cases are executed using:
 Visualization
 -------------
 
-RLLib provides a [QT4.8](http://qt-project.org/doc/qt-4.8/index.html) based Reinforcement Learning problems and algorithms visualization tool named `RLLibViz`. Currently RLLibViz visualizes following problems and algorithms:
+RLLib provides a [QT5](http://qt-project.org/qt5) based Reinforcement Learning problems and algorithms visualization tool named `RLLibViz`. Currently RLLibViz visualizes following problems and algorithms:
 
 * On-policy:
     * SwingPendulum problem with continuous actions. We use AverageRewardActorCritic algorithm.
@@ -161,9 +162,10 @@ RLLib provides a [QT4.8](http://qt-project.org/doc/qt-4.8/index.html) based Rein
 * In order to install RLLibViz:     
     * Change directory to `visualization/RLLibViz`
     * ./configure
-    * ./RLLibVizSwingPendulum
     * ./RLLibVizContinuousGridworld
     * ./RLLibVizMountainCar
+    * ./RLLibVizSwingPendulum
+    * ./RLLibVizSwingPendulum2
   
 	
 Documentation
@@ -172,6 +174,12 @@ Documentation
 * [http://web.cs.miami.edu/home/saminda/rllib.html](http://web.cs.miami.edu/home/saminda/rllib.html)
 * [mloss.org](https://mloss.org/software/view/502/)  
 
+Systems
+-------
+
+* Ubuntu >= 11.04
+* Windows (Visual Studio 2013)
+* Mac OS
 
 Publication
 -----------

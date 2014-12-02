@@ -28,7 +28,6 @@
 #include <cassert>
 
 #include <Eigen/Dense>//<< Eigen 3 (Sam)
-#include <Vector.h> //<< RLLib Vector (Sam)
 
 #include "rtLeaf.h"
 #include "Dataset.h"
@@ -94,8 +93,7 @@ class rtLeafLinearInterp: public rtLeaf
     virtual void ReadFromStream(ifstream& in);
 
   protected:
-    //gsl_vector* mCoeffs;
-    RLLib::Vector<double>* mCoeffs;
+    Eigen::VectorXd mCoeffs;
 
 };
 

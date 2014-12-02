@@ -149,7 +149,8 @@ void TreeFittedTest::testCigar()
   PoliFitted::Dataset* trainingDataset = new PoliFitted::Dataset(input_size, output_size);
   PoliFitted::Dataset* testingDataset = new PoliFitted::Dataset(input_size, output_size);
   PoliFitted::Regressor* reg = new PoliFitted::ExtraTreeEnsemble(input_size, output_size, 50, 5, 2,
-      0.0f, LeafType::CONSTANT);
+      0.0f, LeafType::LINEAR);
+  RLLib::Timer* timer = new RLLib::Timer;
 
   const int nbTrainingSamples = 1000;
   const int nbTestingSamples = 200;
@@ -172,17 +173,24 @@ void TreeFittedTest::testCigar()
   }
 
   std::cout << "Learning: " << std::endl;
+  timer->start();
   reg->Train(trainingDataset);
+  timer->stop();
+  std::cout << "train (reg) (ms): " << timer->getElapsedTimeInMilliSec() << std::endl;
 
   std::cout << "Evaluation reg: " << std::endl;
+
   for (PoliFitted::Dataset::iterator iter = testingDataset->begin(); iter != testingDataset->end();
       ++iter)
   {
     PoliFitted::Tuple* input = (*iter)->GetInputTuple();
     PoliFitted::Tuple* ouput = (*iter)->GetOutputTuple();
     PoliFitted::Tuple result(input_size);
+    timer->start();
     reg->Evaluate(input, result);
-    std::cout << "f_actual: " << ouput->at(0) << " f_estimated: " << result.at(0) << std::endl;
+    timer->stop();
+    std::cout << "f_actual: " << ouput->at(0) << " f_estimated: " << result.at(0) << " ms: "
+        << timer->getElapsedTimeInMilliSec() << std::endl;
   }
 
   std::cout << "reg_training_err (L2): " << reg->ComputeTrainError(trainingDataset)
@@ -204,8 +212,11 @@ void TreeFittedTest::testCigar()
     PoliFitted::Tuple* input = (*iter)->GetInputTuple();
     PoliFitted::Tuple* ouput = (*iter)->GetOutputTuple();
     PoliFitted::Tuple result(input_size);
+    timer->start();
     reg2->Evaluate(input, result);
-    std::cout << "f_actual: " << ouput->at(0) << " f_estimated: " << result.at(0) << std::endl;
+    timer->stop();
+    std::cout << "f_actual: " << ouput->at(0) << " f_estimated: " << result.at(0) << " ms: "
+        << timer->getElapsedTimeInMilliSec() << std::endl;
   }
 
   std::cout << "reg2_training_err (L2): " << reg2->ComputeTrainError(trainingDataset)
@@ -224,6 +235,65 @@ void TreeFittedTest::testCigar()
   delete testingDataset;
   delete reg;
   delete reg2;
+  delete timer;
+}
+
+void TreeFittedTest::testRegularizedLinearRegression()
+{
+  // This test uses Eigen3 functionality in all our fitting codes.
+  std::string line;
+  std::ifstream infile("databases/housing.data");
+  double value;
+  Eigen::MatrixXd X = Eigen::MatrixXd::Zero(506, 14); // These values are only housing.data
+  Eigen::VectorXd y(506);
+  X.col(0).array() += 1.0;
+
+  int i = 0;
+  while (std::getline(infile, line))  // this does the checking!
+  {
+    std::istringstream iss(line);
+    if (line.size() > 0)
+    {
+      int j = 0;
+      while (iss >> value)
+      {
+        if (j < 13)
+          X(i, j + 1) = value;
+        else
+          y(i) = value;
+        ++j;
+      }
+      ASSERT(j == 14);
+    }
+    ++i;
+  }
+  ASSERT(i == 506);
+
+  double lambda = 1.0f;
+  // print a row
+  int myrow = 0;
+  for (int j = 0; j < 14; j++)
+    std::cout << X(myrow, j) << " ";
+  std::cout << std::endl;
+  std::cout << y(0);
+  std::cout << std::endl;
+
+  Eigen::MatrixXd A_new = (X.transpose() * X + lambda * MatrixXd::Identity(X.cols(), X.cols()));
+  Eigen::VectorXd b_new = X.transpose() * y;
+  Eigen::VectorXd theta_estimated = A_new.colPivHouseholderQr().solve(b_new); // Fit
+  RLLib::PVector<double> theta(theta_estimated.rows());
+  for (int i = 0; i < theta.dimension(); i++)
+    theta.setEntry(i, (double) theta_estimated(i));
+  std::cout << theta << std::endl;
+
+  double mrsq = sqrt((y - X * theta_estimated).array().square().sum() / double(506.0));
+  std::cout << "mrsq: " << mrsq << std::endl;
+
+  Eigen::VectorXd y_estimated = X.topRows<10>() * theta_estimated;
+
+  for (int i = 0; i < 10; i++)
+    std::cout << y(i) << " " << y_estimated(i) << "\n";
+  std::cout << std::endl;
 }
 
 void TreeFittedTest::run()
@@ -231,5 +301,6 @@ void TreeFittedTest::run()
   testRosenbrock();
   testRastrigin();
   testCigar();
+  testRegularizedLinearRegression();
 }
 

@@ -22,7 +22,8 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#ifdef WIN32
+// Visual Studio 2013
+#ifdef _MSC_VER
 #include <windows.h>
 #else
 #include <sys/time.h>

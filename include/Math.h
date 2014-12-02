@@ -29,6 +29,11 @@
 
 #include "Vector.h"
 
+// Visual Studio 2013
+#ifdef _MSC_VER
+#define NOMINMAX
+#endif
+
 namespace RLLib
 {
 
@@ -49,7 +54,7 @@ class Boundedness
       T sum = T(0);
       for (int i = 0; i < distribution->dimension(); i++)
         sum += distribution->getEntry(i);
-      return ::fabs(1.0f - sum) < 1e-6;/*for stability*/
+      return std::abs(1.0f - sum) < 1e-6f;/*for stability*/
     }
 };
 
