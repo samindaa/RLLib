@@ -184,7 +184,8 @@ Systems
 Publication
 -----------
 
-[Dynamic Role Assignment using General ValueFunctions](http://www.humanoidsoccer.org/ws12/papers/HSR12_Abeyruwan.pdf)
+* [Dynamic Role Assignment using General ValueFunctions](http://www.humanoidsoccer.org/ws12/papers/HSR12_Abeyruwan.pdf)
+* [Humanoid Robots and Spoken Dialog Systems for Brief Health Interventions](http://www.aaai.org/ocs/index.php/FSS/FSS14/paper/download/9122/9125)
 
 Contact
 -------
