@@ -30,18 +30,34 @@
      </sizepolicy>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>10</y>
+      <width>16</width>
+      <height>721</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
       <x>830</x>
-      <y>0</y>
-      <width>361</width>
-      <height>641</height>
+      <y>1</y>
+      <width>352</width>
+      <height>651</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <layout class="QFormLayout" name="formLayout_2">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+       </property>
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
@@ -84,6 +100,47 @@
       </layout>
      </item>
      <item>
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="title">
+        <string>Simulation Speed</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="horizontalSliderSimulationSpeed">
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="value">
+        <number>100</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QProgressBar" name="progressBarSimulationSpeed">
+       <property name="value">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -95,6 +152,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
@@ -129,24 +193,11 @@
      </item>
     </layout>
    </widget>
-   <widget class="Line" name="line">
-    <property name="geometry">
-     <rect>
-      <x>810</x>
-      <y>10</y>
-      <width>16</width>
-      <height>721</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
    <zorder>layoutWidget</zorder>
    <zorder>mainWidget</zorder>
-   <zorder>verticalSpacer</zorder>
-   <zorder>verticalSpacer</zorder>
    <zorder>line</zorder>
+   <zorder>groupBox_2</zorder>
+   <zorder>verticalSpacer_2</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

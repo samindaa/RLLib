@@ -24,6 +24,7 @@ class RLLibVizMediator: public QMainWindow
   private slots:
     void execClicked();
     void stopClicked();
+    void updateSimulationSpeed(int value);
 
   private:
     Ui::RLLibVizMediator *ui;

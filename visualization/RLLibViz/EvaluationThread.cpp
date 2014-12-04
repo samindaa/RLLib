@@ -20,7 +20,6 @@ EvaluationThread::~EvaluationThread()
 
 void EvaluationThread::doWork(ModelBase* modelBase, Window* window)
 {
-  usleep(10000); // We slow down for user visualization
   if (isActive && modelBase && window)
     modelBase->doEvaluation(window);
 }

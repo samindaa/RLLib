@@ -9,6 +9,7 @@
 #define THREADBASE_H_
 
 #include <QThread>
+//
 #include "ModelBase.h"
 #include "Window.h"
 
@@ -22,6 +23,7 @@ class ThreadBase: public QThread
     ModelBase* model;
     Window* window;
     bool isActive;
+    int simulationSpeed;
 
   public:
     explicit ThreadBase(QObject* parent = 0);
@@ -29,6 +31,7 @@ class ThreadBase: public QThread
     void setActive(const bool& isActive);
     void setModel(ModelBase* model);
     void setWindow(Window* window);
+    void setSimulationSpeed(const int& simulationSpeed);
     virtual void doWork(ModelBase* modelBase, Window* window) =0;
     void run();
 };

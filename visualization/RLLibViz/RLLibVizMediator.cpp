@@ -24,6 +24,11 @@ RLLibVizMediator::RLLibVizMediator(QWidget *parent) :
   ui->setupUi(this);
   connect(ui->pushButtonExec, SIGNAL(clicked()), this, SLOT(execClicked()));
   connect(ui->pushButtonStop, SIGNAL(clicked()), this, SLOT(stopClicked()));
+  connect(ui->horizontalSliderSimulationSpeed, SIGNAL(valueChanged(int)),
+      ui->progressBarSimulationSpeed, SLOT(setValue(int)));
+  connect(ui->horizontalSliderSimulationSpeed, SIGNAL(valueChanged(int)), this,
+      SLOT(updateSimulationSpeed(int)));
+
   ui->pushButtonStop->setEnabled(false);
 
   demoThreads.insert(std::make_pair("doLearning", new RLLibViz::LearningThread));
@@ -134,4 +139,10 @@ void RLLibVizMediator::stopClicked()
     iter->second->setActive(false);
   ui->pushButtonExec->setEnabled(true);
   ui->pushButtonStop->setEnabled(false);
+}
+
+void RLLibVizMediator::updateSimulationSpeed(int value)
+{
+  for (DemoThreads::iterator iter = demoThreads.begin(); iter != demoThreads.end(); ++iter)
+    iter->second->setSimulationSpeed(value);
 }

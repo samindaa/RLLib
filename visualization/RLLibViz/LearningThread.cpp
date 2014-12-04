@@ -20,7 +20,6 @@ LearningThread::~LearningThread()
 
 void LearningThread::doWork(ModelBase* modelBase, Window* window)
 {
-  //usleep(5000);
   if (isActive && modelBase && window)
     modelBase->doLearning(window);
 }

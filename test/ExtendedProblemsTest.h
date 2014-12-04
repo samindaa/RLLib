@@ -67,7 +67,6 @@ class ExtendedProblemsTest: public ExtendedProblemsTestBase
 
     void testPoleBalancingPlant();
     void testPersistResurrect();
-    void testMatrix();
     void testTorquedPendulum();
     void testSupervisedProjector();
 

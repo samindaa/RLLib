@@ -39,7 +39,6 @@ void ValueFunctionView::add(QWidget* that, const Vec& p, const Vec&)
   // Nearest
   if (image)
   {
-    std::cout << p << std::endl;
     image->setPixel(p.y, p.x, qRgb(255, 255, 255));
     update();
   }

@@ -11,7 +11,7 @@
 using namespace RLLibViz;
 
 ThreadBase::ThreadBase(QObject* parent) :
-    QThread(parent), model(0), window(0), isActive(false)
+    QThread(parent), model(0), window(0), isActive(false), simulationSpeed(100/*maximum*/)
 {
 }
 
@@ -34,8 +34,17 @@ void ThreadBase::setWindow(Window* window)
   this->window = window;
 }
 
+void ThreadBase::setSimulationSpeed(const int& simulationSpeed)
+{
+  this->simulationSpeed = simulationSpeed;
+}
+
 void ThreadBase::run()
 {
   while (true)
+  {
+    if (simulationSpeed < 90)
+      usleep((100 - simulationSpeed) * 500);
     doWork(model, window);
+  }
 }
