@@ -9,8 +9,7 @@
 
 using namespace RLLibViz;
 
-MountainCarModel::MountainCarModel(QObject *parent) :
-    ModelBase(parent)
+MountainCarModel::MountainCarModel()
 {
   // RLLib:
   random = new Random<double>;
@@ -53,8 +52,6 @@ MountainCarModel::MountainCarModel(QObject *parent) :
   simulators.insert(std::make_pair(simulators.size(), learningRunner));
   simulators.insert(std::make_pair(simulators.size(), evaluationRunner));
 
-  valueFunction = new Matrix(100, 100);
-
 }
 
 MountainCarModel::~MountainCarModel()
@@ -77,15 +74,9 @@ MountainCarModel::~MountainCarModel()
   delete evaluationAgent;
   delete learningRunner;
   delete evaluationRunner;
-  delete valueFunction;
 }
 
-void MountainCarModel::initialize()
-{
-  ModelBase::initialize();
-}
-
-void MountainCarModel::doWork()
+void MountainCarModel::doLearning(Window* window)
 {
   for (std::tr1::unordered_map<int, Simulator<double>*>::iterator i = simulators.begin();
       i != simulators.end(); ++i)
@@ -96,44 +87,21 @@ void MountainCarModel::doWork()
   {
     if (i->second->isEndingOfEpisode())
     {
-      emit signal_draw(window->views[i->first]);
-      emit signal_add(window->plots[i->first], Vec(i->second->timeStep, 0),
+      emit signal_add(window->plotVector[i->first], Vec(i->second->timeStep, 0),
           Vec(i->second->episodeR, 0));
-      emit signal_draw(window->plots[i->first]);
+      emit signal_draw(window->plotVector[i->first]);
     }
-    else
-      emit signal_add(window->views[i->first],
-          Vec(i->second->getRLProblem()->getObservations()->at(0),
-              i->second->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
+
+    emit signal_add(window->problemVector[i->first],
+        Vec(i->second->getRLProblem()->getObservations()->at(0),
+            i->second->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
+    emit signal_draw(window->problemVector[i->first]);
   }
 
-  // Value function
-  if (evaluationRunner->isEndingOfEpisode() && window->vfuns.size() > 1)
-  {
-    RLLib::PVector<double> x_t(2);
-    double maxValue = 0, minValue = 0;
-    const Range<double>* positionRange = behaviourEnvironment->getObservationRanges()->at(0);
-    const Range<double>* velocityRange = behaviourEnvironment->getObservationRanges()->at(1);
-
-    for (int position = 0; position < valueFunction->rows(); position++)
-    {
-      for (int velocity = 0; velocity < valueFunction->cols(); velocity++)
-      {
-        x_t[0] = positionRange->toUnit(
-            positionRange->length() * position / valueFunction->cols() + positionRange->min());
-        x_t[1] = velocityRange->toUnit(
-            velocityRange->length() * velocity / valueFunction->rows() + velocityRange->min());
-        double v = control->computeValueFunction(&x_t);
-        valueFunction->at(position, velocity) = v;
-        if (v > maxValue)
-          maxValue = v;
-        if (v < minValue)
-          minValue = v;
-      }
-    }
-    //out.close();
-    emit signal_add(window->vfuns[1], valueFunction, minValue, maxValue);
-    emit signal_draw(window->vfuns[1]);
-  }
+  updateValueFunction(window, control, behaviourEnvironment->getObservationRanges(),
+      evaluationRunner->isEndingOfEpisode(), 1);
 }
 
+void MountainCarModel::doEvaluation(Window* window)
+{
+}

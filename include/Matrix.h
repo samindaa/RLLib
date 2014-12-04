@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cmath>
 #include <string.h>
 
 #include "Assert.h"
@@ -335,7 +336,7 @@ class Matrix
         scale = 0.0;
         if (i > 1)
           for (k = 0; k < i; k++)
-            scale += fabs(basic(i, k));
+            scale += std::abs(basic(i, k));
 
         if (scale == 0.0)
           oD[i] = basic(i, i - 1);
@@ -415,8 +416,8 @@ class Matrix
           // look for small sub-diagonal element
           for (m = l; m < m_rows - 1; m++)
           {
-            s = fabs(eigenval(m)) + fabs(eigenval(m + 1));
-            if (fabs(oD[m]) + s == s)
+            s = std::abs(eigenval(m)) + std::abs(eigenval(m + 1));
+            if (std::abs(oD[m]) + s == s)
               break;
           }
           p = eigenval(l);
@@ -435,7 +436,7 @@ class Matrix
             // form shift
             g = (eigenval(l + 1) - p) / (2.0 * oD[l]);
             r = ::sqrt(g * g + 1.0);
-            g = eigenval(m) - p + oD[l] / (g + ((g > 0.0) ? fabs(r) : -fabs(r)));
+            g = eigenval(m) - p + oD[l] / (g + ((g > 0.0) ? std::abs(r) : -std::abs(r)));
             s = 1.0;
             c = 1.0;
             p = 0.0;
@@ -444,7 +445,7 @@ class Matrix
             {
               f = s * oD[i];
               b = c * oD[i];
-              if (fabs(f) >= fabs(g))
+              if (std::abs(f) >= std::abs(g))
               {
                 c = g / f;
                 r = ::sqrt(c * c + 1.0);
@@ -635,7 +636,7 @@ class Matrix
       unsigned int i, ic = size();
       double sum = 0.0;
       for (i = 0; i < ic; i++)
-        sum += ::pow(fabs(m_data[i]), p);
+        sum += ::pow(std::abs(m_data[i]), p);
       return ::pow(sum, 1.0 / p);
     }
 
@@ -644,7 +645,7 @@ class Matrix
       unsigned int i, ic = size();
       double sum = 0.0;
       for (i = 0; i < ic; i++)
-        sum += fabs(m_data[i]);
+        sum += std::abs(m_data[i]);
       return sum;
     }
 
@@ -675,10 +676,10 @@ class Matrix
     double maxnorm() const
     {
       unsigned int i, ic = size();
-      double m = fabs(m_data[0]);
+      double m = std::abs(m_data[0]);
       for (i = 1; i < ic; i++)
       {
-        double v = fabs(m_data[i]);
+        double v = std::abs(m_data[i]);
         if (v > m)
           m = v;
       }

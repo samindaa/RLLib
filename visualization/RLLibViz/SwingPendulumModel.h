@@ -30,7 +30,7 @@ namespace RLLibViz
 
 class SwingPendulumModel: public ModelBase
 {
-    Q_OBJECT
+  Q_OBJECT
 
   protected:
     Random<double>* random;
@@ -63,14 +63,13 @@ class SwingPendulumModel: public ModelBase
 
     Simulator<double>* simulator;
 
-    RLLib::Matrix* valueFunction;
-
   public:
-    SwingPendulumModel(QObject *parent = 0);
+    SwingPendulumModel();
     virtual ~SwingPendulumModel();
-    void initialize();
+
   protected:
-    void doWork();
+    void doLearning(Window* window);
+    void doEvaluation(Window* window);
 };
 
 }  // namespace RLLibViz

@@ -35,7 +35,7 @@ namespace RLLibViz
 
 class ContinuousGridworldModel: public ModelBase
 {
-    Q_OBJECT
+  Q_OBJECT
 
   protected:
 // RLLib
@@ -73,14 +73,14 @@ class ContinuousGridworldModel: public ModelBase
 
     std::tr1::unordered_map<int, Simulator<double>*> simulators;
 
-    RLLib::Matrix* valueFunction;
-
   public:
-    ContinuousGridworldModel(QObject *parent = 0);
+    ContinuousGridworldModel();
     virtual ~ContinuousGridworldModel();
-    void initialize();
+
   protected:
-    void doWork();
+    void doLearning(Window* window);
+    void doEvaluation(Window* window);
+    void step(Window* window, RLLib::Simulator<double>* runner);
 };
 
 }  // namespace RLLibViz

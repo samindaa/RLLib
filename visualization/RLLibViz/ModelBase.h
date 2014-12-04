@@ -10,7 +10,10 @@
 
 #include <QObject>
 #include "Window.h"
+#include "Vec.h"
 #include "Matrix.h"
+#include "Control.h"
+#include "RL.h"
 
 using namespace RLLib;
 
@@ -23,14 +26,12 @@ class ModelBase: public QObject
 {
   Q_OBJECT
 
-  protected:
-    Window* window;
+  private:
+    RLLib::Matrix* valueFunction;
+
   public:
-    explicit ModelBase(QObject *parent = 0);
+    explicit ModelBase();
     virtual ~ModelBase();
-    void setWindow(Window* window);
-    void run();
-    virtual void initialize();
 
   public:
   signals:
@@ -38,8 +39,13 @@ class ModelBase: public QObject
     void signal_add(QWidget* that, const Vec& p, const Vec& q);
     void signal_add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
 
+  public:
+    virtual void doLearning(Window* window) =0;
+    virtual void doEvaluation(Window* window) =0;
+
   protected:
-    virtual void doWork() =0;
+    virtual void updateValueFunction(Window* window, const RLLib::Control<double>* control,
+        const RLLib::Ranges<double>* ranges, const bool& isEndingOfEpisode, const int& index);
 
 };
 

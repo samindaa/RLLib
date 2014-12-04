@@ -161,12 +161,9 @@ RLLib provides a [QT5](http://qt-project.org/qt5) based Reinforcement Learning p
 
 * In order to install RLLibViz:     
     * Change directory to `visualization/RLLibViz`
-    * ./configure
-    * ./RLLibVizContinuousGridworld
-    * ./RLLibVizMountainCar
-    * ./RLLibVizSwingPendulum
-    * ./RLLibVizSwingPendulum2
-  
+    * qmake RLLibViz.pro
+    * make
+    * ./RLLibViz
 	
 Documentation
 ------------- 
@@ -174,8 +171,8 @@ Documentation
 * [http://web.cs.miami.edu/home/saminda/rllib.html](http://web.cs.miami.edu/home/saminda/rllib.html)
 * [mloss.org](https://mloss.org/software/view/502/)  
 
-Systems
--------
+Operating Systems
+-----------------
 
 * Ubuntu >= 11.04
 * Windows (Visual Studio 2013)

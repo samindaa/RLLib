@@ -32,10 +32,6 @@ class ViewBase: public QWidget
     ViewBase(QWidget *parent = 0);
     ~ViewBase();
 
-    // QT4
-    QSize minimumSizeHint() const;
-    QSize sizeHint() const;
-
     // RLLibViz
     virtual void initialize() =0;
 

@@ -1,34 +1,40 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include <vector>
 #include <QWidget>
 #include <QGridLayout>
 
+#include "ModelBase.h"
 #include "ViewBase.h"
-#include <vector>
 
 namespace RLLibViz
 {
+
+class ModelBase;
 
 class Window: public QWidget
 {
   Q_OBJECT
 
-  public:
-    typedef std::vector<ViewBase*> Views;
-    typedef std::vector<ViewBase*> Plots;
-    typedef std::vector<ViewBase*> VFuns;
-    Views views;
-    Plots plots;
-    VFuns vfuns;
-    QGridLayout* grid;
-    int colsA, colsB, colsC;
+  private:
+    int topColumns, centerColumns, bottomColumns;
 
   public:
-    explicit Window(QWidget *parent = 0);
+    typedef std::vector<ViewBase*> WindowVector;
+    WindowVector problemVector;
+    WindowVector plotVector;
+    WindowVector valueFunctionVector;
+
+  public:
+    explicit Window(QWidget* parent = 0);
     virtual ~Window();
-    void addView(ViewBase* view);
-    void addPlot(ViewBase* view);
+
+    void initialize(ModelBase* modelBase);
+    bool empty() const;
+    void newLayout();
+    void addProblemView(ViewBase* view);
+    void addPlotView(ViewBase* view);
     void addValueFunctionView(ViewBase* valueFunctionView);
 
   protected:

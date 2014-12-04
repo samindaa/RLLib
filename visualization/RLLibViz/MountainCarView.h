@@ -31,6 +31,7 @@ class MountainCarView: public ViewBase
     Vec x;
     Vec y;
     QGraphicsScene* scene;
+
   public:
     MountainCarView(QWidget *parent = 0);
     virtual ~MountainCarView();

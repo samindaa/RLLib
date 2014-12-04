@@ -8,55 +8,44 @@
 
 using namespace RLLibViz;
 
-ModelBase::ModelBase(QObject *parent) :
-    QObject(parent), window(0)
+ModelBase::ModelBase() :
+    valueFunction(new Matrix(100, 100))
 {
 }
 
 ModelBase::~ModelBase()
 {
+  delete valueFunction;
 }
 
-void ModelBase::setWindow(Window* window)
+void ModelBase::updateValueFunction(Window* window, const RLLib::Control<double>* control,
+    const RLLib::Ranges<double>* ranges, const bool& isEndingOfEpisode, const int& index)
 {
-  this->window = window;
-}
-
-void ModelBase::initialize()
-{
-  for (Window::Views::iterator iter = window->views.begin(); iter != window->views.end(); ++iter)
+  // Value function
+  if (isEndingOfEpisode)
   {
-    ViewBase* view = *iter;
-    view->initialize();
-    connect(this, SIGNAL(signal_draw(QWidget*)), view, SLOT(draw(QWidget*)));
-    connect(this, SIGNAL(signal_add(QWidget*, const Vec&, const Vec&)), view,
-    SLOT(add(QWidget*,const Vec&, const Vec&)));
-  }
+    RLLib::PVector<double> x_t(2);
+    double maxValue = 0, minValue = 0;
+    const Range<double>* positionRange = ranges->at(0);
+    const Range<double>* velocityRange = ranges->at(1);
 
-  for (Window::Plots::iterator iter = window->plots.begin(); iter != window->plots.end(); ++iter)
-  {
-    ViewBase* view = *iter;
-    view->initialize();
-    connect(this, SIGNAL(signal_draw(QWidget*)), view, SLOT(draw(QWidget*)));
-    connect(this, SIGNAL(signal_add(QWidget*, const Vec&, const Vec&)), view,
-    SLOT(add(QWidget*,const Vec&, const Vec&)));
-  }
-
-  for (Window::VFuns::iterator iter = window->vfuns.begin(); iter != window->vfuns.end(); ++iter)
-  {
-    ViewBase* view = *iter;
-    view->initialize();
-    connect(this,
-    SIGNAL(signal_add(QWidget*, const Matrix*, double const&, double const&)), view,
-    SLOT(add(QWidget*, const Matrix*, double const&, double const&)));
+    for (int position = 0; position < valueFunction->rows(); position++)
+    {
+      for (int velocity = 0; velocity < valueFunction->cols(); velocity++)
+      {
+        x_t[0] = positionRange->toUnit(
+            positionRange->length() * position / valueFunction->cols() + positionRange->min());
+        x_t[1] = velocityRange->toUnit(
+            velocityRange->length() * velocity / valueFunction->rows() + velocityRange->min());
+        double v = control->computeValueFunction(&x_t);
+        valueFunction->at(position, velocity) = v;
+        if (v > maxValue)
+          maxValue = v;
+        if (v < minValue)
+          minValue = v;
+      }
+    }
+    emit signal_add(window->valueFunctionVector[index], valueFunction, minValue, maxValue);
+    emit signal_draw(window->valueFunctionVector[index]);
   }
 }
-
-void ModelBase::run()
-{
-  if (window != 0 && !window->views.empty())
-    doWork();
-  else
-    std::cerr << " Model is invalid" << std::endl;
-}
-

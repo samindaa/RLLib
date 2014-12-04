@@ -73,14 +73,13 @@ class SwingPendulumModel2: public ModelBase
 
     std::tr1::unordered_map<int, Simulator<double>*> simulators;
 
-    RLLib::Matrix* valueFunction;
-
   public:
-    SwingPendulumModel2(QObject *parent = 0);
+    SwingPendulumModel2();
     virtual ~SwingPendulumModel2();
-    void initialize();
+
   protected:
-    void doWork();
+    void doLearning(Window* window);
+    void doEvaluation(Window* window);
 };
 
 }  // namespace RLLibViz

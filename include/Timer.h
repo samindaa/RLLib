@@ -37,7 +37,7 @@ class Timer
   public:
     Timer()
     {
-#ifdef WIN32
+#ifdef _MSC_VER
       QueryPerformanceFrequency(&frequency);
       startCount.QuadPart = 0;
       endCount.QuadPart = 0;
@@ -58,7 +58,7 @@ class Timer
     void start()
     {
       stopped = 0; // reset stop flag
-#ifdef WIN32
+#ifdef _MSC_VER
           QueryPerformanceCounter(&startCount);
 #else
       gettimeofday(&startCount, NULL);
@@ -69,7 +69,7 @@ class Timer
     {
       stopped = 1; // set timer stopped flag
 
-#ifdef WIN32
+#ifdef _MSC_VER
       QueryPerformanceCounter(&endCount);
 #else
       gettimeofday(&endCount, NULL);
@@ -78,7 +78,7 @@ class Timer
 
     double getElapsedTimeInMicroSec()
     {
-#ifdef WIN32
+#ifdef _MSC_VER
       if(!stopped)
       QueryPerformanceCounter(&endCount);
 
@@ -116,7 +116,7 @@ class Timer
     double startTimeInMicroSec;
     double endTimeInMicroSec;
     int stopped;
-#ifdef WIN32
+#ifdef _MSC_VER
     LARGE_INTEGER frequency;                    // ticks per second
     LARGE_INTEGER startCount;//
     LARGE_INTEGER endCount;//

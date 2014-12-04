@@ -8,15 +8,12 @@ RLLibViz is a [Qt5](http://qt-project.org/) based visualization tool to observe 
 
 Configuration
 -------------
+	qmake RLLibViz.pro
+	make 
+	./RLLibViz
 
-	./configure
-	./RLLibVizContinuousGridworld
-	./RLLibVizMountainCar
-	./RLLibVizSwingPendulum
-	./RLLibVizSwingPendulum2
-
-Systems
--------
+Operating Systems
+-----------------
 
 Ubuntu >= 11.04
 Windows >= 7

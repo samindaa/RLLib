@@ -9,8 +9,7 @@
 
 using namespace RLLibViz;
 
-ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
-    ModelBase(parent)
+ContinuousGridworldModel::ContinuousGridworldModel()
 {
   // RLLib:
   random = new Random<double>;
@@ -52,9 +51,6 @@ ContinuousGridworldModel::ContinuousGridworldModel(QObject *parent) :
 
   simulators.insert(std::make_pair(simulators.size(), learningRunner));
   simulators.insert(std::make_pair(simulators.size(), evaluationRunner));
-
-  valueFunction = new Matrix(100, 100);
-
 }
 
 ContinuousGridworldModel::~ContinuousGridworldModel()
@@ -77,15 +73,9 @@ ContinuousGridworldModel::~ContinuousGridworldModel()
   delete evaluationAgent;
   delete learningRunner;
   delete evaluationRunner;
-  delete valueFunction;
 }
 
-void ContinuousGridworldModel::initialize()
-{
-  ModelBase::initialize();
-}
-
-void ContinuousGridworldModel::doWork()
+void ContinuousGridworldModel::doLearning(Window* window)
 {
   for (std::tr1::unordered_map<int, Simulator<double>*>::iterator i = simulators.begin();
       i != simulators.end(); ++i)
@@ -96,41 +86,22 @@ void ContinuousGridworldModel::doWork()
   {
     if (i->second->isEndingOfEpisode())
     {
-      emit signal_draw(window->views[i->first]);
-      emit signal_add(window->plots[i->first], Vec(i->second->timeStep, 0),
+      emit signal_draw(window->problemVector[i->first]);
+      emit signal_add(window->plotVector[i->first], Vec(i->second->timeStep, 0),
           Vec(i->second->episodeR, 0));
-      emit signal_draw(window->plots[i->first]);
+      emit signal_draw(window->plotVector[i->first]);
     }
     else
-      emit signal_add(window->views[i->first],
+      emit signal_add(window->problemVector[i->first],
           Vec(i->second->getRLProblem()->getObservations()->at(0),
               i->second->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
   }
 
-  // Value function
-  if (evaluationRunner->isEndingOfEpisode() && window->vfuns.size() > 1)
-  {
-    RLLib::PVector<double> x_t(2);
-    double maxValue = 0, minValue = 0;
-    const Range<double>* xRange = behaviourEnvironment->getObservationRanges()->at(0);
-    const Range<double>* yRange = behaviourEnvironment->getObservationRanges()->at(1);
-    for (int x = 0; x < valueFunction->rows(); x++)
-    {
-      for (int y = 0; y < valueFunction->cols(); y++)
-      {
-        x_t[0] = xRange->toUnit(xRange->length() * x / valueFunction->cols() + xRange->min());
-        x_t[1] = yRange->toUnit(yRange->length() * y / valueFunction->rows() + yRange->min());
-        double v = control->computeValueFunction(&x_t);
-        valueFunction->at(x, y) = v;
-        if (v > maxValue)
-          maxValue = v;
-        if (v < minValue)
-          minValue = v;
-      }
-    }
+  updateValueFunction(window, control, behaviourEnvironment->getObservationRanges(),
+      evaluationRunner->isEndingOfEpisode(), 1);
+}
 
-    //out.close();
-    emit signal_add(window->vfuns[1], valueFunction, minValue, maxValue);
-    emit signal_draw(window->vfuns[1]);
-  }
+void ContinuousGridworldModel::doEvaluation(Window* window)
+{
+  // nothing
 }

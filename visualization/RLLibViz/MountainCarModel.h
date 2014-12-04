@@ -37,7 +37,7 @@ namespace RLLibViz
 
 class MountainCarModel: public ModelBase
 {
-    Q_OBJECT
+  Q_OBJECT
 
   protected:
     // RLLib
@@ -75,14 +75,13 @@ class MountainCarModel: public ModelBase
 
     std::tr1::unordered_map<int, Simulator<double>*> simulators;
 
-    RLLib::Matrix* valueFunction;
-
   public:
-    MountainCarModel(QObject *parent = 0);
+    MountainCarModel();
     virtual ~MountainCarModel();
-    void initialize();
+
   protected:
-    void doWork();
+    void doLearning(Window* window);
+    void doEvaluation(Window* window);
 };
 
 }  // namespace RLLibViz

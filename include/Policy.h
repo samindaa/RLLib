@@ -409,7 +409,7 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
         if (tmp > maxValue)
           maxValue = tmp;
       }
-
+      ASSERT(Boundedness::checkValue(maxValue));
       for (typename Actions<T>::const_iterator a = Base::actions->begin();
           a != Base::actions->end(); ++a)
       {

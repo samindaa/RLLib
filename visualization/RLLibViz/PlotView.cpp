@@ -50,7 +50,8 @@ PlotView::PlotView(const QString& title, QWidget* parent) :
 
 PlotView::~PlotView()
 {
-  //fixMe
+  delete grid;
+  delete plot;
 }
 
 void PlotView::initialize()

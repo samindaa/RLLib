@@ -9,8 +9,7 @@
 
 using namespace RLLibViz;
 
-SwingPendulumModel::SwingPendulumModel(QObject *parent) :
-    ModelBase(parent)
+SwingPendulumModel::SwingPendulumModel()
 {
   random = new Random<double>;
   problem = new SwingPendulum<double>;
@@ -45,7 +44,6 @@ SwingPendulumModel::SwingPendulumModel(QObject *parent) :
   agent = new LearnerAgent<double>(control);
   simulator = new Simulator<double>(agent, problem, 5000);
   simulator->setVerbose(false);
-  valueFunction = new Matrix(100, 100);
 
 }
 
@@ -69,54 +67,29 @@ SwingPendulumModel::~SwingPendulumModel()
   delete control;
   delete agent;
   delete simulator;
-  delete valueFunction;
 }
 
-void SwingPendulumModel::initialize()
-{
-  ModelBase::initialize();
-}
-
-void SwingPendulumModel::doWork()
+void SwingPendulumModel::doLearning(Window* window)
 {
   simulator->step();
   if (simulator->isEndingOfEpisode())
   {
-    emit signal_add(window->plots[0], Vec(simulator->timeStep, 0), Vec(simulator->episodeR, 0));
-    emit signal_draw(window->plots[0]);
+    emit signal_add(window->plotVector[0], Vec(simulator->timeStep, 0),
+        Vec(simulator->episodeR, 0));
+    emit signal_draw(window->plotVector[0]);
   }
 
-  emit signal_add(window->views[0],
+  emit signal_add(window->problemVector[0],
       Vec(simulator->getRLProblem()->getObservations()->at(0),
           simulator->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
-  emit signal_draw(window->views[0]);
+  emit signal_draw(window->problemVector[0]);
 
-  // Value function
-  if (simulator->isEndingOfEpisode() && window->vfuns.size() > 0)
-  {
-    RLLib::PVector<double> x_t(2);
-    double maxValue = 0, minValue = 0;
-    const Range<double>* thetaRange = problem->getObservationRanges()->at(0);
-    const Range<double>* velocityRange = problem->getObservationRanges()->at(1);
+  updateValueFunction(window, control, problem->getObservationRanges(),
+      simulator->isEndingOfEpisode(), 0);
 
-    for (int theta = 0; theta < valueFunction->rows(); theta++)
-    {
-      for (int velocity = 0; velocity < valueFunction->cols(); velocity++)
-      {
-        x_t[0] = thetaRange->toUnit(
-            thetaRange->length() * theta / valueFunction->cols() + thetaRange->min());
-        x_t[1] = velocityRange->toUnit(
-            velocityRange->length() * velocity / valueFunction->rows() + velocityRange->min());
-        double v = control->computeValueFunction(&x_t);
-        valueFunction->at(theta, velocity) = v;
-        if (v > maxValue)
-          maxValue = v;
-        if (v < minValue)
-          minValue = v;
-      }
-    }
-    //out.close();
-    emit signal_add(window->vfuns[0], valueFunction, minValue, maxValue);
-    emit signal_draw(window->vfuns[0]);
-  }
+}
+
+void SwingPendulumModel::doEvaluation(Window* window)
+{
+  // Nothing
 }

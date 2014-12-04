@@ -6,34 +6,94 @@
 
 using namespace RLLibViz;
 
-Window::Window(QWidget *parent) :
-    QWidget(parent), grid(0), colsA(0), colsB(0), colsC(0)
+Window::Window(QWidget* parent) :
+    QWidget(parent), topColumns(0), centerColumns(0), bottomColumns(0)
 {
-  grid = new QGridLayout(this);
-  setLayout(grid);
+  setLayout(new QGridLayout);
+  setVisible(false);
 }
 
 Window::~Window()
 {
-  // fixMe: delete stuff
 }
 
-void Window::addView(ViewBase* view)
+void Window::initialize(ModelBase* modelBase)
 {
-  views.push_back(view);
-  grid->addWidget(view, 0, colsA++);
+  for (WindowVector::iterator iter = problemVector.begin(); iter != problemVector.end(); ++iter)
+  {
+    ViewBase* view = *iter;
+    view->initialize();
+    connect(modelBase, SIGNAL(signal_draw(QWidget*)), view, SLOT(draw(QWidget*)));
+    connect(modelBase, SIGNAL(signal_add(QWidget*, const Vec&, const Vec&)), view,
+        SLOT(add(QWidget*,const Vec&, const Vec&)));
+  }
+
+  for (WindowVector::iterator iter = plotVector.begin(); iter != plotVector.end(); ++iter)
+  {
+    ViewBase* view = *iter;
+    view->initialize();
+    connect(modelBase, SIGNAL(signal_draw(QWidget*)), view, SLOT(draw(QWidget*)));
+    connect(modelBase, SIGNAL(signal_add(QWidget*, const Vec&, const Vec&)), view,
+        SLOT(add(QWidget*,const Vec&, const Vec&)));
+  }
+
+  for (WindowVector::iterator iter = valueFunctionVector.begin(); iter != valueFunctionVector.end();
+      ++iter)
+  {
+    ViewBase* view = *iter;
+    view->initialize();
+    connect(modelBase, SIGNAL(signal_add(QWidget*, const Matrix*, double const&, double const&)),
+        view, SLOT(add(QWidget*, const Matrix*, double const&, double const&)));
+  }
 }
 
-void Window::addPlot(ViewBase* view)
+bool Window::empty() const
 {
-  plots.push_back(view);
-  grid->addWidget(view, 1, colsB++);
+  return problemVector.empty();
 }
 
-void Window::addValueFunctionView(ViewBase* valueFunctionView)
+void Window::newLayout()
 {
-  vfuns.push_back(valueFunctionView);
-  grid->addWidget(valueFunctionView, 2, colsC++);
+  topColumns = centerColumns = bottomColumns = 0;
+  if (this->layout())
+  {
+    for (WindowVector::iterator iter = problemVector.begin(); iter != problemVector.end(); ++iter)
+      this->layout()->removeWidget(*iter);
+    for (WindowVector::iterator iter = plotVector.begin(); iter != plotVector.end(); ++iter)
+      this->layout()->removeWidget(*iter);
+    for (WindowVector::iterator iter = valueFunctionVector.begin();
+        iter != valueFunctionVector.end(); ++iter)
+      this->layout()->removeWidget(*iter);
+    delete this->layout();
+  }
+
+  QGridLayout* gridLayout = new QGridLayout;
+  setLayout(gridLayout);
+
+  for (WindowVector::iterator iter = problemVector.begin(); iter != problemVector.end(); ++iter)
+    gridLayout->addWidget(*iter, 0, topColumns++);
+
+  for (WindowVector::iterator iter = plotVector.begin(); iter != plotVector.end(); ++iter)
+    gridLayout->addWidget(*iter, 1, centerColumns++);
+
+  for (WindowVector::iterator iter = valueFunctionVector.begin(); iter != valueFunctionVector.end();
+      ++iter)
+    gridLayout->addWidget(*iter, 2, bottomColumns++);
+}
+
+void Window::addProblemView(ViewBase* view)
+{
+  problemVector.push_back(view);
+}
+
+void Window::addPlotView(ViewBase* view)
+{
+  plotVector.push_back(view);
+}
+
+void Window::addValueFunctionView(ViewBase* view)
+{
+  valueFunctionVector.push_back(view);
 }
 
 void Window::keyPressEvent(QKeyEvent* event)
