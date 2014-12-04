@@ -24,22 +24,20 @@
 
 #include "RL.h"
 
-using namespace RLLib;
-
 template<class T>
-class ContinuousGridworld: public RLProblem<T>
+class ContinuousGridworld: public RLLib::RLProblem<T>
 {
-    typedef RLProblem<T> Base;
+    typedef RLLib::RLProblem<T> Base;
   protected:
-    Range<T>* observationRange;
-    Range<T>* actionRange;
+    RLLib::Range<T>* observationRange;
+    RLLib::Range<T>* actionRange;
     float absoluteNoise;
     std::ofstream outpath;
 
   public:
-    ContinuousGridworld(Random<T>* random) :
-        RLProblem<T>(random, 2, 2 * 2 + 1, 1), observationRange(new Range<T>(0, 1.0)), actionRange(
-            new Range<T>(-0.05, 0.05)), absoluteNoise(0.025)
+    ContinuousGridworld(RLLib::Random<T>* random) :
+        RLLib::RLProblem<T>(random, 2, 2 * 2 + 1, 1), observationRange(new RLLib::Range<T>(0, 1.0)), actionRange(
+            new RLLib::Range<T>(-0.05, 0.05)), absoluteNoise(0.025)
     {
       // discrete actions
       for (int i = 0; i < Base::discreteActions->dimension(); i++)
@@ -80,7 +78,7 @@ class ContinuousGridworld: public RLProblem<T>
         Base::output->o_tp1->at(i) = Base::observations->at(i);
     }
 
-    void step(const Action<T>* action)
+    void step(const RLLib::Action<T>* action)
     {
       float noise = Base::random->nextReal() * absoluteNoise - (absoluteNoise / 2.0f);
       for (int i = 0; i < Base::observations->dimension(); i++)

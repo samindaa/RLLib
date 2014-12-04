@@ -41,19 +41,21 @@ void SwingPendulumView::add(QWidget* that, const Vec& p, const Vec& p2)
   rotation = Mat::rotateZ(p.x + M_PI);
 }
 
-void SwingPendulumView::add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV)
+void SwingPendulumView::add(QWidget* that, const MatrixXd& mat)
 {
 }
 
 void SwingPendulumView::paintEvent(QPaintEvent* event)
 {
   QPainter painter(this);
-  painter.setPen(QPen(Qt::blue, 1, Qt::SolidLine));
+  painter.setPen(QPen(Qt::darkRed, 2, Qt::SolidLine));
   painter.setRenderHint(QPainter::Antialiasing, true);
 
   Vec p1 = trans * Vec(0.0, 0.0, 0.0, 1.0);
-  Vec p2 = trans * rotation * Vec(0.0, double(width()) / 3.0, 0.0, 1.0);
+  Vec p2 = trans * rotation * Vec(0.0, double(height()) / 2.0 - 5.0, 0.0, 1.0);
 
-  painter.drawLine(QPoint(p1.x, p1.y), QPoint(p2.x, p2.y));
-
+  painter.drawEllipse(QPointF(p1.x, p1.y), 6, 6);
+  painter.drawLine(QPointF(p1.x, p1.y), QPointF(p2.x, p2.y));
+  painter.setBrush(QBrush(Qt::darkRed));
+  painter.drawEllipse(QPointF(p2.x, p2.y), 6, 6);
 }

@@ -97,8 +97,8 @@ void ContinuousGridworldModel::doLearning(Window* window)
               i->second->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
   }
 
-  updateValueFunction(window, control, behaviourEnvironment->getObservationRanges(),
-      evaluationRunner->isEndingOfEpisode(), 1);
+  updateValueFunction(window, control, evaluationEnvironment->getTRStep(),
+      evaluationEnvironment->getObservationRanges(), evaluationRunner->isEndingOfEpisode(), 1);
 }
 
 void ContinuousGridworldModel::doEvaluation(Window* window)

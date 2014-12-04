@@ -24,29 +24,28 @@
 
 #include "RL.h"
 
-using namespace RLLib;
-
 template<class T>
-class SwingPendulum: public RLProblem<T>
+class SwingPendulum: public RLLib::RLProblem<T>
 {
-    typedef RLProblem<T> Base;
+    typedef RLLib::RLProblem<T> Base;
   protected:
     float uMax, stepTime, theta, velocity, maxVelocity;
 
-    Range<float>* actionRange;
-    Range<T>* thetaRange;
-    Range<T>* velocityRange;
+    RLLib::Range<float>* actionRange;
+    RLLib::Range<T>* thetaRange;
+    RLLib::Range<T>* velocityRange;
 
     float mass, length, g, requiredUpTime, upRange;
 
     int upTime;
   public:
-    SwingPendulum(Random<T>* random = 0) :
-        RLProblem<T>(random, 2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(0), velocity(
-            0), maxVelocity(
-        M_PI_4 / stepTime), actionRange(new Range<float>(-uMax, uMax)), thetaRange(
-            new Range<T>(-M_PI, M_PI)), velocityRange(new Range<T>(-maxVelocity, maxVelocity)), mass(
-            1.0), length(1.0), g(9.8), requiredUpTime(10.0 /*seconds*/), upRange(
+    SwingPendulum(RLLib::Random<T>* random = 0) :
+        RLLib::RLProblem<T>(random, 2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(
+            0), velocity(0), maxVelocity(
+        M_PI_4 / stepTime), actionRange(new RLLib::Range<float>(-uMax, uMax)), thetaRange(
+            new RLLib::Range<T>(-M_PI, M_PI)), velocityRange(
+            new RLLib::Range<T>(-maxVelocity, maxVelocity)), mass(1.0), length(1.0), g(9.8), requiredUpTime(
+            10.0 /*seconds*/), upRange(
         M_PI_4 /*seconds*/), upTime(0)
     {
 
@@ -80,7 +79,7 @@ class SwingPendulum: public RLProblem<T>
   public:
     void updateTRStep()
     {
-      DenseVector<T>& vars = *Base::output->o_tp1;
+      RLLib::DenseVector<T>& vars = *Base::output->o_tp1;
       vars[0] = thetaRange->toUnit(theta);
       vars[1] = velocityRange->toUnit(velocity);
 
@@ -99,7 +98,7 @@ class SwingPendulum: public RLProblem<T>
       adjustTheta();
     }
 
-    void step(const Action<double>* a)
+    void step(const RLLib::Action<double>* a)
     {
       //std::cout << a.at() << std::endl;
       float torque = actionRange->bound(a->getEntry(0));

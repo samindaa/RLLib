@@ -12,7 +12,8 @@ TARGET = RLLibViz
 TEMPLATE = app
 
 INCLUDEPATH += ../../include \
-               ../../simulation
+               ../../simulation \
+               ../../util
 
 SOURCES += main.cpp\
     plot/qcustomplot.cpp \

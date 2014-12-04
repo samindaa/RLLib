@@ -14,6 +14,7 @@
 #include <QHBoxLayout>
 #include <QPixmap>
 
+#include "Math.h"
 #include "ViewBase.h"
 #include "Mat.h"
 
@@ -118,6 +119,7 @@ class ValueFunctionView: public ViewBase
     QLabel* imageLabel;
     QHBoxLayout* mainLayour;
     ColorGradient heatMapGradient;
+
   public:
     ValueFunctionView(QWidget *parent = 0);
     virtual ~ValueFunctionView();
@@ -126,7 +128,7 @@ class ValueFunctionView: public ViewBase
   public slots:
     void add(QWidget*, const Vec&, const Vec&);
     void draw(QWidget* that);
-    void add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
+    void add(QWidget* that, const MatrixXd& mat);
 };
 
 }  // namespace RLLibViz

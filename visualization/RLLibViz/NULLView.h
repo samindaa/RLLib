@@ -37,7 +37,7 @@ class NULLView: public ViewBase
         return;
     }
 
-    void add(QWidget* that, const Matrix*, double const&, double const&)
+    void add(QWidget* that, const MatrixXd&)
     {
       if (this != that)
         return;

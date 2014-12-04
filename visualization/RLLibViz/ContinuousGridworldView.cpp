@@ -60,8 +60,7 @@ void ContinuousGridworldView::draw(QWidget* that)
   update();
 }
 
-void ContinuousGridworldView::add(QWidget* that, const Matrix* mat, double const& minV,
-    double const& maxV)
+void ContinuousGridworldView::add(QWidget* that, const MatrixXd& mat)
 {
 }
 

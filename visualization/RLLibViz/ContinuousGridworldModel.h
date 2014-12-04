@@ -16,7 +16,6 @@
 #include "Projector.h"
 #include "ControlAlgorithm.h"
 #include "StateToStateAction.h"
-#include "Matrix.h"
 
 // From the simulation
 #include "ContinuousGridworld.h"

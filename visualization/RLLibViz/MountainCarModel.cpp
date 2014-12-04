@@ -98,8 +98,8 @@ void MountainCarModel::doLearning(Window* window)
     emit signal_draw(window->problemVector[i->first]);
   }
 
-  updateValueFunction(window, control, behaviourEnvironment->getObservationRanges(),
-      evaluationRunner->isEndingOfEpisode(), 1);
+  updateValueFunction(window, control, evaluationEnvironment->getTRStep(),
+      evaluationEnvironment->getObservationRanges(), evaluationRunner->isEndingOfEpisode(), 1);
 }
 
 void MountainCarModel::doEvaluation(Window* window)

@@ -42,8 +42,10 @@ void Window::initialize(ModelBase* modelBase)
   {
     ViewBase* view = *iter;
     view->initialize();
-    connect(modelBase, SIGNAL(signal_add(QWidget*, const Matrix*, double const&, double const&)),
-        view, SLOT(add(QWidget*, const Matrix*, double const&, double const&)));
+    connect(modelBase, SIGNAL(signal_add(QWidget*, const MatrixXd&)), view,
+        SLOT(add(QWidget*, const MatrixXd&)));
+    connect(modelBase, SIGNAL(signal_add(QWidget*, const Vec&, const Vec&)), view,
+        SLOT(add(QWidget*,const Vec&, const Vec&)));
   }
 }
 

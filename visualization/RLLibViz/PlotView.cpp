@@ -99,6 +99,6 @@ void PlotView::add(QWidget* that, const Vec& graphOneP, const Vec& graphTwoP)
   ++xR1[xR1.size() - 1];
 }
 
-void PlotView::add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV)
+void PlotView::add(QWidget* that, const MatrixXd& mat)
 {
 }

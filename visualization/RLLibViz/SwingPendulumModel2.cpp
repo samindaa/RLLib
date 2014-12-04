@@ -98,8 +98,8 @@ void SwingPendulumModel2::doLearning(Window* window)
     emit signal_draw(window->problemVector[i->first]);
   }
 
-  updateValueFunction(window, control, behaviourEnvironment->getObservationRanges(),
-      evaluationRunner->isEndingOfEpisode(), 1);
+  updateValueFunction(window, control, evaluationEnvironment->getTRStep(),
+      evaluationEnvironment->getObservationRanges(), evaluationRunner->isEndingOfEpisode(), 1);
 }
 
 void SwingPendulumModel2::doEvaluation(Window* window)

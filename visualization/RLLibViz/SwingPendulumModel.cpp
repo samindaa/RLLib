@@ -84,7 +84,7 @@ void SwingPendulumModel::doLearning(Window* window)
           simulator->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
   emit signal_draw(window->problemVector[0]);
 
-  updateValueFunction(window, control, problem->getObservationRanges(),
+  updateValueFunction(window, control, problem->getTRStep(), problem->getObservationRanges(),
       simulator->isEndingOfEpisode(), 0);
 
 }

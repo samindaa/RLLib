@@ -26,7 +26,7 @@ class MountainCarView: public ViewBase
   Q_OBJECT
 
   protected:
-    QVector<QPoint> points;
+    QVector<QPointF> points;
     Vec p;
     Vec x;
     Vec y;
@@ -40,7 +40,7 @@ class MountainCarView: public ViewBase
   public slots:
     void add(QWidget* that, const Vec& p1, const Vec& p2);
     void draw(QWidget* that);
-    void add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
+    void add(QWidget* that, const MatrixXd& mat);
 
   protected:
     void resizeEvent(QResizeEvent *);

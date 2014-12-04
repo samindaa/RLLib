@@ -32,25 +32,35 @@ void ValueFunctionView::initialize()
 {
 }
 
-void ValueFunctionView::add(QWidget*, const Vec&, const Vec&)
-{ /*Not used*/
+void ValueFunctionView::add(QWidget* that, const Vec& p, const Vec&)
+{
+  if (this != that)
+    return;
+  // Nearest
+  if (image)
+  {
+    std::cout << p << std::endl;
+    image->setPixel(p.y, p.x, qRgb(255, 255, 255));
+    update();
+  }
 }
 
-void ValueFunctionView::add(QWidget* that, const Matrix* mat, double const& minV,
-    double const& maxV)
+void ValueFunctionView::add(QWidget* that, const MatrixXd& valueFunction2D)
 {
   if (this != that)
     return;
   if (!image)
-    image = new QImage(mat->cols(), mat->rows(), QImage::Format_RGB32);
+    image = new QImage(valueFunction2D.cols(), valueFunction2D.rows(), QImage::Format_RGB32);
 
+  RLLib::Range<double> valueFunction2DRange(valueFunction2D.minCoeff(), valueFunction2D.maxCoeff());
   // Value function
-  for (unsigned int y = 0; y < mat->rows(); y++)
+  for (size_t y = 0; y < valueFunction2D.rows(); y++)
   {
-    for (unsigned int x = 0; x < mat->cols(); x++)
+    for (size_t x = 0; x < valueFunction2D.cols(); x++)
     {
-      float value = (mat->at(y, x) - minV) / (maxV - minV);
-      image->setPixel(y, x, heatMapGradient.getColorAtValue(value));
+      image->setPixel(y, x,
+          heatMapGradient.getColorAtValue(
+              valueFunction2DRange.toUnit((double) valueFunction2D(y, x))));
     }
   }
 

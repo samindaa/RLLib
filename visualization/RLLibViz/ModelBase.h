@@ -9,13 +9,17 @@
 #define MODELBASE_H_
 
 #include <QObject>
+//
 #include "Window.h"
 #include "Vec.h"
-#include "Matrix.h"
+//
 #include "Control.h"
 #include "RL.h"
+//
+#include "Eigen/Dense"
 
 using namespace RLLib;
+using namespace Eigen;
 
 namespace RLLibViz
 {
@@ -27,7 +31,7 @@ class ModelBase: public QObject
   Q_OBJECT
 
   private:
-    RLLib::Matrix* valueFunction;
+    MatrixXd valueFunction2D;
 
   public:
     explicit ModelBase();
@@ -37,7 +41,7 @@ class ModelBase: public QObject
   signals:
     void signal_draw(QWidget* that);
     void signal_add(QWidget* that, const Vec& p, const Vec& q);
-    void signal_add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
+    void signal_add(QWidget* that, const MatrixXd& mat);
 
   public:
     virtual void doLearning(Window* window) =0;
@@ -45,7 +49,8 @@ class ModelBase: public QObject
 
   protected:
     virtual void updateValueFunction(Window* window, const RLLib::Control<double>* control,
-        const RLLib::Ranges<double>* ranges, const bool& isEndingOfEpisode, const int& index);
+        const TRStep<double>* output, const RLLib::Ranges<double>* ranges, const bool& isEndingOfEpisode,
+        const int& index);
 
 };
 

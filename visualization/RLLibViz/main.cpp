@@ -1,21 +1,22 @@
 #include <QApplication>
 #include "RLLibVizMediator.h"
 
-#include "Matrix.h"
+#include "Eigen/Dense"
 #include "Vec.h"
 
 using namespace RLLibViz;
 using namespace RLLib;
+using namespace Eigen;
 
 Q_DECLARE_METATYPE(Vec)
-Q_DECLARE_METATYPE(Matrix)
+Q_DECLARE_METATYPE(MatrixXd)
 
 int main(int argc, char *argv[])
 {
   QApplication a(argc, argv);
 
   qRegisterMetaType<Vec>();
-  qRegisterMetaType<Matrix>();
+  qRegisterMetaType<MatrixXd>();
 
   RLLibVizMediator w;
   w.show();

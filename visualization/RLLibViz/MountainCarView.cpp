@@ -42,7 +42,7 @@ void MountainCarView::initialize()
   for (double i = x.x; i < x.y; i += 0.1)
   {
     Vec sp((i - x.x) / (x.y - x.x) * width(), (::sin(3.0 * i) - y.x) / (y.y - y.x) * height());
-    points.push_back(QPoint(sp.x, -sp.y + height()));
+    points.push_back(QPointF(sp.x, -sp.y + height()));
   }
 
 }
@@ -61,7 +61,7 @@ void MountainCarView::draw(QWidget* that)
   update();
 }
 
-void MountainCarView::add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV)
+void MountainCarView::add(QWidget* that, const MatrixXd& mat)
 {
   // Not used
 }
@@ -74,7 +74,7 @@ void MountainCarView::resizeEvent(QResizeEvent* event)
 void MountainCarView::paintEvent(QPaintEvent* event)
 {
   QPainter painter(this);
-  painter.setPen(QPen(Qt::blue, 1, Qt::SolidLine));
+  painter.setPen(QPen(Qt::darkBlue, 1, Qt::SolidLine));
   painter.setRenderHint(QPainter::Antialiasing, true);
   // update() call this
 
@@ -90,8 +90,9 @@ void MountainCarView::paintEvent(QPaintEvent* event)
   Vec sp((p.x - x.x) / (x.y - x.x) * width(), (::sin(3.0 * p.x) - y.x) / (y.y - y.x) * height());
   QPointF ep(sp.x, -sp.y + height());
   QPainter painter2(this);
-  painter2.setPen(QPen(Qt::red, 3, Qt::SolidLine));
+  painter2.setPen(QPen(Qt::darkRed, 2, Qt::SolidLine));
+  painter2.setBrush(QBrush(Qt::darkRed));
   painter2.setRenderHint(QPainter::Antialiasing, true);
-  painter2.drawEllipse(ep.x(), ep.y(), 5, 5);
+  painter2.drawEllipse(ep, 8, 8);
 }
 

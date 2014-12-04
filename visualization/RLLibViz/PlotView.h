@@ -42,7 +42,7 @@ class PlotView: public ViewBase
 
   public slots:
     void add(QWidget* that, const Vec& p1, const Vec& p2);
-    void add(QWidget* that, const Matrix* mat, double const& minV, double const& maxV);
+    void add(QWidget* that, const MatrixXd& mat);
     void draw(QWidget* that);
 };
 

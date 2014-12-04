@@ -8,44 +8,45 @@
 
 using namespace RLLibViz;
 
-ModelBase::ModelBase() :
-    valueFunction(new Matrix(100, 100))
+ModelBase::ModelBase()
 {
+  valueFunction2D.resize(100, 100);
 }
 
 ModelBase::~ModelBase()
 {
-  delete valueFunction;
 }
 
 void ModelBase::updateValueFunction(Window* window, const RLLib::Control<double>* control,
-    const RLLib::Ranges<double>* ranges, const bool& isEndingOfEpisode, const int& index)
+    const TRStep<double>* output, const RLLib::Ranges<double>* ranges,
+    const bool& isEndingOfEpisode, const int& index)
 {
   // Value function
   if (isEndingOfEpisode)
   {
-    RLLib::PVector<double> x_t(2);
-    double maxValue = 0, minValue = 0;
+    RLLib::PVector<double> stateVariable(2);
     const Range<double>* positionRange = ranges->at(0);
     const Range<double>* velocityRange = ranges->at(1);
 
-    for (int position = 0; position < valueFunction->rows(); position++)
+    for (int position = 0; position < valueFunction2D.rows(); position++)
     {
-      for (int velocity = 0; velocity < valueFunction->cols(); velocity++)
+      for (int velocity = 0; velocity < valueFunction2D.cols(); velocity++)
       {
-        x_t[0] = positionRange->toUnit(
-            positionRange->length() * position / valueFunction->cols() + positionRange->min());
-        x_t[1] = velocityRange->toUnit(
-            velocityRange->length() * velocity / valueFunction->rows() + velocityRange->min());
-        double v = control->computeValueFunction(&x_t);
-        valueFunction->at(position, velocity) = v;
-        if (v > maxValue)
-          maxValue = v;
-        if (v < minValue)
-          minValue = v;
+        stateVariable[0] = positionRange->toUnit(
+            positionRange->length() * position / valueFunction2D.cols() + positionRange->min());
+        stateVariable[1] = velocityRange->toUnit(
+            velocityRange->length() * velocity / valueFunction2D.rows() + velocityRange->min());
+        double v = control->computeValueFunction(&stateVariable);
+        valueFunction2D(position, velocity) = v;
       }
     }
-    emit signal_add(window->valueFunctionVector[index], valueFunction, minValue, maxValue);
+    emit signal_add(window->valueFunctionVector[index], valueFunction2D);
     emit signal_draw(window->valueFunctionVector[index]);
   }
+
+  // Nearest target position
+  emit signal_add(window->valueFunctionVector[index],
+      Vec(output->o_tp1->getEntry(0) * (valueFunction2D.rows() - 1),
+          output->o_tp1->getEntry(1) * (valueFunction2D.cols() - 1), 0, 1),
+      Vec(0.0, 0.0, 0.0, 1.0));
 }

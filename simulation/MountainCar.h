@@ -24,30 +24,29 @@
 
 #include "RL.h"
 
-using namespace RLLib;
-
 template<class T>
-class MountainCar: public RLProblem<T>
+class MountainCar: public RLLib::RLProblem<T>
 {
   private:
-    typedef RLProblem<T> Base;
+    typedef RLLib::RLProblem<T> Base;
   protected:
     // Global variables:
     float position;
     float velocity;
 
-    Range<T>* positionRange;
-    Range<T>* velocityRange;
-    Range<float>* actionRange;
+    RLLib::Range<T>* positionRange;
+    RLLib::Range<T>* velocityRange;
+    RLLib::Range<float>* actionRange;
 
     float targetPosition;
     float throttleFactor;
 
   public:
-    MountainCar(Random<T>* random = 0) :
-        RLProblem<T>(random, 2, 3, 1), position(0), velocity(0), positionRange(
-            new Range<T>(-1.2, 0.6)), velocityRange(new Range<T>(-0.07, 0.07)), actionRange(
-            new Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(1.0)
+    MountainCar(RLLib::Random<T>* random = 0) :
+        RLLib::RLProblem<T>(random, 2, 3, 1), position(0), velocity(0), positionRange(
+            new RLLib::Range<T>(-1.2, 0.6)), velocityRange(new RLLib::Range<T>(-0.07, 0.07)), actionRange(
+            new RLLib::Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(
+            1.0)
     {
       Base::discreteActions->push_back(0, actionRange->min());
       Base::discreteActions->push_back(1, 0.0);
@@ -69,7 +68,7 @@ class MountainCar: public RLProblem<T>
 
     void updateTRStep()
     {
-      DenseVector<T>& vars = *Base::output->o_tp1;
+      RLLib::DenseVector<T>& vars = *Base::output->o_tp1;
       vars[0] = positionRange->toUnit(position);
       vars[1] = velocityRange->toUnit(velocity);
 
@@ -93,7 +92,7 @@ class MountainCar: public RLProblem<T>
       }
     }
 
-    void step(const Action<T>* a)
+    void step(const RLLib::Action<T>* a)
     {
       float throttle = actionRange->bound(a->getEntry()) * throttleFactor;
       velocity = velocityRange->bound(
