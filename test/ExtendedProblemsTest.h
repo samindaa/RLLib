@@ -26,7 +26,6 @@
 
 // From the RLLib
 #include "Vector.h"
-#include "Matrix.h"
 #include "Trace.h"
 #include "Projector.h"
 #include "ControlAlgorithm.h"

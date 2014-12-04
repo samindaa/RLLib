@@ -24,17 +24,18 @@
 
 #include "RL.h"
 
-class NoStateProblem: public RLProblem<double>
+class NoStateProblem: public RLLib::RLProblem<double>
 {
   protected:
     double mu;
     double sigma;
-    const Range<double>* range;
+    const RLLib::Range<double>* range;
     double currentA;
 
   public:
-    NoStateProblem(Random<double>* random, const double& mu, const double& sigma, const Range<double>* range = 0) :
-        RLProblem<double>(random,1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
+    NoStateProblem(RLLib::Random<double>* random, const double& mu, const double& sigma,
+        const RLLib::Range<double>* range = 0) :
+          RLLib::RLProblem<double>(random, 1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
     {
       discreteActions->push_back(0, 0);
       continuousActions->push_back(0, 0);
@@ -48,7 +49,7 @@ class NoStateProblem: public RLProblem<double>
     {
     }
 
-    void step(const Action<double>* action)
+    void step(const RLLib::Action<double>* action)
     {
       currentA = action->getEntry(0);
       if (range != 0)
