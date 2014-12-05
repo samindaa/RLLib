@@ -10,25 +10,9 @@
 
 #include "ModelBase.h"
 
-// From the RLLib
-#include "Vector.h"
-#include "Trace.h"
-#include "Projector.h"
-#include "ControlAlgorithm.h"
-#include "StateToStateAction.h"
-
 // From the simulation
 #include "SwingPendulum.h"
-#include "RL.h"
 
-// View
-#include "SwingPendulumView.h"
-
-//
-#include <vector>
-#include <tr1/unordered_map>
-
-using namespace RLLib;
 namespace RLLibViz
 {
 
@@ -70,7 +54,7 @@ class SwingPendulumModel2: public ModelBase
     Simulator<double>* learningRunner;
     Simulator<double>* evaluationRunner;
 
-    std::tr1::unordered_map<int, Simulator<double>*> simulators;
+    std::map<int, Simulator<double>*> simulators;
 
   public:
     SwingPendulumModel2();

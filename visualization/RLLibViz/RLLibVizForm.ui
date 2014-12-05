@@ -48,7 +48,7 @@
      <rect>
       <x>830</x>
       <y>1</y>
-      <width>352</width>
+      <width>370</width>
       <height>651</height>
      </rect>
     </property>
@@ -95,6 +95,13 @@
            </property>
           </widget>
          </item>
+         <item row="4" column="0">
+          <widget class="QRadioButton" name="radioButtonMountainCarSarsaAlphaBound">
+           <property name="text">
+            <string>MountainCar (SarsaAlphaBound) {Random}</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>
@@ -119,7 +126,7 @@
         <number>100</number>
        </property>
        <property name="value">
-        <number>100</number>
+        <number>99</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -129,7 +136,7 @@
      <item>
       <widget class="QProgressBar" name="progressBarSimulationSpeed">
        <property name="value">
-        <number>100</number>
+        <number>99</number>
        </property>
       </widget>
      </item>

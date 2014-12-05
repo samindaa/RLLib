@@ -43,8 +43,7 @@ void ThreadBase::run()
 {
   while (true)
   {
-    if (simulationSpeed < 90)
-      usleep((100 - simulationSpeed) * 500);
+    usleep((100 - simulationSpeed) * 500);
     doWork(model, window);
   }
 }

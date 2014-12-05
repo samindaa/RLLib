@@ -78,12 +78,10 @@ SwingPendulumModel2::~SwingPendulumModel2()
 
 void SwingPendulumModel2::doLearning(Window* window)
 {
-  for (std::tr1::unordered_map<int, Simulator<double>*>::iterator i = simulators.begin();
-      i != simulators.end(); ++i)
+  for (Simulators::iterator i = simulators.begin(); i != simulators.end(); ++i)
     i->second->step();
 
-  for (std::tr1::unordered_map<int, Simulator<double>*>::iterator i = simulators.begin();
-      i != simulators.end(); ++i)
+  for (Simulators::iterator i = simulators.begin(); i != simulators.end(); ++i)
   {
     if (i->second->isEndingOfEpisode())
     {

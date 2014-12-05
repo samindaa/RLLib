@@ -9,11 +9,17 @@
 #define MODELBASE_H_
 
 #include <QObject>
+#include <map>
 //
 #include "Window.h"
 #include "Vec.h"
 //
-#include "Control.h"
+// From the RLLib
+#include "Vector.h"
+#include "Trace.h"
+#include "Projector.h"
+#include "ControlAlgorithm.h"
+#include "StateToStateAction.h"
 #include "RL.h"
 //
 #include "Eigen/Dense"
@@ -30,8 +36,10 @@ class ModelBase: public QObject
 {
   Q_OBJECT
 
-  private:
+  protected:
     MatrixXd valueFunction2D;
+    typedef std::map<int, Simulator<double>*> Simulators;
+    Simulators simulators;
 
   public:
     explicit ModelBase();

@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     Framebuffer.cpp \
     SwingPendulumModel.cpp \
     SwingPendulumModel2.cpp \
-    SwingPendulumView.cpp
+    SwingPendulumView.cpp \
+    MountainCarModel2.cpp
 
 HEADERS  += \
     plot/qcustomplot.h \
@@ -56,7 +57,8 @@ HEADERS  += \
     Framebuffer.h \
     SwingPendulumModel.h \
     SwingPendulumModel2.h \
-    SwingPendulumView.h
+    SwingPendulumView.h \
+    MountainCarModel2.h
 
 
 FORMS    += \

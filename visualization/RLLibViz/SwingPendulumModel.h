@@ -10,20 +10,8 @@
 
 #include "ModelBase.h"
 
-// From the RLLib
-#include "Vector.h"
-#include "Trace.h"
-#include "Projector.h"
-#include "ControlAlgorithm.h"
-#include "StateToStateAction.h"
-
 // From the simulation
 #include "SwingPendulum.h"
-#include "RL.h"
-
-#include <unistd.h>
-
-using namespace RLLib;
 
 namespace RLLibViz
 {

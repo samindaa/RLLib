@@ -10,26 +10,8 @@
 
 #include "ModelBase.h"
 
-// From the RLLib
-#include "Vector.h"
-#include "Trace.h"
-#include "Projector.h"
-#include "ControlAlgorithm.h"
-#include "StateToStateAction.h"
-
 // From the simulation
-#include "MountainCarModel.h"
-#include "RL.h"
-
-// View
 #include "MountainCar.h"
-#include "MountainCarView.h"
-
-//
-#include <vector>
-#include <tr1/unordered_map>
-
-using namespace RLLib;
 
 namespace RLLibViz
 {
@@ -71,8 +53,6 @@ class MountainCarModel: public ModelBase
 
     Simulator<double>* learningRunner;
     Simulator<double>* evaluationRunner;
-
-    std::tr1::unordered_map<int, Simulator<double>*> simulators;
 
   public:
     MountainCarModel();

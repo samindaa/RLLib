@@ -2,6 +2,7 @@
 #include "ui_RLLibVizForm.h"
 //
 #include "MountainCarModel.h"
+#include "MountainCarModel2.h"
 #include "ContinuousGridworldModel.h"
 #include "SwingPendulumModel.h"
 #include "SwingPendulumModel2.h"
@@ -82,6 +83,17 @@ RLLibVizMediator::RLLibVizMediator(QWidget *parent) :
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
+  demoProblems.insert(
+      std::make_pair(ui->radioButtonMountainCarSarsaAlphaBound,
+          std::make_pair(new RLLibViz::Window, new RLLibViz::MountainCarModel2)));
+  iter = demoProblems.find(ui->radioButtonMountainCarSarsaAlphaBound);
+  iter->second.first->addProblemView(new RLLibViz::MountainCarView);
+  iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
+  iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
+  iter->second.first->initialize(iter->second.second);
+
+  // Add more problems
+
 }
 
 RLLibVizMediator::~RLLibVizMediator()
@@ -102,15 +114,12 @@ void RLLibVizMediator::execClicked()
     currentModelBase = 0;
   }
 
-  DemoProblems::iterator iter = demoProblems.end();
-  if (ui->radioButtonMountainCarOffPAC->isChecked())
-    iter = demoProblems.find(ui->radioButtonMountainCarOffPAC);
-  else if (ui->radioButtonContinuousGridworldOffPAC->isChecked())
-    iter = demoProblems.find(ui->radioButtonContinuousGridworldOffPAC);
-  else if (ui->radioButtonSwingPendulumOffPAC->isChecked())
-    iter = demoProblems.find(ui->radioButtonSwingPendulumOffPAC);
-  else if (ui->radioButtonSwingPendulumAverageRewardActorCritic->isChecked())
-    iter = demoProblems.find(ui->radioButtonSwingPendulumAverageRewardActorCritic);
+  DemoProblems::iterator iter = demoProblems.begin();
+  for (; iter != demoProblems.end(); ++iter)
+  {
+    if (iter->first->isChecked())
+      break;
+  }
 
   if (iter != demoProblems.end())
   {

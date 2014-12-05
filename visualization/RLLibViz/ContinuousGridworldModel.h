@@ -10,25 +10,9 @@
 
 #include "ModelBase.h"
 
-// From the RLLib
-#include "Vector.h"
-#include "Trace.h"
-#include "Projector.h"
-#include "ControlAlgorithm.h"
-#include "StateToStateAction.h"
-
 // From the simulation
 #include "ContinuousGridworld.h"
-#include "RL.h"
 
-// View
-#include "ContinuousGridworldView.h"
-
-//
-#include <vector>
-#include <tr1/unordered_map>
-
-using namespace RLLib;
 namespace RLLibViz
 {
 
@@ -37,7 +21,7 @@ class ContinuousGridworldModel: public ModelBase
   Q_OBJECT
 
   protected:
-// RLLib
+    // RLLib
     Random<double>* random;
     RLProblem<double>* behaviourEnvironment;
     RLProblem<double>* evaluationEnvironment;
@@ -69,8 +53,6 @@ class ContinuousGridworldModel: public ModelBase
 
     Simulator<double>* learningRunner;
     Simulator<double>* evaluationRunner;
-
-    std::tr1::unordered_map<int, Simulator<double>*> simulators;
 
   public:
     ContinuousGridworldModel();
