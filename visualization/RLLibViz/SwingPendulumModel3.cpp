@@ -1,35 +1,36 @@
 /*
- * MountainCarModel2.cpp
+ * SwingPendulumModel3.cpp
  *
  *  Created on: Dec 4, 2014
  *      Author: sam
  */
 
-#include "MountainCarModel2.h"
+#include "SwingPendulumModel3.h"
 
 using namespace RLLibViz;
 
-MountainCarModel2::MountainCarModel2()
+SwingPendulumModel3::SwingPendulumModel3()
 {
   random = new Random<double>;
-  problem = new MountainCar<double>(random);
-  hashing = new MurmurHashing<double>(random, 10000);
-  projector = new TileCoderHashing<double>(hashing, problem->dimension(), 9, 10, false);
+  problem = new SwingPendulum<double>;
+  hashing = new MurmurHashing<double>(random, 100000);
+  projector = new TileCoderHashing<double>(hashing, problem->dimension(), 16, 16, true);
   toStateAction = new StateActionTilings<double>(projector, problem->getDiscreteActions());
   e = new ATrace<double>(projector->dimension());
+  alpha = 0.3 / projector->vectorNorm();
   gamma = 0.99;
-  lambda = 0.3;
-  sarsaAdaptive = new SarsaAlphaBound<double>(1.0f, gamma, lambda, e);
+  lambda = 0.4;
+  sarsaTrue = new SarsaTrue<double>(alpha, gamma, lambda, e);
   epsilon = 0.01;
-  acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsaAdaptive, epsilon);
-  control = new SarsaControl<double>(acting, toStateAction, sarsaAdaptive);
+  acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsaTrue, epsilon);
+  control = new SarsaControl<double>(acting, toStateAction, sarsaTrue);
 
   agent = new LearnerAgent<double>(control);
   simulator = new Simulator<double>(agent, problem, 5000);
   simulator->setVerbose(false);
 }
 
-MountainCarModel2::~MountainCarModel2()
+SwingPendulumModel3::~SwingPendulumModel3()
 {
   delete random;
   delete problem;
@@ -37,14 +38,14 @@ MountainCarModel2::~MountainCarModel2()
   delete projector;
   delete toStateAction;
   delete e;
-  delete sarsaAdaptive;
+  delete sarsaTrue;
   delete acting;
   delete control;
   delete agent;
   delete simulator;
 }
 
-void MountainCarModel2::doLearning(Window* window)
+void SwingPendulumModel3::doLearning(Window* window)
 {
   simulator->step();
   if (simulator->isEndingOfEpisode())
@@ -64,7 +65,8 @@ void MountainCarModel2::doLearning(Window* window)
 
 }
 
-void MountainCarModel2::doEvaluation(Window* window)
+void SwingPendulumModel3::doEvaluation(Window* window)
 {
 }
+
 

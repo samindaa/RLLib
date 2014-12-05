@@ -6,6 +6,7 @@
 #include "ContinuousGridworldModel.h"
 #include "SwingPendulumModel.h"
 #include "SwingPendulumModel2.h"
+#include "SwingPendulumModel3.h"
 //
 #include "MountainCarView.h"
 #include "ContinuousGridworldView.h"
@@ -88,6 +89,15 @@ RLLibVizMediator::RLLibVizMediator(QWidget *parent) :
           std::make_pair(new RLLibViz::Window, new RLLibViz::MountainCarModel2)));
   iter = demoProblems.find(ui->radioButtonMountainCarSarsaAlphaBound);
   iter->second.first->addProblemView(new RLLibViz::MountainCarView);
+  iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
+  iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
+  iter->second.first->initialize(iter->second.second);
+
+  demoProblems.insert(
+      std::make_pair(ui->radioButtonSwingPendulumSarsaTrue,
+          std::make_pair(new RLLibViz::Window, new RLLibViz::SwingPendulumModel3)));
+  iter = demoProblems.find(ui->radioButtonSwingPendulumSarsaTrue);
+  iter->second.first->addProblemView(new RLLibViz::SwingPendulumView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
