@@ -24,6 +24,7 @@
 
 #include "Tiles.h"
 #include "Vector.h"
+#include "Action.h"
 
 namespace RLLib
 {
@@ -31,7 +32,6 @@ namespace RLLib
 /**
  * Feature extractor for function approximation.
  * @class T feature type
- * @class O observation type
  */
 template<class T>
 class Projector
@@ -152,6 +152,94 @@ class TileCoderHashing: public TileCoder<T>
       inputs->clear();
       inputs->addToSelf(gridResolution, x);
       tiles->tiles(Base::vector, Base::nbTilings, inputs, h1);
+    }
+};
+
+template<class T>
+class FourierBasis: public Projector<T>
+{
+  protected:
+    Vector<T>* featureVector;
+    std::vector<Vector<T>*> coefficientVectors;
+
+  public:
+    FourierBasis(const int& nbInputs, const int& order, const Actions<T>* actions)
+    {
+      computeFourierCoefficients(nbInputs, order);
+      featureVector = new PVector<T>(coefficientVectors.size() * actions->dimension());
+    }
+
+    virtual ~FourierBasis()
+    {
+      delete featureVector;
+      for (typename std::vector<Vector<T>*>::iterator iter = coefficientVectors.begin();
+          iter != coefficientVectors.end(); ++iter)
+        delete *iter;
+    }
+
+    /**
+     * x must be unit normalize [0, 1)
+     */
+    const Vector<T>* project(const Vector<T>* x, const int& h1)
+    {
+      featureVector->clear();
+      // FixMe: SIMD
+      for (size_t i = 0; i < coefficientVectors.size(); i++)
+      {
+        featureVector->setEntry(i + coefficientVectors.size() * h1,
+            std::cos(M_PI * x->dot(coefficientVectors[i])));
+      }
+      return featureVector;
+
+    }
+
+    const Vector<T>* project(const Vector<T>* x)
+    {
+      return project(x, 0);
+    }
+
+    T vectorNorm() const
+    {
+      return T(1); //FixMe:
+    }
+
+    int dimension() const
+    {
+      return featureVector->dimension();
+    }
+
+    const std::vector<Vector<T>*>& getCoefficientVectors() const
+    {
+      return coefficientVectors;
+    }
+
+  private:
+    inline void nextCoefficientVector(Vector<T>* coefficientVector, const int& nbInputs,
+        const int& order)
+    {
+      coefficientVector->setEntry(nbInputs - 1, coefficientVector->getEntry(nbInputs - 1) + 1);
+      if (coefficientVector->getEntry(nbInputs - 1) > order)
+      {
+        if (nbInputs > 1)
+        {
+          coefficientVector->setEntry(nbInputs - 1, 0);
+          nextCoefficientVector(coefficientVector, nbInputs - 1, order);
+        }
+      }
+    }
+
+    inline void computeFourierCoefficients(const int& nbInputs, const int& order)
+    {
+      Vector<T>* coefficientVector = new PVector<T>(nbInputs);
+      do
+      {
+        Vector<T>* newCoefficientVector = new PVector<T>(nbInputs);
+        newCoefficientVector->set(coefficientVector);
+        coefficientVectors.push_back(newCoefficientVector);
+        nextCoefficientVector(coefficientVector, nbInputs, order);
+      } while (coefficientVector->getEntry(0) <= order);
+      ASSERT(coefficientVectors.size() == std::pow(order + 1, nbInputs));
+      delete coefficientVector;
     }
 };
 

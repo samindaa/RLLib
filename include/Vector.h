@@ -86,7 +86,7 @@ class Vector
     virtual bool empty() const =0;
     virtual T maxNorm() const =0;
     virtual T l1Norm() const =0;
-    virtual T l2Norm() const =0;
+    virtual T l2Norm() const =0; //<< FixMe: Sam deprecate this method
     virtual T sum() const =0;
 
     // Return the data as an array

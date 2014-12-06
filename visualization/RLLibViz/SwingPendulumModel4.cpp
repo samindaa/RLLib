@@ -1,51 +1,50 @@
 /*
- * SwingPendulumModel3.cpp
+ * SwingPendulumModel4.cpp
  *
- *  Created on: Dec 4, 2014
+ *  Created on: Dec 5, 2014
  *      Author: sam
  */
 
-#include "SwingPendulumModel3.h"
+#include "SwingPendulumModel4.h"
 
 using namespace RLLibViz;
 
-SwingPendulumModel3::SwingPendulumModel3()
+SwingPendulumModel4::SwingPendulumModel4()
 {
   random = new Random<double>;
   problem = new SwingPendulum<double>(0, true);
-  hashing = new MurmurHashing<double>(random, 100000);
-  projector = new TileCoderHashing<double>(hashing, problem->dimension(), 16, 16, true);
+  order = 11;
+  projector = new FourierBasis<double>(problem->dimension(), order, problem->getDiscreteActions());
   toStateAction = new StateActionTilings<double>(projector, problem->getDiscreteActions());
   e = new ATrace<double>(projector->dimension());
-  alpha = 0.2 / projector->vectorNorm();
+  alpha = 0.001;
   gamma = 0.99;
-  lambda = 0.4;
-  sarsaTrue = new SarsaTrue<double>(alpha, gamma, lambda, e);
+  lambda = 0.3;
+  sarsaAdaptive = new SarsaAlphaBound<double>(alpha, gamma, lambda, e);
   epsilon = 0.01;
-  acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsaTrue, epsilon);
-  control = new SarsaControl<double>(acting, toStateAction, sarsaTrue);
+  acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsaAdaptive, epsilon);
+  control = new SarsaControl<double>(acting, toStateAction, sarsaAdaptive);
 
   agent = new LearnerAgent<double>(control);
   simulator = new Simulator<double>(agent, problem, 5000);
   simulator->setVerbose(false);
 }
 
-SwingPendulumModel3::~SwingPendulumModel3()
+SwingPendulumModel4::~SwingPendulumModel4()
 {
   delete random;
   delete problem;
-  delete hashing;
   delete projector;
   delete toStateAction;
   delete e;
-  delete sarsaTrue;
+  delete sarsaAdaptive;
   delete acting;
   delete control;
   delete agent;
   delete simulator;
 }
 
-void SwingPendulumModel3::doLearning(Window* window)
+void SwingPendulumModel4::doLearning(Window* window)
 {
   simulator->step();
   if (simulator->isEndingOfEpisode())
@@ -65,7 +64,7 @@ void SwingPendulumModel3::doLearning(Window* window)
 
 }
 
-void SwingPendulumModel3::doEvaluation(Window* window)
+void SwingPendulumModel4::doEvaluation(Window* window)
 {
 }
 

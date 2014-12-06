@@ -37,6 +37,7 @@ class ProjectorTest: public ProjectorTestBase
 
   private:
     void testProjector();
+    void testFourierBasis();
 };
 
 #endif /* PROJECTORTEST_H_ */

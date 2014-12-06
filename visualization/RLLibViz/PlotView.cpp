@@ -19,7 +19,7 @@ PlotView::PlotView(const QString& title, QWidget* parent) :
 
   xR1.resize(sizeHint().width());
   for (int i = 0; i < xR1.size(); i++)
-    xR1[i] = i;
+    xR1[i] = i - (xR1.size() - 1);
 
   globalColors.push_back(Qt::darkRed);
   globalColors.push_back(Qt::darkGreen);

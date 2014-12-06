@@ -22,9 +22,6 @@
 #ifndef STATETOSTATEACTION_H_
 #define STATETOSTATEACTION_H_
 
-#include <vector>
-#include "Action.h"
-#include "Vector.h"
 #include "Projector.h"
 
 namespace RLLib

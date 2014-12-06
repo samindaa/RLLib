@@ -36,17 +36,20 @@ class SwingPendulum: public RLLib::RLProblem<T>
     RLLib::Range<T>* velocityRange;
 
     float mass, length, g, requiredUpTime, upRange;
-
+    float previousTheta, cumulatedRotation;
+    bool overRotated;
+    float overRotatedTime;
     int upTime;
+    bool useOverRotated;
+
   public:
-    SwingPendulum(RLLib::Random<T>* random = 0) :
+    SwingPendulum(RLLib::Random<T>* random = 0, const bool& useOverRotated = false) :
         RLLib::RLProblem<T>(random, 2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(
-            0), velocity(0), maxVelocity(
-        M_PI_4 / stepTime), actionRange(new RLLib::Range<float>(-uMax, uMax)), thetaRange(
-            new RLLib::Range<T>(-M_PI, M_PI)), velocityRange(
+            0), velocity(0), maxVelocity( M_PI_4 / stepTime), actionRange(
+            new RLLib::Range<float>(-uMax, uMax)), thetaRange(new RLLib::Range<T>(-M_PI, M_PI)), velocityRange(
             new RLLib::Range<T>(-maxVelocity, maxVelocity)), mass(1.0), length(1.0), g(9.8), requiredUpTime(
-            10.0 /*seconds*/), upRange(
-        M_PI_4 /*seconds*/), upTime(0)
+            10.0 /*seconds*/), upRange(M_PI_4 /*seconds*/), previousTheta(0), cumulatedRotation(0), overRotated(
+            false), overRotatedTime(0), upTime(0), useOverRotated(useOverRotated)
     {
 
       Base::discreteActions->push_back(0, actionRange->min());
@@ -96,6 +99,10 @@ class SwingPendulum: public RLLib::RLProblem<T>
         theta = M_PI_2;
       velocity = 0.0;
       adjustTheta();
+      previousTheta = theta;
+      cumulatedRotation = theta;
+      overRotated = false;
+      overRotatedTime = 0;
     }
 
     void step(const RLLib::Action<double>* a)
@@ -107,17 +114,34 @@ class SwingPendulum: public RLLib::RLProblem<T>
       theta += velocity * stepTime;
       adjustTheta();
       upTime = fabs(theta) > upRange ? 0 : upTime + 1;
+
+      float signAngleDifference = std::atan2(std::sin(theta - previousTheta),
+          std::cos(theta - previousTheta));
+      cumulatedRotation += signAngleDifference;
+      if (!overRotated && std::abs(cumulatedRotation) > 5.0f * M_PI)
+        overRotated = true;
+      if (overRotated)
+        overRotatedTime += 1;
+      previousTheta = theta;
     }
 
     bool endOfEpisode() const
     {
-      return false;
+      if (useOverRotated)
+        // Reinforcement Learning in Continuous Time and Space (Kenji Doya)
+        return (overRotated && (overRotatedTime > 1.0 / stepTime)) ? true : false;
+      else
+        return false;
       //return upTime + 1 >= requiredUpTime / stepTime; // 1000 steps
     }
 
     T r() const
     {
-      return cos(theta);
+      if (useOverRotated)
+        // Reinforcement Learning in Continuous Time and Space (Kenji Doya)
+        return (!overRotated) ? cos(theta) : -1.0f;
+      else
+        return cos(theta);
     }
 
     T z() const

@@ -50,8 +50,58 @@ void ProjectorTest::testProjector()
   }
 }
 
+void ProjectorTest::testFourierBasis()
+{
+  const int nbDiscreteActions = 1;
+  const int nbInputs = 2;
+  const int order = 5;
+  Vector<double>* x = new PVector<double>(nbInputs);
+  Actions<double>* actions = new ActionArray<double>(nbDiscreteActions);
+  FourierBasis<double>* fourierBasisProjector = new FourierBasis<double>(nbInputs, order, actions);
+
+  ASSERT(
+      fourierBasisProjector->dimension() == std::pow(order + 1, nbInputs) * actions->dimension());
+
+  const std::vector<Vector<double>*>& coefficientVectors =
+      fourierBasisProjector->getCoefficientVectors();
+
+  for (size_t i = 0; i < coefficientVectors.size(); i++)
+  {
+    std::cout << i << " ";
+    for (int k = 0; k < nbInputs; k++)
+      std::cout << coefficientVectors[i]->getEntry(k) << " ";
+    std::cout << std::endl;
+  }
+
+  //std::ofstream testout("FourierBasis.txt");
+  const double rangeInc = 0.01;
+  for (double x1 = 0; x1 <= 1; x1 += rangeInc)
+  {
+    x->setEntry(0, x1);
+    for (double x2 = 0; x2 <= 1; x2 += rangeInc)
+    {
+      x->setEntry(1, x2);
+      for (int h1 = 0; h1 < actions->dimension(); h1++)
+      {
+        //const Vector<double>* phi = fourierBasisProjector->project(x, actions->getEntry(h1)->id());
+        //for (int i = 0; i < phi->dimension(); i++)
+        //const int i = 35;
+        //testout << phi->getEntry(i) << " ";
+      }
+      //testout << std::endl;
+    }
+    //testout << std::endl;
+  }
+  //testout.close();
+
+  delete x;
+  delete actions;
+  delete fourierBasisProjector;
+}
+
 void ProjectorTest::run()
 {
   testProjector();
+  testFourierBasis();
 }
 

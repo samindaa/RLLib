@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
+    <width>1270</width>
     <height>700</height>
    </rect>
   </property>
@@ -48,7 +48,7 @@
      <rect>
       <x>830</x>
       <y>1</y>
-      <width>370</width>
+      <width>427</width>
       <height>651</height>
      </rect>
     </property>
@@ -77,14 +77,14 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
+         <item row="7" column="0">
           <widget class="QRadioButton" name="radioButtonContinuousGridworldOffPAC">
            <property name="text">
             <string>ContinuousGridworld (OffPAC)</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QRadioButton" name="radioButtonMountainCarOffPAC">
            <property name="text">
             <string>MountainCar (OffPAC)</string>
@@ -98,7 +98,7 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
+         <item row="5" column="0">
           <widget class="QRadioButton" name="radioButtonMountainCarSarsaAlphaBound">
            <property name="text">
             <string>MountainCar (SarsaAlphaBound) {Random}</string>
@@ -109,6 +109,20 @@
           <widget class="QRadioButton" name="radioButtonSwingPendulumSarsaTrue">
            <property name="text">
             <string>SwingPendulum (SarsaTrue)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QRadioButton" name="radioButtonMountainCarSarsaAlphaBoundFourierBasis">
+           <property name="text">
+            <string>MountainCar (SarsaAlphaBound) {FourierBasis|Random}</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QRadioButton" name="radioButtonSwingPendulumSarsaAlphaBoundFourierBasis">
+           <property name="text">
+            <string>SwingPendulum (SarsaAlphaBound) {FourierBasis}</string>
            </property>
           </widget>
          </item>
@@ -282,7 +296,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1200</width>
+     <width>1270</width>
      <height>25</height>
     </rect>
    </property>

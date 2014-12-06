@@ -234,6 +234,44 @@ void MountainCarTest::testSarsaAdaptiveMountainCar()
   delete sim;
 }
 
+void MountainCarTest::testSarsaAdaptiveMountainCar2()
+{
+  Random<double>* random = new Random<double>;
+  RLProblem<double>* problem = new MountainCar<double>;
+  int order = 5;
+  Projector<double>* projector = new FourierBasis<double>(problem->dimension(), order,
+      problem->getDiscreteActions());
+  StateToStateAction<double>* toStateAction = new StateActionTilings<double>(projector,
+      problem->getDiscreteActions());
+  Trace<double>* e = new ATrace<double>(projector->dimension());
+  double gamma = 1.0;
+  double lambda = 0.9;
+  Sarsa<double>* sarsaAdaptive = new SarsaAlphaBound<double>(1.0f, gamma, lambda, e);
+  double epsilon = 0.01;
+  Policy<double>* acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(),
+      sarsaAdaptive, epsilon);
+  OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction,
+      sarsaAdaptive);
+
+  RLAgent<double>* agent = new LearnerAgent<double>(control);
+  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 10);
+  sim->setTestEpisodesAfterEachRun(true);
+  sim->setEnableStatistics(true);
+  sim->run();
+  sim->computeValueFunction();
+
+  delete random;
+  delete problem;
+  delete projector;
+  delete toStateAction;
+  delete e;
+  delete sarsaAdaptive;
+  delete acting;
+  delete control;
+  delete agent;
+  delete sim;
+}
+
 void MountainCarTest::testExpectedSarsaMountainCar()
 {
   Random<double>* random = new Random<double>;
@@ -763,6 +801,7 @@ void MountainCarTest::run()
   testSarsaMountainCar();
   testSarsaTrueMountainCar();
   testSarsaAdaptiveMountainCar();
+  testSarsaAdaptiveMountainCar2();
   testExpectedSarsaMountainCar();
   testQMountainCar();
 
