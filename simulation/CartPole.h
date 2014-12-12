@@ -30,86 +30,100 @@
 
 #include "RL.h"
 
-using namespace RLLib;
-
-template<class T>
-class CartPole: public RLProblem<T>
+class CartPole: public RLLib::RLProblem<double>
 {
-    typedef RLProblem<T> Base;
   protected:
-    float gravity;
-    float massCart;
-    float massPole;
-    float totalMass;
-    float length;
-    float poleMassLength;
-    float forceMag;
-    float tau;
-    float fourthirds;
-    float twelveRadians;
+    double gravity;
+    double massCart;
+    double massPole;
+    double totalMass;
+    double length;
+    double poleMassLength;
+    double forceMag;
+    double tau;
+    double fourthirds;
 
-    float x, x_dot, theta, theta_dot;
-    Range<float>* forceRange;
-    Range<T> *xRange, *thetaRange;
+    double x, x_dot, theta, theta_dot;
+    RLLib::Range<double>* forceRange;
+    RLLib::Range<double> *xRange, *xDotRange, *thetaRange, *thetaDotRange;
+
+    float previousTheta, cumulatedRotation;
+    bool overRotated;
+    float overRotatedTime;
+    int upTime;
+
   public:
-    CartPole(Random<T>* random) :
-        RLProblem<T>(random, 4, 3, 1), gravity(9.8), massCart(1.0), massPole(0.1), totalMass(
-            massPole + massCart), length(0.5), poleMassLength(massPole * length), forceMag(10.0), tau(
-            0.02), fourthirds(4.0f / 3.0f), twelveRadians(12.0f / 180.0f * M_PI), x(0), x_dot(0), theta(
-            0), theta_dot(0), forceRange(new Range<float>(-forceMag, forceMag)), xRange(
-            new Range<T>(-2.4, 2.4)), thetaRange(new Range<T>(-twelveRadians, twelveRadians))
+    CartPole(Random<double>* random = 0) :
+        RLLib::RLProblem<double>(random, 4, 3, 1), gravity(9.8), massCart(1.0), massPole(0.1), totalMass(
+            massPole + massCart), length(0.5/* actually half the pole's length */), poleMassLength(
+            massPole * length), forceMag(10.0), tau(0.02/* seconds between state updates */), fourthirds(
+            4.0f / 3.0f), x(0/* cart position, meters */), x_dot(0/* cart velocity */), theta(
+            0/* pole angle, radians */), theta_dot(0/* pole angular velocity */), forceRange(
+            new RLLib::Range<double>(-forceMag, forceMag)), xRange(
+            new RLLib::Range<double>(-2.4, 2.4)), xDotRange(new RLLib::Range<double>(-2.4, 2.4)), thetaRange(
+            new RLLib::Range<double>(-M_PI, M_PI)), thetaDotRange(
+            new RLLib::Range<double>(-4.0 * M_PI, 4.0 * M_PI)), previousTheta(0), cumulatedRotation(
+            0), overRotated(false), overRotatedTime(0), upTime(0)
     {
-      Base::discreteActions->push_back(0, forceRange->min());
-      Base::discreteActions->push_back(1, 0.0);
-      Base::discreteActions->push_back(2, forceRange->max());
+      discreteActions->push_back(0, forceRange->min());
+      discreteActions->push_back(1, 0.0);
+      discreteActions->push_back(2, forceRange->max());
 
       // subject to change
-      Base::continuousActions->push_back(0, 0.0);
+      continuousActions->push_back(0, 0.0);
 
-      Base::observationRanges->push_back(xRange);
-      Base::observationRanges->push_back(thetaRange);
+      observationRanges->push_back(xRange);
+      observationRanges->push_back(xDotRange);
+      observationRanges->push_back(thetaRange);
+      observationRanges->push_back(thetaDotRange);
     }
 
     virtual ~CartPole()
     {
       delete forceRange;
       delete xRange;
+      delete xDotRange;
       delete thetaRange;
+      delete thetaDotRange;
     }
 
     void updateTRStep()
     {
-      DenseVector<T>& vars = *Base::output->o_tp1;
-      Base::observations->at(0) = x;
-      Base::observations->at(1) = x_dot;
-      Base::observations->at(2) = theta;
-      Base::observations->at(3) = theta_dot;
+      RLLib::DenseVector<double>& vars = *output->o_tp1;
+      observations->at(0) = x;
+      observations->at(1) = x_dot;
+      observations->at(2) = theta;
+      observations->at(3) = theta_dot;
 
       vars[0] = xRange->toUnit(x);
-      vars[1] = x_dot; // FixME
+      vars[1] = xDotRange->toUnit(x_dot);
       vars[2] = thetaRange->toUnit(theta);
-      vars[3] = theta_dot; // FixME
+      vars[3] = thetaDotRange->toUnit(theta_dot);
 
     }
 
     // Profiles
     void initialize()
     {
-      if (Base::random)
+      if (random)
       {
-        Range<T> xs2(-0.2, 0.2);
-        Range<T> thetas2(-0.2, 0.2);
         x_dot = theta_dot = 0;
-        x = xs2.choose(Base::random);
-        theta = thetas2.choose(Base::random);
+        x = xRange->choose(random);
+        theta = thetaRange->choose(random);
       }
       else
-        x = x_dot = theta = theta_dot = 0; //<< fixMe with noise
+        x = x_dot = theta = theta_dot = 0;
+
+      previousTheta = theta;
+      cumulatedRotation = theta;
+      overRotated = false;
+      overRotatedTime = 0;
+      upTime = 0;
     }
 
-    void step(const Action<T>* a)
+    void step(const RLLib::Action<double>* a)
     {
-      float xacc, thetaacc, force, costheta, sintheta, temp;
+      double xacc, thetaacc, force, costheta, sintheta, temp;
       force = forceRange->bound(a->getEntry(0));
       costheta = cos(theta);
       sintheta = sin(theta);
@@ -120,21 +134,47 @@ class CartPole: public RLProblem<T>
 
       x += tau * x_dot;
       x_dot += tau * xacc;
+      x_dot = xDotRange->bound(x_dot);
       theta += tau * theta_dot;
       theta_dot += tau * thetaacc;
+      theta_dot = thetaDotRange->bound(theta_dot);
+      theta = RLLib::Angle::normalize(theta);
+
+      float signAngleDifference = std::atan2(std::sin(theta - previousTheta),
+          std::cos(theta - previousTheta));
+      cumulatedRotation += signAngleDifference;
+      if (!overRotated && std::abs(cumulatedRotation) > 5.0f * M_PI)
+        overRotated = true;
+      if (overRotated)
+        overRotatedTime += 1;
+      ++upTime;
+      previousTheta = theta;
     }
 
     bool endOfEpisode() const
     {
-      return !(xRange->in(x) && thetaRange->in(theta));
+      if (!xRange->in(x))
+        return true;
+      // Reinforcement Learning in Continuous Time and Space (Kenji Doya)
+      if (overRotated && (overRotatedTime > (0.5 / tau)))
+        return true;
+      // Reinforcement Learning in Continuous Time and Space (Kenji Doya)
+      //if (upTime >= (20.0/*seconds*// tau))
+      //  return true;
+
+      return false;
     }
 
-    T r() const
+    double r() const
     {
-      return cos(theta);
+      // Reinforcement Learning in Continuous Time and Space (Kenji Doya)
+      if (overRotated || !xRange->in(x))
+        return -1.0f;
+      else
+        return (cos(theta) - 1.0) / 2.0;
     }
 
-    T z() const
+    double z() const
     {
       return 0.0f;
     }

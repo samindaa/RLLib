@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1270</width>
-    <height>700</height>
+    <height>750</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,7 +49,7 @@
       <x>830</x>
       <y>1</y>
       <width>427</width>
-      <height>651</height>
+      <height>681</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -123,6 +123,20 @@
           <widget class="QRadioButton" name="radioButtonSwingPendulumSarsaAlphaBoundFourierBasis">
            <property name="text">
             <string>SwingPendulum (SarsaAlphaBound) {FourierBasis}</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0">
+          <widget class="QRadioButton" name="radioButtonCartPoleSarsaAlphaBoundFourierBasis">
+           <property name="text">
+            <string>CartPole (SarsaAlphaBound) {FourierBasis}</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QRadioButton" name="radioButtonAcrobotSarasaAlphaBoundFourierBasis">
+           <property name="text">
+            <string>Acrobot (SarsaAlphaBound) {FourierBasis}</string>
            </property>
           </widget>
          </item>
@@ -210,27 +224,6 @@
       <widget class="QLabel" name="label_5">
        <property name="text">
         <string>    simulation speed.</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>5. You can stop the executing  demo anytime</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>   using &quot;Stop&quot;. Select a new demo and press &quot;Exec&quot;</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_8">
-       <property name="text">
-        <string>    to excute it.</string>
        </property>
       </widget>
      </item>

@@ -37,7 +37,11 @@ SOURCES += main.cpp\
     MountainCarModel2.cpp \
     SwingPendulumModel3.cpp \
     MountainCarModel3.cpp \
-    SwingPendulumModel4.cpp
+    SwingPendulumModel4.cpp \
+    AcrobotModel.cpp \
+    AcrobotView.cpp \
+    CartPoleModel.cpp \
+    CartPoleView.cpp
 
 HEADERS  += \
     plot/qcustomplot.h \
@@ -64,7 +68,11 @@ HEADERS  += \
     MountainCarModel2.h \
     SwingPendulumModel3.h \
     MountainCarModel3.h \
-    SwingPendulumModel4.h
+    SwingPendulumModel4.h \
+    AcrobotModel.h \
+    AcrobotView.h \
+    CartPoleModel.h \
+    CartPoleView.h
 
 
 FORMS    += \

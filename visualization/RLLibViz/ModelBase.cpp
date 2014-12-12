@@ -22,7 +22,7 @@ void ModelBase::updateValueFunction(Window* window, const RLLib::Control<double>
     const bool& isEndingOfEpisode, const int& index)
 {
   // Value function
-  if (isEndingOfEpisode)
+  if (isEndingOfEpisode && output->o_tp1->dimension() == 2 /*FixMe*/)
   {
     RLLib::PVector<double> stateVariable(2);
     const Range<double>* positionRange = ranges->at(0);

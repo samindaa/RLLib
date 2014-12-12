@@ -46,8 +46,10 @@ namespace RLLib
 #if !defined(EMBEDDED_MODE)
 template<class T> class DenseVector;
 template<class T> class SparseVector;
+template<class T> class Vector;
 template<class T> std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that);
 template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that);
+template<class T> std::ostream& operator<<(std::ostream& out, const Vector<T>* that);
 #endif
 /**
  * This is used in parameter representation in a given vector space for
@@ -829,7 +831,7 @@ class PVector: public DenseVector<T>
         return this;
       }
 
-      for (int i = 0; i < this->dimension(); i++)
+      for (int i = 0; i < this->dimension(); i++) // FixMe: SIMD
         Base::data[i] += factor * that->getEntry(i);
       return this;
     }
@@ -849,7 +851,7 @@ class PVector: public DenseVector<T>
         return this;
       }
 
-      for (int i = 0; i < this->dimension(); i++)
+      for (int i = 0; i < this->dimension(); i++) // FixMe: SIMD
         Base::data[i] -= that->getEntry(i);
       return this;
     }
@@ -864,7 +866,7 @@ class PVector: public DenseVector<T>
         return *this;
       }
 
-      for (int i = 0; i < this->dimension(); i++)
+      for (int i = 0; i < this->dimension(); i++) // FixMe: SIMD
         Base::data[i] -= that->getEntry(i);
       return *this;
     }
@@ -879,15 +881,15 @@ class PVector: public DenseVector<T>
         return *this;
       }
 
-      for (int i = 0; i < this->dimension(); i++)
-        Base::data[i] += that->at(i);
+      for (int i = 0; i < this->dimension(); i++) // FixMe: SIMD
+        Base::data[i] += that->getEntry(i);
       return *this;
     }
 
     PVector<T>& operator/(const Vector<T>* that)
     {
       ASSERT(this->dimension() == that->dimension());
-      for (int i = 0; i < this->dimension(); i++)
+      for (int i = 0; i < this->dimension(); i++) // FixMe: SIMD
       {
         const T& thatValue = that->getEntry(i);
         if (thatValue != 0)
@@ -896,7 +898,6 @@ class PVector: public DenseVector<T>
       return *this;
     }
 
-
     Vector<T>* set(const Vector<T>* that, const int& offset)
     { // FixMe:
       //assert(this->dimension() == that->dimension());
@@ -904,13 +905,24 @@ class PVector: public DenseVector<T>
       const DenseVector<T>* other = RTTI<T>::constDenseVector(that);
       if (other)
       {
-        std::copy(other->getValues() + offset, other->getValues() + this->dimension(),
-            this->getValues());
+        std::copy(other->getValues(), other->getValues() + other->dimension(),
+            this->getValues() + offset); // FixMe: SIMD
         return this;
       }
-      // FixMe: This is very expensive for SVector<T>
-      for (int i = 0; i < that->dimension(); i++)
-        Base::data[i] = that->getEntry(i);
+
+      const SparseVector<T>* another = RTTI<T>::constSparseVector(that);
+      if (another)
+      {
+        for (int position = 0; position < another->nonZeroElements(); position++)
+        {
+          const int index = another->nonZeroIndexes()[position];
+          this->setEntry(index + offset, another->getValues()[position]);
+        }
+        return this;
+      }
+
+      ASSERT(false); // This condition should not have happened
+
       return this;
     }
 
@@ -1492,30 +1504,32 @@ std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that)
 }
 
 template<class T>
-static void printVector(const Vector<T>* other)
+std::ostream& operator<<(std::ostream& out, const Vector<T>* that)
 {
-  const SparseVector<T>* that = RTTI<T>::constSparseVector(other);
-  if (that)
+  const SparseVector<T>* other = RTTI<T>::constSparseVector(that);
+  if (other)
   {
-    std::cout << "SparseVector(" << that->nonZeroElements() << ") index=";
+    out << "SparseVector(" << other->nonZeroElements() << ") index=";
     //for (int index = 0; index < that->dimension(); index++)
     //  std::cout << that->getIndexesPosition()[index] << " ";
     //std::cout << std::endl;
 
-    for (int position = 0; position < that->nonZeroElements(); position++)
-      std::cout << "[p=" << position << " i=" << that->nonZeroIndexes()[position] << " v="
-          << that->getEntry(that->nonZeroIndexes()[position]) << "] ";
-    std::cout << std::endl;
+    for (int position = 0; position < other->nonZeroElements(); position++)
+      out << "[p=" << position << " i=" << other->nonZeroIndexes()[position] << " v="
+          << other->getEntry(other->nonZeroIndexes()[position]) << "] ";
+    out << std::endl;
   }
 
-  const DenseVector<T>* theOther = RTTI<T>::constDenseVector(other);
-  if (theOther)
+  const DenseVector<T>* another = RTTI<T>::constDenseVector(that);
+  if (another)
   {
-    std::cout << "DenseVector(" << theOther->dimension() << ") ";
-    for (const T* i = theOther->getValues(); i < theOther->getValues() + theOther->dimension(); ++i)
-      std::cout << *i << " ";
-    std::cout << std::endl;
+    out << "DenseVector(" << another->dimension() << ") ";
+    for (const T* i = another->getValues(); i < another->getValues() + another->dimension(); ++i)
+      out << *i << " ";
+    out << std::endl;
   }
+
+  return out;
 }
 #endif
 

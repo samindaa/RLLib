@@ -36,6 +36,7 @@ class SwingPendulum: public RLLib::RLProblem<T>
     RLLib::Range<T>* velocityRange;
 
     float mass, length, g, requiredUpTime, upRange;
+
     float previousTheta, cumulatedRotation;
     bool overRotated;
     float overRotatedTime;

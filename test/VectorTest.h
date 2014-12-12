@@ -31,6 +31,7 @@ class VectorTest
     Vector<double>* b;
 
     std::vector<Vector<double>*> vectors;
+    Random<double>* random;
 
   public:
     VectorTest();
@@ -79,6 +80,7 @@ class VectorTest
     virtual void testAbs();
     virtual void testSetPVector();
     virtual void testL1Norm();
+    virtual void testOffset();
 };
 
 class PVectorTest: public VectorTest

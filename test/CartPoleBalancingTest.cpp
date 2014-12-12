@@ -18,7 +18,7 @@ void CartPoleBalancingTest::run()
 void CartPoleBalancingTest::testCartPole()
 {
   Random<double> random;
-  CartPole<double> pb(&random);
+  CartPole pb(&random);
   pb.initialize();
   Action<double> action(0);
   action.push_back(1.0f);
@@ -69,7 +69,7 @@ void CartPoleBalancingTest::testNonMarkovPoleBalancingCMAES()
 void CartPoleBalancingTest::testCartPoleCMAES()
 {
   Random<double>* random = new Random<double>;
-  RLProblem<double>* problem = new CartPole<double>(random);
+  RLProblem<double>* problem = new CartPole(random);
   RLAgent<double>* agent = new CMAESAgent(problem, false);
   Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 200, 1);
   sim->setVerbose(false);

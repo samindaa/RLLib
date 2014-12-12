@@ -9,10 +9,14 @@
 #include "SwingPendulumModel2.h"
 #include "SwingPendulumModel3.h"
 #include "SwingPendulumModel4.h"
+#include "AcrobotModel.h"
+#include "CartPoleModel.h"
 //
 #include "MountainCarView.h"
 #include "ContinuousGridworldView.h"
 #include "SwingPendulumView.h"
+#include "AcrobotView.h"
+#include "CartPoleView.h"
 //
 #include "ValueFunctionView.h"
 #include "NULLView.h"
@@ -120,6 +124,24 @@ RLLibVizMediator::RLLibVizMediator(QWidget *parent) :
   iter->second.first->addProblemView(new RLLibViz::MountainCarView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
+  iter->second.first->initialize(iter->second.second);
+
+  demoProblems.insert(
+      std::make_pair(ui->radioButtonAcrobotSarasaAlphaBoundFourierBasis,
+          std::make_pair(new RLLibViz::Window, new RLLibViz::AcrobotModel)));
+  iter = demoProblems.find(ui->radioButtonAcrobotSarasaAlphaBoundFourierBasis);
+  iter->second.first->addProblemView(new RLLibViz::AcrobotView);
+  iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
+  //iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
+  iter->second.first->initialize(iter->second.second);
+
+  demoProblems.insert(
+      std::make_pair(ui->radioButtonCartPoleSarsaAlphaBoundFourierBasis,
+          std::make_pair(new RLLibViz::Window, new RLLibViz::CartPoleModel)));
+  iter = demoProblems.find(ui->radioButtonCartPoleSarsaAlphaBoundFourierBasis);
+  iter->second.first->addProblemView(new RLLibViz::CartPoleView);
+  iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
+  //iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
   // Add more problems

@@ -122,16 +122,27 @@ class TileCoderHashing: public TileCoder<T>
 {
   private:
     typedef TileCoder<T> Base;
-    T gridResolution;
+    Vector<T>* gridResolutions;
     Vector<T>* inputs;
     Tiles<T>* tiles;
 
   public:
     TileCoderHashing(Hashing<T>* hashing, const int& nbInputs, const T& gridResolution,
         const int& nbTilings, const bool& includeActiveFeature = true) :
-        TileCoder<T>(hashing->getMemorySize(), nbTilings, includeActiveFeature), gridResolution(
-            gridResolution), inputs(new PVector<T>(nbInputs)), tiles(new Tiles<T>(hashing))
+        TileCoder<T>(hashing->getMemorySize(), nbTilings, includeActiveFeature), gridResolutions(
+            new PVector<T>(nbInputs)), inputs(new PVector<T>(nbInputs)), tiles(
+            new Tiles<T>(hashing))
     {
+      gridResolutions->set(gridResolution);
+    }
+
+    TileCoderHashing(Hashing<T>* hashing, const int& nbInputs, Vector<T>* gridResolutions,
+        const int& nbTilings, const bool& includeActiveFeature = true) :
+        TileCoder<T>(hashing->getMemorySize(), nbTilings, includeActiveFeature), gridResolutions(
+            new PVector<T>(nbInputs)), inputs(new PVector<T>(nbInputs)), tiles(
+            new Tiles<T>(hashing))
+    {
+      this->gridResolutions->set(gridResolutions);
     }
 
     virtual ~TileCoderHashing()
@@ -143,14 +154,14 @@ class TileCoderHashing: public TileCoder<T>
     void coder(const Vector<T>* x)
     {
       inputs->clear();
-      inputs->addToSelf(gridResolution, x);
+      inputs->addToSelf(x)->ebeMultiplyToSelf(gridResolutions);
       tiles->tiles(Base::vector, Base::nbTilings, inputs);
     }
 
     void coder(const Vector<T>* x, const int& h1)
     {
       inputs->clear();
-      inputs->addToSelf(gridResolution, x);
+      inputs->addToSelf(x)->ebeMultiplyToSelf(gridResolutions);
       tiles->tiles(Base::vector, Base::nbTilings, inputs, h1);
     }
 };
@@ -178,17 +189,17 @@ class FourierBasis: public Projector<T>
     }
 
     /**
-     * x must be unit normalize [0, 1)
+     * x must be unit normalized [0, 1)
      */
     const Vector<T>* project(const Vector<T>* x, const int& h1)
     {
       featureVector->clear();
+      if (x->empty())
+        return featureVector;
       // FixMe: SIMD
+      const int stripWidth = coefficientVectors.size() * h1;
       for (size_t i = 0; i < coefficientVectors.size(); i++)
-      {
-        featureVector->setEntry(i + coefficientVectors.size() * h1,
-            std::cos(M_PI * x->dot(coefficientVectors[i])));
-      }
+        featureVector->setEntry(i + stripWidth, std::cos(M_PI * x->dot(coefficientVectors[i])));
       return featureVector;
 
     }

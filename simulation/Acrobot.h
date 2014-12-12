@@ -24,26 +24,23 @@
 
 #include "RL.h"
 
-class Acrobot: public RLProblem<double>
+class Acrobot: public RLLib::RLProblem<double>
 {
   protected:
-    Range<double>* thetaRange;
-    Range<double>* theta1DotRange;
-    Range<double>* theta2DotRange;
+    RLLib::Range<double>* thetaRange;
+    RLLib::Range<double>* theta1DotRange;
+    RLLib::Range<double>* theta2DotRange;
     double m1;
     double m2;
     double l1;
     double l2;
-    double l1Square;
-    double l2Square;
     double lc1;
     double lc2;
-    double lc1Square;
-    double lc2Square;
     double I1;
     double I2;
     double g;
-    double delta_t;
+    double dt;
+    double acrobotGoalPosition;
 
     double theta1;
     double theta2;
@@ -52,16 +49,16 @@ class Acrobot: public RLProblem<double>
     double targetPosition;
     double transitionNoise;
 
-    Range<double>* actionRange;
+    RLLib::Range<double>* actionRange;
 
   public:
-    Acrobot(Random<double>* random) :
-        RLProblem<double>(random, 4, 3, 1), thetaRange(new Range<double>(-M_PI, M_PI)), theta1DotRange(
-            new Range<double>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
-            new Range<double>(-9.0 * M_PI, 9.0 * M_PI)), m1(1.0), m2(1.0), l1(1.0), l2(1.0), l1Square(
-            l1 * l1), l2Square(l2 * l2), lc1(0.5), lc2(0.5), lc1Square(lc1 * lc1), lc2Square(
-            lc2 * lc2), I1(1.0), I2(1.0), g(9.8), delta_t(0.05), theta1(0), theta2(0), theta1Dot(0), theta2Dot(
-            0), targetPosition(1.0), transitionNoise(0), actionRange(new Range<double>(-1.0, 1.0))
+    Acrobot(RLLib::Random<double>* random) :
+        RLProblem<double>(random, 4, 3, 1), thetaRange(new RLLib::Range<double>(-M_PI, M_PI)), theta1DotRange(
+            new RLLib::Range<double>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
+            new RLLib::Range<double>(-9.0 * M_PI, 9.0 * M_PI)), m1(1.0), m2(1.0), l1(1.0), l2(1.0), lc1(
+            0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), acrobotGoalPosition(1.0), theta1(0), theta2(
+            0), theta1Dot(0), theta2Dot(0), targetPosition(1.0), transitionNoise(0), actionRange(
+            new RLLib::Range<double>(-1.0, 1.0))
     {
       discreteActions->push_back(0, actionRange->min());
       discreteActions->push_back(1, 0.0);
@@ -90,7 +87,7 @@ class Acrobot: public RLProblem<double>
 
     void updateTRStep()
     {
-      DenseVector<double>& vars = *output->o_tp1;
+      RLLib::DenseVector<double>& vars = *output->o_tp1;
       vars[0] = thetaRange->toUnit(theta1);
       vars[1] = thetaRange->toUnit(theta2);
       vars[2] = theta1DotRange->toUnit(theta1Dot);
@@ -98,44 +95,66 @@ class Acrobot: public RLProblem<double>
 
       observations->at(0) = theta1;
       observations->at(1) = theta2;
-      observations->at(2) = theta1Dot;
-      observations->at(3) = theta2Dot;
+      observations->at(2) = theta1DotRange->bound(theta1Dot);
+      observations->at(3) = theta2DotRange->bound(theta2Dot);
     }
 
-    void step(const Action<double>* action)
+    void step(const RLLib::Action<double>* action)
     {
       double torque = actionRange->bound(action->getEntry(0));
 
       //torque is in [-1,1]
       //We'll make noise equal to at most +/- 1
       double theNoise = random ? transitionNoise * 2.0 * (random->nextReal() - 0.5) : 0;
-
       torque += theNoise;
 
-      double d1 = m1 * lc1Square + m2 * (l1Square + lc2Square + 2 * l1 * lc2 * cos(theta2)) + I1
-          + I2;
-      double d2 = m2 * (lc2Square + l1 * lc2 * cos(theta2)) + I2;
+      int stepAdvancement = 0;
+      double d1;
+      double d2;
+      double phi_2;
+      double phi_1;
+      double theta2_ddot;
+      double theta1_ddot;
 
-      double phi2 = m2 * lc2 * g * cos(theta1 + theta2 - M_PI_2);
-      double phi1 = -m2 * l1 * lc2 * theta2Dot * sin(theta2) * (theta2Dot - 2.0f * theta1Dot)
-          + (m1 * lc1 + m2 * l1) * g * cos(theta1 - M_PI_2) + phi2;
-
-      double accel2 = (torque + phi1 * (d2 / d1)
-          - m2 * l1 * lc2 * theta1Dot * theta1Dot * sin(theta2) - phi2);
-      accel2 = accel2 / (m2 * lc2Square + I2 - (d2 * d2 / d1));
-      double accel1 = -(d2 * accel2 + phi1) / d1;
-
-      // 4 time step advancement
-      for (int i = 0; i < 4; i++)
+      while (!endOfEpisode() && (stepAdvancement++ < 4))
       {
-        theta1Dot += accel1 * delta_t;
+        d1 = m1 * std::pow(lc1, 2)
+            + m2 * (std::pow(l1, 2) + std::pow(lc2, 2) + 2 * l1 * lc2 * std::cos(theta2)) + I1 + I2;
+        d2 = m2 * (std::pow(lc2, 2) + l1 * lc2 * std::cos(theta2)) + I2;
+
+        phi_2 = m2 * lc2 * g * std::cos(theta1 + theta2 - M_PI_2);
+        phi_1 = -(m2 * l1 * lc2 * std::pow(theta2Dot, 2) * std::sin(theta2)
+            - 2 * m2 * l1 * lc2 * theta1Dot * theta2Dot * std::sin(theta2))
+            + (m1 * lc1 + m2 * l1) * g * std::cos(theta1 - M_PI_2) + phi_2;
+
+        theta2_ddot = (torque + (d2 / d1) * phi_1
+            - m2 * l1 * lc2 * std::pow(theta1Dot, 2) * std::sin(theta2) - phi_2)
+            / (m2 * std::pow(lc2, 2) + I2 - std::pow(d2, 2) / d1);
+        theta1_ddot = -(d2 * theta2_ddot + phi_1) / d1;
+
+        theta1Dot += theta1_ddot * dt;
+        theta2Dot += theta2_ddot * dt;
+
+        theta1 += theta1Dot * dt;
+        theta2 += theta2Dot * dt;
+
         theta1Dot = theta1DotRange->bound(theta1Dot);
-        theta1 += theta1Dot * delta_t;
-        theta1 = thetaRange->bound(theta1);
-        theta2Dot += accel2 * delta_t;
         theta2Dot = theta2DotRange->bound(theta2Dot);
-        theta2 += theta2Dot * delta_t;
-        theta2 = thetaRange->bound(theta2);
+
+        /* Put a hard constraint on the Acrobot physics, thetas MUST be in [-PI,+PI]
+         * if they reach a top then angular velocity becomes zero
+         */
+        if (!thetaRange->in(theta1))
+        {
+          theta1 = thetaRange->bound(theta1);
+          theta1Dot = 0;
+        }
+
+        if (!thetaRange->in(theta2))
+        {
+          theta2 = thetaRange->bound(theta2);
+          theta2Dot = 0;
+        }
       }
 
     }

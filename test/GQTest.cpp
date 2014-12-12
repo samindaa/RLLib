@@ -112,8 +112,8 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
   double error = FiniteStateGraph::distanceToSolution(&solution, vFun);
   std::cout << "## nbEpisode=" << nbEpisode << " ||v||=" << v->dimension() << " error=" << error
       << " elapsedTime(ms)=" << timer.getElapsedTimeInMilliSec() << std::endl;
-  printVector(vFun);
-  printVector(v);
+  std::cout << vFun << std::endl;
+  std::cout << v << std::endl;
 
   delete random;
   delete targetPolicy;

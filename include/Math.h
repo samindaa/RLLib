@@ -398,10 +398,26 @@ class Ranges
 class Signum
 {
   public:
-    template<typename T>
+    template<class T>
     inline static int valueOf(const T& val)
     {
       return (T(0) < val) - (val < T(0));
+    }
+};
+
+class Angle
+{
+  public:
+    /**
+     * Normalize to [-pi, pi)
+     */
+    template<class T>
+    inline static T normalize(const T& data)
+    {
+      T x = fmod(data + M_PI, 2.0 * M_PI);
+      if (x < 0)
+        x += 2.0 * M_PI;
+      return x - M_PI;
     }
 };
 

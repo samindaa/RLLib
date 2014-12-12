@@ -29,7 +29,7 @@ void MountainCarTest::testSarsaTabularActionMountainCar()
   RLProblem<double>* problem = new MountainCar<double>;
   Hashing<double>* hashing = new UNH<double>(random, 1000);
   Projector<double>* projector = new TileCoderHashing<double>(hashing, problem->dimension(), 10, 10,
-      true);
+      false);
   StateToStateAction<double>* toStateAction = new TabularAction<double>(projector,
       problem->getDiscreteActions(), true);
   Trace<double>* e = new RTrace<double>(toStateAction->dimension());
@@ -60,7 +60,6 @@ void MountainCarTest::testSarsaTabularActionMountainCar()
   delete sarsa;
   delete acting;
   delete control;
-  delete agent;
   delete agent;
   delete sim;
 }
@@ -798,6 +797,7 @@ void MountainCarTest::testOnPolicyBoltzmannATraceNaturalActorCriticCar()
 
 void MountainCarTest::run()
 {
+  testSarsaTabularActionMountainCar();
   testSarsaMountainCar();
   testSarsaTrueMountainCar();
   testSarsaAdaptiveMountainCar();
@@ -815,8 +815,6 @@ void MountainCarTest::run()
   testOnPolicyBoltzmannRTraceCar();
   testOnPolicyContinousActionCar();
   testOnPolicyBoltzmannATraceNaturalActorCriticCar();
-
-  testSarsaTabularActionMountainCar();
   testOnPolicyBoltzmannRTraceTabularActionCar();
 }
 

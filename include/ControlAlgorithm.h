@@ -158,6 +158,12 @@ class ExpectedSarsaControl: public SarsaControl<T>
 
 };
 
+/**
+ * This is an implementation of
+ * a linear, gradient-descent version of Watkins's Q($\lambda $).
+ * http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node89.html
+ * This algorithms does not have convergence guarantees. Use with care.
+ */
 template<class T>
 class Q: public Predictor<T>, public LinearLearner<T>
 {

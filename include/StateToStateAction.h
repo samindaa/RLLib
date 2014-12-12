@@ -54,6 +54,12 @@ class Representations
       return phis.size();
     }
 
+    int vectorSize() const
+    {
+      ASSERT(dimension() > 0);
+      return phis[0]->dimension();
+    }
+
     void set(const Vector<T>* phi, const Action<T>* action)
     {
       ASSERT(action->id() < static_cast<int>(phis.size()));
@@ -158,7 +164,7 @@ class TabularAction: public StateToStateAction<T>
     Projector<T>* projector;
     Actions<T>* actions;
     Representations<T>* phis;
-    Vector<T>* _phi;
+    Vector<T>* phi;
     bool includeActiveFeature;
   public:
     TabularAction(Projector<T>* projector, Actions<T>* actions, bool includeActiveFeature = true) :
@@ -166,27 +172,26 @@ class TabularAction: public StateToStateAction<T>
             new Representations<T>(
                 includeActiveFeature ?
                     actions->dimension() * projector->dimension() + 1 :
-                    actions->dimension() * projector->dimension(), actions)), _phi(
-            new SVector<T>(
-                includeActiveFeature ?
-                    actions->dimension() * projector->dimension() + 1 :
-                    actions->dimension() * projector->dimension())), includeActiveFeature(
-            includeActiveFeature)
+                    actions->dimension() * projector->dimension(), actions)), phi(
+            new SVector<T>(phis->vectorSize())), includeActiveFeature(includeActiveFeature)
     {
     }
 
     ~TabularAction()
     {
       delete phis;
-      delete _phi;
+      delete phi;
     }
 
     const Vector<T>* stateAction(const Vector<T>* x, const Action<T>* a)
     {
-      _phi->set(projector->project(x), projector->dimension() * a->id());
+      phi->clear();
+      if (x->empty())
+        return phi;
+      phi->set(projector->project(x), projector->dimension() * a->id());
       if (includeActiveFeature)
-        _phi->setEntry(_phi->dimension() - 1, 1.0);
-      return _phi;
+        phi->setEntry(phi->dimension() - 1, 1.0);
+      return phi;
     }
 
     const Representations<T>* stateActions(const Vector<T>* x)
@@ -209,10 +214,7 @@ class TabularAction: public StateToStateAction<T>
 
     int dimension() const
     {
-      return
-          includeActiveFeature ?
-              actions->dimension() * projector->dimension() + 1 :
-              actions->dimension() * projector->dimension();
+      return phis->vectorSize();
     }
 };
 

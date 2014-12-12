@@ -24,7 +24,7 @@
 #include "VectorTest.h"
 
 VectorTest::VectorTest() :
-    a(0), b(0)
+    a(0), b(0), random(new Random<double>)
 {
 }
 
@@ -33,6 +33,7 @@ VectorTest::~VectorTest()
   for (vector<Vector<double>*>::iterator iter = vectors.begin(); iter != vectors.end(); ++iter)
     delete *iter;
   vectors.clear();
+  delete random;
 }
 
 void VectorTest::run()
@@ -63,6 +64,7 @@ void VectorTest::run()
   testAbs();
   testSetPVector();
   testL1Norm();
+  testOffset();
 }
 
 Vector<double>* VectorTest::newVector(const int& size)
@@ -401,7 +403,7 @@ void VectorTest::testCheckValue()
   Assert::assertPasses(VectorsTestsUtils::checkValues(newVector(aValues, Arrays::length(aValues))));
   const double bValues[] = { 1.0, std::numeric_limits<double>::quiet_NaN() };
   Assert::assertFails(VectorsTestsUtils::checkValues(newVector(bValues, Arrays::length(bValues))));
-  const double cValues[] = {1.0, std::numeric_limits<double>::infinity()};
+  const double cValues[] = { 1.0, std::numeric_limits<double>::infinity() };
   Assert::assertFails(VectorsTestsUtils::checkValues(newVector(cValues, Arrays::length(cValues))));
 }
 
@@ -472,6 +474,63 @@ void VectorTest::testL1Norm()
   const double vValues[] = { 1.0, -2.0, -3.0, 0.0, 2.0 };
   Vector<double>* v = newVector(vValues, Arrays::length(vValues));
   Assert::assertObjectEquals(8.0, v->l1Norm(), 1e-8);
+}
+
+void VectorTest::testOffset()
+{
+  const int nbStrips = 3;
+  const int stripSize = 10;
+  Vector<double>* a = newVector(nbStrips * stripSize);
+
+  Vector<double>* b = newPVector(stripSize);
+  Vector<double>* c = newSVector(stripSize);
+  b->set(1.0f);
+  c->set(1.0f);
+
+  Vector<double>* d = newPVector(stripSize);
+  Vector<double>* e = newSVector(stripSize);
+  for (int i = 0; i < stripSize; i++)
+  {
+    d->setEntry(i, random->nextNormalGaussian());
+    e->setEntry(i, random->nextNormalGaussian());
+  }
+
+  for (int i = 0; i < nbStrips; i++)
+  {
+    a->set(b, stripSize * i);
+    std::cout << a << std::endl;
+    double value = 0;
+    for (int j = 0; j < stripSize; j++)
+      value += a->getEntry(i * stripSize + j);
+    Assert::assertObjectEquals(value, b->sum());
+  }
+
+  for (int i = 0; i < nbStrips; i++)
+  {
+    a->set(c, stripSize * i);
+    double value = 0;
+    for (int j = 0; j < stripSize; j++)
+      value += a->getEntry(i * stripSize + j);
+    Assert::assertObjectEquals(value, c->sum());
+  }
+
+  for (int i = 0; i < nbStrips; i++)
+  {
+    a->set(d, stripSize * i);
+    double value = 0;
+    for (int j = 0; j < stripSize; j++)
+      value += a->getEntry(i * stripSize + j);
+    Assert::assertObjectEquals(value, d->sum(), 0.0001);
+  }
+
+  for (int i = 0; i < nbStrips; i++)
+  {
+    a->set(e, stripSize * i);
+    double value = 0;
+    for (int j = 0; j < stripSize; j++)
+      value += a->getEntry(i * stripSize + j);
+    Assert::assertObjectEquals(value, e->sum(), 0.0001);
+  }
 }
 
 void PVectorTest::initialize()
@@ -667,23 +726,23 @@ void SVectorTest::testSVector()
     b.insertEntry(i, i + 11);
   }
 
-  //cout << a << endl;
-  //cout << b << endl;
-  //cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
+//cout << a << endl;
+//cout << b << endl;
+//cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
   Assert::assertObjectEquals(5, a.nonZeroElements());
   Assert::assertObjectEquals(5, b.nonZeroElements());
   Assert::assertObjectEquals(205, (int) a.dot(&b));
   b.removeEntry(2);
-  //cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
+//cout << a.nbActiveEntries() << " " << b.nbActiveEntries() << endl;
   Assert::assertObjectEquals(4, b.nonZeroElements());
-  //cout << a << endl;
-  //cout << b << endl;
+//cout << a << endl;
+//cout << b << endl;
   Assert::assertObjectEquals(166, (int) a.dot(&b));
-  //cout << "dot=" << a.dot(b) << endl;
+//cout << "dot=" << a.dot(b) << endl;
   cout << a.addToSelf(&b) << endl;
   a.clear();
   b.clear();
   Assert::assertObjectEquals(0, (int) a.dot(&b));
-  //cout << a << endl;
-  //cout << b << endl;
+//cout << a << endl;
+//cout << b << endl;
 }
