@@ -51,8 +51,8 @@ class ContinuousGridworldModel: public ModelBase
     RLAgent<double>* learningAgent;
     RLAgent<double>* evaluationAgent;
 
-    Simulator<double>* learningRunner;
-    Simulator<double>* evaluationRunner;
+    RLRunner<double>* learningRunner;
+    RLRunner<double>* evaluationRunner;
 
   public:
     ContinuousGridworldModel();
@@ -61,7 +61,7 @@ class ContinuousGridworldModel: public ModelBase
   protected:
     void doLearning(Window* window);
     void doEvaluation(Window* window);
-    void step(Window* window, RLLib::Simulator<double>* runner);
+    void step(Window* window, RLLib::RLRunner<double>* runner);
 };
 
 }  // namespace RLLibViz

@@ -275,7 +275,7 @@ void NextingTest::testNexting()
   OnPolicyControlLearner<double>* control = new PolicyBasedControl<double>(policy, toStateAction);
   Horde<double>* horde = new Horde<double>(projector);
   RLAgent<double>* hordeAgent = new HordeAgent<double>(control, horde);
-  Simulator<double>* sim = new Simulator<double>(hordeAgent, problem, 1, 1, 1);
+  RLRunner<double>* sim = new RLRunner<double>(hordeAgent, problem, 1, 1, 1);
 
   double alpha = 0.1 / projector->vectorNorm();
   double gamma = 0.98;

@@ -49,7 +49,7 @@ class SwingPendulumModel: public ModelBase
     OnPolicyControlLearner<double>* control;
     RLAgent<double>* agent;
 
-    Simulator<double>* simulator;
+    RLRunner<double>* simulator;
 
   public:
     SwingPendulumModel();

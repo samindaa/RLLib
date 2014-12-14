@@ -106,7 +106,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testRandom()
   actor = new Actor<double>(alpha_u, policyDistribution);
   control = new ActorCritic<double>(critic, actor, projector, toStateAction);
   agent = new LearnerAgent<double>(control);
-  sim = new Simulator<double>(agent, problem, 5000, 50, 5);
+  sim = new RLRunner<double>(agent, problem, 5000, 50, 5);
   sim->run();
 
   ASSERT(evaluate() < 0.0);
@@ -122,7 +122,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCritic()
   actor = new Actor<double>(alpha_u, policyDistribution);
   control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction, 0.01);
   agent = new LearnerAgent<double>(control);
-  sim = new Simulator<double>(agent, problem, 5000, 50, 5);
+  sim = new RLRunner<double>(agent, problem, 5000, 50, 5);
   sim->run();
   sim->computeValueFunction();
   ASSERT(evaluate() > 0.75);
@@ -139,7 +139,7 @@ void ActorCriticOnPolicyControlLearnerPendulumTest::testActorCriticWithEligiblit
   actor = new ActorLambda<double>(alpha_u, gamma, lambda, policyDistribution, actorTraces);
   control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction, 0.01);
   agent = new LearnerAgent<double>(control);
-  sim = new Simulator<double>(agent, problem, 5000, 50, 5);
+  sim = new RLRunner<double>(agent, problem, 5000, 50, 5);
   sim->run();
   sim->computeValueFunction();
   ASSERT(evaluate() > 0.75);

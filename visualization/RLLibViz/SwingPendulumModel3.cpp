@@ -26,7 +26,7 @@ SwingPendulumModel3::SwingPendulumModel3()
   control = new SarsaControl<double>(acting, toStateAction, sarsaTrue);
 
   agent = new LearnerAgent<double>(control);
-  simulator = new Simulator<double>(agent, problem, 5000);
+  simulator = new RLRunner<double>(agent, problem, 5000);
   simulator->setVerbose(false);
 }
 

@@ -53,9 +53,9 @@ void ValueFunctionView::add(QWidget* that, const MatrixXd& valueFunction2D)
 
   RLLib::Range<double> valueFunction2DRange(valueFunction2D.minCoeff(), valueFunction2D.maxCoeff());
   // Value function
-  for (size_t y = 0; y < valueFunction2D.rows(); y++)
+  for (int y = 0; y < valueFunction2D.rows(); y++)
   {
-    for (size_t x = 0; x < valueFunction2D.cols(); x++)
+    for (int x = 0; x < valueFunction2D.cols(); x++)
     {
       image->setPixel(y, x,
           heatMapGradient.getColorAtValue(

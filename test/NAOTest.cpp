@@ -67,7 +67,7 @@ void NAOTest::testTrain()
         toStateAction, projector);
 
     RLAgent<float>* agent = new LearnerAgent<float>(control);
-    Simulator<float>* sim = new Simulator<float>(agent, problem, 5000, 100, 1);
+    RLRunner<float>* sim = new RLRunner<float>(agent, problem, 5000, 100, 1);
     //sim->setVerbose(false);
     sim->run();
     control->persist("NAOTest_x32_M.bin");
@@ -126,7 +126,7 @@ void NAOTest::testTrain()
         projector, toStateAction, alpha_r);
 
     RLAgent<double>* agent = new LearnerAgent<double>(control);
-    Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 1);
+    RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 100, 1);
     sim->run();
     control->persist("NAOTest_x32_S.bin");
 
@@ -176,7 +176,7 @@ void NAOTest::testEvaluate()
         toStateAction, projector);
 
     RLAgent<float>* agent = new ControlAgent<float>(control);
-    Simulator<float>* sim = new Simulator<float>(agent, problem, 5000, 10, 10);
+    RLRunner<float>* sim = new RLRunner<float>(agent, problem, 5000, 10, 10);
 
     control->reset();
     control->resurrect("NAOTest_x32_M.bin");
@@ -229,7 +229,7 @@ void NAOTest::testEvaluate()
         projector, toStateAction, 0);
 
     RLAgent<double>* agent = new ControlAgent<double>(control);
-    Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 10, 10);
+    RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 10, 10);
 
     control->reset();
     control->resurrect("NAOTest_x32_S.bin");

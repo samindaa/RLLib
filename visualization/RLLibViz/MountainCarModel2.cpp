@@ -25,7 +25,7 @@ MountainCarModel2::MountainCarModel2()
   control = new SarsaControl<double>(acting, toStateAction, sarsaAdaptive);
 
   agent = new LearnerAgent<double>(control);
-  simulator = new Simulator<double>(agent, problem, 5000);
+  simulator = new RLRunner<double>(agent, problem, 5000);
   simulator->setVerbose(false);
 }
 

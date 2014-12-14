@@ -139,7 +139,7 @@ class TraceTest: public TraceTestBase
     }
 
     template<class T>
-    class PerformanceVerifier: public Simulator<T>::Event
+    class PerformanceVerifier: public RLRunner<T>::Event
     {
       private:
         double minEpisodeReward;
@@ -151,13 +151,13 @@ class TraceTest: public TraceTestBase
 
         void update() const
         {
-          if (Simulator<T>::Event::nbEpisodeDone < 200)
+          if (RLRunner<T>::Event::nbEpisodeDone < 200)
             return;
           else
           {
             //std::cout << "[" << Simulator<T>::Event::episodeR << ","
             //    << Simulator<T>::Event::averageTimePerStep << "] ";
-            Assert::assertFails(Simulator<T>::Event::episodeR < minEpisodeReward);
+            Assert::assertFails(RLRunner<T>::Event::episodeR < minEpisodeReward);
           }
         }
     };

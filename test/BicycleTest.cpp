@@ -117,7 +117,7 @@ void BicycleTest::testBicycleBalance()
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 100000, 130, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 100000, 130, 1);
   sim->run();
   control->persist("visualization/bicycle_balance.dat");
   control->reset();
@@ -154,7 +154,7 @@ void BicycleTest::testBicycleGoToTarget()
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 100000, 1000, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 100000, 1000, 1);
   sim->run();
   control->persist("visualization/bicycle_goToTarget.dat");
   control->reset();
@@ -189,7 +189,7 @@ void BicycleTest::testBicycleGoToTargetEvaluate()
   control->resurrect("visualization/bicycle_goToTarget.dat");
 
   RLAgent<double>* agent = new ControlAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 100000, 10, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 100000, 10, 1);
   sim->run();
 
   delete random;

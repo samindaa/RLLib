@@ -36,7 +36,7 @@ class AcrobotModel: public ModelBase
     Policy<double>* acting;
     OnPolicyControlLearner<double>* control;
     RLAgent<double>* agent;
-    Simulator<double>* simulator;
+    RLRunner<double>* simulator;
 
   public:
     AcrobotModel();

@@ -48,7 +48,7 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
       problem->getDiscreteActions(), toStateAction, gq);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 50001, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 50001, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -98,7 +98,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 2000, 5);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 2000, 5);
   sim->setTestEpisodesAfterEachRun(true);
   //sim->setVerbose(false);
   sim->run();
@@ -158,7 +158,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworld2()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 2000, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 2000, 1);
   //sim->run(5, 5000, 3000);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
@@ -221,7 +221,7 @@ void ContinuousGridworldTest::testOffPACOnPolicyContinuousGridworld()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 8000, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 8000, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -281,7 +281,7 @@ void ContinuousGridworldTest::testOffPACContinuousGridworldOPtimized()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 5000, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 5000, 1);
   sim->run();
   sim->computeValueFunction();
 

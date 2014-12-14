@@ -57,7 +57,7 @@ void SwingPendulumTest::testOffPACSwingPendulum()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 200, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 200, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -117,7 +117,7 @@ void SwingPendulumTest::testOnPolicySwingPendulum()
       projector, toStateAction, alpha_r);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 10);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 100, 10);
   sim->setVerbose(true);
   sim->run();
 
@@ -177,7 +177,7 @@ void SwingPendulumTest::testOffPACSwingPendulum2()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 200, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 200, 1);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
 
@@ -231,7 +231,7 @@ void SwingPendulumTest::testOffPACOnPolicySwingPendulum()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 10, 5);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 10, 5);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();
@@ -277,7 +277,7 @@ void SwingPendulumTest::testOnPolicyBoltzmannATraceNaturalActorCriticSwingPendul
   OnPolicyControlLearner<double>* control = new ActorCritic<double>(critic, actor, projector,
       toStateAction);
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 50, 10);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 50, 10);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   sim->computeValueFunction();

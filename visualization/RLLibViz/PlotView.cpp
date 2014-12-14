@@ -101,4 +101,6 @@ void PlotView::add(QWidget* that, const Vec& graphOneP, const Vec& graphTwoP)
 
 void PlotView::add(QWidget* that, const MatrixXd& mat)
 {
+  (void) that;
+  (void) mat;
 }

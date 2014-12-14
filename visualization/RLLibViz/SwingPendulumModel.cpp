@@ -42,7 +42,7 @@ SwingPendulumModel::SwingPendulumModel()
 
   control = new AverageRewardActorCritic<double>(critic, actor, projector, toStateAction, alpha_r);
   agent = new LearnerAgent<double>(control);
-  simulator = new Simulator<double>(agent, problem, 5000);
+  simulator = new RLRunner<double>(agent, problem, 5000);
   simulator->setVerbose(false);
 
 }

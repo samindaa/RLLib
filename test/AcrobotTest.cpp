@@ -26,7 +26,7 @@ void AcrobotTest::testAcrobotOnPolicy()
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 1000, 300, 10);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 1000, 300, 10);
   sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   control->persist("visualization/Acrobot.dat");

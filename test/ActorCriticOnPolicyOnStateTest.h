@@ -42,7 +42,7 @@ class ActorCriticOnPolicyOnStateTest: public ActorCriticOnPolicyOnStateTestBase
 
     OnPolicyControlLearner<double>* control;
     RLAgent<double>* agent;
-    Simulator<double>* sim;
+    RLRunner<double>* sim;
 
   public:
     ActorCriticOnPolicyOnStateTest();

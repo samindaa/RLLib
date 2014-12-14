@@ -457,6 +457,7 @@ class SparseVector: public Vector<T>
   protected:
     void updateEntry(const int& index, const T& value, const int& position)
     {
+      (void) index;
       values[position] = value;
     }
 
@@ -476,6 +477,7 @@ class SparseVector: public Vector<T>
 
     void removeEntry(const int& position, const int& index)
     {
+      (void) index;
       swapEntry(nbActive - 1, position);
       indexesPosition[activeIndexes[nbActive - 1]] = -1;
       nbActive--;

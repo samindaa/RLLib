@@ -38,7 +38,7 @@ class ModelBase: public QObject
 
   protected:
     MatrixXd valueFunction2D;
-    typedef std::map<int, Simulator<double>*> Simulators;
+    typedef std::map<int, RLRunner<double>*> Simulators;
     Simulators simulators;
 
   public:

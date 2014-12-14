@@ -531,15 +531,20 @@ class RandomPolicy: public Policy<T>
 
     void update(const Representations<T>* phi)
     {
+      (void) phi;
     }
+
     T pi(const Action<T>* a)
     {
+      (void) a;
       return T(1) / actions->dimension();
     }
+
     const Action<T>* sampleAction()
     {
       return actions->getEntry(random->nextInt(actions->dimension()));
     }
+
     const Action<T>* sampleBestAction()
     {
       ASSERT(false);

@@ -81,7 +81,7 @@ void ActorCriticOnPolicyOnStateTest::checkDistribution(
   control = new ActorCritic<double>(critic, actor, projector, toStateAction);
 
   agent = new LearnerAgent<double>(control);
-  sim = new Simulator<double>(agent, problem, 10000, 1, 1);
+  sim = new RLRunner<double>(agent, problem, 10000, 1, 1);
   sim->run();
   double discReward = sim->episodeR / sim->timeStep;
   std::cout << discReward << std::endl;
@@ -126,7 +126,7 @@ void ActorCriticOnPolicyOnStateTest::testNormalDistributionWithEligibility()
   control = new ActorCritic<double>(critic, actor, projector, toStateAction);
 
   agent = new LearnerAgent<double>(control);
-  sim = new Simulator<double>(agent, problem, 1000, 1, 1);
+  sim = new RLRunner<double>(agent, problem, 1000, 1, 1);
   sim->run();
   double discReward = sim->episodeR / sim->timeStep;
   std::cout << discReward << std::endl;

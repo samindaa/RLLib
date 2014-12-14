@@ -36,7 +36,7 @@ CartPoleModel::CartPoleModel()
   control = new SarsaControl<double>(acting, toStateAction, sarsaAdaptive);
 
   agent = new LearnerAgent<double>(control);
-  simulator = new Simulator<double>(agent, problem, 1000);
+  simulator = new RLRunner<double>(agent, problem, 1000);
   simulator->setVerbose(false);
 }
 

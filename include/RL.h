@@ -259,12 +259,12 @@ class RLProblem
 };
 
 template<class T>
-class Simulator
+class RLRunner
 {
   public:
     class Event
     {
-        friend class Simulator;
+        friend class RLRunner;
       protected:
         int nbTotalTimeSteps;
         int nbEpisodeDone;
@@ -315,7 +315,7 @@ class Simulator
     T episodeZ;
     std::vector<Event*> onEpisodeEnd;
 
-    Simulator(RLAgent<T>* agent, RLProblem<T>* problem, const int& maxEpisodeTimeSteps,
+    RLRunner(RLAgent<T>* agent, RLProblem<T>* problem, const int& maxEpisodeTimeSteps,
         const int nbEpisodes = -1, const int nbRuns = -1) :
         agent(agent), problem(problem), agentAction(0), maxEpisodeTimeSteps(maxEpisodeTimeSteps), nbEpisodes(
             nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), endingOfEpisode(false), verbose(true), totalTimeInMilliseconds(
@@ -324,7 +324,7 @@ class Simulator
     {
     }
 
-    ~Simulator()
+    ~RLRunner()
     {
       onEpisodeEnd.clear();
     }
@@ -470,7 +470,7 @@ class Simulator
       std::cout << "\n@@ Evaluate=" << enableTestEpisodesAfterEachRun << std::endl;
 #endif
       RLAgent<T>* evaluateAgent = new ControlAgent<T>(agent->getRLAgent());
-      Simulator<T>* runner = new Simulator<T>(evaluateAgent, problem, maxEpisodeTimeSteps,
+      RLRunner<T>* runner = new RLRunner<T>(evaluateAgent, problem, maxEpisodeTimeSteps,
           nbEpisodes, nbRuns);
       runner->run();
       delete evaluateAgent;

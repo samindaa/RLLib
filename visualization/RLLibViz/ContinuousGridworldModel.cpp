@@ -44,8 +44,8 @@ ContinuousGridworldModel::ContinuousGridworldModel()
   learningAgent = new LearnerAgent<double>(control);
   evaluationAgent = new ControlAgent<double>(control);
 
-  learningRunner = new Simulator<double>(learningAgent, behaviourEnvironment, 5000);
-  evaluationRunner = new Simulator<double>(evaluationAgent, evaluationEnvironment, 5000);
+  learningRunner = new RLRunner<double>(learningAgent, behaviourEnvironment, 5000);
+  evaluationRunner = new RLRunner<double>(evaluationAgent, evaluationEnvironment, 5000);
   learningRunner->setVerbose(false);
   evaluationRunner->setVerbose(false);
 

@@ -51,10 +51,10 @@ class SwingPendulumModel2: public ModelBase
     RLAgent<double>* learningAgent;
     RLAgent<double>* evaluationAgent;
 
-    Simulator<double>* learningRunner;
-    Simulator<double>* evaluationRunner;
+    RLRunner<double>* learningRunner;
+    RLRunner<double>* evaluationRunner;
 
-    std::map<int, Simulator<double>*> simulators;
+    std::map<int, RLRunner<double>*> simulators;
 
   public:
     SwingPendulumModel2();

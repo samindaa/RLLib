@@ -36,7 +36,7 @@ class MountainCarModel3: public ModelBase
     Policy<double>* acting;
     OnPolicyControlLearner<double>* control;
     RLAgent<double>* agent;
-    Simulator<double>* simulator;
+    RLRunner<double>* simulator;
 
 
   public:

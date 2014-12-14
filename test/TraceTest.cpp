@@ -38,8 +38,8 @@ void TraceTest::runTest(Random<double>* random, RLProblem<double>* problem,
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 500, 1);
-  Simulator<double>::Event* performanceVerifier = new PerformanceVerifier<double>();
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 500, 1);
+  RLRunner<double>::Event* performanceVerifier = new PerformanceVerifier<double>();
   sim->onEpisodeEnd.push_back(performanceVerifier);
   sim->setVerbose(false);
   sim->run();

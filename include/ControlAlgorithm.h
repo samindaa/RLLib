@@ -65,6 +65,9 @@ class SarsaControl: public OnPolicyControlLearner<T>
     const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const T& r_tp1, const T& z_tp1)
     {
+      (void) x_t;
+      (void) a_t;
+      (void) z_tp1;
       const Representations<T>* phi_tp1 = toStateAction->stateActions(x_tp1);
       const Action<T>* a_tp1 = Policies::sampleAction(acting, phi_tp1);
       const Vector<T>* xa_tp1 = phi_tp1->at(a_tp1);
@@ -968,6 +971,9 @@ class AverageRewardActorCritic: public AbstractActorCritic<T>
     T updateCritic(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
         const T& r_tp1, const T& z_tp1)
     {
+      (void) x_t;
+      (void) a_t;
+      (void) z_tp1;
       const Vector<T>* phi_tp1 = Base::projector->project(x_tp1);
       // Update critic
       T delta_t = Base::critic->update(Base::phi_t, phi_tp1, r_tp1 - averageReward);

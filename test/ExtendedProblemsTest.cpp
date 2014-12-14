@@ -55,7 +55,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_1()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 100, 1);
   sim->run();
   sim->runEvaluate();
 
@@ -102,7 +102,7 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
       problem->getDiscreteActions(), toStateAction, gq);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 300, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 300, 1);
   sim->run();
   //sim->computeValueFunction();
   control->persist("visualization/mcar3d_greedy_gq.data");
@@ -146,7 +146,7 @@ void ExtendedProblemsTest::testSarsaMountainCar3D()
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 300, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 300, 1);
   sim->run();
   sim->runEvaluate();
 
@@ -195,7 +195,7 @@ void ExtendedProblemsTest::testOffPACMountainCar3D_2()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 1000, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 1000, 1);
   sim->run();
   sim->computeValueFunction();
 
@@ -252,7 +252,7 @@ void ExtendedProblemsTest::testOffPACAcrobot()
       toStateAction, projector);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 300, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 300, 1);
   sim->run();
   sim->runEvaluate();
   sim->computeValueFunction();
@@ -300,7 +300,7 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
       problem->getDiscreteActions(), toStateAction, gq);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 500, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 500, 1);
   sim->run();
   sim->runEvaluate();
   sim->computeValueFunction();
@@ -340,7 +340,7 @@ void ExtendedProblemsTest::testTrueSarsaUnderwaterVehicle()
   OnPolicyControlLearner<double>* control = new SarsaControl<double>(acting, toStateAction, sarsa);
 
   RLAgent<double>* agent = new LearnerAgent<double>(control);
-  Simulator<double>* sim = new Simulator<double>(agent, problem, 5000, 100, 1);
+  RLRunner<double>* sim = new RLRunner<double>(agent, problem, 5000, 100, 1);
   //sim->setTestEpisodesAfterEachRun(true);
   sim->run();
   //sim->computeValueFunction();
