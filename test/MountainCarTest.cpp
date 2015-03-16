@@ -359,9 +359,8 @@ void MountainCarTest::testGreedyGQOnPolicyMountainCar()
   double alpha_v = 0.05 / projector->vectorNorm();
   double alpha_w = 0.0 / projector->vectorNorm();
   double gamma_tp1 = 0.9;
-  double beta_tp1 = 1.0 - gamma_tp1;
   double lambda_t = 0.1;
-  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, gamma_tp1, lambda_t, e);
   //double epsilon = 0.01;
   Policy<double>* acting = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), gq,
       0.01);
@@ -400,9 +399,8 @@ void MountainCarTest::testGreedyGQMountainCar()
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = 0.0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
-  double beta_tp1 = 1.0 - gamma_tp1;
   double lambda_t = 0.4;
-  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, gamma_tp1, lambda_t, e);
   //double epsilon = 0.01;
   //Policy<double>* behavior = new EpsilonGreedy<double>(gq,
   //    problem->getActions(), epsilon);
@@ -444,9 +442,8 @@ void MountainCarTest::testSoftmaxGQOnMountainCar()
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .0005 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
-  double beta_tp1 = 1.0 - gamma_tp1;
   double lambda_t = 0.4;
-  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, gamma_tp1, lambda_t, e);
   Policy<double>* behavior = new RandomPolicy<double>(random, problem->getDiscreteActions());
   Policy<double>* target = new SoftMax<double>(random, problem->getDiscreteActions(), gq, 0.1);
   OffPolicyControlLearner<double>* control = new GreedyGQ<double>(target, behavior,

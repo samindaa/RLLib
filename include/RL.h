@@ -185,9 +185,10 @@ class RLProblem
 
   public:
     RLProblem(Random<T>* random, int nbVars, int nbDiscreteActions, int nbContinuousActions) :
-        random(random), observations(new PVector<T>(nbVars)), output(new TRStep<T>(nbVars)), discreteActions(
-            new ActionArray<T>(nbDiscreteActions)), continuousActions(
-            new ActionArray<T>(nbContinuousActions)), observationRanges(new Ranges<T>())
+        random(random), observations(new PVector<T>(nbVars)), output(new TRStep<T>(nbVars)), //
+        discreteActions(new ActionArray<T>(nbDiscreteActions)), //
+        continuousActions(new ActionArray<T>(nbContinuousActions)), //
+        observationRanges(new Ranges<T>())
     {
     }
 
@@ -220,7 +221,7 @@ class RLProblem
     void updateTuple()
     {
       updateTRStep();
-      output->updateTRStep(r(),z(), endOfEpisode());
+      output->updateTRStep(r(), z(), endOfEpisode());
     }
 
     virtual void draw() const
@@ -317,10 +318,11 @@ class RLRunner
 
     RLRunner(RLAgent<T>* agent, RLProblem<T>* problem, const int& maxEpisodeTimeSteps,
         const int nbEpisodes = -1, const int nbRuns = -1) :
-        agent(agent), problem(problem), agentAction(0), maxEpisodeTimeSteps(maxEpisodeTimeSteps), nbEpisodes(
-            nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), endingOfEpisode(false), verbose(true), totalTimeInMilliseconds(
-            0), enableStatistics(false), enableTestEpisodesAfterEachRun(false), maxTestEpisodesAfterEachRun(
-            20), timeStep(0), episodeR(0), episodeZ(0)
+        agent(agent), problem(problem), agentAction(0), maxEpisodeTimeSteps(maxEpisodeTimeSteps), //
+        nbEpisodes(nbEpisodes), nbRuns(nbRuns), nbEpisodeDone(0), endingOfEpisode(false), //
+        verbose(true), totalTimeInMilliseconds(0), enableStatistics(false), //
+        enableTestEpisodesAfterEachRun(false), maxTestEpisodesAfterEachRun(20), timeStep(0), //
+        episodeR(0), episodeZ(0)
     {
     }
 
@@ -470,8 +472,8 @@ class RLRunner
       std::cout << "\n@@ Evaluate=" << enableTestEpisodesAfterEachRun << std::endl;
 #endif
       RLAgent<T>* evaluateAgent = new ControlAgent<T>(agent->getRLAgent());
-      RLRunner<T>* runner = new RLRunner<T>(evaluateAgent, problem, maxEpisodeTimeSteps,
-          nbEpisodes, nbRuns);
+      RLRunner<T>* runner = new RLRunner<T>(evaluateAgent, problem, maxEpisodeTimeSteps, nbEpisodes,
+          nbRuns);
       runner->run();
       delete evaluateAgent;
       delete runner;

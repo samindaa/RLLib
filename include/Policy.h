@@ -104,11 +104,12 @@ class NormalDistribution: public PolicyDistribution<T>
 
     NormalDistribution(Random<T>* random, Actions<T>* actions, const T& initialMean,
         const T& initialStddev, const int& nbFeatures) :
-        random(random), actions(actions), initialMean(initialMean), initialStddev(initialStddev), sigma2(
-            0), mean(0), stddev(0), meanStep(0), stddevStep(0), u_mean(new PVector<T>(nbFeatures)), u_stddev(
-            new PVector<T>(nbFeatures)), gradMean(new SVector<T>(u_mean->dimension())), gradStddev(
-            new SVector<T>(u_stddev->dimension())), x(new SVector<T>(nbFeatures)), multiu(
-            new Vectors<T>()), multigrad(new Vectors<T>()), defaultAction(0)
+        random(random), actions(actions), initialMean(initialMean), initialStddev(initialStddev), //
+        sigma2(0), mean(0), stddev(0), meanStep(0), stddevStep(0), //
+        u_mean(new PVector<T>(nbFeatures)), u_stddev(new PVector<T>(nbFeatures)), //
+        gradMean(new SVector<T>(u_mean->dimension())), //
+        gradStddev(new SVector<T>(u_stddev->dimension())), x(new SVector<T>(nbFeatures)), //
+        multiu(new Vectors<T>()), multigrad(new Vectors<T>()), defaultAction(0)
     {
       multiu->push_back(u_mean);
       multiu->push_back(u_stddev);
@@ -246,8 +247,8 @@ class ScaledPolicyDistribution: public PolicyDistribution<T>
   public:
     ScaledPolicyDistribution(Actions<T>* actions, PolicyDistribution<T>* policy,
         Range<T>* policyRange, Range<T>* problemRange) :
-        actions(actions), policy(policy), policyRange(policyRange), problemRange(problemRange), a_t(
-            new Action<T>(0))
+        actions(actions), policy(policy), policyRange(policyRange), problemRange(problemRange), //
+        a_t(new Action<T>(0))
     {
       a_t->push_back(0.0);
     }
@@ -374,9 +375,9 @@ class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistributi
     typedef StochasticPolicy<T> Base;
   public:
     BoltzmannDistribution(Random<T>* random, Actions<T>* actions, const int& numFeatures) :
-        StochasticPolicy<T>(random, actions), avg(new SVector<T>(numFeatures)), grad(
-            new SVector<T>(numFeatures)), u(new PVector<T>(numFeatures)), multiu(new Vectors<T>()), multigrad(
-            new Vectors<T>())
+        StochasticPolicy<T>(random, actions), avg(new SVector<T>(numFeatures)), //
+        grad(new SVector<T>(numFeatures)), u(new PVector<T>(numFeatures)), multiu(new Vectors<T>()), //
+        multigrad(new Vectors<T>())
     {
       // Parameter setting
       multiu->push_back(u);
@@ -562,8 +563,8 @@ class RandomBiasPolicy: public Policy<T>
     PVector<T>* distribution;
   public:
     RandomBiasPolicy(Random<T>* random, Actions<T>* actions) :
-        random(random), actions(actions), prev(&actions->at(0)), distribution(
-            new PVector<T>(actions->dimension()))
+        random(random), actions(actions), prev(&actions->at(0)), //
+        distribution(new PVector<T>(actions->dimension()))
     {
     }
 
@@ -632,8 +633,8 @@ class Greedy: public DiscreteActionPolicy<T>
 
   public:
     Greedy(Actions<T>* actions, Predictor<T>* predictor) :
-        actions(actions), predictor(predictor), actionValues(new T[actions->dimension()]), bestValue(
-            0.0f), bestAction(0)
+        actions(actions), predictor(predictor), actionValues(new T[actions->dimension()]), //
+        bestValue(0.0f), bestAction(0)
     {
     }
 
@@ -741,8 +742,8 @@ class BoltzmannDistributionPerturbed: public Policy<T>
   public:
     BoltzmannDistributionPerturbed(Random<T>* random, Actions<T>* actions, Vector<T>* u,
         const T& epsilon, const T& perturbation) :
-        random(random), actions(actions), u(u), distribution(new PVector<T>(actions->dimension())), epsilon(
-            epsilon), perturbation(perturbation)
+        random(random), actions(actions), u(u), distribution(new PVector<T>(actions->dimension())), //
+        epsilon(epsilon), perturbation(perturbation)
     {
     }
 

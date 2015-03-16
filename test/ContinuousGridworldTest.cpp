@@ -36,9 +36,8 @@ void ContinuousGridworldTest::testGreedyGQContinuousGridworld()
   double alpha_v = 0.01 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
-  double beta_tp1 = 1.0 - gamma_tp1;
   double lambda_t = 0.1;
-  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, e);
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, gamma_tp1, lambda_t, e);
   //double epsilon = 0.01;
   /*Policy<double>* behavior = new EpsilonGreedy<double>(gq,
    problem->getDiscreteActions(), 0.01);*/

@@ -93,9 +93,9 @@ class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
 
   public:
     IDBD(const int& size, const T& theta) :
-        w(new PVector<T>(size)), alphas(new PVector<T>(w->dimension())), hs(
-            new PVector<T>(w->dimension())), pool(new VectorPool<T>(size)), theta(theta), minimumStepSize(
-            1e-6)
+        w(new PVector<T>(size)), alphas(new PVector<T>(w->dimension())), //
+        hs(new PVector<T>(w->dimension())), pool(new VectorPool<T>(size)), theta(theta), //
+        minimumStepSize(1e-6)
     {
       alphas->set(1.0f / w->dimension());
     }
@@ -170,9 +170,9 @@ class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
 
   public:
     SemiLinearIDBD(const int& size, const T& theta) :
-        w(new PVector<T>(size)), alphas(new PVector<T>(w->dimension())), hs(
-            new PVector<T>(w->dimension())), pool(new VectorPool<T>(size)), theta(theta), minimumStepSize(
-            1e-6)
+        w(new PVector<T>(size)), alphas(new PVector<T>(w->dimension())), //
+        hs(new PVector<T>(w->dimension())), pool(new VectorPool<T>(size)), theta(theta), //
+        minimumStepSize(1e-6)
     {
       alphas->set(1.0f / w->dimension());
     }
@@ -249,8 +249,8 @@ class K1: public LearningAlgorithm<T>, public LinearLearner<T>
 
   public:
     K1(const int& size, const T& theta) :
-        w(new PVector<T>(size)), alphas(new PVector<T>(size)), betas(new PVector<T>(size)), hs(
-            new PVector<T>(size)), pool(new VectorPool<T>(size)), theta(theta)
+        w(new PVector<T>(size)), alphas(new PVector<T>(size)), betas(new PVector<T>(size)), //
+        hs(new PVector<T>(size)), pool(new VectorPool<T>(size)), theta(theta)
     {
       betas->set(std::log(0.1f));
     }
@@ -355,10 +355,10 @@ class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
 
   public:
     Autostep(const int& nbFeatures, const T& kappa = 0.01f, const T& initStepsize = 1.0) :
-        w(new PVector<T>(nbFeatures)), alphas(new PVector<T>(w->dimension())), h(
-            new PVector<T>(w->dimension())), v(new PVector<T>(w->dimension())), pool(
-            new VectorPool<T>(nbFeatures)), tau(10000), minimumStepsize(1e-6), kappa(kappa), delta(
-            0.0f)
+        w(new PVector<T>(nbFeatures)), alphas(new PVector<T>(w->dimension())), //
+        h(new PVector<T>(w->dimension())), v(new PVector<T>(w->dimension())), //
+        pool(new VectorPool<T>(nbFeatures)), tau(10000), minimumStepsize(1e-6), kappa(kappa), //
+        delta(0.0f)
     {
       alphas->set(initStepsize);
       v->set(1.0);

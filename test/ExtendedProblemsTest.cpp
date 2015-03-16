@@ -89,9 +89,8 @@ void ExtendedProblemsTest::testGreedyGQMountainCar3D()
   double alpha_v = 0.1 / projector->vectorNorm();
   double alpha_w = .0001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
-  double beta_tp1 = 1.0 - gamma_tp1;
   double lambda_t = 0.8;
-  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, eML);
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, gamma_tp1, lambda_t, eML);
   //double epsilon = 0.01;
   Policy<double>* behavior = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), gq,
       0.1);
@@ -287,9 +286,8 @@ void ExtendedProblemsTest::testGreedyGQAcrobot()
   double alpha_v = 0.2 / projector->vectorNorm();
   double alpha_w = .001 / projector->vectorNorm();
   double gamma_tp1 = 0.99;
-  double beta_tp1 = 1.0 - gamma_tp1;
   double lambda_t = 0.8;
-  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, beta_tp1, lambda_t, eML);
+  GQ<double>* gq = new GQ<double>(alpha_v, alpha_w, gamma_tp1, lambda_t, eML);
   //double epsilon = 0.01;
   Policy<double>* behavior = new EpsilonGreedy<double>(random, problem->getDiscreteActions(), gq,
       0.1);

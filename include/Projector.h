@@ -61,9 +61,9 @@ class TileCoder: public Projector<T>
 
   public:
     TileCoder(const int& memorySize, const int& nbTilings, bool includeActiveFeature = true) :
-        includeActiveFeature(includeActiveFeature), vector(
-            new SVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)), nbTilings(
-            nbTilings)
+        includeActiveFeature(includeActiveFeature), //
+        vector(new SVector<T>(includeActiveFeature ? memorySize + 1 : memorySize)), //
+        nbTilings(nbTilings)
     {
     }
 
@@ -129,18 +129,18 @@ class TileCoderHashing: public TileCoder<T>
   public:
     TileCoderHashing(Hashing<T>* hashing, const int& nbInputs, const T& gridResolution,
         const int& nbTilings, const bool& includeActiveFeature = true) :
-        TileCoder<T>(hashing->getMemorySize(), nbTilings, includeActiveFeature), gridResolutions(
-            new PVector<T>(nbInputs)), inputs(new PVector<T>(nbInputs)), tiles(
-            new Tiles<T>(hashing))
+        TileCoder<T>(hashing->getMemorySize(), nbTilings, includeActiveFeature), //
+        gridResolutions(new PVector<T>(nbInputs)), inputs(new PVector<T>(nbInputs)), //
+        tiles(new Tiles<T>(hashing))
     {
       gridResolutions->set(gridResolution);
     }
 
     TileCoderHashing(Hashing<T>* hashing, const int& nbInputs, Vector<T>* gridResolutions,
         const int& nbTilings, const bool& includeActiveFeature = true) :
-        TileCoder<T>(hashing->getMemorySize(), nbTilings, includeActiveFeature), gridResolutions(
-            new PVector<T>(nbInputs)), inputs(new PVector<T>(nbInputs)), tiles(
-            new Tiles<T>(hashing))
+        TileCoder<T>(hashing->getMemorySize(), nbTilings, includeActiveFeature), //
+        gridResolutions(new PVector<T>(nbInputs)), inputs(new PVector<T>(nbInputs)), //
+        tiles(new Tiles<T>(hashing))
     {
       this->gridResolutions->set(gridResolutions);
     }

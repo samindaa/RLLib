@@ -125,8 +125,8 @@ class ExpectedSarsaControl: public SarsaControl<T>
 
     ExpectedSarsaControl(Policy<T>* acting, StateToStateAction<T>* toStateAction, Sarsa<T>* sarsa,
         Actions<T>* actions) :
-        SarsaControl<T>(acting, toStateAction, sarsa), actions(actions), pool(
-            new VectorPool<T>(toStateAction->dimension()))
+        SarsaControl<T>(acting, toStateAction, sarsa), actions(actions), //
+        pool(new VectorPool<T>(toStateAction->dimension()))
     {
     }
     virtual ~ExpectedSarsaControl()
@@ -183,9 +183,9 @@ class Q: public Predictor<T>, public LinearLearner<T>
   public:
     Q(const T& alpha, const T& gamma, const T& lambda, Trace<T>* e, Actions<T>* actions,
         StateToStateAction<T>* toStateAction) :
-        alpha(alpha), gamma(gamma), lambda(lambda), initialized(false), delta(0.0f), e(e), toStateAction(
-            toStateAction), q(new PVector<T>(e->vect()->dimension())), target(
-            new Greedy<T>(actions, this)), phi_sa_t(0)
+        alpha(alpha), gamma(gamma), lambda(lambda), initialized(false), delta(0.0f), e(e), //
+        toStateAction(toStateAction), q(new PVector<T>(e->vect()->dimension())), //
+        target(new Greedy<T>(actions, this)), phi_sa_t(0)
     {
     }
 
@@ -351,8 +351,8 @@ class GreedyGQ: public OffPolicyControlLearner<T>
   public:
     GreedyGQ(Policy<T>* target, Policy<T>* behavior, Actions<T>* actions,
         StateToStateAction<T>* toStateAction, GQ<T>* gq) :
-        rho_t(0), target(target), behavior(behavior), actions(actions), toStateAction(
-            toStateAction), gq(gq), phi_t(0), phi_bar_tp1(0)
+        rho_t(0), target(target), behavior(behavior), actions(actions), //
+        toStateAction(toStateAction), gq(gq), phi_t(0), phi_bar_tp1(0)
     {
     }
 
@@ -530,8 +530,8 @@ class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T>
   public:
     ActorLambdaOffPolicy(const T& alpha_u, const T& gamma/*not used*/, const T& lambda,
         PolicyDistribution<T>* targetPolicy, Traces<T>* e) :
-        AbstractActorOffPolicy<T>(targetPolicy), alpha_u(alpha_u), gamma(gamma), lambda(lambda), e_u(
-            e)
+        AbstractActorOffPolicy<T>(targetPolicy), alpha_u(alpha_u), gamma(gamma), lambda(lambda), //
+        e_u(e)
     {
     }
 
@@ -582,8 +582,8 @@ class OffPAC: public OffPolicyControlLearner<T>
   public:
     OffPAC(Policy<T>* behavior, OffPolicyTD<T>* critic, ActorOffPolicy<T>* actor,
         StateToStateAction<T>* toStateAction, Projector<T>* projector) :
-        rho_t(0), delta_t(0), behavior(behavior), critic(critic), actor(actor), toStateAction(
-            toStateAction), projector(projector), phi_t(0)
+        rho_t(0), delta_t(0), behavior(behavior), critic(critic), actor(actor), //
+        toStateAction(toStateAction), projector(projector), phi_t(0)
     {
     }
 
@@ -683,8 +683,8 @@ class Actor: public ActorOnPolicy<T>
 
   public:
     Actor(const T& alpha_u, PolicyDistribution<T>* policyDistribution) :
-        initialized(false), alpha_u(alpha_u), policyDistribution(policyDistribution), u(
-            policyDistribution->parameters())
+        initialized(false), alpha_u(alpha_u), policyDistribution(policyDistribution), //
+        u(policyDistribution->parameters())
     {
     }
 
@@ -959,8 +959,8 @@ class AverageRewardActorCritic: public AbstractActorCritic<T>
   public:
     AverageRewardActorCritic(OnPolicyTD<T>* critic, ActorOnPolicy<T>* actor,
         Projector<T>* projector, StateToStateAction<T>* toStateAction, T alpha_r) :
-        AbstractActorCritic<T>(critic, actor, projector, toStateAction), alpha_r(alpha_r), averageReward(
-            0)
+        AbstractActorCritic<T>(critic, actor, projector, toStateAction), alpha_r(alpha_r), //
+        averageReward(0)
     {
     }
 

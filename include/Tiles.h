@@ -71,8 +71,8 @@ class Tiles
 
   public:
     Tiles(Hashing<T>* hashing) :
-        hashing(hashing), i_tmp_arr(new PVector<int>(Hashing<T>::MAX_NUM_VARS)), f_tmp_arr(
-            new PVector<T>(Hashing<T>::MAX_NUM_VARS))
+        hashing(hashing), i_tmp_arr(new PVector<int>(Hashing<T>::MAX_NUM_VARS)), //
+        f_tmp_arr(new PVector<T>(Hashing<T>::MAX_NUM_VARS))
     {
     }
 

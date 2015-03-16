@@ -7,9 +7,9 @@
 
 #include "GQTest.h"
 
-GreedyGQFactory::GreedyGQFactory(const double& beta, const double& alpha_theta,
+GreedyGQFactory::GreedyGQFactory(const double& gamma, const double& alpha_theta,
     const double& alpha_w, const double& lambda) :
-    beta(beta), alpha_theta(alpha_theta), alpha_w(alpha_w), lambda(lambda)
+    gamma(gamma), alpha_theta(alpha_theta), alpha_w(alpha_w), lambda(lambda)
 {
 }
 
@@ -30,7 +30,7 @@ OffPolicyControlLearner<double>* GreedyGQFactory::createLearner(Actions<double>*
 {
   Trace<double>* e = new ATrace<double>(toStateAction->dimension() * actions->dimension());
   traces.push_back(e);
-  GQ<double>* gq = new GQ<double>(alpha_theta, alpha_w, beta, lambda, e);
+  GQ<double>* gq = new GQ<double>(alpha_theta, alpha_w, gamma, lambda, e);
   predictors.push_back(gq);
   OffPolicyControlLearner<double>* controlGQ = new GreedyGQ<double>(target, behavior, actions,
       toStateAction, gq);
@@ -38,9 +38,9 @@ OffPolicyControlLearner<double>* GreedyGQFactory::createLearner(Actions<double>*
   return controlGQ;
 }
 
-double GreedyGQFactory::getBeta() const
+double GreedyGQFactory::getGamma() const
 {
-  return beta;
+  return gamma;
 }
 
 double GreedyGQFactory::getLambda() const
@@ -50,17 +50,17 @@ double GreedyGQFactory::getLambda() const
 
 void GQTest::testOnPolicyGQ()
 {
-  testGQOnRandomWalk(0.5, 0.5, new GreedyGQFactory(0.0, 0.01, 0.0, 0.0));
-  testGQOnRandomWalk(0.5, 0.5, new GreedyGQFactory(0.1, 0.01, 0.0, 0.0));
-  testGQOnRandomWalk(0.5, 0.5, new GreedyGQFactory(0.1, 0.01, 0.0, 0.1));
-  testGQOnRandomWalk(0.5, 0.5, new GreedyGQFactory(0.1, 0.01, 0.5, 0.1));
+  testGQOnRandomWalk(0.5, 0.5, new GreedyGQFactory(1.0, 0.01, 0.0, 0.0));
+  testGQOnRandomWalk(0.5, 0.5, new GreedyGQFactory(0.9, 0.01, 0.0, 0.0));
+  testGQOnRandomWalk(0.5, 0.5, new GreedyGQFactory(0.9, 0.01, 0.0, 0.1));
+  testGQOnRandomWalk(0.5, 0.5, new GreedyGQFactory(0.9, 0.01, 0.5, 0.1));
 }
 
 void GQTest::testOffPolicyGQ()
 {
-  testGQOnRandomWalk(0.3, 0.5, new GreedyGQFactory(0.1, 0.01, 0.0, 0.0));
-  testGQOnRandomWalk(0.3, 0.5, new GreedyGQFactory(0.1, 0.01, 0.0, 0.1));
-  testGQOnRandomWalk(0.3, 0.5, new GreedyGQFactory(0.1, 0.01, 0.5, 0.1));
+  testGQOnRandomWalk(0.3, 0.5, new GreedyGQFactory(0.9, 0.01, 0.0, 0.0));
+  testGQOnRandomWalk(0.3, 0.5, new GreedyGQFactory(0.9, 0.01, 0.0, 0.1));
+  testGQOnRandomWalk(0.3, 0.5, new GreedyGQFactory(0.9, 0.01, 0.5, 0.1));
 }
 
 void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
@@ -83,7 +83,7 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
 
   int nbEpisode = 0;
   const PVector<double> solution = agentState->computeSolution(targetPolicy,
-      1.0 - learnerFactory->getBeta(), learnerFactory->getLambda());
+      learnerFactory->getGamma(), learnerFactory->getLambda());
   while (FiniteStateGraph::distanceToSolution(&solution, vFun) > 0.05)
   {
     FiniteStateGraph::StepData stepData = agentState->step();

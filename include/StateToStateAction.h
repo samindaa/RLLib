@@ -168,12 +168,13 @@ class TabularAction: public StateToStateAction<T>
     bool includeActiveFeature;
   public:
     TabularAction(Projector<T>* projector, Actions<T>* actions, bool includeActiveFeature = true) :
-        projector(projector), actions(actions), phis(
+        projector(projector), actions(actions), //
+        phis(
             new Representations<T>(
                 includeActiveFeature ?
                     actions->dimension() * projector->dimension() + 1 :
-                    actions->dimension() * projector->dimension(), actions)), phi(
-            new SVector<T>(phis->vectorSize())), includeActiveFeature(includeActiveFeature)
+                    actions->dimension() * projector->dimension(), actions)), //
+        phi(new SVector<T>(phis->vectorSize())), includeActiveFeature(includeActiveFeature)
     {
     }
 

@@ -405,9 +405,10 @@ class SparseVector: public Vector<T>
 
   public:
     SparseVector(const int& capacity = 1, const int& activeIndexesLength = 10) :
-        Vector<T>(Vector<T>::SPARSE_VECTOR), indexesPositionLength(capacity), activeIndexesLength(
-            activeIndexesLength), nbActive(0), indexesPosition(new int[indexesPositionLength]), activeIndexes(
-            new int[activeIndexesLength]), values(new T[activeIndexesLength])
+        Vector<T>(Vector<T>::SPARSE_VECTOR), indexesPositionLength(capacity), //
+        activeIndexesLength(activeIndexesLength), nbActive(0), //
+        indexesPosition(new int[indexesPositionLength]), //
+        activeIndexes(new int[activeIndexesLength]), values(new T[activeIndexesLength])
     {
       std::fill(indexesPosition, indexesPosition + capacity, -1);
     }
@@ -420,10 +421,10 @@ class SparseVector: public Vector<T>
     }
 
     SparseVector(const SparseVector<T>& that) :
-        Vector<T>(Vector<T>::SPARSE_VECTOR), indexesPositionLength(that.indexesPositionLength), activeIndexesLength(
-            that.activeIndexesLength), nbActive(that.nbActive), indexesPosition(
-            new int[that.indexesPositionLength]), activeIndexes(new int[that.activeIndexesLength]), values(
-            new T[that.activeIndexesLength])
+        Vector<T>(Vector<T>::SPARSE_VECTOR), indexesPositionLength(that.indexesPositionLength), //
+        activeIndexesLength(that.activeIndexesLength), nbActive(that.nbActive), //
+        indexesPosition(new int[that.indexesPositionLength]), //
+        activeIndexes(new int[that.activeIndexesLength]), values(new T[that.activeIndexesLength])
     {
       std::copy(that.indexesPosition, that.indexesPosition + that.indexesPositionLength,
           indexesPosition);

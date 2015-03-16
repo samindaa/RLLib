@@ -313,8 +313,9 @@ class ColisionDetection: public Hashing<T>
 
   public:
     ColisionDetection(Hashing<T>* hashing, const int& size, const int& safety) :
-        hashing(hashing), referenceHashing(new UNH<T>(INT_MAX)), referenceHashing2(
-            new UNH<T>(INT_MAX / 4)), safe(safe), calls(0), clearhits(0), collisions(0), m(size)
+        hashing(hashing), referenceHashing(new UNH<T>(INT_MAX)), //
+        referenceHashing2(new UNH<T>(INT_MAX / 4)), safe(safe), calls(0), clearhits(0), //
+        collisions(0), m(size)
     {
       if (size % 2 != 0)
       {

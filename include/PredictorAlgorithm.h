@@ -41,8 +41,8 @@ class TD: public OnPolicyTD<T>
     bool initialized;
   public:
     TD(const T& alpha_v, const T& gamma, const int& nbFeatures) :
-        delta_t(0), alpha_v(alpha_v), gamma(gamma), v(new PVector<T>(nbFeatures)), initialized(
-            false)
+        delta_t(0), alpha_v(alpha_v), gamma(gamma), v(new PVector<T>(nbFeatures)), //
+        initialized(false)
     {
     }
     virtual ~TD()
@@ -220,8 +220,8 @@ class TDLambdaAlphaBound: public TDLambdaAbstract<T>
 
   public:
     TDLambdaAlphaBound(const T& alpha, const T& gamma, const T& lambda, Trace<T>* e) :
-        TDLambdaAbstract<T>(alpha, gamma, lambda, e), gammaXtp1MinusX(
-            new SVector<T>(e->vect()->dimension()))
+        TDLambdaAbstract<T>(alpha, gamma, lambda, e), //
+        gammaXtp1MinusX(new SVector<T>(e->vect()->dimension()))
     {
     }
 
@@ -273,8 +273,8 @@ class Sarsa: public Predictor<T>, public LinearLearner<T>
 
   public:
     Sarsa(const T& alpha, const T& gamma, const T& lambda, Trace<T>* e) :
-        v_t(0), v_tp1(0), delta(0), initialized(false), alpha(alpha), gamma(gamma), lambda(lambda), e(
-            e), q(new PVector<T>(e->vect()->dimension()))
+        v_t(0), v_tp1(0), delta(0), initialized(false), alpha(alpha), gamma(gamma), lambda(lambda), //
+        e(e), q(new PVector<T>(e->vect()->dimension()))
     {
     }
     virtual ~Sarsa()
@@ -385,8 +385,8 @@ class SarsaAlphaBound: public Sarsa<T>
     T alpha_0;
   public:
     SarsaAlphaBound(const T& alpha, const T& gamma, const T& lambda, Trace<T>* e) :
-        Sarsa<T>(alpha, gamma, lambda, e), gammaXtp1MinusX(new SVector<T>(e->vect()->dimension())), alpha_0(
-            alpha)
+        Sarsa<T>(alpha, gamma, lambda, e), gammaXtp1MinusX(new SVector<T>(e->vect()->dimension())), //
+        alpha_0(alpha)
     {
     }
 
@@ -436,16 +436,16 @@ class GQ: public Predictor<T>, public LinearLearner<T>
     bool initialized;
 
   protected:
-    T alpha_v, alpha_w, beta_tp1, lambda_t;
+    T alpha_v, alpha_w, gamma_t, gamma_tp1, lambda_t, lambda_tp1;
     Trace<T>* e;
     Vector<T>* v;
     Vector<T>* w;
 
   public:
-    GQ(const T& alpha_v, const T& alpha_w, const T& beta_tp1, const T& lambda_t, Trace<T>* e) :
-        delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), beta_tp1(beta_tp1), lambda_t(
-            lambda_t), e(e), v(new PVector<T>(e->vect()->dimension())), w(
-            new PVector<T>(e->vect()->dimension()))
+    GQ(const T& alpha_v, const T& alpha_w, const T& gamma_tp1, const T& lambda_t, Trace<T>* e) :
+        delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), gamma_t(gamma_t), //
+        gamma_tp1(gamma_tp1), lambda_t(lambda_tp1), lambda_tp1(lambda_t), e(e), //
+        v(new PVector<T>(e->vect()->dimension())), w(new PVector<T>(e->vect()->dimension()))
     {
     }
 
@@ -466,20 +466,22 @@ class GQ: public Predictor<T>, public LinearLearner<T>
         const T& z_tp1)
     {
       ASSERT(initialized);
-      delta_t = r_tp1 + beta_tp1 * z_tp1 + (T(1) - beta_tp1) * v->dot(phi_bar_tp1) - v->dot(phi_t);
-      e->update((T(1) - beta_tp1) * lambda_t * rho_t, phi_t); // paper says beta_t ?
+      delta_t = r_tp1 + (T(1) - gamma_tp1) * z_tp1 + gamma_tp1 * v->dot(phi_bar_tp1)
+          - v->dot(phi_t);
+      e->update(gamma_t * lambda_t * rho_t, phi_t);
       // v
       // part 1
       v->addToSelf(alpha_v * delta_t, e->vect());
       // part 2
-      v->addToSelf(-alpha_v * (T(1) - beta_tp1) * (T(1) - lambda_t) * w->dot(e->vect()),
-          phi_bar_tp1); // paper says beta_t ?
+      v->addToSelf(-alpha_v * gamma_tp1 * (T(1) - lambda_tp1) * w->dot(e->vect()), phi_bar_tp1);
 
       // w
       // part 2
       w->addToSelf(-alpha_w * w->dot(phi_t), phi_t);
       // part 1
       w->addToSelf(alpha_w * delta_t, e->vect());
+      gamma_t = gamma_tp1;
+      lambda_t = lambda_tp1;
       return delta_t;
     }
 
@@ -509,6 +511,16 @@ class GQ: public Predictor<T>, public LinearLearner<T>
     {
       return v;
     }
+
+    void set_gamma_tp1(const T& gamma_tp1)
+    {
+      this->gamma_tp1 = gamma_tp1;
+    }
+
+    void set_lambda_tp1(const T& lambda_tp1)
+    {
+      this->lambda_tp1 = lambda_tp1;
+    }
 };
 
 // Prediction problems
@@ -527,8 +539,8 @@ class GTDLambda: public OnPolicyTD<T>, public GVF<T>
 
   public:
     GTDLambda(const T& alpha_v, const T& alpha_w, const T& gamma_t, const T& lambda_t, Trace<T>* e) :
-        delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), gamma_t(gamma_t), lambda_t(
-            lambda_t), e(e), v(new PVector<T>(e->vect()->dimension())), w(
+        delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), gamma_t(gamma_t), //
+        lambda_t(lambda_t), e(e), v(new PVector<T>(e->vect()->dimension())), w(
             new PVector<T>(e->vect()->dimension()))
     {
     }
