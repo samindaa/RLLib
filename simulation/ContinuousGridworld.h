@@ -36,8 +36,8 @@ class ContinuousGridworld: public RLLib::RLProblem<T>
 
   public:
     ContinuousGridworld(RLLib::Random<T>* random) :
-        RLLib::RLProblem<T>(random, 2, 2 * 2 + 1, 1), observationRange(new RLLib::Range<T>(0, 1.0)), actionRange(
-            new RLLib::Range<T>(-0.05, 0.05)), absoluteNoise(0.025)
+        RLLib::RLProblem<T>(random, 2, 2 * 2 + 1, 1), observationRange(new RLLib::Range<T>(0, 1.0)), //
+        actionRange(new RLLib::Range<T>(-0.05, 0.05)), absoluteNoise(0.025)
     {
       // discrete actions
       for (int i = 0; i < Base::discreteActions->dimension(); i++)
@@ -67,31 +67,32 @@ class ContinuousGridworld: public RLLib::RLProblem<T>
 
     void initialize()
     {
-      Base::observations->at(0) = 0.2;
-      Base::observations->at(1) = 0.4;
+      Base::output->observation_tp1->setEntry(0, 0.2);
+      Base::output->observation_tp1->setEntry(1, 0.4);
     }
 
     void updateTRStep()
     { // nothing
       // unit generalization
       for (int i = 0; i < Base::output->o_tp1->dimension(); i++)
-        Base::output->o_tp1->at(i) = Base::observations->at(i);
+        Base::output->o_tp1->setEntry(i, Base::output->observation_tp1->getEntry(i));
     }
 
     void step(const RLLib::Action<T>* action)
     {
       float noise = Base::random->nextReal() * absoluteNoise - (absoluteNoise / 2.0f);
-      for (int i = 0; i < Base::observations->dimension(); i++)
-        Base::observations->at(i) = observationRange->bound(
-            Base::observations->at(i) + actionRange->bound(action->getEntry(i) + noise));
+      for (int i = 0; i < Base::output->observation_tp1->dimension(); i++)
+        Base::output->observation_tp1->setEntry(i,
+            observationRange->bound(Base::output->observation_tp1->getEntry(i) //
+            + actionRange->bound(action->getEntry(i) + noise)));
     }
 
     bool endOfEpisode() const
     {
       // L1-norm
       float distance = 0;
-      for (int i = 0; i < Base::observations->dimension(); i++)
-        distance += fabs(1.0 - Base::observations->at(i));
+      for (int i = 0; i < Base::output->observation_tp1->dimension(); i++)
+        distance += fabs(1.0 - Base::output->observation_tp1->getEntry(i));
       return distance < 0.1;
     }
 
@@ -102,12 +103,10 @@ class ContinuousGridworld: public RLLib::RLProblem<T>
 
     T r() const
     {
-      float px = Base::observations->at(0);
-      float py = Base::observations->at(1);
-      return -1.0f
-          - 2.0f
-              * (N(px, 0.3f, 0.1f) * N(py, 0.6f, 0.03f) + N(px, 0.4f, 0.03f) * N(py, 0.5f, 0.1f)
-                  + N(px, 0.8f, 0.03f) * N(py, 0.9f, 0.1f));
+      float px = Base::output->observation_tp1->getEntry(0);
+      float py = Base::output->observation_tp1->getEntry(1);
+      return -1.0f - 2.0f * (N(px, 0.3f, 0.1f) * N(py, 0.6f, 0.03f) + //
+          N(px, 0.4f, 0.03f) * N(py, 0.5f, 0.1f) + N(px, 0.8f, 0.03f) * N(py, 0.9f, 0.1f));
     }
 
     T z() const
@@ -121,10 +120,9 @@ class ContinuousGridworld: public RLLib::RLProblem<T>
       for (float px = observationRange->min(); px <= observationRange->max(); px += 0.01f)
       {
         for (float py = observationRange->min(); py <= observationRange->max(); py += 0.01f)
-          oute
-              << (N(px, 0.3f, 0.1f) * N(py, 0.6f, 0.03f) + N(px, 0.4f, 0.03f) * N(py, 0.5f, 0.1f)
-                  + N(px, 0.8f, 0.03f) * N(py, 0.9f, 0.1f)) << " ";
-
+          oute << (N(px, 0.3f, 0.1f) * N(py, 0.6f, 0.03f) + //
+              N(px, 0.4f, 0.03f) * N(py, 0.5f, 0.1f) + N(px, 0.8f, 0.03f) * N(py, 0.9f, 0.1f))
+              << " ";
         oute << std::endl;
       }
       oute.close();

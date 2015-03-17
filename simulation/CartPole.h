@@ -54,16 +54,17 @@ class CartPole: public RLLib::RLProblem<double>
 
   public:
     CartPole(Random<double>* random = 0) :
-        RLLib::RLProblem<double>(random, 4, 3, 1), gravity(9.8), massCart(1.0), massPole(0.1), totalMass(
-            massPole + massCart), length(0.5/* actually half the pole's length */), poleMassLength(
-            massPole * length), forceMag(10.0), tau(0.02/* seconds between state updates */), fourthirds(
-            4.0f / 3.0f), x(0/* cart position, meters */), x_dot(0/* cart velocity */), theta(
-            0/* pole angle, radians */), theta_dot(0/* pole angular velocity */), forceRange(
-            new RLLib::Range<double>(-forceMag, forceMag)), xRange(
-            new RLLib::Range<double>(-2.4, 2.4)), xDotRange(new RLLib::Range<double>(-2.4, 2.4)), thetaRange(
-            new RLLib::Range<double>(-M_PI, M_PI)), thetaDotRange(
-            new RLLib::Range<double>(-4.0 * M_PI, 4.0 * M_PI)), previousTheta(0), cumulatedRotation(
-            0), overRotated(false), overRotatedTime(0), upTime(0)
+        RLLib::RLProblem<double>(random, 4, 3, 1), gravity(9.8), massCart(1.0), massPole(0.1), //
+        totalMass(massPole + massCart), length(0.5/* actually half the pole's length */), //
+        poleMassLength(massPole * length), forceMag(10.0), //
+        tau(0.02/* seconds between state updates */), fourthirds(4.0f / 3.0f), //
+        x(0/* cart position, meters */), x_dot(0/* cart velocity */), //
+        theta(0/* pole angle, radians */), theta_dot(0/* pole angular velocity */), //
+        forceRange(new RLLib::Range<double>(-forceMag, forceMag)), //
+        xRange(new RLLib::Range<double>(-2.4, 2.4)), xDotRange(new RLLib::Range<double>(-2.4, 2.4)), //
+        thetaRange(new RLLib::Range<double>(-M_PI, M_PI)), //
+        thetaDotRange(new RLLib::Range<double>(-4.0 * M_PI, 4.0 * M_PI)), previousTheta(0), //
+        cumulatedRotation(0), overRotated(false), overRotatedTime(0), upTime(0)
     {
       discreteActions->push_back(0, forceRange->min());
       discreteActions->push_back(1, 0.0);
@@ -89,16 +90,15 @@ class CartPole: public RLLib::RLProblem<double>
 
     void updateTRStep()
     {
-      RLLib::DenseVector<double>& vars = *output->o_tp1;
-      observations->at(0) = x;
-      observations->at(1) = x_dot;
-      observations->at(2) = theta;
-      observations->at(3) = theta_dot;
+      output->observation_tp1->setEntry(0, x);
+      output->observation_tp1->setEntry(1, x_dot);
+      output->observation_tp1->setEntry(2, theta);
+      output->observation_tp1->setEntry(3, theta_dot);
 
-      vars[0] = xRange->toUnit(x);
-      vars[1] = xDotRange->toUnit(x_dot);
-      vars[2] = thetaRange->toUnit(theta);
-      vars[3] = thetaDotRange->toUnit(theta_dot);
+      output->o_tp1->setEntry(0, xRange->toUnit(x));
+      output->o_tp1->setEntry(1, xDotRange->toUnit(x_dot));
+      output->o_tp1->setEntry(2, thetaRange->toUnit(theta));
+      output->o_tp1->setEntry(3, thetaDotRange->toUnit(theta_dot));
 
     }
 

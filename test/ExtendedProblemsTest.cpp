@@ -373,9 +373,9 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
     int round = 0;
     do
     {
-      const DenseVector<double>& vars = *poleBalancing.getObservations();
-      for (int i = 0; i < vars.dimension(); i++)
-        x[i] = vars[i];
+      const Vector<double>* o_tp1 = poleBalancing.getTRStep()->o_tp1;
+      for (int i = 0; i < o_tp1->dimension(); i++)
+        x[i] = o_tp1->getEntry(i);
       cout << "x=" << x.transpose();
       cout << endl;
 

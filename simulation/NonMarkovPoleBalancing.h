@@ -62,14 +62,14 @@ class NonMarkovPoleBalancing: public RLProblem<T>
 
   public:
     NonMarkovPoleBalancing(Random<T>* random, const int& nbPoles = 1) :
-        RLProblem<T>(random, (1 + nbPoles) * 2, 3, 1), nbPoles(nbPoles), stepTime(0.02), x(0), xDot(
-            0), g(-9.81), M(1.0), muc(0), threeFourth(3.0f / 4.0f), fifteenRadian(
-            15.0f / 180.0f * M_PI), twelveRadian(12.0f / 180.0f * M_PI), xRange(
-            new Range<float>(-2.4f, 2.4f)), actionRange(new Range<float>(-10.0f, 10.0f)), theta(
-            new PVector<float>(nbPoles)), thetaDot(new PVector<float>(nbPoles)), length(
-            new PVector<float>(nbPoles)), effectiveForce(new PVector<float>(nbPoles)), mass(
-            new PVector<float>(nbPoles)), effectiveMass(new PVector<float>(nbPoles)), mup(
-            new PVector<float>(nbPoles))
+        RLProblem<T>(random, (1 + nbPoles) * 2, 3, 1), nbPoles(nbPoles), stepTime(0.02), x(0), //
+        xDot(0), g(-9.81), M(1.0), muc(0), threeFourth(3.0f / 4.0f), //
+        fifteenRadian(15.0f / 180.0f * M_PI), twelveRadian(12.0f / 180.0f * M_PI), //
+        xRange(new Range<float>(-2.4f, 2.4f)), actionRange(new Range<float>(-10.0f, 10.0f)), //
+        theta(new PVector<float>(nbPoles)), thetaDot(new PVector<float>(nbPoles)), //
+        length(new PVector<float>(nbPoles)), effectiveForce(new PVector<float>(nbPoles)), //
+        mass(new PVector<float>(nbPoles)), effectiveMass(new PVector<float>(nbPoles)), //
+        mup(new PVector<float>(nbPoles))
     {
       assert(nbPoles <= 2);
       if (nbPoles == 2)
@@ -128,19 +128,17 @@ class NonMarkovPoleBalancing: public RLProblem<T>
   public:
     void updateTRStep()
     {
-      DenseVector<T>& vars = *Base::output->o_tp1;
-
-      Base::observations->at(0) = xRange->bound(x);
-      Base::observations->at(1) = xDot;
-      vars[0] = Base::observations->at(0); //<<FixMe: only for testing
-      vars[1] = Base::observations->at(1);
+      Base::output->observation_tp1->setEntry(0, xRange->bound(x));
+      Base::output->observation_tp1->setEntry(1, xDot);
+      Base::output->o_tp1->setEntry(0, Base::output->observation_tp1->getEntry(0)); //<<FixMe: only for testing
+      Base::output->o_tp1->setEntry(1, Base::output->observation_tp1->getEntry(1));
 
       for (int i = 0; i < nbPoles; i += 2)
       {
-        Base::observations->at(i + 2) = theta->getEntry(i);
-        Base::observations->at(i + 3) = thetaDot->getEntry(i);
-        vars[i + 2] = Base::observations->at(i + 2); //<<FixMe: only for testing
-        vars[i + 3] = Base::observations->at(i + 3);
+        Base::output->observation_tp1->setEntry(i + 2, theta->getEntry(i));
+        Base::output->observation_tp1->setEntry(i + 3, thetaDot->getEntry(i));
+        Base::output->o_tp1->setEntry(i + 2, Base::output->observation_tp1->getEntry(i + 2)); //<<FixMe: only for testing
+        Base::output->o_tp1->setEntry(i + 3, Base::output->observation_tp1->getEntry(i + 3));
       }
 
     }

@@ -53,12 +53,12 @@ class Acrobot: public RLLib::RLProblem<double>
 
   public:
     Acrobot(RLLib::Random<double>* random) :
-        RLProblem<double>(random, 4, 3, 1), thetaRange(new RLLib::Range<double>(-M_PI, M_PI)), theta1DotRange(
-            new RLLib::Range<double>(-4.0 * M_PI, 4.0 * M_PI)), theta2DotRange(
-            new RLLib::Range<double>(-9.0 * M_PI, 9.0 * M_PI)), m1(1.0), m2(1.0), l1(1.0), l2(1.0), lc1(
-            0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), acrobotGoalPosition(1.0), theta1(0), theta2(
-            0), theta1Dot(0), theta2Dot(0), targetPosition(1.0), transitionNoise(0), actionRange(
-            new RLLib::Range<double>(-1.0, 1.0))
+        RLProblem<double>(random, 4, 3, 1), thetaRange(new RLLib::Range<double>(-M_PI, M_PI)), //
+        theta1DotRange(new RLLib::Range<double>(-4.0 * M_PI, 4.0 * M_PI)), //
+        theta2DotRange(new RLLib::Range<double>(-9.0 * M_PI, 9.0 * M_PI)), m1(1.0), m2(1.0), //
+        l1(1.0), l2(1.0), lc1(0.5), lc2(0.5), I1(1.0), I2(1.0), g(9.8), dt(0.05), //
+        acrobotGoalPosition(1.0), theta1(0), theta2(0), theta1Dot(0), theta2Dot(0), //
+        targetPosition(1.0), transitionNoise(0), actionRange(new RLLib::Range<double>(-1.0, 1.0))
     {
       discreteActions->push_back(0, actionRange->min());
       discreteActions->push_back(1, 0.0);
@@ -87,16 +87,15 @@ class Acrobot: public RLLib::RLProblem<double>
 
     void updateTRStep()
     {
-      RLLib::DenseVector<double>& vars = *output->o_tp1;
-      vars[0] = thetaRange->toUnit(theta1);
-      vars[1] = thetaRange->toUnit(theta2);
-      vars[2] = theta1DotRange->toUnit(theta1Dot);
-      vars[3] = theta2DotRange->toUnit(theta2Dot);
+      output->o_tp1->setEntry(0, thetaRange->toUnit(theta1));
+      output->o_tp1->setEntry(1, thetaRange->toUnit(theta2));
+      output->o_tp1->setEntry(2, theta1DotRange->toUnit(theta1Dot));
+      output->o_tp1->setEntry(3, theta2DotRange->toUnit(theta2Dot));
 
-      observations->at(0) = theta1;
-      observations->at(1) = theta2;
-      observations->at(2) = theta1DotRange->bound(theta1Dot);
-      observations->at(3) = theta2DotRange->bound(theta2Dot);
+      output->observation_tp1->setEntry(0, theta1);
+      output->observation_tp1->setEntry(1, theta2);
+      output->observation_tp1->setEntry(2, theta1DotRange->bound(theta1Dot));
+      output->observation_tp1->setEntry(3, theta2DotRange->bound(theta2Dot));
     }
 
     void step(const RLLib::Action<double>* action)

@@ -33,7 +33,7 @@ void NextingProblem::step(const Action<double>* action)
 void NextingProblem::updateTRStep()
 {
   for (int i = 0; i < dimension(); i++)
-    output->o_tp1->at(i) = random->nextReal();
+    output->o_tp1->setEntry(i, random->nextReal());
 }
 
 bool NextingProblem::endOfEpisode() const

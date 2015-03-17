@@ -113,11 +113,10 @@ class PoleBalancing: public RLProblem<double>
 
     void updateTRStep()
     {
-      DenseVector<double>& vars = *output->o_tp1;
-      for (int i = 0; i < vars.dimension(); i++)
+      for (int i = 0; i < output->observation_tp1->dimension(); i++)
       {
-        observations->at(i) = x[i];
-        vars[i] = x[i];
+        output->observation_tp1->setEntry(i, double(x[i]));
+        output->o_tp1->setEntry(i, output->observation_tp1->getEntry(i));
       }
     }
 

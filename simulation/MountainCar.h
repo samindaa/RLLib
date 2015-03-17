@@ -43,10 +43,11 @@ class MountainCar: public RLLib::RLProblem<T>
 
   public:
     MountainCar(RLLib::Random<T>* random = 0) :
-        RLLib::RLProblem<T>(random, 2, 3, 1), position(0), velocity(0), positionRange(
-            new RLLib::Range<T>(-1.2, 0.6)), velocityRange(new RLLib::Range<T>(-0.07, 0.07)), actionRange(
-            new RLLib::Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), throttleFactor(
-            1.0)
+        RLLib::RLProblem<T>(random, 2, 3, 1), position(0), velocity(0), //
+        positionRange(new RLLib::Range<T>(-1.2, 0.6)), //
+        velocityRange(new RLLib::Range<T>(-0.07, 0.07)), //
+        actionRange(new RLLib::Range<float>(-1.0, 1.0)), targetPosition(positionRange->max()), //
+        throttleFactor(1.0)
     {
       Base::discreteActions->push_back(0, actionRange->min());
       Base::discreteActions->push_back(1, 0.0);
@@ -68,12 +69,11 @@ class MountainCar: public RLLib::RLProblem<T>
 
     void updateTRStep()
     {
-      RLLib::DenseVector<T>& vars = *Base::output->o_tp1;
-      vars[0] = positionRange->toUnit(position);
-      vars[1] = velocityRange->toUnit(velocity);
+      Base::output->o_tp1->setEntry(0, positionRange->toUnit(position));
+      Base::output->o_tp1->setEntry(1, velocityRange->toUnit(velocity));
 
-      Base::observations->at(0) = position;
-      Base::observations->at(1) = velocity;
+      Base::output->observation_tp1->setEntry(0, position);
+      Base::output->observation_tp1->setEntry(1, velocity);
 
     }
 

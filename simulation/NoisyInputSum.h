@@ -55,9 +55,9 @@ class NoisyInputSum: public PredictionProblem<double>
 
   public:
     NoisyInputSum(const int& nbNonZeroWeights, const int& nbInputs) :
-        target(0), nbChangingWeights(nbNonZeroWeights), changePeriod(20), nbSteps(0), inputs(
-            new PVector<double>(nbInputs)), w(new PVector<double>(nbInputs)), random(
-            new Random<double>())
+        target(0), nbChangingWeights(nbNonZeroWeights), changePeriod(20), nbSteps(0), //
+        inputs(new PVector<double>(nbInputs)), w(new PVector<double>(nbInputs)), //
+        random(new Random<double>())
     {
       for (int i = 0; i < w->dimension(); i++)
       {

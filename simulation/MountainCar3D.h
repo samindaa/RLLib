@@ -67,9 +67,9 @@ class MountainCar3D: public RLProblem<T>
 
   public:
     MountainCar3D(Random<T>* random) :
-        RLProblem<T>(random, 4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), offset(
-            0), targetPosition(0.5), positionRange(new Range<T>(-1.2, 0.5)), velocityRange(
-            new Range<T>(-0.07, 0.07))
+        RLProblem<T>(random, 4, 5, 1), xposition(0), yposition(0), xvelocity(0), yvelocity(0), //
+        offset(0), targetPosition(0.5), positionRange(new Range<T>(-1.2, 0.5)), //
+        velocityRange(new Range<T>(-0.07, 0.07))
     {
 
       for (int a = 0; a < Base::discreteActions->dimension(); a++)
@@ -150,16 +150,15 @@ class MountainCar3D: public RLProblem<T>
 
     void updateTRStep()
     {
-      DenseVector<T>& vars = *Base::output->o_tp1;
-      vars[0] = positionRange->toUnit(xposition);
-      vars[1] = positionRange->toUnit(yposition);
-      vars[2] = velocityRange->toUnit(xvelocity);
-      vars[3] = velocityRange->toUnit(yvelocity);
+      Base::output->o_tp1->setEntry(0, positionRange->toUnit(xposition));
+      Base::output->o_tp1->setEntry(1, positionRange->toUnit(yposition));
+      Base::output->o_tp1->setEntry(2, velocityRange->toUnit(xvelocity));
+      Base::output->o_tp1->setEntry(3, velocityRange->toUnit(yvelocity));
 
-      Base::observations->at(0) = xposition;
-      Base::observations->at(1) = yposition;
-      Base::observations->at(2) = xvelocity;
-      Base::observations->at(3) = yvelocity;
+      Base::output->observation_tp1->setEntry(0, xposition);
+      Base::output->observation_tp1->setEntry(1, yposition);
+      Base::output->observation_tp1->setEntry(2, xvelocity);
+      Base::output->observation_tp1->setEntry(3, yvelocity);
     }
 
   public:

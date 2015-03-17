@@ -134,9 +134,9 @@ class FiniteStateGraph
 
   public:
     FiniteStateGraph() :
-        O(new GraphState("NULL", std::numeric_limits<int>::min())), X(
-            new Action<double>(std::numeric_limits<int>::max())), stepTime(-1), s_0(0), a_t(0), s_t(
-            0), acting(0), graphStates(0)
+        O(new GraphState("NULL", std::numeric_limits<int>::min())), //
+        X(new Action<double>(std::numeric_limits<int>::max())), stepTime(-1), s_0(0), a_t(0), //
+        s_t(0), acting(0), graphStates(0)
     {
       O->setVectorRepresentation(new PVector<double>(0));
     }
@@ -249,9 +249,9 @@ class LineProblem: public FiniteStateGraph
     GraphState* D;
 
     LineProblem() :
-        FiniteStateGraph(), Gamma(0.9), actions(new ActionArray<double>(1)), acting(
-            new SingleActionPolicy<double>(actions)), states(new std::vector<GraphState*>()), solution(
-            new PVector<double>(3)), Move(actions->getEntry(0))
+        FiniteStateGraph(), Gamma(0.9), actions(new ActionArray<double>(1)), //
+        acting(new SingleActionPolicy<double>(actions)), states(new std::vector<GraphState*>()), //
+        solution(new PVector<double>(3)), Move(actions->getEntry(0))
     {
       A = new GraphState("A", 0.0);
       B = new GraphState("B", 0.0);
@@ -340,9 +340,9 @@ class RandomWalk: public FiniteStateGraph
     Policy<double>* acting;
 
     RandomWalk(Random<double>* random) :
-        FiniteStateGraph(), random(random), Gamma(0.9), actions(new ActionArray<double>(2)), states(
-            new std::vector<GraphState*>()), solution(new PVector<double>(5)), Left(
-            actions->getEntry(0)), Right(actions->getEntry(1))
+        FiniteStateGraph(), random(random), Gamma(0.9), actions(new ActionArray<double>(2)), //
+        states(new std::vector<GraphState*>()), solution(new PVector<double>(5)), //
+        Left(actions->getEntry(0)), Right(actions->getEntry(1))
     {
       TL = new GraphState("TL", 0.0);
       A = new GraphState("A", 0.0);

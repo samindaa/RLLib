@@ -441,12 +441,11 @@ class Helicopter: public RLProblem<T>
 
     void updateTRStep()
     {
-      DenseVector<T>& vars = *Base::output->o_tp1;
       const vector<double>& observation = heliDynamics.getObservation();
       for (unsigned int i = 0; i < observation.size(); i++)
       {
-        this->observations->at(i) = observation[i];
-        vars[i] = observation[i];
+        Base::output->observation_tp1->setEntry(i, observation[i]);
+        Base::output->o_tp1->setEntry(i, observation[i]);
         // TODO: scaling?
       }
     }

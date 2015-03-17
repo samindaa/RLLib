@@ -62,9 +62,9 @@ class UnderwaterVehicle: public RLProblem<double>
 
   public:
     UnderwaterVehicle(Random<double>* random) :
-        RLProblem<double>(random, 1, 5, 1), thrustRange(new Range<double>(-30, 30)), velocityRange(
-            new Range<double>(-5, 5)), dt(0.03), C(0.01), mu(0.3), setPoint(4), timeSteps(800), dynamic(
-            new Dynammic(dt))
+        RLProblem<double>(random, 1, 5, 1), thrustRange(new Range<double>(-30, 30)), //
+        velocityRange(new Range<double>(-5, 5)), dt(0.03), C(0.01), mu(0.3), setPoint(4), //
+        timeSteps(800), dynamic(new Dynammic(dt))
     {
       discreteActions->push_back(0, thrustRange->min());
       discreteActions->push_back(1, thrustRange->min() / 2.0f);
@@ -98,7 +98,7 @@ class UnderwaterVehicle: public RLProblem<double>
     void updateTRStep()
     {
       output->o_tp1->setEntry(0, velocityRange->toUnit(dynamic->vec()->getEntry(0)));
-      observations->at(0) = dynamic->vec()->getEntry(0);
+      output->observation_tp1->setEntry(0, dynamic->vec()->getEntry(0));
       // TODO: only with one variable first
     }
 

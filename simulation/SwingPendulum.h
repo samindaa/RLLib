@@ -45,12 +45,14 @@ class SwingPendulum: public RLLib::RLProblem<T>
 
   public:
     SwingPendulum(RLLib::Random<T>* random = 0, const bool& useOverRotated = false) :
-        RLLib::RLProblem<T>(random, 2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), theta(
-            0), velocity(0), maxVelocity( M_PI_4 / stepTime), actionRange(
-            new RLLib::Range<float>(-uMax, uMax)), thetaRange(new RLLib::Range<T>(-M_PI, M_PI)), velocityRange(
-            new RLLib::Range<T>(-maxVelocity, maxVelocity)), mass(1.0), length(1.0), g(9.8), requiredUpTime(
-            10.0 /*seconds*/), upRange(M_PI_4 /*seconds*/), previousTheta(0), cumulatedRotation(0), overRotated(
-            false), overRotatedTime(0), upTime(0), useOverRotated(useOverRotated)
+        RLLib::RLProblem<T>(random, 2, 3, 1), uMax(2.0/*Doya's paper 5.0*/), stepTime(0.01), //
+        theta(0), velocity(0), maxVelocity( M_PI_4 / stepTime), //
+        actionRange(new RLLib::Range<float>(-uMax, uMax)), //
+        thetaRange(new RLLib::Range<T>(-M_PI, M_PI)), //
+        velocityRange(new RLLib::Range<T>(-maxVelocity, maxVelocity)), mass(1.0), length(1.0), //
+        g(9.8), requiredUpTime(10.0 /*seconds*/), upRange(M_PI_4 /*seconds*/), previousTheta(0), //
+        cumulatedRotation(0), overRotated(false), overRotatedTime(0), upTime(0), //
+        useOverRotated(useOverRotated)
     {
 
       Base::discreteActions->push_back(0, actionRange->min());
@@ -83,12 +85,11 @@ class SwingPendulum: public RLLib::RLProblem<T>
   public:
     void updateTRStep()
     {
-      RLLib::DenseVector<T>& vars = *Base::output->o_tp1;
-      vars[0] = thetaRange->toUnit(theta);
-      vars[1] = velocityRange->toUnit(velocity);
+      Base::output->o_tp1->setEntry(0, thetaRange->toUnit(theta));
+      Base::output->o_tp1->setEntry(1, velocityRange->toUnit(velocity));
 
-      Base::observations->at(0) = theta;
-      Base::observations->at(1) = velocity;
+      Base::output->observation_tp1->setEntry(0, theta);
+      Base::output->observation_tp1->setEntry(1, velocity);
     }
 
     void initialize()

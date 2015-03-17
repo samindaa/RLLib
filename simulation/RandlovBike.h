@@ -71,19 +71,20 @@ class RandlovBike: public RLProblem<Type>
 
   public:
     RandlovBike(Random<Type>* random, const bool& goToTarget) :
-        RLProblem<Type>(random, (goToTarget ? 1 : 0) + 5, 9, 0), goToTarget(goToTarget), x_goal(
-            1000.0f), y_goal(0), radius_goal(10.0f), reinforcement(0), isTerminal(false), omega(0), omega_dot(
-            0), omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(0), yf(0), xb(0), yb(0), psi_goal(
-            0), rCM(0), rf(0), rb(0), T(0), d(0), phi(0), psi(0), R1(-1.0), R2(0.0), R3(+1.0), R_FACTOR(
-            0.00001), dt(0.01), v(10.0 / 3.6), g(9.82), dCM(0.3), c(0.66), h(0.94), Mc(15.0), Md(
-            1.7), Mp(60.0), M(Mc + Mp), R(0.34),
+        RLProblem<Type>(random, (goToTarget ? 1 : 0) + 5, 9, 0), goToTarget(goToTarget), //
+        x_goal(1000.0f), y_goal(0), radius_goal(10.0f), reinforcement(0), isTerminal(false), //
+        omega(0), omega_dot(0), omega_d_dot(0), theta(0), theta_dot(0), theta_d_dot(0), xf(0), //
+        yf(0), xb(0), yb(0), psi_goal(0), rCM(0), rf(0), rb(0), T(0), d(0), phi(0), psi(0), //
+        R1(-1.0), R2(0.0), R3(+1.0), R_FACTOR(0.00001), dt(0.01), v(10.0 / 3.6), g(9.82), dCM(0.3), //
+        c(0.66), h(0.94), Mc(15.0), Md(1.7), Mp(60.0), M(Mc + Mp), R(0.34),
         /* tyre radius */
-        sigma_dot(v / R), I_bike((13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)), I_dc(
-            Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl((1.0 / 2) * Md * R * R), l(1.11), pi(
-        M_PI), Gamma(0.99), thetaRange(new Range<float>(-M_PI_2, M_PI_2)), thetaDotRange(
-            new Range<float>(-2, 2)), omegaRange(new Range<float>(-M_PI / 15.0f, M_PI / 15.0f)), omegaDotRange(
-            new Range<float>(-0.5, 0.5)), omegaDotDotRange(new Range<float>(-2, 2)), psiRange(
-            new Range<float>(-M_PI, M_PI))
+        sigma_dot(v / R), I_bike((13.0 / 3) * Mc * h * h + Mp * (h + dCM) * (h + dCM)), //
+        I_dc(Md * R * R), I_dv((3.0 / 2) * Md * R * R), I_dl((1.0 / 2) * Md * R * R), l(1.11), //
+        pi( M_PI), Gamma(0.99), thetaRange(new Range<float>(-M_PI_2, M_PI_2)), //
+        thetaDotRange(new Range<float>(-2, 2)), //
+        omegaRange(new Range<float>(-M_PI / 15.0f, M_PI / 15.0f)), //
+        omegaDotRange(new Range<float>(-0.5, 0.5)), omegaDotDotRange(new Range<float>(-2, 2)), //
+        psiRange(new Range<float>(-M_PI, M_PI))
     {
 
       for (int i = 0; i < Base::discreteActions->dimension(); i++)
@@ -129,21 +130,20 @@ class RandlovBike: public RLProblem<Type>
   public:
     void updateTRStep()
     {
-      DenseVector<Type>& vars = *Base::output->o_tp1;
-      vars[0] = omegaRange->toUnit(omega);
-      vars[1] = omegaDotRange->toUnit(omega_dot);
-      vars[2] = omegaDotDotRange->toUnit(omega_d_dot);
-      vars[3] = thetaRange->toUnit(theta);
-      vars[4] = thetaDotRange->toUnit(theta_dot);
+      Base::output->o_tp1->setEntry(0, omegaRange->toUnit(omega));
+      Base::output->o_tp1->setEntry(1, omegaDotRange->toUnit(omega_dot));
+      Base::output->o_tp1->setEntry(2, omegaDotDotRange->toUnit(omega_d_dot));
+      Base::output->o_tp1->setEntry(3, thetaRange->toUnit(theta));
+      Base::output->o_tp1->setEntry(4, thetaDotRange->toUnit(theta_dot));
       if (goToTarget)
-        vars[5] = psiRange->toUnit(psi_goal);
-      Base::observations->at(0) = omega;
-      Base::observations->at(1) = omega_dot;
-      Base::observations->at(2) = omega_d_dot;
-      Base::observations->at(3) = theta;
-      Base::observations->at(4) = theta_dot;
+        Base::output->o_tp1->setEntry(5, psiRange->toUnit(psi_goal));
+      Base::output->observation_tp1->setEntry(0, omega);
+      Base::output->observation_tp1->setEntry(1, omega_dot);
+      Base::output->observation_tp1->setEntry(2, omega_d_dot);
+      Base::output->observation_tp1->setEntry(3, theta);
+      Base::output->observation_tp1->setEntry(4, theta_dot);
       if (goToTarget)
-        Base::observations->at(5) = psi_goal;
+        Base::output->observation_tp1->setEntry(5, psi_goal);
     }
 
     void bike(const int& to_do, const int& action = 0)

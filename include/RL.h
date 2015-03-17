@@ -42,12 +42,15 @@ template<class T>
 class TRStep
 {
   public:
-    DenseVector<T>* o_tp1;
+    Vector<T>* o_tp1; // [0, 1]
+    Vector<T>* observation_tp1; // (-inf, inf)
     T r_tp1;
     T z_tp1;
     bool endOfEpisode;
+
     TRStep(const int& nbVars) :
-        o_tp1(new PVector<T>(nbVars)), r_tp1(0.0f), z_tp1(0.0f), endOfEpisode(false)
+        o_tp1(new PVector<T>(nbVars)), observation_tp1(new PVector<T>(nbVars)), r_tp1(0.0f), //
+        z_tp1(0.0f), endOfEpisode(false)
     {
     }
 
@@ -61,6 +64,7 @@ class TRStep
     ~TRStep()
     {
       delete o_tp1;
+      delete observation_tp1;
     }
 
     void setForcedEndOfEpisode(const bool& endOfEpisode)
@@ -177,24 +181,23 @@ class RLProblem
 {
   protected:
     Random<T>* random;
-    DenseVector<T>* observations;
     TRStep<T>* output;
     Actions<T>* discreteActions;
     Actions<T>* continuousActions;
     Ranges<T>* observationRanges;
+    int nbVars;
 
   public:
     RLProblem(Random<T>* random, int nbVars, int nbDiscreteActions, int nbContinuousActions) :
-        random(random), observations(new PVector<T>(nbVars)), output(new TRStep<T>(nbVars)), //
+        random(random), output(new TRStep<T>(nbVars)), //
         discreteActions(new ActionArray<T>(nbDiscreteActions)), //
         continuousActions(new ActionArray<T>(nbContinuousActions)), //
-        observationRanges(new Ranges<T>())
+        observationRanges(new Ranges<T>()), nbVars(nbVars)
     {
     }
 
     virtual ~RLProblem()
     {
-      delete observations;
       delete output;
       delete discreteActions;
       delete continuousActions;
@@ -238,11 +241,6 @@ class RLProblem
       return continuousActions;
     }
 
-    virtual const DenseVector<T>* getObservations() const
-    {
-      return observations;
-    }
-
     virtual TRStep<T>* getTRStep() const
     {
       return output;
@@ -250,7 +248,7 @@ class RLProblem
 
     virtual int dimension() const
     {
-      return observations->dimension();
+      return nbVars;
     }
 
     virtual const Ranges<T>* getObservationRanges() const
