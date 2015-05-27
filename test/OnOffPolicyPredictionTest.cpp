@@ -7,9 +7,9 @@
 
 #include "OnOffPolicyPredictionTest.h"
 
-OnOffPolicyPredictionTest::OnOffPolicyPredictionTest() :
-    random(new Random<double>), lineProblem(new LineProblem), randomWalkProblem(
-        new RandomWalk(random))
+OnOffPolicyPredictionTest::OnOffPolicyPredictionTest()
+    : random(new Random<double>), lineProblem(new LineProblem), //
+    randomWalkProblem(new RandomWalk(random))
 {
 }
 
@@ -68,6 +68,8 @@ void OnOffPolicyPredictionTest::testTD(FiniteStateGraph* problem, OnPolicyTDFact
   timer.stop();
 
   double error = FiniteStateGraph::distanceToSolution(solution, td->weights());
+  //for (int i = 0; i < solution->dimension(); ++i)
+  //  std::cout << "\t" << solution->getEntry(i) << " " << td->weights()->getEntry(i) << std::endl;
   std::cout << "## nbEpisode=" << nbEpisode << " error=" << error << " elapsedTime(ms)="
       << timer.getElapsedTimeInMilliSec() << std::endl;
 
@@ -102,7 +104,9 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(RandomWalk* problem, OffPolicyT
     //phi_t->set(agentState->project(stepData.v_t()));
     phi_tp1->set(agentState->currentFeatureState());
     if (stepData.v_t()->empty())
+    {
       gtd->initialize();
+    }
     else
     {
       double pi_t = targetPolicy->pi(stepData.a_t);
@@ -196,6 +200,34 @@ void OnOffPolicyPredictionTest::testOnRandomWalkProblem()
 
 }
 
+void OnOffPolicyPredictionTest::testOnRandomWalk2Problem()
+{
+  random->reseed(0);
+  for (int i = 0; i <= 10; ++i)
+    onPolicyTDFactoryVector.push_back(new TDLambdaTrueTest2(double(i) * 0.1));
+
+  RandomWalk2 randomWalk2Problem(random);
+
+  int tmp = 0;
+  for (std::vector<OnPolicyTDFactory*>::iterator iter = onPolicyTDFactoryVector.begin();
+      iter != onPolicyTDFactoryVector.end(); ++iter)
+  {
+    OnPolicyTDFactory* factory = *iter;
+    for (int i = 0; i < factory->lambdaValues()->dimension(); i++)
+    {
+      std::cout << "alpha: " << (double(tmp) * 0.1) << " lambda: "
+          << factory->lambdaValues()->getEntry(i) << std::endl;
+      testTD(&randomWalk2Problem, factory, factory->lambdaValues()->getEntry(i), 10);
+    }
+    ++tmp;
+  }
+
+  for (std::vector<OnPolicyTDFactory*>::iterator iter = onPolicyTDFactoryVector.begin();
+      iter != onPolicyTDFactoryVector.end(); ++iter)
+    delete *iter;
+  onPolicyTDFactoryVector.clear();
+}
+
 void OnOffPolicyPredictionTest::testOnRandomWalkProblemWithLambda()
 {
   random->reseed(0);
@@ -262,6 +294,7 @@ void OnOffPolicyPredictionTest::run()
   testOnRandomWalkProblemWithLambda();
   testOffPolicy();
   testOffPolicyWithLambda();
+  testOnRandomWalk2Problem();
 }
 
 RLLIB_TEST_MAKE(OnOffPolicyPredictionTest)

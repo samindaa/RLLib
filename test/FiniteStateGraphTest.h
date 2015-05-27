@@ -9,6 +9,8 @@
 #define FINITESTATEGRAPHTEST_H_
 
 #include "Test.h"
+//
+#include "StateGraph.h"
 
 RLLIB_TEST(FiniteStateGraphTest)
 

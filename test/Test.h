@@ -27,6 +27,7 @@
 #include <ctime>
 #include <string>
 #include <cstring>
+#include <cassert>
 #include <map>
 #include <set>
 #include <fstream>
@@ -49,7 +50,7 @@
 #include "SwingPendulum.h"
 #include "ContinuousGridworld.h"
 #include "NoStateProblem.h"
-#include "StateGraph.h"
+//#include "StateGraph.h"
 #include "NoisyInputSum.h"
 #include "RL.h"
 

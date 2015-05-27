@@ -30,7 +30,11 @@ void NAOTest::run()
     testEvaluate();
   }
   else
+  {
     std::cout << "Nothing ..." << std::endl;
+    RLLib::PVector<double> w;
+    w.resurrect("/home/sam/Projects/saminda/RC14/patt_rec/bin_backup/optTheta_audio_4ch.bin");
+  }
 }
 
 void NAOTest::testTrain()

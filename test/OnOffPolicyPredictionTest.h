@@ -9,6 +9,8 @@
 #define ONOFFPOLICYPREDICTIONTEST_H_
 
 #include "Test.h"
+//
+#include "StateGraph.h"
 
 class OnPolicyTDFactory
 {
@@ -18,8 +20,8 @@ class OnPolicyTDFactory
     Vector<double>* lambdaVector;
 
   public:
-    OnPolicyTDFactory() :
-        lambdaVector(0)
+    OnPolicyTDFactory()
+        : lambdaVector(0)
     {
     }
     virtual ~OnPolicyTDFactory()
@@ -53,8 +55,8 @@ class OffPolicyTDFactory: public OnPolicyTDFactory
     std::vector<OffPolicyTD<double>*> newOffPolicyTDs;
 
   public:
-    OffPolicyTDFactory() :
-        OnPolicyTDFactory()
+    OffPolicyTDFactory()
+        : OnPolicyTDFactory()
     {
     }
 
@@ -102,6 +104,8 @@ class OnOffPolicyPredictionTest: public OnOffPolicyPredictionTestBase
     void testOffPolicy();
     void testOffPolicyWithLambda();
     int nbEpisodeMax() const;
+
+    void testOnRandomWalk2Problem();
 
   public:
     void run();
@@ -204,6 +208,45 @@ class TDLambdaTrueTest: public OnPolicyTDFactory
       Vector<double>* vec = getLambdaVector(2);
       vec->setEntry(0, 0.5);
       vec->setEntry(1, 1.0);
+      return vec;
+    }
+
+    double precision()
+    {
+      return 0.01;
+    }
+};
+
+class TDLambdaTrueTest2: public OnPolicyTDFactory
+{
+  private:
+    double alpha;
+
+  public:
+    TDLambdaTrueTest2(const double& alpha)
+        : alpha(alpha)
+    {
+    }
+
+    OnPolicyTD<double>* create(const double& gamma, const double& lambda, const double& vectorNorm,
+        const int& vectorSize)
+    {
+      Trace<double>* newTrace = new ATrace<double>(vectorSize);
+      OnPolicyTD<double>* newOnPolicyTD = new TDLambdaTrue<double>(alpha, gamma, lambda, newTrace);
+      newTraces.push_back(newTrace);
+      newOnPolicyTDs.push_back(newOnPolicyTD);
+      return newOnPolicyTD;
+    }
+
+    const Vector<double>* lambdaValues()
+    {
+      double labmbda_range[] =
+      { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.925, 0.95, 0.9725, 1 };
+
+      int size = sizeof(labmbda_range) / sizeof(labmbda_range[0]);
+      Vector<double>* vec = getLambdaVector(size);
+      for (int i = 0; i < size; ++i)
+        vec->setEntry(i, labmbda_range[i]);
       return vec;
     }
 

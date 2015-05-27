@@ -9,6 +9,9 @@
 #define TEST_TREEFITTEDTEST_H_
 
 #include "Test.h"
+// Matrix
+#include "util/Eigen/Dense"
+using Eigen::MatrixXd;
 
 RLLIB_TEST(TreeFittedTest)
 class TreeFittedTest: public TreeFittedTestBase

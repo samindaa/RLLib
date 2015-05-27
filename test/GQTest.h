@@ -9,6 +9,8 @@
 #define GQTEST_H_
 
 #include "Test.h"
+//
+#include "StateGraph.h"
 
 class OffPolicyLearnerFactory
 {
