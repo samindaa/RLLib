@@ -35,7 +35,7 @@ class NoStateProblem: public RLLib::RLProblem<double>
   public:
     NoStateProblem(RLLib::Random<double>* random, const double& mu, const double& sigma,
         const RLLib::Range<double>* range = 0) :
-          RLLib::RLProblem<double>(random, 1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
+        RLLib::RLProblem<double>(random, 1, 1, 1), mu(mu), sigma(sigma), range(range), currentA(0)
     {
       discreteActions->push_back(0, 0);
       continuousActions->push_back(0, 0);

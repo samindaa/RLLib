@@ -389,7 +389,8 @@ void ExtendedProblemsTest::testPoleBalancingPlant()
       cout << "r=" << poleBalancing.r() << endl;
       ++round;
       cout << "round=" << round << endl;
-    } while (!poleBalancing.endOfEpisode());
+    }
+    while (!poleBalancing.endOfEpisode());
   }
 }
 

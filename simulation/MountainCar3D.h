@@ -112,26 +112,26 @@ class MountainCar3D: public RLProblem<T>
 
       switch (act->id())
       {
-      case 0:
-        xvelocity += cos(3 * xposition) * (-0.0025);
-        yvelocity += cos(3 * yposition) * (-0.0025);
-        break;
-      case 1:
-        xvelocity += -0.001 + cos(3 * xposition) * (-0.0025);
-        yvelocity += cos(3 * yposition) * (-0.0025);
-        break;
-      case 2:
-        xvelocity += +0.001 + cos(3 * xposition) * (-0.0025);
-        yvelocity += cos(3 * yposition) * (-0.0025);
-        break;
-      case 3:
-        xvelocity += cos(3 * xposition) * (-0.0025);
-        yvelocity += -0.001 + cos(3 * yposition) * (-0.0025);
-        break;
-      case 4:
-        xvelocity += cos(3 * xposition) * (-0.0025);
-        yvelocity += +0.001 + cos(3 * yposition) * (-0.0025);
-        break;
+        case 0:
+          xvelocity += cos(3 * xposition) * (-0.0025);
+          yvelocity += cos(3 * yposition) * (-0.0025);
+          break;
+        case 1:
+          xvelocity += -0.001 + cos(3 * xposition) * (-0.0025);
+          yvelocity += cos(3 * yposition) * (-0.0025);
+          break;
+        case 2:
+          xvelocity += +0.001 + cos(3 * xposition) * (-0.0025);
+          yvelocity += cos(3 * yposition) * (-0.0025);
+          break;
+        case 3:
+          xvelocity += cos(3 * xposition) * (-0.0025);
+          yvelocity += -0.001 + cos(3 * yposition) * (-0.0025);
+          break;
+        case 4:
+          xvelocity += cos(3 * xposition) * (-0.0025);
+          yvelocity += +0.001 + cos(3 * yposition) * (-0.0025);
+          break;
       }
 
       //xvelocity *= get_gaussian(1.0,std_dev_eff);

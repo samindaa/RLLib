@@ -36,7 +36,8 @@ class ContinuousGridworld: public RLLib::RLProblem<T>
 
   public:
     ContinuousGridworld(RLLib::Random<T>* random) :
-        RLLib::RLProblem<T>(random, 2, 2 * 2 + 1, 1), observationRange(new RLLib::Range<T>(0, 1.0)), //
+        RLLib::RLProblem<T>(random, 2, 2 * 2 + 1, 1), //
+        observationRange(new RLLib::Range<T>(0, 1.0)), //
         actionRange(new RLLib::Range<T>(-0.05, 0.05)), absoluteNoise(0.025)
     {
       // discrete actions

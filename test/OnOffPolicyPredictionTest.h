@@ -20,8 +20,8 @@ class OnPolicyTDFactory
     Vector<double>* lambdaVector;
 
   public:
-    OnPolicyTDFactory()
-        : lambdaVector(0)
+    OnPolicyTDFactory() :
+        lambdaVector(0)
     {
     }
     virtual ~OnPolicyTDFactory()
@@ -55,8 +55,8 @@ class OffPolicyTDFactory: public OnPolicyTDFactory
     std::vector<OffPolicyTD<double>*> newOffPolicyTDs;
 
   public:
-    OffPolicyTDFactory()
-        : OnPolicyTDFactory()
+    OffPolicyTDFactory() :
+        OnPolicyTDFactory()
     {
     }
 
@@ -223,8 +223,8 @@ class TDLambdaTrueTest2: public OnPolicyTDFactory
     double alpha;
 
   public:
-    TDLambdaTrueTest2(const double& alpha)
-        : alpha(alpha)
+    TDLambdaTrueTest2(const double& alpha) :
+        alpha(alpha)
     {
     }
 
@@ -240,8 +240,8 @@ class TDLambdaTrueTest2: public OnPolicyTDFactory
 
     const Vector<double>* lambdaValues()
     {
-      double labmbda_range[] =
-      { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.925, 0.95, 0.9725, 1 };
+      double labmbda_range[] = { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.925, 0.95,
+          0.9725, 1 };
 
       int size = sizeof(labmbda_range) / sizeof(labmbda_range[0]);
       Vector<double>* vec = getLambdaVector(size);

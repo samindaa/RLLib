@@ -27,15 +27,15 @@
 namespace RLLib
 {
 
-template<class T>
-class LearningAlgorithm: public Predictor<T>
-{
-  public:
-    virtual ~LearningAlgorithm()
-    {
-    }
-    virtual T learn(const Vector<T>* x_t, const T& y_tp1) = 0;
-};
+  template<class T>
+  class LearningAlgorithm: public Predictor<T>
+  {
+    public:
+      virtual ~LearningAlgorithm()
+      {
+      }
+      virtual T learn(const Vector<T>* x_t, const T& y_tp1) = 0;
+  };
 
 } // namespace RLLib
 

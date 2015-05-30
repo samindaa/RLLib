@@ -28,48 +28,48 @@
 namespace RLLib
 {
 
-template<class T>
-class Predictor
-{
-  public:
-    virtual ~Predictor()
-    {
-    }
-    virtual T predict(const Vector<T>* x) const =0;
-};
+  template<class T>
+  class Predictor
+  {
+    public:
+      virtual ~Predictor()
+      {
+      }
+      virtual T predict(const Vector<T>* x) const =0;
+  };
 
-template<class T>
-class OnPolicyTD: public Predictor<T>, public LinearLearner<T>
-{
-  public:
-    virtual ~OnPolicyTD()
-    {
-    }
-    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1) =0;
-};
+  template<class T>
+  class OnPolicyTD: public Predictor<T>, public LinearLearner<T>
+  {
+    public:
+      virtual ~OnPolicyTD()
+      {
+      }
+      virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1) =0;
+  };
 
-template<class T>
-class OffPolicyTD: public Predictor<T>, public LinearLearner<T>
-{
-  public:
-    virtual ~OffPolicyTD()
-    {
-    }
-    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& rho_t, const T& r_tp1,
-        const T& z_tp1) =0;
+  template<class T>
+  class OffPolicyTD: public Predictor<T>, public LinearLearner<T>
+  {
+    public:
+      virtual ~OffPolicyTD()
+      {
+      }
+      virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& rho_t, const T& r_tp1,
+          const T& z_tp1) =0;
 
-};
+  };
 
-template<class T>
-class GVF: public OffPolicyTD<T>
-{
-  public:
-    virtual ~GVF()
-    {
-    }
-    virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& gamma_tp1,
-        const T& lambda_tp1, const T& rho_t, const T& r_tp1, const T& z_tp1) =0;
-};
+  template<class T>
+  class GVF: public OffPolicyTD<T>
+  {
+    public:
+      virtual ~GVF()
+      {
+      }
+      virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& gamma_tp1,
+          const T& lambda_tp1, const T& rho_t, const T& r_tp1, const T& z_tp1) =0;
+  };
 
 } // namespace RLLib
 

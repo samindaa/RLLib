@@ -31,71 +31,72 @@
 namespace RLLib
 {
 
-template<class T>
-class Control: public ParameterizedFunction<T>
-{
-  public:
-    virtual ~Control()
-    {
-    }
-    virtual const Action<T>* initialize(const Vector<T>* x) =0;
-    virtual void reset() =0;
-    virtual const Action<T>* proposeAction(const Vector<T>* x) =0;
-    virtual const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t,
-        const Vector<T>* x_tp1, const T& r_tp1, const T& z_tp1) =0;
-    virtual T computeValueFunction(const Vector<T>* x) const =0;
-    virtual const Predictor<T>* predictor() const =0;
-};
+  template<class T>
+  class Control: public ParameterizedFunction<T>
+  {
+    public:
+      virtual ~Control()
+      {
+      }
+      virtual const Action<T>* initialize(const Vector<T>* x) =0;
+      virtual void reset() =0;
+      virtual const Action<T>* proposeAction(const Vector<T>* x) =0;
+      virtual const Action<T>* step(const Vector<T>* x_t, const Action<T>* a_t,
+          const Vector<T>* x_tp1, const T& r_tp1, const T& z_tp1) =0;
+      virtual T computeValueFunction(const Vector<T>* x) const =0;
+      virtual const Predictor<T>* predictor() const =0;
+  };
 
-template<class T>
-class OnPolicyControlLearner: public Control<T>
-{
-  public:
-    virtual ~OnPolicyControlLearner()
-    {
-    }
-};
+  template<class T>
+  class OnPolicyControlLearner: public Control<T>
+  {
+    public:
+      virtual ~OnPolicyControlLearner()
+      {
+      }
+  };
 
-template<class T>
-class OffPolicyControlLearner: public Control<T>
-{
-  public:
-    virtual ~OffPolicyControlLearner()
-    {
-    }
-    virtual void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
-        const T& r_tp1, const T& z_tp1) = 0;
-};
+  template<class T>
+  class OffPolicyControlLearner: public Control<T>
+  {
+    public:
+      virtual ~OffPolicyControlLearner()
+      {
+      }
+      virtual void learn(const Vector<T>* x_t, const Action<T>* a_t, const Vector<T>* x_tp1,
+          const T& r_tp1, const T& z_tp1) = 0;
+  };
 
-template<class T>
-class ActorOffPolicy: public ParameterizedFunction<T>
-{
-  public:
-    virtual ~ActorOffPolicy()
-    {
-    }
-    virtual void initialize() =0;
-    virtual void reset() =0;
-    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, T const& rho_t,
-        const T& delta_t) =0;
-    virtual PolicyDistribution<T>* policy() const =0;
-    virtual const Action<T>* proposeAction(const Representations<T>* phi) =0;
-    virtual T pi(const Action<T>* a) const =0;
-};
+  template<class T>
+  class ActorOffPolicy: public ParameterizedFunction<T>
+  {
+    public:
+      virtual ~ActorOffPolicy()
+      {
+      }
+      virtual void initialize() =0;
+      virtual void reset() =0;
+      virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, T const& rho_t,
+          const T& delta_t) =0;
+      virtual PolicyDistribution<T>* policy() const =0;
+      virtual const Action<T>* proposeAction(const Representations<T>* phi) =0;
+      virtual T pi(const Action<T>* a) const =0;
+  };
 
-template<class T>
-class ActorOnPolicy: public ParameterizedFunction<T>
-{
-  public:
-    virtual ~ActorOnPolicy()
-    {
-    }
-    virtual void initialize() =0;
-    virtual void reset() =0;
-    virtual void update(const Representations<T>* phi_t, const Action<T>* a_t, const T& delta_t) =0;
-    virtual PolicyDistribution<T>* policy() const =0;
-    virtual const Action<T>* proposeAction(const Representations<T>* phi) =0;
-};
+  template<class T>
+  class ActorOnPolicy: public ParameterizedFunction<T>
+  {
+    public:
+      virtual ~ActorOnPolicy()
+      {
+      }
+      virtual void initialize() =0;
+      virtual void reset() =0;
+      virtual void update(const Representations<T>* phi_t, const Action<T>* a_t,
+          const T& delta_t) =0;
+      virtual PolicyDistribution<T>* policy() const =0;
+      virtual const Action<T>* proposeAction(const Representations<T>* phi) =0;
+  };
 
 } // namespace RLLib
 

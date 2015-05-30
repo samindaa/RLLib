@@ -66,26 +66,26 @@ class TraceTest: public TraceTestBase
       TraceDoubleType* trace = 0;
       switch (type)
       {
-      case ATraceDouble:
-      {
-        trace = new ATraceDoubleType(100);
-        break;
-      }
-      case RTraceDouble:
-      {
-        trace = new RTraceDoubleType(100);
-        break;
-      }
-      case AMaxTraceDouble:
-      {
-        trace = new AMaxTraceDoubleType(100, 1e-8, 5.0);
-        break;
-      }
-      default:
-      {
-        cerr << "ERROR!" << endl;
-        exit(-1);
-      }
+        case ATraceDouble:
+        {
+          trace = new ATraceDoubleType(100);
+          break;
+        }
+        case RTraceDouble:
+        {
+          trace = new RTraceDoubleType(100);
+          break;
+        }
+        case AMaxTraceDouble:
+        {
+          trace = new AMaxTraceDoubleType(100, 1e-8, 5.0);
+          break;
+        }
+        default:
+        {
+          cerr << "ERROR!" << endl;
+          exit(-1);
+        }
       }
       traces.push_back(trace);
       return trace;

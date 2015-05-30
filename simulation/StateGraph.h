@@ -47,8 +47,8 @@ namespace RLLib
       std::string name;
       double reward;
 
-      GraphState(const std::string& name, const double& reward)
-          : vectorRepresentation(0), name(name), reward(reward)
+      GraphState(const std::string& name, const double& reward) :
+          vectorRepresentation(0), name(name), reward(reward)
       {
       }
 
@@ -93,8 +93,8 @@ namespace RLLib
           const Action<double>* a_tp1;
 
           StepData(const int& stepTime, const GraphState* s_t, const Action<double>* a_t,
-              GraphState* s_tp1, const double& r_tp1, const Action<double>* a_tp1)
-              : stepTime(stepTime), s_t(s_t), a_t(a_t), s_tp1(s_tp1), r_tp1(r_tp1), a_tp1(a_tp1)
+              GraphState* s_tp1, const double& r_tp1, const Action<double>* a_tp1) :
+              stepTime(stepTime), s_t(s_t), a_t(a_t), s_tp1(s_tp1), r_tp1(r_tp1), a_tp1(a_tp1)
           {
           }
 
@@ -133,8 +133,8 @@ namespace RLLib
       std::vector<GraphState*>* graphStates;
 
     public:
-      FiniteStateGraph()
-          : O(new GraphState("NULL", std::numeric_limits<int>::min())), //
+      FiniteStateGraph() :
+          O(new GraphState("NULL", std::numeric_limits<int>::min())), //
           X(new Action<double>(std::numeric_limits<int>::max())), stepTime(-1), s_0(0), a_t(0), //
           s_t(0), acting(0), graphStates(0)
       {
@@ -248,8 +248,8 @@ namespace RLLib
       GraphState* C;
       GraphState* D;
 
-      LineProblem()
-          : FiniteStateGraph(), Gamma(0.9), actions(new ActionArray<double>(1)), //
+      LineProblem() :
+          FiniteStateGraph(), Gamma(0.9), actions(new ActionArray<double>(1)), //
           acting(new SingleActionPolicy<double>(actions)), states(new std::vector<GraphState*>()), //
           solution(new PVector<double>(3)), Move(actions->getEntry(0))
       {
@@ -339,8 +339,8 @@ namespace RLLib
 
       Policy<double>* acting;
 
-      RandomWalk(Random<double>* random)
-          : FiniteStateGraph(), random(random), Gamma(0.9), actions(new ActionArray<double>(2)), //
+      RandomWalk(Random<double>* random) :
+          FiniteStateGraph(), random(random), Gamma(0.9), actions(new ActionArray<double>(2)), //
           states(new std::vector<GraphState*>()), solution(new PVector<double>(5)), //
           Left(actions->getEntry(0)), Right(actions->getEntry(1))
       {
@@ -472,8 +472,8 @@ namespace RLLib
       const Action<double>* Right;
       Policy<double>* acting;
 
-      RandomWalk2(Random<double>* random)
-          : FiniteStateGraph(), random(random), Gamma(0.99), pRight(0.9), //
+      RandomWalk2(Random<double>* random) :
+          FiniteStateGraph(), random(random), Gamma(0.99), pRight(0.9), //
           actions(new ActionArray<double>(2)), states(new std::vector<GraphState*>()), //
           solution(new PVector<double>(10)), Left(actions->getEntry(0)), Right(actions->getEntry(1))
       {
@@ -576,8 +576,8 @@ namespace RLLib
       Representations<double>* phis;
 
     public:
-      FSGAgentState(FiniteStateGraph* graph)
-          : graph(graph), featureState(0), stateIndexes(new std::map<GraphState*, int>)
+      FSGAgentState(FiniteStateGraph* graph) :
+          graph(graph), featureState(0), stateIndexes(new std::map<GraphState*, int>)
       {
         std::vector<GraphState*>* states = graph->states();
         for (std::vector<GraphState*>::iterator iter = states->begin(); iter != states->end();

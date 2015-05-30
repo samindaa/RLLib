@@ -32,99 +32,99 @@
 
 namespace RLLib
 {
-class Timer
-{
-  public:
-    Timer()
-    {
+  class Timer
+  {
+    public:
+      Timer()
+      {
 #ifdef _MSC_VER
-      QueryPerformanceFrequency(&frequency);
-      startCount.QuadPart = 0;
-      endCount.QuadPart = 0;
+        QueryPerformanceFrequency(&frequency);
+        startCount.QuadPart = 0;
+        endCount.QuadPart = 0;
 #else
-      startCount.tv_sec = startCount.tv_usec = 0;
-      endCount.tv_sec = endCount.tv_usec = 0;
+        startCount.tv_sec = startCount.tv_usec = 0;
+        endCount.tv_sec = endCount.tv_usec = 0;
 #endif
 
-      stopped = 0;
-      startTimeInMicroSec = 0;
-      endTimeInMicroSec = 0;
-    }
+        stopped = 0;
+        startTimeInMicroSec = 0;
+        endTimeInMicroSec = 0;
+      }
 
-    ~Timer()
-    {
-    }
+      ~Timer()
+      {
+      }
 
-    void start()
-    {
-      stopped = 0; // reset stop flag
+      void start()
+      {
+        stopped = 0; // reset stop flag
 #ifdef _MSC_VER
-          QueryPerformanceCounter(&startCount);
+            QueryPerformanceCounter(&startCount);
 #else
-      gettimeofday(&startCount, NULL);
+        gettimeofday(&startCount, NULL);
 #endif
-    }
+      }
 
-    void stop()
-    {
-      stopped = 1; // set timer stopped flag
+      void stop()
+      {
+        stopped = 1; // set timer stopped flag
 
 #ifdef _MSC_VER
-      QueryPerformanceCounter(&endCount);
+        QueryPerformanceCounter(&endCount);
 #else
-      gettimeofday(&endCount, NULL);
-#endif
-    }
-
-    double getElapsedTimeInMicroSec()
-    {
-#ifdef _MSC_VER
-      if(!stopped)
-      QueryPerformanceCounter(&endCount);
-
-      startTimeInMicroSec = startCount.QuadPart * (1000000.0 / frequency.QuadPart);
-      endTimeInMicroSec = endCount.QuadPart * (1000000.0 / frequency.QuadPart);
-#else
-      if (!stopped)
         gettimeofday(&endCount, NULL);
-
-      startTimeInMicroSec = (startCount.tv_sec * 1000000.0) + startCount.tv_usec;
-      endTimeInMicroSec = (endCount.tv_sec * 1000000.0) + endCount.tv_usec;
 #endif
+      }
 
-      return endTimeInMicroSec - startTimeInMicroSec;
-    }
-
-    double getElapsedTimeInSec()
-    {
-      return this->getElapsedTimeInMicroSec() * 0.000001;
-    }
-
-    double getElapsedTime()
-    {
-      return this->getElapsedTimeInSec();
-    }
-
-    double getElapsedTimeInMilliSec()
-    {
-      return this->getElapsedTimeInMicroSec() * 0.001;
-    }
-
-  protected:
-
-  private:
-    double startTimeInMicroSec;
-    double endTimeInMicroSec;
-    int stopped;
+      double getElapsedTimeInMicroSec()
+      {
 #ifdef _MSC_VER
-    LARGE_INTEGER frequency;                    // ticks per second
-    LARGE_INTEGER startCount;//
-    LARGE_INTEGER endCount;//
+        if(!stopped)
+        QueryPerformanceCounter(&endCount);
+
+        startTimeInMicroSec = startCount.QuadPart * (1000000.0 / frequency.QuadPart);
+        endTimeInMicroSec = endCount.QuadPart * (1000000.0 / frequency.QuadPart);
 #else
-    timeval startCount;                         //
-    timeval endCount;                           //
+        if (!stopped)
+          gettimeofday(&endCount, NULL);
+
+        startTimeInMicroSec = (startCount.tv_sec * 1000000.0) + startCount.tv_usec;
+        endTimeInMicroSec = (endCount.tv_sec * 1000000.0) + endCount.tv_usec;
 #endif
-};
+
+        return endTimeInMicroSec - startTimeInMicroSec;
+      }
+
+      double getElapsedTimeInSec()
+      {
+        return this->getElapsedTimeInMicroSec() * 0.000001;
+      }
+
+      double getElapsedTime()
+      {
+        return this->getElapsedTimeInSec();
+      }
+
+      double getElapsedTimeInMilliSec()
+      {
+        return this->getElapsedTimeInMicroSec() * 0.001;
+      }
+
+    protected:
+
+    private:
+      double startTimeInMicroSec;
+      double endTimeInMicroSec;
+      int stopped;
+#ifdef _MSC_VER
+      LARGE_INTEGER frequency;                    // ticks per second
+      LARGE_INTEGER startCount;//
+      LARGE_INTEGER endCount;//
+#else
+      timeval startCount;                         //
+      timeval endCount;                           //
+#endif
+  };
 
 }  // namespace RLLib
 

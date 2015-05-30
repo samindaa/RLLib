@@ -104,8 +104,7 @@ class RandlovBike: public RLProblem<Type>
   private:
     enum OperationMode
     {
-      start = 0,
-      execute_action,
+      start = 0, execute_action,
     };
 
     float calcDistToGoal(float xf, float xb, float yf, float yb)
@@ -155,97 +154,97 @@ class RandlovBike: public RLProblem<Type>
 
       switch (to_do)
       {
-      case start:
-      {
-        omega = omega_dot = omega_d_dot = 0;
-        theta = theta_dot = theta_d_dot = 0;
-        xb = 0;
-        yb = 0;
-        xf = 0;
-        yf = l;
-        psi = atan((xb - xf) / (yf - yb));
-        psi_goal = calcAngleToGoal(xf, xb, yf, yb);
-        isTerminal = false;
-        break;
-      }
-
-      case execute_action:
-      {
-
-        if (theta == 0)
+        case start:
         {
-          rCM = rf = rb = 9999999; /* just a large number */
-        }
-        else
-        {
-          rCM = sqrt(pow(l - c, 2) + l * l / (pow(tan(theta), 2)));
-          rf = l / fabs(sin(theta));
-          rb = l / fabs(tan(theta));
-        } /* rCM, rf and rb are always positiv */
-
-        /* Main physics eq. in the bicycle model coming here: */
-        phi = omega + atan(d / h);
-        omega_d_dot = (h * M * g * sin(phi)
-            - cos(phi)
-                * (I_dc * sigma_dot * theta_dot
-                    + Signum::valueOf(theta) * v * v
-                        * (Md * R * (1.0 / rf + 1.0 / rb) + M * h / rCM))) / I_bike;
-        theta_d_dot = (T - I_dv * omega_dot * sigma_dot) / I_dl;
-
-        /*--- Eulers method ---*/
-        omega_dot += omega_d_dot * dt;
-        omega += omega_dot * dt;
-        theta_dot += theta_d_dot * dt;
-        theta += theta_dot * dt;
-
-        if (fabs(theta) > 1.3963)
-        { /* handlebars cannot turn more than
-         80 degrees */
-          theta = Signum::valueOf(theta) * 1.3963;
+          omega = omega_dot = omega_d_dot = 0;
+          theta = theta_dot = theta_d_dot = 0;
+          xb = 0;
+          yb = 0;
+          xf = 0;
+          yf = l;
+          psi = atan((xb - xf) / (yf - yb));
+          psi_goal = calcAngleToGoal(xf, xb, yf, yb);
+          isTerminal = false;
+          break;
         }
 
-        /* New position of front tyre */
-        float temp = v * dt / (2 * rf);
-        if (temp > 1)
-          temp = Signum::valueOf(psi + theta) * pi / 2;
-        else
-          temp = Signum::valueOf(psi + theta) * asin(temp);
-        xf += v * dt * (-sin(psi + theta + temp));
-        yf += v * dt * cos(psi + theta + temp);
-
-        /* New position of back tyre */
-        temp = v * dt / (2 * rb);
-        if (temp > 1)
-          temp = Signum::valueOf(psi) * pi / 2;
-        else
-          temp = Signum::valueOf(psi) * asin(temp);
-        xb += v * dt * (-sin(psi + temp));
-        yb += v * dt * (cos(psi + temp));
-
-        /* Round off errors accumulate so the length of the bike changes over many
-         iterations. The following take care of that: */
-        temp = sqrt((xf - xb) * (xf - xb) + (yf - yb) * (yf - yb));
-        if (fabs(temp - l) > 0.01)
+        case execute_action:
         {
-          xb += (xb - xf) * (l - temp) / temp;
-          yb += (yb - yf) * (l - temp) / temp;
-        }
 
-        temp = yf - yb;
-        if ((xf == xb) && (temp < 0))
-          psi = pi;
-        else
-        {
-          if (temp > 0)
-            psi = atan((xb - xf) / temp);
+          if (theta == 0)
+          {
+            rCM = rf = rb = 9999999; /* just a large number */
+          }
           else
-            psi = Signum::valueOf(xb - xf) * (pi / 2) - atan(temp / (xb - xf));
+          {
+            rCM = sqrt(pow(l - c, 2) + l * l / (pow(tan(theta), 2)));
+            rf = l / fabs(sin(theta));
+            rb = l / fabs(tan(theta));
+          } /* rCM, rf and rb are always positiv */
+
+          /* Main physics eq. in the bicycle model coming here: */
+          phi = omega + atan(d / h);
+          omega_d_dot = (h * M * g * sin(phi)
+              - cos(phi)
+                  * (I_dc * sigma_dot * theta_dot
+                      + Signum::valueOf(theta) * v * v
+                          * (Md * R * (1.0 / rf + 1.0 / rb) + M * h / rCM))) / I_bike;
+          theta_d_dot = (T - I_dv * omega_dot * sigma_dot) / I_dl;
+
+          /*--- Eulers method ---*/
+          omega_dot += omega_d_dot * dt;
+          omega += omega_dot * dt;
+          theta_dot += theta_d_dot * dt;
+          theta += theta_dot * dt;
+
+          if (fabs(theta) > 1.3963)
+          { /* handlebars cannot turn more than
+           80 degrees */
+            theta = Signum::valueOf(theta) * 1.3963;
+          }
+
+          /* New position of front tyre */
+          float temp = v * dt / (2 * rf);
+          if (temp > 1)
+            temp = Signum::valueOf(psi + theta) * pi / 2;
+          else
+            temp = Signum::valueOf(psi + theta) * asin(temp);
+          xf += v * dt * (-sin(psi + theta + temp));
+          yf += v * dt * cos(psi + theta + temp);
+
+          /* New position of back tyre */
+          temp = v * dt / (2 * rb);
+          if (temp > 1)
+            temp = Signum::valueOf(psi) * pi / 2;
+          else
+            temp = Signum::valueOf(psi) * asin(temp);
+          xb += v * dt * (-sin(psi + temp));
+          yb += v * dt * (cos(psi + temp));
+
+          /* Round off errors accumulate so the length of the bike changes over many
+           iterations. The following take care of that: */
+          temp = sqrt((xf - xb) * (xf - xb) + (yf - yb) * (yf - yb));
+          if (fabs(temp - l) > 0.01)
+          {
+            xb += (xb - xf) * (l - temp) / temp;
+            yb += (yb - yf) * (l - temp) / temp;
+          }
+
+          temp = yf - yb;
+          if ((xf == xb) && (temp < 0))
+            psi = pi;
+          else
+          {
+            if (temp > 0)
+              psi = atan((xb - xf) / temp);
+            else
+              psi = Signum::valueOf(xb - xf) * (pi / 2) - atan(temp / (xb - xf));
+          }
+
+          psi_goal = calcAngleToGoal(xf, xb, yf, yb);
+
+          break;
         }
-
-        psi_goal = calcAngleToGoal(xf, xb, yf, yb);
-
-        break;
-      }
       }
 
       /*-- Calculation of the reinforcement  signal --*/

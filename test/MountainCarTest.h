@@ -29,9 +29,13 @@ RLLIB_TEST(MountainCarTest)
 class MountainCarTest: public MountainCarTestBase
 {
   public:
-    MountainCarTest() {}
+    MountainCarTest()
+    {
+    }
 
-    virtual ~MountainCarTest() {}
+    virtual ~MountainCarTest()
+    {
+    }
     void run();
 
   private:

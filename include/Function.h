@@ -27,48 +27,48 @@
 namespace RLLib
 {
 
-template<class T>
-class ParameterizedFunction
-{
-  public:
-    virtual ~ParameterizedFunction()
-    {
-    }
-    virtual void persist(const char* f) const =0;
-    virtual void resurrect(const char* f) =0;
-};
+  template<class T>
+  class ParameterizedFunction
+  {
+    public:
+      virtual ~ParameterizedFunction()
+      {
+      }
+      virtual void persist(const char* f) const =0;
+      virtual void resurrect(const char* f) =0;
+  };
 
-template<class T>
-class LinearLearner: public ParameterizedFunction<T>
-{
-  public:
-    virtual ~LinearLearner()
-    {
-    }
-    virtual T initialize() =0;
-    virtual void reset() =0;
-    virtual Vector<T>* weights() const =0;
-};
+  template<class T>
+  class LinearLearner: public ParameterizedFunction<T>
+  {
+    public:
+      virtual ~LinearLearner()
+      {
+      }
+      virtual T initialize() =0;
+      virtual void reset() =0;
+      virtual Vector<T>* weights() const =0;
+  };
 
-template<class T>
-class RewardFunction
-{
-  public:
-    virtual ~RewardFunction()
-    {
-    }
-    virtual T reward() =0;
-};
+  template<class T>
+  class RewardFunction
+  {
+    public:
+      virtual ~RewardFunction()
+      {
+      }
+      virtual T reward() =0;
+  };
 
-template<class T>
-class OutcomeFunction
-{
-  public:
-    virtual ~OutcomeFunction()
-    {
-    }
-    virtual T outcome() =0;
-};
+  template<class T>
+  class OutcomeFunction
+  {
+    public:
+      virtual ~OutcomeFunction()
+      {
+      }
+      virtual T outcome() =0;
+  };
 
 }  // namespace RLLib
 

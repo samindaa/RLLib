@@ -7,8 +7,8 @@
 
 #include "OnOffPolicyPredictionTest.h"
 
-OnOffPolicyPredictionTest::OnOffPolicyPredictionTest()
-    : random(new Random<double>), lineProblem(new LineProblem), //
+OnOffPolicyPredictionTest::OnOffPolicyPredictionTest() :
+    random(new Random<double>), lineProblem(new LineProblem), //
     randomWalkProblem(new RandomWalk(random))
 {
 }

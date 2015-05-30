@@ -38,9 +38,13 @@ RLLIB_TEST(ContinuousGridworldTest)
 class ContinuousGridworldTest: public ContinuousGridworldTestBase
 {
   public:
-    ContinuousGridworldTest() {}
+    ContinuousGridworldTest()
+    {
+    }
 
-    virtual ~ContinuousGridworldTest() {}
+    virtual ~ContinuousGridworldTest()
+    {
+    }
     void run();
 
   private:

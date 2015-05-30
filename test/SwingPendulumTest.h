@@ -38,9 +38,13 @@ RLLIB_TEST(SwingPendulumTest)
 class SwingPendulumTest: public SwingPendulumTestBase
 {
   public:
-    SwingPendulumTest() {}
+    SwingPendulumTest()
+    {
+    }
 
-    virtual ~SwingPendulumTest() {}
+    virtual ~SwingPendulumTest()
+    {
+    }
     void run();
 
   private:

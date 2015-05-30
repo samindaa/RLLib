@@ -30,9 +30,13 @@ RLLIB_TEST(ProjectorTest)
 class ProjectorTest: public ProjectorTestBase
 {
   public:
-    ProjectorTest() {}
+    ProjectorTest()
+    {
+    }
 
-    virtual ~ProjectorTest() {}
+    virtual ~ProjectorTest()
+    {
+    }
     void run();
 
   private:
