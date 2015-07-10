@@ -55,8 +55,9 @@ void MountainCarModel2::doLearning(Window* window)
   }
 
   emit signal_add(window->problemVector[0],
-      Vec(simulator->getRLProblem()->getObservations()->at(0),
-          simulator->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
+      Vec(simulator->getRLProblem()->getTRStep()->observation_tp1->getEntry(0),
+          simulator->getRLProblem()->getTRStep()->observation_tp1->getEntry(1)),
+      Vec(0.0, 0.0, 0.0, 1.0));
   emit signal_draw(window->problemVector[0]);
 
   updateValueFunction(window, control, problem->getTRStep(), problem->getObservationRanges(),

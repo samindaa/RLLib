@@ -91,8 +91,9 @@ void SwingPendulumModel2::doLearning(Window* window)
     }
 
     emit signal_add(window->problemVector[i->first],
-        Vec(i->second->getRLProblem()->getObservations()->at(0),
-            i->second->getRLProblem()->getObservations()->at(1)), Vec(0.0, 0.0, 0.0, 1.0));
+        Vec(i->second->getRLProblem()->getTRStep()->observation_tp1->getEntry(0),
+            i->second->getRLProblem()->getTRStep()->observation_tp1->getEntry(1)),
+        Vec(0.0, 0.0, 0.0, 1.0));
     emit signal_draw(window->problemVector[i->first]);
   }
 
