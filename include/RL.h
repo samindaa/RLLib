@@ -506,6 +506,11 @@ namespace RLLib
         return agentAction == 0;
       }
 
+      const Action<T>* getAgentAction() const
+      {
+        return agentAction;
+      }
+
       bool isEndingOfEpisode() const
       {
         return endingOfEpisode;

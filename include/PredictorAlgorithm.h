@@ -170,10 +170,11 @@ namespace RLLib
       typedef TDLambdaAbstract<T> Base;
       T v_t;
       T v_tp1;
-      bool initializedVt;
+      T v_old;
+
     public:
       TDLambdaTrue(const T& alpha, const T& gamma, const T& lambda, Trace<T>* e) :
-          TDLambdaAbstract<T>(alpha, gamma, lambda, e), v_t(0), v_tp1(0), initializedVt(false)
+          TDLambdaAbstract<T>(alpha, gamma, lambda, e), v_t(0), v_tp1(0), v_old(0)
       {
       }
 
@@ -184,31 +185,27 @@ namespace RLLib
       T initialize()
       {
         Base::initialize();
-        initializedVt = false;
+        v_old = 0;
         return Base::delta_t;
-      }
-
-      void initialize(const Vector<T>* x_t)
-      {
-        v_t = TD<T>::v->dot(x_t);
-        initializedVt = true;
       }
 
       T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1, const T& gamma_tp1)
       {
         ASSERT(TD<T>::initialized);
-        if (!initializedVt)
-          initialize(x_t);
+        v_t = TD<T>::v->dot(x_t);
         v_tp1 = TD<T>::v->dot(x_tp1);
         TD<T>::delta_t = r_tp1 + gamma_tp1 * v_tp1 - v_t;
-        Base::e->update(Base::lambda * Base::gamma_t, x_t,
-            TD<T>::alpha_v * (T(1) - Base::gamma_t * Base::lambda * Base::e->vect()->dot(x_t)));
-        TD<T>::v->addToSelf(TD<T>::alpha_v * (v_t - TD<T>::v->dot(x_t)), x_t)->addToSelf(
-            TD<T>::delta_t, Base::e->vect());
-        v_t = v_tp1;
+
+        Base::e->update(Base::gamma_t * Base::lambda, x_t,
+            (T(1) - TD<T>::alpha_v * Base::gamma_t * Base::lambda * Base::e->vect()->dot(x_t)));
+        TD<T>::v->addToSelf(-TD<T>::alpha_v * (v_t - v_old), x_t)->addToSelf(
+            TD<T>::alpha_v * (TD<T>::delta_t + v_t - v_old), Base::e->vect());
+
+        v_old = v_tp1;
         Base::gamma_t = gamma_tp1;
         return TD<T>::delta_t;
       }
+
   };
 
   template<class T>
@@ -336,10 +333,11 @@ namespace RLLib
   {
     private:
       typedef Sarsa<T> Base;
-      bool initializedVt;
+      T v_old;
+
     public:
       SarsaTrue(const T& alpha, const T& gamma, const T& lambda, Trace<T>* e) :
-          Sarsa<T>(alpha, gamma, lambda, e), initializedVt(false)
+          Sarsa<T>(alpha, gamma, lambda, e), v_old(0)
       {
       }
 
@@ -351,28 +349,24 @@ namespace RLLib
       T initialize()
       {
         Base::initialize();
-        initializedVt = false;
+        v_old = 0;
         return T(0);
-      }
-
-      void initialize(const Vector<T>* phi_t)
-      {
-        Base::v_t = Base::q->dot(phi_t);
-        initializedVt = true;
       }
 
       T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& r_tp1)
       {
         ASSERT(Base::initialized);
-        if (!initializedVt)
-          initialize(phi_t);
+
+        Base::v_t = Base::q->dot(phi_t);
         Base::v_tp1 = Base::q->dot(phi_tp1);
         Base::delta = r_tp1 + Base::gamma * Base::v_tp1 - Base::v_t;
-        Base::e->update(Base::lambda * Base::gamma, phi_t,
-            Base::alpha * (T(1) - Base::gamma * Base::lambda * Base::e->vect()->dot(phi_t)));
-        Base::q->addToSelf(Base::alpha * (Base::v_t - Base::q->dot(phi_t)), phi_t)->addToSelf(
-            Base::delta, Base::e->vect());
-        Base::v_t = Base::v_tp1;
+
+        Base::e->update(Base::gamma * Base::lambda, phi_t,
+            (T(1) - Base::alpha * Base::gamma * Base::lambda * Base::e->vect()->dot(phi_t)));
+        Base::q->addToSelf(-Base::alpha * (Base::v_t - v_old), phi_t)->addToSelf(
+            Base::alpha * (Base::delta + Base::v_t - v_old), Base::e->vect());
+
+        v_old = Base::v_tp1;
         return Base::delta;
       }
   };

@@ -560,11 +560,11 @@ namespace RLLib
     protected:
       Random<T>* random;
       Actions<T>* actions;
-      const Action<T>* prev;
+      const Action<T>* previousAction;
       PVector<T>* distribution;
     public:
       RandomBiasPolicy(Random<T>* random, Actions<T>* actions) :
-          random(random), actions(actions), prev(&actions->at(0)), //
+          random(random), actions(actions), previousAction(actions->getEntry(0)), //
           distribution(new PVector<T>(actions->dimension()))
       {
       }
@@ -585,40 +585,42 @@ namespace RLLib
           for (typename Actions<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
           {
             const int id = (*a)->id();
-            if (id == prev->id())
+            if (id == previousAction->id())
               distribution->at(id) = 0.5;
             else
               distribution->at(id) = 0.5 / (actions->dimension() - 1);
           }
         }
         // chose an action
-        T rand = random->nextDouble();
+        T rand = random->nextReal();
         T sum = T(0);
         for (typename Actions<T>::const_iterator a = actions->begin(); a != actions->end(); ++a)
         {
           sum += distribution->at((*a)->id());
           if (sum >= rand)
           {
-            prev = *a;
+            previousAction = *a;
             return;
           }
         }
-        prev = &actions->at(actions->dimension() - 1);
+
+        previousAction = actions->getEntry(actions->dimension() - 1);
       }
 
       T pi(const Action<T>* action)
       {
-        return distribution->at(action->id());
+        return distribution->getEntry(action->id());
       }
 
       const Action<T>* sampleAction()
       {
-        return *prev;
+        return previousAction;
       }
+
       const Action<T>* sampleBestAction()
       {
         ASSERT(false);
-        return actions->at(0);
+        return actions->getEntry(0);
       }
   };
 
