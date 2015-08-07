@@ -105,7 +105,7 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
 
   const Predictor<double>* predictor = learner->predictor();
   const LinearLearner<double>* gqLearner =
-      static_cast<const LinearLearner<double>*>(static_cast<const GQ<double>*>(predictor));
+      static_cast<const LinearLearner<double>*>(reinterpret_cast<const GQ<double>*>(predictor));
   const Vector<double>* v = gqLearner->weights();
   Assert::checkValues(v);
 

@@ -39,7 +39,7 @@ namespace RLLib
   };
 
   template<class T>
-  class OnPolicyTD: public Predictor<T>, public LinearLearner<T>
+  class OnPolicyTD: public virtual Predictor<T>, public virtual LinearLearner<T>
   {
     public:
       virtual ~OnPolicyTD()
@@ -49,7 +49,7 @@ namespace RLLib
   };
 
   template<class T>
-  class OffPolicyTD: public Predictor<T>, public LinearLearner<T>
+  class OffPolicyTD: public virtual Predictor<T>, public virtual LinearLearner<T>
   {
     public:
       virtual ~OffPolicyTD()

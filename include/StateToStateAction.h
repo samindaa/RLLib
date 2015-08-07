@@ -38,7 +38,7 @@ namespace RLLib
       {
         for (typename Actions<T>::const_iterator iter = actions->begin(); iter != actions->end();
             ++iter)
-          phis.push_back(new SVector<T>(numFeatures));
+          phis.push_back(new SVector<T>(numFeatures)); // fixme: generalize
       }
 
       ~Representations()

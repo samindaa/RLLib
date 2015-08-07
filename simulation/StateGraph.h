@@ -577,7 +577,7 @@ namespace RLLib
 
     public:
       FSGAgentState(FiniteStateGraph* graph) :
-          graph(graph), featureState(0), stateIndexes(new std::map<GraphState*, int>)
+          graph(graph), featureState(0), stateIndexes(new std::map<GraphState*, int>())
       {
         std::vector<GraphState*>* states = graph->states();
         for (std::vector<GraphState*>::iterator iter = states->begin(); iter != states->end();
@@ -588,8 +588,8 @@ namespace RLLib
             stateIndexes->insert(std::make_pair(gs, stateIndexes->size()));
         }
         featureState = new PVector<double>(stateIndexes->size());
-        phis = new Representations<double>(stateIndexes->size() * graph->getActions()->dimension(),
-            graph->getActions());
+        phis = new Representations<double>(
+            featureState->dimension() * graph->getActions()->dimension(), graph->getActions());
       }
 
       ~FSGAgentState()
@@ -608,7 +608,7 @@ namespace RLLib
         {
           GraphState* sg = graph->state(x);
           if (sg->hasNextState())
-            featureState->setEntry(stateIndexes->at(sg), 1.0);
+            featureState->setEntry(stateIndexes->at(sg), 1.0); // fixme
         }
         return stepData;
       }

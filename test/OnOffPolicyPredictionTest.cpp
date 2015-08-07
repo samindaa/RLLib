@@ -143,7 +143,9 @@ void OnOffPolicyPredictionTest::registerTDFactories()
   onPolicyTDFactoryVector.push_back(new TDLambdaAlphaBoundTest);
   onPolicyTDFactoryVector.push_back(new TDLambdaTrueTest);
   onPolicyTDFactoryVector.push_back(new GTDLambdaTest);
+  onPolicyTDFactoryVector.push_back(new GTDLambdaTrueTest);
   offPolicyTDFactoryVector.push_back(new GTDLambdaTest);
+  offPolicyTDFactoryVector.push_back(new GTDLambdaTrueTest);
 }
 
 void OnOffPolicyPredictionTest::clearTDFactories()

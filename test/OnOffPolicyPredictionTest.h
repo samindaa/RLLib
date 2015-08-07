@@ -295,4 +295,51 @@ class GTDLambdaTest: public OffPolicyTDFactory
     }
 };
 
+class GTDLambdaTrueTest: public OffPolicyTDFactory
+{
+  public:
+    OnPolicyTD<double>* create(const double& gamma, const double& lambda, const double& vectorNorm,
+        const int& vectorSize)
+    {
+      Trace<double>* e = new ATrace<double>(vectorSize);
+      Trace<double>* e_d = new ATrace<double>(vectorSize);
+      Trace<double>* e_w = new ATrace<double>(vectorSize);
+      OnPolicyTD<double>* newOnPolicyTD = new GTDLambdaTrue<double>(0.01 / vectorNorm,
+          0.5 / vectorNorm, gamma, lambda, e, e_d, e_w);
+      newTraces.push_back(e);
+      newTraces.push_back(e_d);
+      newTraces.push_back(e_w);
+      newOnPolicyTDs.push_back(newOnPolicyTD);
+      return newOnPolicyTD;
+    }
+
+    OffPolicyTD<double>* newTD(const double& gamma, const double& lambda, const double& vectorNorm,
+        const int& vectorSize)
+    {
+      Trace<double>* e = new ATrace<double>(vectorSize);
+      Trace<double>* e_d = new ATrace<double>(vectorSize);
+      Trace<double>* e_w = new ATrace<double>(vectorSize);
+      OffPolicyTD<double>* newOffPolicyTD = new GTDLambdaTrue<double>(0.01 / vectorNorm,
+          0.5 / vectorNorm, gamma, lambda, e, e_d, e_w);
+      newTraces.push_back(e);
+      newTraces.push_back(e_d);
+      newTraces.push_back(e_w);
+      newOffPolicyTDs.push_back(newOffPolicyTD);
+      return newOffPolicyTD;
+    }
+
+    const Vector<double>* lambdaValues()
+    {
+      Vector<double>* vec = getLambdaVector(1);
+      vec->setEntry(0, 0.1);
+      //vec->setEntry(1, 0.2);
+      return vec;
+    }
+
+    double precision()
+    {
+      return 0.02;
+    }
+};
+
 #endif /* ONOFFPOLICYPREDICTIONTEST_H_ */
