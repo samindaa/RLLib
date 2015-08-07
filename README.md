@@ -9,21 +9,22 @@ Features
 --------
 
 * **Off-policy prediction algorithms**: 
- * `GTD(lambda)`
- * `GQ(lambda)`
+ * `GTD(λ)`
+ * `GTD(λ)True`
+ * `GQ(λ)`
 * **Off-policy control algorithms**:  
- * `Q(lambda)`
- * `Greedy-GQ(lambda)`
- * `Softmax-GQ(lambda)`
+ * `Q(λ)`
+ * `Greedy-GQ(λ)`
+ * `Softmax-GQ(λ)`
  * `Off-PAC (can be used in on-policy setting)`
 * **On-policy algorithms**: 
- * `TD(lambda)`
- * `TD(lambda)AlphaBound`
- * `TD(lambda)True` 
- * `Sarsa(lambda)`
- * `Sarsa(lambda)AlphaBound`
- * `Sarsa(lambda)True`
- * `Sarsa(lambda)Expected`
+ * `TD(λ)`
+ * `TD(λ)AlphaBound`
+ * `TD(λ)True` 
+ * `Sarsa(λ)`
+ * `Sarsa(λ)AlphaBound`
+ * `Sarsa(λ)True`
+ * `Sarsa(λ)Expected`
  * `Actor-Critic (continuous actions, discrete actions, discounted reward settting, averaged reward settings, and so on)` 
 * **Supervised learning algorithms**: 
  * `Adaline`
