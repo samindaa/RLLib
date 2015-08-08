@@ -532,22 +532,19 @@ namespace RLLib
       }
   };
 
-// Prediction problems
   template<class T>
-  class GTDLambda: public OnPolicyTD<T>, public GVF<T>
+  class GTDLambdaAbstract: public OnPolicyTD<T>, public GVF<T>
   {
-    private:
+    protected:
       T delta_t;
       bool initialized;
 
-    protected:
       T alpha_v, alpha_w, gamma_t, lambda_t;
       Trace<T>* e;
       Vector<T>* v;
       Vector<T>* w;
 
-    public:
-      GTDLambda(const T& alpha_v, const T& alpha_w, const T& gamma_t, const T& lambda_t,
+      GTDLambdaAbstract(const T& alpha_v, const T& alpha_w, const T& gamma_t, const T& lambda_t,
           Trace<T>* e) :
           delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), gamma_t(gamma_t), //
           lambda_t(lambda_t), e(e), v(new PVector<T>(e->vect()->dimension())), //
@@ -555,7 +552,7 @@ namespace RLLib
       {
       }
 
-      virtual ~GTDLambda()
+      virtual ~GTDLambdaAbstract()
       {
         delete v;
         delete w;
@@ -568,29 +565,8 @@ namespace RLLib
         return T(0);
       }
 
-      T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& gamma_tp1,
-          const T& lambda_tp1, const T& rho_t, const T& r_tp1, const T& z_tp1)
-      {
-        delta_t = r_tp1 + (T(1) - gamma_tp1) * z_tp1 + gamma_tp1 * v->dot(phi_tp1) - v->dot(phi_t);
-        e->update(gamma_t * lambda_t, phi_t);
-        e->vect()->mapMultiplyToSelf(rho_t);
-
-        // v
-        // part 1
-        v->addToSelf(alpha_v * delta_t, e->vect());
-        // part2
-        v->addToSelf(-alpha_v * gamma_tp1 * (T(1) - lambda_tp1) * w->dot(e->vect()), phi_tp1);
-
-        // w
-        // part 2
-        w->addToSelf(-alpha_w * w->dot(phi_t), phi_t);
-        // part 1
-        w->addToSelf(alpha_w * delta_t, e->vect());
-
-        gamma_t = gamma_tp1;
-        lambda_t = lambda_tp1;
-        return delta_t;
-      }
+      virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& gamma_tp1,
+          const T& lambda_tp1, const T& rho_t, const T& r_tp1, const T& z_tp1) =0;
 
       T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& rho_t, const T& r_tp1,
           const T& z_tp1)
@@ -630,134 +606,132 @@ namespace RLLib
       {
         return v;
       }
+
+  };
+
+// Prediction problems
+  template<class T>
+  class GTDLambda: public GTDLambdaAbstract<T>
+  {
+    protected:
+      typedef GTDLambdaAbstract<T> Base;
+
+    public:
+      GTDLambda(const T& alpha_v, const T& alpha_w, const T& gamma_t, const T& lambda_t,
+          Trace<T>* e) :
+          GTDLambdaAbstract<T>(alpha_v, alpha_w, gamma_t, lambda_t, e)
+      {
+      }
+
+      T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& gamma_tp1,
+          const T& lambda_tp1, const T& rho_t, const T& r_tp1, const T& z_tp1)
+      {
+        Base::delta_t = r_tp1 + (T(1) - gamma_tp1) * z_tp1 + gamma_tp1 * Base::v->dot(phi_tp1)
+            - Base::v->dot(phi_t);
+        Base::e->update(Base::gamma_t * Base::lambda_t, phi_t);
+        Base::e->vect()->mapMultiplyToSelf(rho_t);
+
+        // v
+        // part 1
+        Base::v->addToSelf(Base::alpha_v * Base::delta_t, Base::e->vect());
+        // part2
+        Base::v->addToSelf(
+            -Base::alpha_v * gamma_tp1 * (T(1) - lambda_tp1) * Base::w->dot(Base::e->vect()),
+            phi_tp1);
+
+        // w
+        // part 2
+        Base::w->addToSelf(-Base::alpha_w * Base::w->dot(phi_t), phi_t);
+        // part 1
+        Base::w->addToSelf(Base::alpha_w * Base::delta_t, Base::e->vect());
+
+        Base::gamma_t = gamma_tp1;
+        Base::lambda_t = lambda_tp1;
+        return Base::delta_t;
+      }
+
   };
 
   // Off-policy TD() with a true online equivalence
   template<class T>
-  class GTDLambdaTrue: public OnPolicyTD<T>, public GVF<T>
+  class GTDLambdaTrue: public GTDLambdaAbstract<T>
   {
-    private:
-      T v_t, v_tp1, v_old, delta_t;
-      bool initialized;
-
     protected:
-      T alpha_v, alpha_w, gamma_t, lambda_t, gamma_tp1, lambda_tp1, rho_tm1;
-      Trace<T>* e;
+      typedef GTDLambdaAbstract<T> Base;
+
+      T v_t, v_tp1, v_old, gamma_tp1, lambda_tp1, rho_tm1;
       Trace<T>* e_d;
       Trace<T>* e_w;
-      Vector<T>* v;
-      Vector<T>* w;
 
     public:
       GTDLambdaTrue(const T& alpha_v, const T& alpha_w, const T& gamma_t, const T& lambda_t,
           Trace<T>* e, Trace<T>* e_d, Trace<T>* e_w) :
-          v_t(0), v_tp1(0), v_old(0), delta_t(0), initialized(false), alpha_v(alpha_v), //
-          alpha_w(alpha_w), gamma_t(gamma_t), lambda_t(lambda_t), gamma_tp1(0), lambda_tp1(0), //
-          rho_tm1(0), e(e), e_d(e_d), e_w(e_w), v(new PVector<T>(e->vect()->dimension())), //
-          w(new PVector<T>(e->vect()->dimension()))
+          GTDLambdaAbstract<T>(alpha_v, alpha_w, gamma_t, lambda_t, e), v_t(0), v_tp1(0), v_old(0), //
+          gamma_tp1(0), lambda_tp1(0), rho_tm1(0), e_d(e_d), e_w(e_w)
       {
-      }
-
-      virtual ~GTDLambdaTrue()
-      {
-        delete v;
-        delete w;
       }
 
       T initialize()
       {
-        e->clear();
+        Base::initialize();
         e_d->clear();
         e_w->clear();
         v_old = 0;
         rho_tm1 = 0;
-        initialized = true;
         return T(0);
       }
 
       T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& gamma_tp1,
           const T& lambda_tp1, const T& rho_t, const T& r_tp1, const T& z_tp1)
       {
-        v_t = v->dot(phi_t);
-        v_tp1 = v->dot(phi_tp1);
-        delta_t = r_tp1 + (T(1) - gamma_tp1) * z_tp1 + gamma_tp1 * v_tp1 - v_t;
+        v_t = Base::v->dot(phi_t);
+        v_tp1 = Base::v->dot(phi_tp1);
+        Base::delta_t = r_tp1 + (T(1) - gamma_tp1) * z_tp1 + gamma_tp1 * v_tp1 - v_t;
 
         // e
-        e->update(gamma_t * lambda_t, phi_t,
-            alpha_v * (T(1) - rho_t * gamma_t * lambda_t * e->vect()->dot(phi_t)));
-        e->vect()->mapMultiplyToSelf(rho_t);
+        Base::e->update(Base::gamma_t * Base::lambda_t, phi_t, Base::alpha_v * //
+            (T(1) - rho_t * Base::gamma_t * Base::lambda_t * Base::e->vect()->dot(phi_t)));
+        Base::e->vect()->mapMultiplyToSelf(rho_t);
 
         // e^{\Delta}
-        e_d->update(gamma_t * lambda_t, phi_t);
+        e_d->update(Base::gamma_t * Base::lambda_t, phi_t);
         e_d->vect()->mapMultiplyToSelf(rho_t);
 
         // e^w
-        e_w->update(rho_tm1 * gamma_t * lambda_t, phi_t,
-            alpha_w * (T(1) - rho_tm1 * gamma_t * lambda_t * e_w->vect()->dot(phi_t)));
+        e_w->update(rho_tm1 * Base::gamma_t * Base::lambda_t, phi_t, Base::alpha_w * //
+            (T(1) - rho_tm1 * Base::gamma_t * Base::lambda_t * e_w->vect()->dot(phi_t)));
 
         // v
         // part 1
-        v->addToSelf((delta_t + v_t - v_old), e->vect());
+        Base::v->addToSelf((Base::delta_t + v_t - v_old), Base::e->vect());
         // part 2
-        v->addToSelf(-alpha_v * rho_t * (v_t - v_old), phi_t);
+        Base::v->addToSelf(-Base::alpha_v * rho_t * (v_t - v_old), phi_t);
         // part3
-        v->addToSelf(-alpha_v * gamma_tp1 * (T(1) - lambda_tp1) * w->dot(e_d->vect()), phi_tp1);
+        Base::v->addToSelf(
+            -Base::alpha_v * gamma_tp1 * (T(1) - lambda_tp1) * Base::w->dot(e_d->vect()), phi_tp1);
 
         // w
         // part 2
-        w->addToSelf(-alpha_w * w->dot(phi_t), phi_t);
+        Base::w->addToSelf(-Base::alpha_w * Base::w->dot(phi_t), phi_t);
         // part 1
-        w->addToSelf(rho_t * delta_t, e->vect());
+        Base::w->addToSelf(rho_t * Base::delta_t, e_w->vect());
 
-        gamma_t = gamma_tp1;
-        lambda_t = lambda_tp1;
+        Base::gamma_t = gamma_tp1;
+        Base::lambda_t = lambda_tp1;
         rho_tm1 = rho_t;
         v_old = v_tp1;
-        return delta_t;
-      }
-
-      T update(const Vector<T>* phi_t, const Vector<T>* phi_tp1, const T& rho_t, const T& r_tp1,
-          const T& z_tp1)
-      {
-        return update(phi_t, phi_tp1, gamma_t, lambda_t, rho_t, r_tp1, z_tp1);
-      }
-
-      T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1)
-      {
-        return update(x_t, x_tp1, gamma_t, lambda_t, T(1), r_tp1, T(0));
+        return Base::delta_t;
       }
 
       void reset()
       {
-        e->clear();
+        Base::reset();
         e_d->clear();
         e_w->clear();
-        v->clear();
-        w->clear();
         v_old = 0;
         rho_tm1 = 0;
-        initialized = false;
       }
 
-      T predict(const Vector<T>* phi) const
-      {
-        return v->dot(phi);
-      }
-
-      void persist(const char* f) const
-      {
-        v->persist(f);
-      }
-
-      void resurrect(const char* f)
-      {
-        v->resurrect(f);
-      }
-
-      Vector<T>* weights() const
-      {
-        return v;
-      }
   };
 
 } // namespace RLLib

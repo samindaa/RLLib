@@ -9,7 +9,7 @@
 
 OnOffPolicyPredictionTest::OnOffPolicyPredictionTest() :
     random(new Random<double>), lineProblem(new LineProblem), //
-    randomWalkProblem(new RandomWalk(random))
+    randomWalkProblem(new RandomWalk(random)), randomWalk2Problem(new RandomWalk2(random))
 {
 }
 
@@ -18,6 +18,7 @@ OnOffPolicyPredictionTest::~OnOffPolicyPredictionTest()
   delete random;
   delete lineProblem;
   delete randomWalkProblem;
+  delete randomWalk2Problem;
   for (std::vector<OnPolicyTDFactory*>::iterator iter = onPolicyTDFactoryVector.begin();
       iter != onPolicyTDFactoryVector.end(); ++iter)
   {
@@ -97,8 +98,9 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(RandomWalk* problem, OffPolicyT
       targetLeftProbability);
   problem->setPolicy(behaviorPolicy);
 
-  const Vector<double>* solution = problem->expectedDiscountedSolution();
-  while (FiniteStateGraph::distanceToSolution(solution, gtd->weights()) > factory->precision())
+  const PVector<double> solution = agentState->computeSolution(targetPolicy, problem->gamma(),
+      lambda);
+  while (FiniteStateGraph::distanceToSolution(&solution, gtd->weights()) > factory->precision())
   {
     FiniteStateGraph::StepData stepData = agentState->step();
     //phi_t->set(agentState->project(stepData.v_t()));
@@ -127,7 +129,7 @@ void OnOffPolicyPredictionTest::testOffPolicyGTD(RandomWalk* problem, OffPolicyT
   }
   timer.stop();
 
-  double error = FiniteStateGraph::distanceToSolution(solution, gtd->weights());
+  double error = FiniteStateGraph::distanceToSolution(&solution, gtd->weights());
   std::cout << "## nbEpisode=" << nbEpisode << " error=" << error << " elapsedTime(ms)="
       << timer.getElapsedTimeInMilliSec() << std::endl;
 
@@ -182,8 +184,8 @@ void OnOffPolicyPredictionTest::testOnLineProblemWithLambda()
       iter != onPolicyTDFactoryVector.end(); ++iter)
   {
     OnPolicyTDFactory* factory = *iter;
-    for (int i = 0; i < factory->lambdaValues()->dimension(); i++)
-      testTD(lineProblem, factory, factory->lambdaValues()->getEntry(i), nbEpisodeMax());
+    for (int i = 0; i < factory->getLambdaVector()->dimension(); i++)
+      testTD(lineProblem, factory, factory->getLambdaVector()->getEntry(i), nbEpisodeMax());
   }
 
   clearTDFactories();
@@ -208,18 +210,16 @@ void OnOffPolicyPredictionTest::testOnRandomWalk2Problem()
   for (int i = 0; i <= 10; ++i)
     onPolicyTDFactoryVector.push_back(new TDLambdaTrueTest2(double(i) * 0.1));
 
-  RandomWalk2 randomWalk2Problem(random);
-
   int tmp = 0;
   for (std::vector<OnPolicyTDFactory*>::iterator iter = onPolicyTDFactoryVector.begin();
       iter != onPolicyTDFactoryVector.end(); ++iter)
   {
     OnPolicyTDFactory* factory = *iter;
-    for (int i = 0; i < factory->lambdaValues()->dimension(); i++)
+    for (int i = 0; i < factory->getLambdaVector()->dimension(); i++)
     {
       std::cout << "alpha: " << (double(tmp) * 0.1) << " lambda: "
-          << factory->lambdaValues()->getEntry(i) << std::endl;
-      testTD(&randomWalk2Problem, factory, factory->lambdaValues()->getEntry(i), 10);
+          << factory->getLambdaVector()->getEntry(i) << std::endl;
+      testTD(randomWalk2Problem, factory, factory->getLambdaVector()->getEntry(i), nbEpisodeMax());
     }
     ++tmp;
   }
@@ -239,8 +239,8 @@ void OnOffPolicyPredictionTest::testOnRandomWalkProblemWithLambda()
       iter != onPolicyTDFactoryVector.end(); ++iter)
   {
     OnPolicyTDFactory* factory = *iter;
-    for (int i = 0; i < factory->lambdaValues()->dimension(); i++)
-      testTD(randomWalkProblem, factory, factory->lambdaValues()->getEntry(i), nbEpisodeMax());
+    for (int i = 0; i < factory->getLambdaVector()->dimension(); i++)
+      testTD(randomWalkProblem, factory, factory->getLambdaVector()->getEntry(i), nbEpisodeMax());
   }
 
   clearTDFactories();
@@ -271,7 +271,7 @@ void OnOffPolicyPredictionTest::testOffPolicyWithLambda()
       iter != offPolicyTDFactoryVector.end(); ++iter)
   {
     OffPolicyTDFactory* factory = *iter;
-    const Vector<double>* lambdas = factory->lambdaValues();
+    const Vector<double>* lambdas = factory->getLambdaVector();
     for (int i = 0; i < lambdas->dimension(); i++)
     {
       testOffPolicyGTD(randomWalkProblem, factory, lambdas->getEntry(i), nbEpisodeMax(), 0.2, 0.5);

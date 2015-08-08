@@ -515,6 +515,7 @@ namespace RLLib
 
         PVector<double> tmpSolution(solution->dimension() + 1);
 
+        // VI: V = TV
         for (int i = 0; i < 10000; ++i)
         {
           for (int s = 0; s < static_cast<int>(states->size()) - 1; ++s)

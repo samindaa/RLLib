@@ -24,6 +24,7 @@ class OnPolicyTDFactory
         lambdaVector(0)
     {
     }
+
     virtual ~OnPolicyTDFactory()
     {
       for (std::vector<OnPolicyTD<double>*>::iterator iter = newOnPolicyTDs.begin();
@@ -32,21 +33,24 @@ class OnPolicyTDFactory
       for (std::vector<Trace<double>*>::iterator iter = newTraces.begin(); iter != newTraces.end();
           ++iter)
         delete *iter;
+
       if (lambdaVector)
         delete lambdaVector;
     }
+
     virtual OnPolicyTD<double>* create(const double& gamma, const double& lambda,
         const double& vectorNorm, const int& vectorSize)=0;
-    virtual const Vector<double>* lambdaValues() =0;
+    virtual const Vector<double>* getLambdaVector() =0;
     virtual double precision() =0;
 
   protected:
-    Vector<double>* getLambdaVector(const int& vectorSize)
+    Vector<double>* createLambdaVector(const int& vectorSize)
     {
       if (!lambdaVector)
         lambdaVector = new PVector<double>(vectorSize);
       return lambdaVector;
     }
+
 };
 
 class OffPolicyTDFactory: public OnPolicyTDFactory
@@ -81,6 +85,7 @@ class OnOffPolicyPredictionTest: public OnOffPolicyPredictionTestBase
     Random<double>* random;
     LineProblem* lineProblem;
     RandomWalk* randomWalkProblem;
+    RandomWalk2* randomWalk2Problem;
 
   public:
     OnOffPolicyPredictionTest();
@@ -103,9 +108,8 @@ class OnOffPolicyPredictionTest: public OnOffPolicyPredictionTestBase
 
     void testOffPolicy();
     void testOffPolicyWithLambda();
-    int nbEpisodeMax() const;
-
     void testOnRandomWalk2Problem();
+    int nbEpisodeMax() const;
 
   public:
     void run();
@@ -122,9 +126,9 @@ class TDTest: public OnPolicyTDFactory
       return newOnPolicyTD;
     }
 
-    const Vector<double>* lambdaValues()
+    const Vector<double>* getLambdaVector()
     {
-      return getLambdaVector(0);
+      return createLambdaVector(0);
     }
 
     double precision()
@@ -147,9 +151,9 @@ class TDLambdaTest: public OnPolicyTDFactory
       return newOnPolicyTD;
     }
 
-    const Vector<double>* lambdaValues()
+    const Vector<double>* getLambdaVector()
     {
-      Vector<double>* vec = getLambdaVector(2);
+      Vector<double>* vec = createLambdaVector(2);
       vec->setEntry(0, 0.5);
       vec->setEntry(1, 1.0);
       return vec;
@@ -175,9 +179,9 @@ class TDLambdaAlphaBoundTest: public OnPolicyTDFactory
       return newOnPolicyTD;
     }
 
-    const Vector<double>* lambdaValues()
+    const Vector<double>* getLambdaVector()
     {
-      Vector<double>* vec = getLambdaVector(2);
+      Vector<double>* vec = createLambdaVector(2);
       vec->setEntry(0, 0.5);
       vec->setEntry(1, 1.0);
       return vec;
@@ -203,9 +207,9 @@ class TDLambdaTrueTest: public OnPolicyTDFactory
       return newOnPolicyTD;
     }
 
-    const Vector<double>* lambdaValues()
+    const Vector<double>* getLambdaVector()
     {
-      Vector<double>* vec = getLambdaVector(2);
+      Vector<double>* vec = createLambdaVector(2);
       vec->setEntry(0, 0.5);
       vec->setEntry(1, 1.0);
       return vec;
@@ -238,13 +242,13 @@ class TDLambdaTrueTest2: public OnPolicyTDFactory
       return newOnPolicyTD;
     }
 
-    const Vector<double>* lambdaValues()
+    const Vector<double>* getLambdaVector()
     {
       double labmbda_range[] = { 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.925, 0.95,
           0.9725, 1 };
 
       int size = sizeof(labmbda_range) / sizeof(labmbda_range[0]);
-      Vector<double>* vec = getLambdaVector(size);
+      Vector<double>* vec = createLambdaVector(size);
       for (int i = 0; i < size; ++i)
         vec->setEntry(i, labmbda_range[i]);
       return vec;
@@ -281,9 +285,9 @@ class GTDLambdaTest: public OffPolicyTDFactory
       return newOffPolicyTD;
     }
 
-    const Vector<double>* lambdaValues()
+    const Vector<double>* getLambdaVector()
     {
-      Vector<double>* vec = getLambdaVector(2);
+      Vector<double>* vec = createLambdaVector(2);
       vec->setEntry(0, 0.1);
       vec->setEntry(1, 0.2);
       return vec;
@@ -319,8 +323,8 @@ class GTDLambdaTrueTest: public OffPolicyTDFactory
       Trace<double>* e = new ATrace<double>(vectorSize);
       Trace<double>* e_d = new ATrace<double>(vectorSize);
       Trace<double>* e_w = new ATrace<double>(vectorSize);
-      OffPolicyTD<double>* newOffPolicyTD = new GTDLambdaTrue<double>(0.01 / vectorNorm,
-          0.5 / vectorNorm, gamma, lambda, e, e_d, e_w);
+      OffPolicyTD<double>* newOffPolicyTD = new GTDLambdaTrue<double>(0.05 / vectorNorm,
+          0.1 / vectorNorm, gamma, lambda, e, e_d, e_w);
       newTraces.push_back(e);
       newTraces.push_back(e_d);
       newTraces.push_back(e_w);
@@ -328,17 +332,25 @@ class GTDLambdaTrueTest: public OffPolicyTDFactory
       return newOffPolicyTD;
     }
 
-    const Vector<double>* lambdaValues()
+    const Vector<double>* getLambdaVector()
     {
-      Vector<double>* vec = getLambdaVector(1);
-      vec->setEntry(0, 0.1);
-      //vec->setEntry(1, 0.2);
+      const double labmbda_range[] = { 0, //
+          (1.0f - std::pow(2, -1)), (1.0f - std::pow(2, -2)), (1.0f - std::pow(2, -3)), //
+          (1.0f - std::pow(2, -4)), (1.0f - std::pow(2, -5)), (1.0f - std::pow(2, -6)), //
+          (1.0f - std::pow(2, -7)), (1.0f - std::pow(2, -8)), (1.0f - std::pow(2, -9)), //
+          (1.0f - std::pow(2, -10)), //
+          1.0f };
+      int size = sizeof(labmbda_range) / sizeof(labmbda_range[0]);
+      Vector<double>* vec = createLambdaVector(size);
+      for (int i = 0; i < size; ++i)
+        vec->setEntry(i, labmbda_range[i]);
+
       return vec;
     }
 
     double precision()
     {
-      return 0.02;
+      return 0.01;
     }
 };
 
