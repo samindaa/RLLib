@@ -177,7 +177,7 @@ Operating Systems
 
 * Ubuntu >= 11.04
 * Windows (Visual Studio 2013)
-* Mac OS
+* Mac OS (with GNU)
 
 TODO
 ----
