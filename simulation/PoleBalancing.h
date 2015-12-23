@@ -25,7 +25,7 @@
 #include "RL.h"
 #include "util/Eigen/Dense"
 #include "util/Eigen/Eigenvalues"
-#include "Math.h"
+#include "Mathema.h"
 
 using Eigen::VectorXd;
 using Eigen::MatrixXd;

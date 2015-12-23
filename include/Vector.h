@@ -22,7 +22,7 @@
 #ifndef VECTOR_H_
 #define VECTOR_H_
 
-#include "Assert.h"
+#include "Affirm.h"
 
 #if !defined(EMBEDDED_MODE)
 #include <iostream>
@@ -44,19 +44,19 @@ namespace RLLib
    * Forward declarations
    */
 #if !defined(EMBEDDED_MODE)
-  template<class T> class DenseVector;
-  template<class T> class SparseVector;
-  template<class T> class Vector;
-  template<class T> std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that);
-  template<class T> std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that);
-  template<class T> std::ostream& operator<<(std::ostream& out, const Vector<T>* that);
+  template<typename T> class DenseVector;
+  template<typename T> class SparseVector;
+  template<typename T> class Vector;
+  template<typename T> std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that);
+  template<typename T> std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that);
+  template<typename T> std::ostream& operator<<(std::ostream& out, const Vector<T>* that);
 #endif
   /**
    * This is used in parameter representation in a given vector space for
    * Machine Learning purposes. This implementation is specialized for sparse
    * vector representation, that is much common in Reinforcement Learning.
    */
-  template<class T>
+  template<typename T>
   class Vector
   {
     public:
@@ -145,7 +145,7 @@ namespace RLLib
 #endif
   };
 
-  template<class T>
+  template<typename T>
   class DenseVector: public Vector<T>
   {
     protected:
@@ -389,7 +389,7 @@ namespace RLLib
    * @use Tile coding; traces etc, where only a handful of features are
    *      active in out of billions of features; O(M) << O(N).
    */
-  template<class T>
+  template<typename T>
   class SparseVector: public Vector<T>
   {
     protected:
@@ -737,7 +737,7 @@ namespace RLLib
   /**
    * RLLibs' dynamic_cast<> alternative to support multiple architectures.
    */
-  template<class T>
+  template<typename T>
   class RTTI
   {
     public:
@@ -770,7 +770,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class PVector: public DenseVector<T>
   {
     private:
@@ -951,7 +951,7 @@ namespace RLLib
   };
 
 // ================================================================================================
-  template<class T>
+  template<typename T>
   class SVector: public SparseVector<T>
   {
     private:
@@ -1150,7 +1150,7 @@ namespace RLLib
   };
 
 // ================================================================================================
-  template<class T>
+  template<typename T>
   class Vectors
   {
     protected:
@@ -1425,7 +1425,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class Filters
   {
     public:
@@ -1445,7 +1445,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class VectorPool
   {
     protected:
@@ -1483,7 +1483,7 @@ namespace RLLib
 
 #if !defined(EMBEDDED_MODE)
 // Global implementations
-  template<class T>
+  template<typename T>
   std::ostream& operator<<(std::ostream& out, const DenseVector<T>& that)
   {
     out << "DenseVector ";
@@ -1492,7 +1492,7 @@ namespace RLLib
     return out;
   }
 
-  template<class T>
+  template<typename T>
   std::ostream& operator<<(std::ostream& out, const SparseVector<T>& that)
   {
     out << "SparseVector(" << that.nbActive << ") index=";
@@ -1506,7 +1506,7 @@ namespace RLLib
     return out;
   }
 
-  template<class T>
+  template<typename T>
   std::ostream& operator<<(std::ostream& out, const Vector<T>* that)
   {
     const SparseVector<T>* other = RTTI<T>::constSparseVector(that);

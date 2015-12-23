@@ -24,7 +24,7 @@
 
 #include "RL.h"
 
-template<class T>
+template<typename T>
 class MountainCar: public RLLib::RLProblem<T>
 {
   private:

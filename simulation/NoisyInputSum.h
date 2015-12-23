@@ -23,14 +23,14 @@
 #define NOISYINPUTSUM_H_
 
 #include "Vector.h"
-#include "Math.h"
+#include "Mathema.h"
 #include "Supervised.h"
 #include "Timer.h"
 
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class PredictionProblem
   {
     public:

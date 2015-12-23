@@ -22,10 +22,9 @@
 #ifndef RANDLOVBIKE_H_
 #define RANDLOVBIKE_H_
 
-#include "RL.h"
-#include "Math.h"
 #include <iostream>
-#include <cmath>
+#include "RL.h"
+#include "Mathema.h"
 
 /**
  * Reference:
@@ -43,7 +42,7 @@
  * bib2html_rescat = "Applications, General RL",
  }
  */
-template<class Type>
+template<typename Type>
 class RandlovBike: public RLProblem<Type>
 {
     typedef RLProblem<Type> Base;

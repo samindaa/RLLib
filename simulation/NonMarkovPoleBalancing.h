@@ -31,7 +31,7 @@ using namespace RLLib;
  *
  */
 
-template<class T>
+template<typename T>
 class NonMarkovPoleBalancing: public RLProblem<T>
 {
     typedef RLProblem<T> Base;

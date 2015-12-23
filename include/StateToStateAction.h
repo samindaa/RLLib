@@ -27,7 +27,7 @@
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class Representations
   {
     protected:
@@ -86,7 +86,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class StateToStateAction
   {
     public:
@@ -101,7 +101,7 @@ namespace RLLib
   };
 
 // Tile coding base projector to state action
-  template<class T>
+  template<typename T>
   class StateActionTilings: public StateToStateAction<T>
   {
     protected:
@@ -157,7 +157,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class TabularAction: public StateToStateAction<T>
   {
     protected:

@@ -32,7 +32,7 @@ namespace RLLib
 {
 
   // Simple control algorithm
-  template<class T>
+  template<typename T>
   class SarsaControl: public OnPolicyControlLearner<T>
   {
     protected:
@@ -114,7 +114,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class ExpectedSarsaControl: public SarsaControl<T>
   {
     protected:
@@ -167,7 +167,7 @@ namespace RLLib
    * http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node89.html
    * This algorithms does not have convergence guarantees. Use with care.
    */
-  template<class T>
+  template<typename T>
   class Q: public Predictor<T>, public LinearLearner<T>
   {
     protected:
@@ -255,7 +255,7 @@ namespace RLLib
   };
 
 // Gradient decent control
-  template<class T>
+  template<typename T>
   class QControl: public OffPolicyControlLearner<T>
   {
     protected:
@@ -333,7 +333,7 @@ namespace RLLib
   };
 
 // Gradient decent control
-  template<class T>
+  template<typename T>
   class GreedyGQ: public OffPolicyControlLearner<T>
   {
     private:
@@ -447,7 +447,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class GQOnPolicyControl: public GreedyGQ<T>
   {
     public:
@@ -465,7 +465,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class AbstractActorOffPolicy: public ActorOffPolicy<T>
   {
     protected:
@@ -520,7 +520,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class ActorLambdaOffPolicy: public AbstractActorOffPolicy<T>
   {
     protected:
@@ -566,7 +566,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class OffPAC: public OffPolicyControlLearner<T>
   {
     private:
@@ -672,7 +672,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class Actor: public ActorOnPolicy<T>
   {
     protected:
@@ -729,7 +729,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class ActorLambda: public Actor<T>
   {
     protected:
@@ -769,7 +769,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class ActorNatural: public Actor<T>
   {
     protected:
@@ -816,7 +816,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class AbstractActorCritic: public OnPolicyControlLearner<T>
   {
     protected:
@@ -922,7 +922,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class ActorCritic: public AbstractActorCritic<T>
   {
     protected:
@@ -949,7 +949,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class AverageRewardActorCritic: public AbstractActorCritic<T>
   {
     protected:

@@ -30,7 +30,7 @@ namespace RLLib
 {
 
   // Simple predictor algorithms
-  template<class T>
+  template<typename T>
   class TD: public OnPolicyTD<T>
   {
     protected:
@@ -100,7 +100,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class TDLambdaAbstract: public TD<T>
   {
     protected:
@@ -135,7 +135,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class TDLambda: public TDLambdaAbstract<T>
   {
     protected:
@@ -163,7 +163,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class TDLambdaTrue: public TDLambdaAbstract<T>
   {
     protected:
@@ -208,7 +208,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class TDLambdaAlphaBound: public TDLambdaAbstract<T>
   {
     private:
@@ -258,7 +258,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class Sarsa: public Predictor<T>, public LinearLearner<T>
   {
     protected:
@@ -328,7 +328,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class SarsaTrue: public Sarsa<T>
   {
     private:
@@ -371,7 +371,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class SarsaAlphaBound: public Sarsa<T>
   {
     private:
@@ -424,7 +424,7 @@ namespace RLLib
   };
 
 // Gradient decent
-  template<class T>
+  template<typename T>
   class GQ: public OnPolicyTD<T>, public GVF<T>
   {
     private:
@@ -532,7 +532,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class GTDLambdaAbstract: public OnPolicyTD<T>, public GVF<T>
   {
     protected:
@@ -610,7 +610,7 @@ namespace RLLib
   };
 
 // Prediction problems
-  template<class T>
+  template<typename T>
   class GTDLambda: public GTDLambdaAbstract<T>
   {
     protected:
@@ -653,7 +653,7 @@ namespace RLLib
   };
 
   // Off-policy TD() with a true online equivalence
-  template<class T>
+  template<typename T>
   class GTDLambdaTrue: public GTDLambdaAbstract<T>
   {
     protected:

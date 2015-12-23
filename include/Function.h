@@ -27,7 +27,7 @@
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class ParameterizedFunction
   {
     public:
@@ -38,7 +38,7 @@ namespace RLLib
       virtual void resurrect(const char* f) =0;
   };
 
-  template<class T>
+  template<typename T>
   class LinearLearner: public ParameterizedFunction<T>
   {
     public:
@@ -50,7 +50,7 @@ namespace RLLib
       virtual Vector<T>* weights() const =0;
   };
 
-  template<class T>
+  template<typename T>
   class RewardFunction
   {
     public:
@@ -60,7 +60,7 @@ namespace RLLib
       virtual T reward() =0;
   };
 
-  template<class T>
+  template<typename T>
   class OutcomeFunction
   {
     public:

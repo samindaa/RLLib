@@ -33,7 +33,7 @@ namespace RLLib
    * Feature extractor for function approximation.
    * @class T feature type
    */
-  template<class T>
+  template<typename T>
   class Projector
   {
     public:
@@ -51,7 +51,7 @@ namespace RLLib
    * http://incompleteideas.net/rlai.cs.ualberta.ca/RLAI/RLtoolkit/tiles.html
    */
 
-  template<class T>
+  template<typename T>
   class TileCoder: public Projector<T>
   {
     protected:
@@ -117,7 +117,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class TileCoderHashing: public TileCoder<T>
   {
     private:
@@ -166,7 +166,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class FourierBasis: public Projector<T>
   {
     protected:

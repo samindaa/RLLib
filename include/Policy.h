@@ -24,13 +24,13 @@
 
 #include "Vector.h"
 #include "Action.h"
+#include "Mathema.h"
 #include "Predictor.h"
 #include "StateToStateAction.h"
-#include "Math.h"
 
 namespace RLLib
 {
-  template<class T>
+  template<typename T>
   class Policy
   {
     public:
@@ -46,14 +46,14 @@ namespace RLLib
   class Policies
   {
     public:
-      template<class T>
+      template<typename T>
       static const Action<T>* sampleAction(Policy<T>* policy, const Representations<T>* phis)
       {
         policy->update(phis);
         return policy->sampleAction();
       }
 
-      template<class T>
+      template<typename T>
       static const Action<T>* sampleBestAction(Policy<T>* policy, const Representations<T>* phis)
       {
         policy->update(phis);
@@ -62,7 +62,7 @@ namespace RLLib
   };
 
 // start with discrete action policy
-  template<class T>
+  template<typename T>
   class DiscreteActionPolicy: public virtual Policy<T>
   {
     public:
@@ -71,7 +71,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class PolicyDistribution: public virtual Policy<T>
   {
     public:
@@ -83,7 +83,7 @@ namespace RLLib
       virtual Vectors<T>* parameters() const =0;
   };
 
-  template<class T>
+  template<typename T>
   class NormalDistribution: public PolicyDistribution<T>
   {
     protected:
@@ -182,7 +182,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class NormalDistributionScaled: public NormalDistribution<T>
   {
     public:
@@ -208,7 +208,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class NormalDistributionSkewed: public NormalDistribution<T>
   {
     public:
@@ -234,7 +234,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class ScaledPolicyDistribution: public PolicyDistribution<T>
   {
     protected:
@@ -320,7 +320,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class StochasticPolicy: public virtual DiscreteActionPolicy<T>
   {
     protected:
@@ -363,7 +363,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class BoltzmannDistribution: public StochasticPolicy<T>, public PolicyDistribution<T>
   {
     protected:
@@ -460,7 +460,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class SoftMax: public StochasticPolicy<T>
   {
     protected:
@@ -515,7 +515,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class RandomPolicy: public Policy<T>
   {
     protected:
@@ -554,7 +554,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class RandomBiasPolicy: public Policy<T>
   {
     protected:
@@ -624,7 +624,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class Greedy: public DiscreteActionPolicy<T>
   {
     protected:
@@ -702,7 +702,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class EpsilonGreedy: public Greedy<T>
   {
     protected:
@@ -732,7 +732,7 @@ namespace RLLib
   };
 
 // Special behavior policies
-  template<class T>
+  template<typename T>
   class BoltzmannDistributionPerturbed: public Policy<T>
   {
     protected:
@@ -816,7 +816,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class SingleActionPolicy: public Policy<T>
   {
     private:
@@ -848,7 +848,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class ConstantPolicy: public StochasticPolicy<T>
   {
     private:

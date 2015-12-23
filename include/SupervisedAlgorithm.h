@@ -27,7 +27,7 @@
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class Adaline: public LearningAlgorithm<T>, public LinearLearner<T>
   {
     protected:
@@ -81,7 +81,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class IDBD: public LearningAlgorithm<T>, public LinearLearner<T>
   {
     protected:
@@ -157,7 +157,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class SemiLinearIDBD: public LearningAlgorithm<T>, public LinearLearner<T>
   {
     protected:
@@ -235,7 +235,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class K1: public LearningAlgorithm<T>, public LinearLearner<T>
   {
     protected:
@@ -341,7 +341,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class Autostep: public LearningAlgorithm<T>, public LinearLearner<T>
   {
     protected:

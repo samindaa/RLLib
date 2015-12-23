@@ -19,8 +19,8 @@
  *      Author: sam
  */
 
-#ifndef MATH_H_
-#define MATH_H_
+#ifndef MATHEMA_H_
+#define MATHEMA_H_
 
 #include <cmath>
 #include <limits>
@@ -42,13 +42,13 @@ namespace RLLib
   class Boundedness
   {
     public:
-      template<class T>
+      template<typename T>
       inline static bool checkValue(const T& value)
       {
-        return !isnan(value) && !isinf(value);
+        return !std::isnan(value) && !std::isinf(value);
       }
 
-      template<class T>
+      template<typename T>
       inline static bool checkDistribution(const Vector<T>* distribution)
       {
         T sum = T(0);
@@ -152,7 +152,7 @@ namespace RLLib
   };
 
 // Important distributions
-  template<class T>
+  template<typename T>
   class Random
   {
     private:
@@ -247,7 +247,7 @@ namespace RLLib
   };
 
 // Helper class for range management for testing environments
-  template<class T>
+  template<typename T>
   class Range
   {
     private:
@@ -307,7 +307,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class Ranges
   {
     protected:
@@ -400,7 +400,7 @@ namespace RLLib
   class Signum
   {
     public:
-      template<class T>
+      template<typename T>
       inline static int valueOf(const T& val)
       {
         return (T(0) < val) - (val < T(0));
@@ -413,7 +413,7 @@ namespace RLLib
       /**
        * Normalize to [-pi, pi)
        */
-      template<class T>
+      template<typename T>
       inline static T normalize(const T& data)
       {
         T x = fmod(data + M_PI, 2.0 * M_PI);
@@ -516,4 +516,4 @@ namespace RLLib
 
 } // namespace RLLib
 
-#endif /* MATH_H_ */
+#endif /* MATHEMA_H_ */

@@ -28,7 +28,7 @@
 
 #include "Vector.h"
 #include "Action.h"
-#include "Math.h"
+#include "Mathema.h"
 #include "Control.h"
 
 #if !defined(EMBEDDED_MODE)
@@ -38,7 +38,7 @@
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class TRStep
   {
     public:
@@ -73,7 +73,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class RLAgent
   {
     protected:
@@ -103,7 +103,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class LearnerAgent: public RLAgent<T>
   {
       typedef RLAgent<T> Base;
@@ -147,7 +147,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class ControlAgent: public RLAgent<T>
   {
       typedef RLAgent<T> Base;
@@ -176,7 +176,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class RLProblem
   {
     protected:
@@ -257,7 +257,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class RLRunner
   {
     public:

@@ -28,7 +28,7 @@
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class Predictor
   {
     public:
@@ -38,7 +38,7 @@ namespace RLLib
       virtual T predict(const Vector<T>* x) const =0;
   };
 
-  template<class T>
+  template<typename T>
   class OnPolicyTD: public virtual Predictor<T>, public virtual LinearLearner<T>
   {
     public:
@@ -48,7 +48,7 @@ namespace RLLib
       virtual T update(const Vector<T>* x_t, const Vector<T>* x_tp1, const T& r_tp1) =0;
   };
 
-  template<class T>
+  template<typename T>
   class OffPolicyTD: public virtual Predictor<T>, public virtual LinearLearner<T>
   {
     public:
@@ -60,7 +60,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class GVF: public OffPolicyTD<T>
   {
     public:

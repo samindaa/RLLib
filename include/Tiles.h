@@ -55,7 +55,7 @@
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class Tiles
   {
     protected:

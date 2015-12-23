@@ -24,7 +24,7 @@
 
 #include "RL.h"
 
-template<class T>
+template<typename T>
 class ContinuousGridworld: public RLLib::RLProblem<T>
 {
     typedef RLLib::RLProblem<T> Base;

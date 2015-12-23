@@ -20,7 +20,7 @@
  */
 
 #include "LearningAlgorithmTest.h"
-#include "Math.h"
+#include "Mathema.h"
 
 RLLIB_TEST_MAKE(SupervisedAlgorithmTest)
 

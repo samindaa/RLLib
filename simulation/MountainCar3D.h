@@ -49,7 +49,7 @@
  */
 using namespace RLLib;
 
-template<class T>
+template<typename T>
 class MountainCar3D: public RLProblem<T>
 {
     typedef RLProblem<T> Base;

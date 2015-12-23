@@ -22,13 +22,13 @@
 #ifndef TRACE_H_
 #define TRACE_H_
 
+#include "Mathema.h"
 #include "Vector.h"
-#include "Math.h"
 
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class Trace
   {
     public:
@@ -40,7 +40,7 @@ namespace RLLib
       virtual Vector<T>* vect() const =0;
   };
 
-  template<class T>
+  template<typename T>
   class ATrace: public Trace<T>
   {
     protected:
@@ -107,7 +107,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class RTrace: public ATrace<T>
   {
     public:
@@ -137,7 +137,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class AMaxTrace: public ATrace<T>
   {
     protected:
@@ -180,7 +180,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class MaxLengthTrace: public Trace<T>
   {
     protected:
@@ -245,7 +245,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class Traces
   {
     protected:

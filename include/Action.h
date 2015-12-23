@@ -23,12 +23,12 @@
 #define ACTION_H_
 
 #include <vector>
-#include "Assert.h"
+#include "Affirm.h"
 
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class Action
   {
     private:
@@ -91,7 +91,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class Actions
   {
     protected:
@@ -137,7 +137,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class ActionArray: public Actions<T>
   {
     private:

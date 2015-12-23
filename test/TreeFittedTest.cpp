@@ -6,7 +6,7 @@
  */
 
 #include "TreeFittedTest.h"
-#include "Math.h"
+#include "Mathema.h"
 #include "util/TreeFitted/ExtraTreeEnsemble.h"
 
 RLLIB_TEST_MAKE(TreeFittedTest)

@@ -23,12 +23,13 @@
 #define HASHING_H_
 
 #include <limits.h>
-#include "Math.h"
+
+#include "Mathema.h"
 
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class Hashing
   {
     public:
@@ -43,7 +44,7 @@ namespace RLLib
       virtual int getMemorySize() const =0;
   };
 
-  template<class T>
+  template<typename T>
   class AbstractHashing: public Hashing<T>
   {
     protected:
@@ -66,7 +67,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class UNH: public AbstractHashing<T>
   {
     private:
@@ -122,7 +123,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class MurmurHashing: public AbstractHashing<T>
   {
     private:
@@ -297,7 +298,7 @@ namespace RLLib
 
   };
 
-  template<class T>
+  template<typename T>
   class ColisionDetection: public Hashing<T>
   {
     protected:

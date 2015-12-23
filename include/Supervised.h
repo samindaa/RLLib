@@ -27,7 +27,7 @@
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class LearningAlgorithm: public Predictor<T>
   {
     public:

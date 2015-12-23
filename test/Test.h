@@ -23,6 +23,7 @@
 #define HEADERTEST_H_
 
 #include <iostream>
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
 #include <string>

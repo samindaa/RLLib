@@ -31,7 +31,7 @@
 namespace RLLib
 {
 
-  template<class T>
+  template<typename T>
   class Control: public ParameterizedFunction<T>
   {
     public:
@@ -47,7 +47,7 @@ namespace RLLib
       virtual const Predictor<T>* predictor() const =0;
   };
 
-  template<class T>
+  template<typename T>
   class OnPolicyControlLearner: public Control<T>
   {
     public:
@@ -56,7 +56,7 @@ namespace RLLib
       }
   };
 
-  template<class T>
+  template<typename T>
   class OffPolicyControlLearner: public Control<T>
   {
     public:
@@ -67,7 +67,7 @@ namespace RLLib
           const T& r_tp1, const T& z_tp1) = 0;
   };
 
-  template<class T>
+  template<typename T>
   class ActorOffPolicy: public ParameterizedFunction<T>
   {
     public:
@@ -83,7 +83,7 @@ namespace RLLib
       virtual T pi(const Action<T>* a) const =0;
   };
 
-  template<class T>
+  template<typename T>
   class ActorOnPolicy: public ParameterizedFunction<T>
   {
     public:
