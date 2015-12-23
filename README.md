@@ -179,6 +179,14 @@ Operating Systems
 * Windows (Visual Studio 2013)
 * Mac OS
 
+TODO
+----
+
+* Variable action per state.
+* Compilation on Mac OS X El Capitan.
+* Non-linear algorithms.
+* Deep learning algorithms. 
+
 Publications
 ------------
 
