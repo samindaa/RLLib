@@ -73,7 +73,7 @@ class Tuple
      * @param ...      sequence of const_iterator (begin,end,begin,end,...)
      * @return the reference of the new tuple
      */
-    static Tuple* CONVERT(unsigned int count, ...);
+    //static Tuple* CONVERT(unsigned int count, ...);
 
     // Constructors/Destructors
     //

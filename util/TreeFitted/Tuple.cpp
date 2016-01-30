@@ -38,6 +38,7 @@
 //<< Sam
 using namespace PoliFitted;
 
+/*
 Tuple* Tuple::CONVERT(unsigned int count, ...)
 {
   Tuple* t = new Tuple(count);
@@ -61,6 +62,7 @@ Tuple* Tuple::CONVERT(unsigned int count, ...)
   va_end(vl);
   return t;
 }
+*/
 
 // Constructors/Destructors
 //

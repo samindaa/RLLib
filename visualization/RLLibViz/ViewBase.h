@@ -17,7 +17,7 @@
 
 // Affine transformations
 #include "Mat.h"
-#include "Math.h"
+#include "Mathema.h"
 // For dense matrices
 #include "Eigen/Dense"
 

@@ -439,8 +439,8 @@ namespace RLLib
 
     public:
       GQ(const T& alpha_v, const T& alpha_w, const T& gamma_tp1, const T& lambda_t, Trace<T>* e) :
-          delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), gamma_t(gamma_t), //
-          gamma_tp1(gamma_tp1), lambda_t(lambda_tp1), lambda_tp1(lambda_t), e(e), //
+          delta_t(0), initialized(false), alpha_v(alpha_v), alpha_w(alpha_w), gamma_t(gamma_tp1), //
+          gamma_tp1(gamma_tp1), lambda_t(lambda_t), lambda_tp1(lambda_t), e(e), //
           v(new PVector<T>(e->vect()->dimension())), w(new PVector<T>(e->vect()->dimension()))
       {
       }

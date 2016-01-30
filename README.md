@@ -131,21 +131,11 @@ void YourTestBase::run() { testYourMethod(); }
 Test Configuration
 -------------------
 
-The test cases are executed using:
+We are using CMAKE >= 2.8.7 to build and run the test suite.
 
-   * ./configure
-   * make
-   * ./RLLib
-   
-* To compile 32-bit binary on a 64-bit machine:
-    * ./configure --march=m32
-    * make
-    * ./RLLib
-
-* Debugging:
-    * ./configure --debug=ggdb
-    * make
-    * ./RLLib
+   * mkdir build
+   * cd build; cmake .. 
+   * make -j
 
 Visualization
 -------------
@@ -163,7 +153,7 @@ RLLib provides a [QT5](http://qt-project.org/qt5) based Reinforcement Learning p
 * In order to install RLLibViz:     
     * Change directory to `visualization/RLLibViz`
     * qmake RLLibViz.pro
-    * make
+    * make -j
     * ./RLLibViz
 	
 Documentation
@@ -177,13 +167,12 @@ Operating Systems
 
 * Ubuntu >= 11.04
 * Windows (Visual Studio 2013)
-* Mac OS
+* Mac OS X
 
 TODO
 ----
 
 * Variable action per state.
-* Compilation on Mac OS X El Capitan.
 * Non-linear algorithms.
 * Deep learning algorithms. 
 
@@ -196,5 +185,5 @@ Publications
 Contact
 -------
 
-   Saminda Abeyruwan (saminda@cs.miami.edu)
+   Saminda Abeyruwan, PhD (saminda@cs.miami.edu, samindaa@gmail.com)
 
