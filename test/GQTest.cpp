@@ -104,9 +104,7 @@ void GQTest::testGQOnRandomWalk(const double& targetLeftProbability,
   Assert::assertPasses(nbEpisode > 100);
 
   const Predictor<double>* predictor = learner->predictor();
-  const LinearLearner<double>* gqLearner =
-      static_cast<const LinearLearner<double>*>(reinterpret_cast<const GQ<double>*>(predictor));
-  const Vector<double>* v = gqLearner->weights();
+  const Vector<double>* v = predictor->weights();
   Assert::checkValues(v);
 
   double error = FiniteStateGraph::distanceToSolution(&solution, vFun);

@@ -36,6 +36,7 @@ namespace RLLib
       {
       }
       virtual T predict(const Vector<T>* x) const =0;
+      virtual Vector<T>* weights() const =0;
   };
 
   template<typename T>

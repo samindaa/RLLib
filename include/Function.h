@@ -47,7 +47,6 @@ namespace RLLib
       }
       virtual T initialize() =0;
       virtual void reset() =0;
-      virtual Vector<T>* weights() const =0;
   };
 
   template<typename T>
