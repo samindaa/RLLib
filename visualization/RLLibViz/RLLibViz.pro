@@ -41,7 +41,8 @@ SOURCES += main.cpp\
     AcrobotModel.cpp \
     AcrobotView.cpp \
     CartPoleModel.cpp \
-    CartPoleView.cpp
+    CartPoleView.cpp \
+    WindowLayout.cpp
 
 HEADERS  += \
     plot/qcustomplot.h \
@@ -72,7 +73,8 @@ HEADERS  += \
     AcrobotModel.h \
     AcrobotView.h \
     CartPoleModel.h \
-    CartPoleView.h
+    CartPoleView.h \
+    WindowLayout.h
 
 
 FORMS    += \

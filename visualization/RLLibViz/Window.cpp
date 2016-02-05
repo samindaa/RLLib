@@ -7,9 +7,9 @@
 using namespace RLLibViz;
 
 Window::Window(QWidget* parent) :
-    QWidget(parent), topColumns(0), centerColumns(0), bottomColumns(0)
+    QWidget(parent), windowLayout(new WindowLayout)
 {
-  setLayout(new QGridLayout);
+  setLayout(windowLayout);
   setVisible(false);
 }
 
@@ -56,7 +56,6 @@ bool Window::empty() const
 
 void Window::newLayout()
 {
-  topColumns = centerColumns = bottomColumns = 0;
   if (this->layout())
   {
     for (WindowVector::iterator iter = problemVector.begin(); iter != problemVector.end(); ++iter)
@@ -69,18 +68,20 @@ void Window::newLayout()
     delete this->layout();
   }
 
-  QGridLayout* gridLayout = new QGridLayout;
-  setLayout(gridLayout);
+  //if (windowLayout)
+  //  delete windowLayout;
+  windowLayout = new WindowLayout;
+  setLayout(windowLayout);
 
   for (WindowVector::iterator iter = problemVector.begin(); iter != problemVector.end(); ++iter)
-    gridLayout->addWidget(*iter, 0, topColumns++);
+    windowLayout->addTopWidget(*iter);
 
   for (WindowVector::iterator iter = plotVector.begin(); iter != plotVector.end(); ++iter)
-    gridLayout->addWidget(*iter, 1, centerColumns++);
+    windowLayout->addCenterWidget(*iter);
 
   for (WindowVector::iterator iter = valueFunctionVector.begin(); iter != valueFunctionVector.end();
       ++iter)
-    gridLayout->addWidget(*iter, 2, bottomColumns++);
+    windowLayout->addBottomWidget(*iter);
 }
 
 void Window::addProblemView(ViewBase* view)

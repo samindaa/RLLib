@@ -39,16 +39,16 @@ RLLibVizMediator::RLLibVizMediator(QWidget *parent) :
 
   ui->pushButtonStop->setEnabled(false);
 
-  demoThreads.insert(std::make_pair("doLearning", new RLLibViz::LearningThread));
-  demoThreads.insert(std::make_pair("doEvaluation", new RLLibViz::EvaluationThread));
+  threadMap.insert(std::make_pair("doLearning", new RLLibViz::LearningThread));
+  threadMap.insert(std::make_pair("doEvaluation", new RLLibViz::EvaluationThread));
 
-  for (DemoThreads::iterator iter = demoThreads.begin(); iter != demoThreads.end(); ++iter)
+  for (ThreadMap::iterator iter = threadMap.begin(); iter != threadMap.end(); ++iter)
     iter->second->start();
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonMountainCarOffPAC,
           std::make_pair(new RLLibViz::Window, new RLLibViz::MountainCarModel)));
-  DemoProblems::iterator iter = demoProblems.find(ui->radioButtonMountainCarOffPAC);
+  ProblemMap::iterator iter = problemMap.find(ui->radioButtonMountainCarOffPAC);
   iter->second.first->addProblemView(new RLLibViz::MountainCarView);
   iter->second.first->addProblemView(new RLLibViz::MountainCarView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Behavior Policy"));
@@ -57,10 +57,10 @@ RLLibVizMediator::RLLibVizMediator(QWidget *parent) :
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonContinuousGridworldOffPAC,
           std::make_pair(new RLLibViz::Window, new RLLibViz::ContinuousGridworldModel)));
-  iter = demoProblems.find(ui->radioButtonContinuousGridworldOffPAC);
+  iter = problemMap.find(ui->radioButtonContinuousGridworldOffPAC);
   iter->second.first->addProblemView(new RLLibViz::ContinuousGridworldView);
   iter->second.first->addProblemView(new RLLibViz::ContinuousGridworldView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Behavior Policy"));
@@ -69,19 +69,19 @@ RLLibVizMediator::RLLibVizMediator(QWidget *parent) :
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonSwingPendulumAverageRewardActorCritic,
           std::make_pair(new RLLibViz::Window, new RLLibViz::SwingPendulumModel)));
-  iter = demoProblems.find(ui->radioButtonSwingPendulumAverageRewardActorCritic);
+  iter = problemMap.find(ui->radioButtonSwingPendulumAverageRewardActorCritic);
   iter->second.first->addProblemView(new RLLibViz::SwingPendulumView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonSwingPendulumOffPAC,
           std::make_pair(new RLLibViz::Window, new RLLibViz::SwingPendulumModel2)));
-  iter = demoProblems.find(ui->radioButtonSwingPendulumOffPAC);
+  iter = problemMap.find(ui->radioButtonSwingPendulumOffPAC);
   iter->second.first->addProblemView(new RLLibViz::SwingPendulumView);
   iter->second.first->addProblemView(new RLLibViz::SwingPendulumView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Behavior Policy"));
@@ -90,55 +90,55 @@ RLLibVizMediator::RLLibVizMediator(QWidget *parent) :
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonMountainCarSarsaAlphaBound,
           std::make_pair(new RLLibViz::Window, new RLLibViz::MountainCarModel2)));
-  iter = demoProblems.find(ui->radioButtonMountainCarSarsaAlphaBound);
+  iter = problemMap.find(ui->radioButtonMountainCarSarsaAlphaBound);
   iter->second.first->addProblemView(new RLLibViz::MountainCarView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonSwingPendulumSarsaTrue,
           std::make_pair(new RLLibViz::Window, new RLLibViz::SwingPendulumModel3)));
-  iter = demoProblems.find(ui->radioButtonSwingPendulumSarsaTrue);
+  iter = problemMap.find(ui->radioButtonSwingPendulumSarsaTrue);
   iter->second.first->addProblemView(new RLLibViz::SwingPendulumView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonSwingPendulumSarsaAlphaBoundFourierBasis,
           std::make_pair(new RLLibViz::Window, new RLLibViz::SwingPendulumModel4)));
-  iter = demoProblems.find(ui->radioButtonSwingPendulumSarsaAlphaBoundFourierBasis);
+  iter = problemMap.find(ui->radioButtonSwingPendulumSarsaAlphaBoundFourierBasis);
   iter->second.first->addProblemView(new RLLibViz::SwingPendulumView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonMountainCarSarsaAlphaBoundFourierBasis,
           std::make_pair(new RLLibViz::Window, new RLLibViz::MountainCarModel3)));
-  iter = demoProblems.find(ui->radioButtonMountainCarSarsaAlphaBoundFourierBasis);
+  iter = problemMap.find(ui->radioButtonMountainCarSarsaAlphaBoundFourierBasis);
   iter->second.first->addProblemView(new RLLibViz::MountainCarView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
   iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonAcrobotSarasaAlphaBoundFourierBasis,
           std::make_pair(new RLLibViz::Window, new RLLibViz::AcrobotModel)));
-  iter = demoProblems.find(ui->radioButtonAcrobotSarasaAlphaBoundFourierBasis);
+  iter = problemMap.find(ui->radioButtonAcrobotSarasaAlphaBoundFourierBasis);
   iter->second.first->addProblemView(new RLLibViz::AcrobotView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
   //iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
   iter->second.first->initialize(iter->second.second);
 
-  demoProblems.insert(
+  problemMap.insert(
       std::make_pair(ui->radioButtonCartPoleSarsaAlphaBoundFourierBasis,
           std::make_pair(new RLLibViz::Window, new RLLibViz::CartPoleModel)));
-  iter = demoProblems.find(ui->radioButtonCartPoleSarsaAlphaBoundFourierBasis);
+  iter = problemMap.find(ui->radioButtonCartPoleSarsaAlphaBoundFourierBasis);
   iter->second.first->addProblemView(new RLLibViz::CartPoleView);
   iter->second.first->addPlotView(new RLLibViz::PlotView("Target Policy"));
   //iter->second.first->addValueFunctionView(new RLLibViz::ValueFunctionView);
@@ -166,14 +166,14 @@ void RLLibVizMediator::execClicked()
     currentModelBase = 0;
   }
 
-  DemoProblems::iterator iter = demoProblems.begin();
-  for (; iter != demoProblems.end(); ++iter)
+  ProblemMap::iterator iter = problemMap.begin();
+  for (; iter != problemMap.end(); ++iter)
   {
     if (iter->first->isChecked())
       break;
   }
 
-  if (iter != demoProblems.end())
+  if (iter != problemMap.end())
   {
     currentWindow = iter->second.first;
     currentModelBase = iter->second.second;
@@ -182,7 +182,7 @@ void RLLibVizMediator::execClicked()
     ui->mainWidget->setLayout(new QGridLayout);
     ui->mainWidget->layout()->addWidget(currentWindow);
     currentWindow->setVisible(true);
-    for (DemoThreads::iterator iter = demoThreads.begin(); iter != demoThreads.end(); ++iter)
+    for (ThreadMap::iterator iter = threadMap.begin(); iter != threadMap.end(); ++iter)
     {
       iter->second->setModel(currentModelBase);
       iter->second->setWindow(currentWindow);
@@ -196,7 +196,7 @@ void RLLibVizMediator::execClicked()
 
 void RLLibVizMediator::stopClicked()
 {
-  for (DemoThreads::iterator iter = demoThreads.begin(); iter != demoThreads.end(); ++iter)
+  for (ThreadMap::iterator iter = threadMap.begin(); iter != threadMap.end(); ++iter)
     iter->second->setActive(false);
   ui->pushButtonExec->setEnabled(true);
   ui->pushButtonStop->setEnabled(false);
@@ -204,6 +204,6 @@ void RLLibVizMediator::stopClicked()
 
 void RLLibVizMediator::updateSimulationSpeed(int value)
 {
-  for (DemoThreads::iterator iter = demoThreads.begin(); iter != demoThreads.end(); ++iter)
+  for (ThreadMap::iterator iter = threadMap.begin(); iter != threadMap.end(); ++iter)
     iter->second->setSimulationSpeed(value);
 }

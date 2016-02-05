@@ -28,10 +28,10 @@ class RLLibVizMediator: public QMainWindow
 
   private:
     Ui::RLLibVizMediator *ui;
-    typedef std::map<QRadioButton*, std::pair<RLLibViz::Window*, RLLibViz::ModelBase*> > DemoProblems;
-    typedef std::map<std::string, RLLibViz::ThreadBase*> DemoThreads;
-    DemoProblems demoProblems;
-    DemoThreads demoThreads;
+    typedef std::map<QRadioButton*, std::pair<RLLibViz::Window*, RLLibViz::ModelBase*> > ProblemMap;
+    typedef std::map<std::string, RLLibViz::ThreadBase*> ThreadMap;
+    ProblemMap problemMap;
+    ThreadMap threadMap;
     RLLibViz::Window* currentWindow;
     RLLibViz::ModelBase* currentModelBase;
 };

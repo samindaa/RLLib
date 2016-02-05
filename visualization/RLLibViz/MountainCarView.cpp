@@ -28,7 +28,7 @@ void MountainCarView::initialize()
   points.clear();
   x = Vec(-1.2, 0.6); // << from specification
 
-  Vec screen(width(), height());
+  //Vec screen(width(), height());
   y = Vec(::sin(3.0 * x.x), ::sin(3.0 * x.x));
   for (double i = x.x; i < x.y; i += 0.1)
   {
