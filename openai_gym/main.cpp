@@ -8,32 +8,9 @@
 #include "SyncTcpServer.h"
 #include "RLLibOpenAiGymProxy.h"
 
-class TestSyncTcpServer: public SyncTcpServer
-{
-  public:
-    TestSyncTcpServer() :
-        SyncTcpServer(2345)
-    {
-    }
-
-    virtual ~TestSyncTcpServer()
-    {
-    }
-
-    std::string toRLLib(const std::string& str)
-    {
-      std::cout << "ecoh:" << str << std::endl;
-      return str;
-    }
-
-};
-
 int main()
 {
-  //TestSyncTcpServer syncServer;
-  //syncServer.server();
-
-  RLLibOpenAiGymProxy syncServer;
+  SyncTcpServer syncServer(2345);
   syncServer.server();
 
   return 0;

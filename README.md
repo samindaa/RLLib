@@ -3,7 +3,7 @@ RLLib
 (C++ Template Library to Predict, Control,  Learn Behaviors, and Represent Learnable Knowledge using On/Off Policy Reinforcement Learning)
 ----------------------------------------------------------------------------------------------------------------------
 
-RLLib is a lightweight C++ template library that implements `incremental`, `standard`, and `gradient temporal-difference` learning algorithms in Reinforcement Learning. It is an optimized library for robotic applications and embedded devices that operates under fast duty cycles (e.g., < 30 ms). RLLib has been tested and evaluated on RoboCup 3D soccer simulation agents,  physical NAO V4 humanoid robots, and Tiva C series launchpad microcontrollers  to predict, control, learn behaviors, and represent learnable knowledge.  The implementation of the RLLib library is inspired by the RLPark API, which is a library of temporal-difference learning algorithms written in Java. 
+RLLib is a lightweight C++ template library that implements `incremental`, `standard`, and `gradient temporal-difference` learning algorithms in Reinforcement Learning. It is an optimized library for robotic applications and embedded devices that operates under fast duty cycles (e.g., < 30 ms). RLLib has been tested and evaluated on RoboCup 3D soccer simulation agents,  physical NAO V4 humanoid robots, and Tiva C series launchpad microcontrollers  to predict, control, learn behaviors, and represent learnable knowledge.  The implementation of the RLLib library is inspired by the RLPark API, which is a library of temporal-difference learning algorithms written in Java.
 
 Features
 --------
@@ -60,13 +60,19 @@ Features
  There are a plethora of examples demonstrating on-policy and off-policy control experiments.
 * **Visualization**:
  We provide a Qt4 based application to visualize benchmark problems.  
+ 
+New: OpenAI Gym Binding
+----
+
+[Open AI Gym](https://gym.openai.com) is a toolkit for developing and comparing reinforcement learning algorithms. We have developed a bridge between Gym and RLLib to use all the functionalities provided by Gym, while writing the agents (on/off-policy) in RLLib. The directory, [openai_gym](openai_gym/README.md), contains our bridge as well as RLLib agents that learn and control the [classic control environments](https://gym.openai.com/envs#classic_control).
+ 
 
 Extension
 -----
 
-Extension for Tiva C Series EK-TM4C123GXL LaunchPad, and Tiva C Series TM4C129 Connected LaunchPad microcontrollers.
+* Extension for Tiva C Series EK-TM4C123GXL LaunchPad, and Tiva C Series TM4C129 Connected LaunchPad microcontrollers.
 
-Tiva C series launchpad microcontrollers: [https://github.com/samindaa/csc688](https://github.com/samindaa/csc688)
+* Tiva C series launchpad microcontrollers: [https://github.com/samindaa/csc688](https://github.com/samindaa/csc688)
 
 Demo
 ----
@@ -186,4 +192,5 @@ Contact
 -------
 
    Saminda Abeyruwan, PhD (saminda@cs.miami.edu, samindaa@gmail.com)
+
 

@@ -11,10 +11,9 @@
 #include <vector>
 #include <iostream>
 //
-#include "SyncTcpServer.h"
 #include "RLLibOpenAiGymAgentRegistry.h"
 
-class RLLibOpenAiGymProxy: public SyncTcpServer
+class RLLibOpenAiGymProxy
 {
   private:
     RLLibOpenAiGymAgent* agent;

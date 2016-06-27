@@ -12,16 +12,17 @@ MountainCarAgent::MountainCarAgent()
   problem = new MountainCar();
   random = new RLLib::Random<double>();
   hashing = new RLLib::MurmurHashing<double>(random, 10000);
-  projector = new RLLib::TileCoderHashing<double>(hashing, problem->dimension(), 9, 10, false);
+  projector = new RLLib::TileCoderHashing<double>(hashing, problem->dimension(), 10, 10, true);
   toStateAction = new RLLib::StateActionTilings<double>(projector, problem->getDiscreteActions());
   e = new RLLib::ATrace<double>(projector->dimension());
+  alpha_v = 1.0f;
   gamma = 0.99;
   lambda = 0.3;
-  sarsaAdaptive = new RLLib::SarsaAlphaBound<double>(1.0f, gamma, lambda, e);
+  sarsa = new RLLib::SarsaAlphaBound<double>(alpha_v, gamma, lambda, e);
   epsilon = 0.01;
-  acting = new RLLib::EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsaAdaptive,
+  acting = new RLLib::EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa,
       epsilon);
-  control = new RLLib::SarsaControl<double>(acting, toStateAction, sarsaAdaptive);
+  control = new RLLib::SarsaControl<double>(acting, toStateAction, sarsa);
 
   agent = new RLLib::LearnerAgent<double>(control);
   simulator = new RLLib::RLRunner<double>(agent, problem, 5000);
@@ -36,7 +37,7 @@ MountainCarAgent::~MountainCarAgent()
   delete projector;
   delete toStateAction;
   delete e;
-  delete sarsaAdaptive;
+  delete sarsa;
   delete acting;
   delete control;
   delete agent;

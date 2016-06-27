@@ -18,18 +18,17 @@ class MountainCar: public OpenAiGymRLProblem
     // Global variables:
     RLLib::Range<double>* positionRange;
     RLLib::Range<double>* velocityRange;
-    RLLib::Range<double>* actionRange;
 
   public:
     MountainCar() :
         OpenAiGymRLProblem(2, 3, 1),  //
         positionRange(new RLLib::Range<double>(-1.2, 0.6)), //
-        velocityRange(new RLLib::Range<double>(-0.07, 0.07)), //
-        actionRange(new RLLib::Range<double>(-1.0, 1.0))
+        velocityRange(new RLLib::Range<double>(-0.07, 0.07))
     {
-      discreteActions->push_back(0, actionRange->min());
-      discreteActions->push_back(1, 0.0);
-      discreteActions->push_back(2, actionRange->max());
+      for (int i = 0; i < discreteActions->dimension(); ++i)
+      {
+        discreteActions->push_back(i, i);
+      }
 
       // subject to change
       continuousActions->push_back(0, 0.0);
@@ -42,7 +41,6 @@ class MountainCar: public OpenAiGymRLProblem
     {
       delete positionRange;
       delete velocityRange;
-      delete actionRange;
     }
 
     void updateTRStep()
@@ -81,9 +79,10 @@ class MountainCarAgent: public RLLibOpenAiGymAgent
     RLLib::Projector<double>* projector;
     RLLib::StateToStateAction<double>* toStateAction;
     RLLib::Trace<double>* e;
+    double alpha_v;
     double gamma;
     double lambda;
-    RLLib::Sarsa<double>* sarsaAdaptive;
+    RLLib::Sarsa<double>* sarsa;
     double epsilon;
     RLLib::Policy<double>* acting;
     RLLib::OnPolicyControlLearner<double>* control;

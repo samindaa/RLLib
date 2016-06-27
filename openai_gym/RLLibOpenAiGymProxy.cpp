@@ -5,14 +5,15 @@
  *      Author: sabeyruw
  */
 
-#include "RLLibOpenAiGymProxy.h"
 #include <sstream>
 #include <iostream>
 #include <iterator>
 #include <algorithm>
+//
+#include "RLLibOpenAiGymProxy.h"
 
 RLLibOpenAiGymProxy::RLLibOpenAiGymProxy() :
-    SyncTcpServer(2345), agent(NULL)
+    agent(NULL)
 {
 }
 
@@ -28,18 +29,22 @@ std::string RLLibOpenAiGymProxy::toRLLib(const std::string& str)
 {
   //std::cout << "recv: " << str << std::endl;
 
-  if (!agent)
+  size_t cmdIdx = str.find_first_of("__"); // Look for commands
+  if (cmdIdx != std::string::npos)
   {
-    size_t idx = str.find("__ENV__");
-    if (idx != std::string::npos)
+    if ((cmdIdx = str.find("__I__")) != std::string::npos)
     {
       if (agent)
       {
         delete agent;
+        agent = 0;
       }
-      agent = RLLibOpenAiGymAgentRegistry::make(str.substr(idx + 8));
-
+      agent = RLLibOpenAiGymAgentRegistry::make(str.substr(cmdIdx + 6));
       return agent ? "OK" : "NOT_OK";
+    }
+    else
+    {
+      return "NOT_OK";
     }
   }
 
@@ -51,7 +56,6 @@ std::string RLLibOpenAiGymProxy::toRLLib(const std::string& str)
   agent->problem->step_tp1->observation_tp1.clear();
   std::stringstream ssEpisodeState(tokens[tokens.size() - 1]);
   ssEpisodeState >> agent->problem->step_tp1->episode_state_tp1;
-
 
   std::stringstream ssEpisodeReward(tokens[tokens.size() - 2]);
   ssEpisodeReward >> agent->problem->step_tp1->reward_tp1;
@@ -65,8 +69,18 @@ std::string RLLibOpenAiGymProxy::toRLLib(const std::string& str)
 
   const RLLib::Action<double>* action_tp1 = agent->toRLLibStep();
 
+  // The action_tp1 will be nullptr when the agent exhausted all the time-steps.
+  // Then we send an episode end signal to OpenAI Gym to reset the environment.
   std::stringstream ssAction_tp1;
-  ssAction_tp1 << (action_tp1 ? action_tp1->id() : -1);
+  if (action_tp1)
+  {
+    ssAction_tp1 << action_tp1->getEntry();
+  }
+  else
+  {
+    ssAction_tp1 << "__E__";
+  }
+
   return ssAction_tp1.str();
 
 }
