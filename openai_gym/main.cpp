@@ -6,7 +6,6 @@
  */
 
 #include "SyncTcpServer.h"
-#include "RLLibOpenAiGymProxy.h"
 
 int main()
 {

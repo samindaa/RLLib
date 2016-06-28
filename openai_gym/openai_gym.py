@@ -3,12 +3,9 @@
 import gym
 import time
 import socket
-
 import numpy as np
 
-
-# This interface provide access to RLLib C++ interface TCP communication. 
-
+# This interfaces provide access to RLLib C++ interface via TCP communication. 
 class TcpClient(object):
     
     def __init__(self, host, port):
@@ -123,7 +120,6 @@ class OnPolicyLearnerAgent(LearnerAgent):
     """
     def __init__(self, env_name, discrete_actions, render):
         super(OnPolicyLearnerAgent, self).__init__(env_name, discrete_actions, render, '127.0.0.1', 2345)        
-    
 
 if __name__ == '__main__':
     #OnPolicyLearnerAgent('MountainCar-v0', True, False).run()
