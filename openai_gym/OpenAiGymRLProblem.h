@@ -12,6 +12,7 @@
 #include <iostream>
 //
 #include "RL.h"
+#include "ControlAlgorithm.h"
 
 class OpenAiGymTRStep
 {
@@ -48,6 +49,21 @@ class OpenAiGymRLProblem: public RLLib::RLProblem<double>
 
     void step(const RLLib::Action<double>* a)
     {
+    }
+
+    bool endOfEpisode() const
+    {
+      return (step_tp1->episode_state_tp1 == 3);
+    }
+
+    double r() const
+    {
+      return step_tp1->reward_tp1;
+    }
+
+    double z() const
+    {
+      return 0.0f;
     }
 
 };

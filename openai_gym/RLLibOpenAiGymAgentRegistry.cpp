@@ -7,6 +7,8 @@
 
 #include "RLLibOpenAiGymAgentRegistry.h"
 //
+#include "AcrobotAgent.h"
+#include "CartPoleAgent.h"
 #include "PendulumAgent.h"
 #include "MountainCarAgent.h"
 
@@ -21,6 +23,14 @@ RLLibOpenAiGymAgent* RLLibOpenAiGymAgentRegistry::make(const std::string& name)
   else if (name == "Pendulum-v0")
   {
     return new PendulumAgent();
+  }
+  else if (name == "Acrobot-v0")
+  {
+    return new AcrobotAgent();
+  }
+  else if (name == "CartPole-v0")
+  {
+    return new CartPoleAgent();
   }
   else
   {

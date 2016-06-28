@@ -8,7 +8,6 @@
 #ifndef OPENAI_GYM_MOUNTAINCARAGENT_H_
 #define OPENAI_GYM_MOUNTAINCARAGENT_H_
 
-#include "ControlAlgorithm.h"
 #include "RLLibOpenAiGymAgent.h"
 
 // Env
@@ -52,22 +51,6 @@ class MountainCar: public OpenAiGymRLProblem
       output->observation_tp1->setEntry(1, step_tp1->observation_tp1.at(1));
 
     }
-
-    bool endOfEpisode() const
-    {
-      return (step_tp1->episode_state_tp1 == 3);
-    }
-
-    double r() const
-    {
-      return step_tp1->reward_tp1;
-    }
-
-    double z() const
-    {
-      return 0.0f;
-    }
-
 };
 
 class MountainCarAgent: public RLLibOpenAiGymAgent

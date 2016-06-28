@@ -40,11 +40,11 @@ std::string RLLibOpenAiGymProxy::toRLLib(const std::string& str)
         agent = 0;
       }
       agent = RLLibOpenAiGymAgentRegistry::make(str.substr(cmdIdx + 6));
-      return agent ? "OK" : "NOT_OK";
+      return agent ? "__A__" : "__?__";
     }
     else
     {
-      return "NOT_OK";
+      return "__?__";
     }
   }
 

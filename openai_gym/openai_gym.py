@@ -1,5 +1,3 @@
-#import sys
-#sys.path.append("/Users/saminda/Projects/gym")
 import gym
 import time
 import socket
@@ -59,7 +57,7 @@ class LearnerAgent(object):
         msg = self.client_socket.send_recv(msg)
         print("msg: " + msg)
         
-        if (msg != "OK"):
+        if (msg != "__A__"):
             print("Agent is not ready")
             return
         
@@ -122,5 +120,7 @@ class OnPolicyLearnerAgent(LearnerAgent):
         super(OnPolicyLearnerAgent, self).__init__(env_name, discrete_actions, render, '127.0.0.1', 2345)        
 
 if __name__ == '__main__':
-    #OnPolicyLearnerAgent('MountainCar-v0', True, False).run()
-    OnPolicyLearnerAgent('Pendulum-v0', False, True).run()
+    OnPolicyLearnerAgent('MountainCar-v0', True, True).run()
+    #OnPolicyLearnerAgent('Pendulum-v0', False, True).run()
+    #OnPolicyLearnerAgent('Acrobot-v0', True, True).run()
+    #OnPolicyLearnerAgent('CartPole-v0', True, True).run()

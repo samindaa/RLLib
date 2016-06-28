@@ -26,7 +26,7 @@ MountainCarAgent::MountainCarAgent()
 
   agent = new RLLib::LearnerAgent<double>(control);
   simulator = new RLLib::RLRunner<double>(agent, problem, 5000);
-
+  simulator->setVerbose(false);
 }
 
 MountainCarAgent::~MountainCarAgent()

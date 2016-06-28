@@ -8,7 +8,6 @@
 #ifndef OPENAI_GYM_PENDULUMAGENT_H_
 #define OPENAI_GYM_PENDULUMAGENT_H_
 
-#include "ControlAlgorithm.h"
 #include "RLLibOpenAiGymAgent.h"
 
 // Env
@@ -57,22 +56,6 @@ class Pendulum: public OpenAiGymRLProblem
       output->observation_tp1->setEntry(1, velocity);
 
     }
-
-    bool endOfEpisode() const
-    {
-      return (step_tp1->episode_state_tp1 == 3);
-    }
-
-    double r() const
-    {
-      return step_tp1->reward_tp1;
-    }
-
-    double z() const
-    {
-      return 0.0f;
-    }
-
 };
 
 class PendulumAgent: public RLLibOpenAiGymAgent
