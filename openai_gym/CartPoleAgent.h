@@ -62,14 +62,168 @@ class CartPole: public OpenAiGymRLProblem
     }
 };
 
+class CartPoleProjector: public RLLib::Projector<double>
+{
+  private:
+    const double gridResolution;
+    RLLib::Hashing<double>* hashing;
+    RLLib::Tiles<double>* tiles;
+    RLLib::Vector<double>* vector;
+    RLLib::Vector<double> *x_t4, *x_t3, *x_t2, *x_t1;
+    std::vector<std::vector<int>> events;
+
+  public:
+    CartPoleProjector(RLLib::Random<double>* random) :
+        gridResolution(4)
+    {
+      int memory = 0;
+      memory += (12 * std::pow(gridResolution, 4));
+      memory += (4 * 3 * std::pow(gridResolution, 3));
+      memory += (6 * 2 * std::pow(gridResolution, 2));
+      memory += (4 * 3 * std::pow(gridResolution, 1));
+      memory *= 1;
+
+      std::cout << "memory: " << memory << std::endl;
+
+      hashing = new RLLib::MurmurHashing<double>(random, memory);
+      tiles = new RLLib::Tiles<double>(hashing);
+      vector = new RLLib::SVector<double>(hashing->getMemorySize() + 1/*bias*/);
+      x_t4 = new RLLib::PVector<double>(4);
+      x_t3 = new RLLib::PVector<double>(3);
+      x_t2 = new RLLib::PVector<double>(2);
+      x_t1 = new RLLib::PVector<double>(1);
+
+      calculateEvents();
+
+      std::cout << "evens: " << events.size() << std::endl;
+      for (size_t i = 0; i < events.size(); ++i)
+      {
+        std::cout << "i: " << i << " size: " << events[i].size() << "  [";
+        for (size_t j = 0; j < events[i].size(); ++j)
+        {
+          std::cout << events[i][j] << " ";
+        }
+        std::cout << "]" << std::endl;
+      }
+
+    }
+
+    virtual ~CartPoleProjector()
+    {
+      delete hashing;
+      delete tiles;
+      delete vector;
+      delete x_t4;
+      delete x_t3;
+      delete x_t2;
+      delete x_t1;
+    }
+
+    const RLLib::Vector<double>* project(const RLLib::Vector<double>* x, const int& h2)
+    {
+      ASSERT(x->dimension() == x->dimension());
+      vector->clear();
+      if (x->empty())
+      {
+        return vector;
+      }
+
+      int h1 = 0;
+      RLLib::Vector<double>* x_t = NULL;
+      for (size_t i = 0; i < events.size(); ++i)
+      {
+        int numTiling = 1;
+        switch (events[i].size())
+        {
+          case 4:
+          {
+            numTiling = 12;
+            x_t = x_t4;
+            break;
+          }
+          case 3:
+          {
+            numTiling = 3;
+            x_t = x_t3;
+            break;
+          }
+          case 2:
+          {
+            numTiling = 2;
+            x_t = x_t2;
+            break;
+          }
+          default:
+          {
+            x_t = x_t1;
+            numTiling = 1;
+          }
+        }
+
+        x_t->clear();
+        for (size_t j = 0; j < events[i].size(); ++j)
+        {
+          x_t->setEntry(j, x->getEntry(events[i][j]) * gridResolution);
+          tiles->tiles(vector, numTiling, x_t, h1++, h2);
+        }
+
+      }
+
+      vector->setEntry(vector->dimension() - 1, 1.0);
+
+      return vector;
+    }
+
+    const RLLib::Vector<double>* project(const RLLib::Vector<double>* x)
+    {
+      return project(x, 0);
+    }
+
+    double vectorNorm() const
+    {
+      return 48 + 1;
+    }
+
+    int dimension() const
+    {
+      return vector->dimension();
+    }
+
+  private:
+    void calculateEvents()
+    {
+      std::vector<int> currVec;
+      std::vector<int> indexVec;
+      for (int i = 0; i < 4; ++i)
+      {
+        indexVec.push_back(i);
+      }
+
+      calculateEvents(indexVec, currVec, 0);
+    }
+
+    void calculateEvents(const std::vector<int>& indexVec, std::vector<int>& currVec,
+        const size_t& i)
+    {
+      if (!currVec.empty())
+      {
+        events.push_back(currVec);
+      }
+
+      for (size_t j = i; j < indexVec.size(); ++j)
+      {
+        currVec.push_back(indexVec[j]);
+        calculateEvents(indexVec, currVec, j + 1);
+        currVec.pop_back();
+      }
+    }
+};
+
 class CartPoleAgent: public RLLibOpenAiGymAgent
 {
   private:
     // RLLib
     RLLib::Random<double>* random;
-    RLLib::Hashing<double>* hashing;
-    int order;
-    RLLib::Vector<double>* gridResolutions;
     RLLib::Projector<double>* projector;
     RLLib::StateToStateAction<double>* toStateAction;
     RLLib::Trace<double>* e;

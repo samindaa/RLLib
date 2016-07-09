@@ -12,32 +12,17 @@ CartPoleAgent::CartPoleAgent()
 
   random = new RLLib::Random<double>;
   problem = new CartPole;
-
-  order = 5;
-  //projector = new RLLib::FourierBasis<double>(problem->dimension(), order,
-  //    problem->getDiscreteActions());
-  //toStateAction = new RLLib::StateActionTilings<double>(projector, problem->getDiscreteActions());
-  //hashing = NULL;
-  //gridResolutions = NULL;
-
-  hashing = new RLLib::MurmurHashing<double>(random, 1000);
-  gridResolutions = new RLLib::PVector<double>(problem->dimension());
-  gridResolutions->setEntry(0, 8);
-  gridResolutions->setEntry(1, 16);
-  gridResolutions->setEntry(2, 8);
-  gridResolutions->setEntry(3, 16);
-  projector = new RLLib::TileCoderHashing<double>(hashing, problem->dimension(), gridResolutions,
-      12);
-
-  toStateAction = new RLLib::TabularAction<double>(projector, problem->getDiscreteActions(), true);
+  projector = new CartPoleProjector(random);
+  toStateAction = new RLLib::StateActionTilings<double>(projector, problem->getDiscreteActions());
 
   e = new RLLib::ATrace<double>(toStateAction->dimension());
-  alpha = 1.0;
+  alpha = 0.1 / projector->vectorNorm();
   gamma = 0.99;
-  lambda = 0.3;
-  sarsa = new RLLib::SarsaAlphaBound<double>(alpha, gamma, lambda, e);
+  lambda = 0.4;
+  sarsa = new RLLib::SarsaTrue<double>(alpha, gamma, lambda, e);
   epsilon = 0.01;
-  acting = new RLLib::EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa, epsilon);
+  //acting = new RLLib::EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa, epsilon);
+  acting = new RLLib::SoftMax<double>(random, problem->getDiscreteActions(), sarsa);
   control = new RLLib::SarsaControl<double>(acting, toStateAction, sarsa);
 
   agent = new RLLib::LearnerAgent<double>(control);
@@ -51,14 +36,6 @@ CartPoleAgent::~CartPoleAgent()
 
   delete random;
   delete problem;
-  if (gridResolutions)
-  {
-    delete gridResolutions;
-  }
-  if (hashing)
-  {
-    delete hashing;
-  }
   delete projector;
   delete toStateAction;
   delete e;

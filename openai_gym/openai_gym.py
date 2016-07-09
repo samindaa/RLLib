@@ -2,6 +2,7 @@ import gym
 import time
 import socket
 import numpy as np
+from sys import argv
 
 # This interfaces provide access to RLLib C++ interface via TCP communication. 
 class TcpClient(object):
@@ -120,7 +121,22 @@ class OnPolicyLearnerAgent(LearnerAgent):
         super(OnPolicyLearnerAgent, self).__init__(env_name, discrete_actions, render, '127.0.0.1', 2345)        
 
 if __name__ == '__main__':
-    OnPolicyLearnerAgent('MountainCar-v0', True, True).run()
-    #OnPolicyLearnerAgent('Pendulum-v0', False, True).run()
-    #OnPolicyLearnerAgent('Acrobot-v0', True, True).run()
-    #OnPolicyLearnerAgent('CartPole-v0', True, True).run()
+    input_v0 = 0
+    
+    if (len(argv) > 1):
+        input_v0 = int(argv[1])
+        
+    if (input_v0 < 0 or input_v0 > 3):
+        input_v0 = 0    
+    
+    print("input_v0: {} argvs: {}".format(input_v0, len(argv)))
+    
+    control_v0 = {0 : OnPolicyLearnerAgent('MountainCar-v0', True, True),
+                  1 : OnPolicyLearnerAgent('Pendulum-v0', False, True),    
+                  2 : OnPolicyLearnerAgent('Acrobot-v0', True, True),
+                  3 : OnPolicyLearnerAgent('CartPole-v0', True, True)
+                 }
+    
+    control_v0[input_v0].run()
+    
+    
