@@ -4,7 +4,7 @@ import socket
 import numpy as np
 from sys import argv
 
-# This interfaces provide access to RLLib C++ interface via TCP communication. 
+# These interfaces provide access to RLLib C++ interface via TCP communication. 
 class TcpClient(object):
     
     def __init__(self, host, port):
