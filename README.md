@@ -29,7 +29,7 @@ Features
 * **Supervised learning algorithms**: 
  * `Adaline`
  * `IDBD`
- * `KI`
+ * `K1`
  * `SemiLinearIDBD`
  * `Autostep`
 * **Policies**: 
