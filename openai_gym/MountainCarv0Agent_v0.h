@@ -5,13 +5,13 @@
  *      Author: sabeyruw
  */
 
-#ifndef OPENAI_GYM_MOUNTAINCARAGENT_H_
-#define OPENAI_GYM_MOUNTAINCARAGENT_H_
+#ifndef OPENAI_GYM_MOUNTAINCARV0AGENT_V0_H_
+#define OPENAI_GYM_MOUNTAINCARV0AGENT_V0_H_
 
 #include "RLLibOpenAiGymAgent.h"
 
 // Env
-class MountainCar: public OpenAiGymRLProblem
+class MountainCar_v0: public OpenAiGymRLProblem
 {
   protected:
     // Global variables:
@@ -19,7 +19,7 @@ class MountainCar: public OpenAiGymRLProblem
     RLLib::Range<double>* velocityRange;
 
   public:
-    MountainCar() :
+    MountainCar_v0() :
         OpenAiGymRLProblem(2, 3, 1),  //
         positionRange(new RLLib::Range<double>(-1.2, 0.6)), //
         velocityRange(new RLLib::Range<double>(-0.07, 0.07))
@@ -36,7 +36,7 @@ class MountainCar: public OpenAiGymRLProblem
       observationRanges->push_back(velocityRange);
     }
 
-    virtual ~MountainCar()
+    virtual ~MountainCar_v0()
     {
       delete positionRange;
       delete velocityRange;
@@ -53,7 +53,7 @@ class MountainCar: public OpenAiGymRLProblem
     }
 };
 
-class MountainCarAgent: public RLLibOpenAiGymAgent
+class MountainCarAgent_v0: public RLLibOpenAiGymAgent
 {
   private:
     // An algorithm
@@ -73,9 +73,9 @@ class MountainCarAgent: public RLLibOpenAiGymAgent
     RLLib::RLRunner<double>* simulator;
 
   public:
-    MountainCarAgent();
-    virtual ~MountainCarAgent();
+    MountainCarAgent_v0();
+    virtual ~MountainCarAgent_v0();
     const RLLib::Action<double>* toRLLibStep();
 };
 
-#endif /* OPENAI_GYM_MOUNTAINCARAGENT_H_ */
+#endif /* OPENAI_GYM_MOUNTAINCARV0AGENT_V0_H_ */

@@ -5,13 +5,13 @@
  *      Author: sabeyruw
  */
 
-#ifndef OPENAI_GYM_CARTPOLEAGENT_H_
-#define OPENAI_GYM_CARTPOLEAGENT_H_
+#ifndef OPENAI_GYM_CARTPOLEAGENTV0_V0_H_
+#define OPENAI_GYM_CARTPOLEAGENTV0_V0_H_
 
 #include "RLLibOpenAiGymAgent.h"
 
 //Env
-class CartPole: public OpenAiGymRLProblem
+class CartPole_v0: public OpenAiGymRLProblem
 {
   protected:
     // Global variables:
@@ -20,7 +20,7 @@ class CartPole: public OpenAiGymRLProblem
     RLLib::Range<double>* theta2DotRange;
 
   public:
-    CartPole() :
+    CartPole_v0() :
         OpenAiGymRLProblem(4, 2, 1),  //
         thetaRange(new RLLib::Range<double>(-M_PI, M_PI)), //
         theta1DotRange(new RLLib::Range<double>(-4.0 * M_PI, 4.0 * M_PI)), //
@@ -40,7 +40,7 @@ class CartPole: public OpenAiGymRLProblem
       observationRanges->push_back(theta2DotRange);
     }
 
-    virtual ~CartPole()
+    virtual ~CartPole_v0()
     {
       delete thetaRange;
       delete theta1DotRange;
@@ -62,7 +62,7 @@ class CartPole: public OpenAiGymRLProblem
     }
 };
 
-class CartPoleProjector: public RLLib::Projector<double>
+class CartPoleProjector_v0: public RLLib::Projector<double>
 {
   private:
     const double gridResolution;
@@ -73,7 +73,7 @@ class CartPoleProjector: public RLLib::Projector<double>
     std::vector<std::vector<int>> events;
 
   public:
-    CartPoleProjector(RLLib::Random<double>* random) :
+    CartPoleProjector_v0(RLLib::Random<double>* random) :
         gridResolution(4)
     {
       int memory = 0;
@@ -108,7 +108,7 @@ class CartPoleProjector: public RLLib::Projector<double>
 
     }
 
-    virtual ~CartPoleProjector()
+    virtual ~CartPoleProjector_v0()
     {
       delete hashing;
       delete tiles;
@@ -219,7 +219,7 @@ class CartPoleProjector: public RLLib::Projector<double>
     }
 };
 
-class CartPoleAgent: public RLLibOpenAiGymAgent
+class CartPoleAgent_v0: public RLLibOpenAiGymAgent
 {
   private:
     // RLLib
@@ -238,9 +238,9 @@ class CartPoleAgent: public RLLibOpenAiGymAgent
     RLLib::RLRunner<double>* simulator;
 
   public:
-    CartPoleAgent();
-    virtual ~CartPoleAgent();
+    CartPoleAgent_v0();
+    virtual ~CartPoleAgent_v0();
     const RLLib::Action<double>* toRLLibStep();
 };
 
-#endif /* OPENAI_GYM_CARTPOLEAGENT_H_ */
+#endif /* OPENAI_GYM_CARTPOLEAGENTV0_V0_H_ */

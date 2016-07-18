@@ -5,14 +5,14 @@
  *      Author: sabeyruw
  */
 
-#include "CartPoleAgent.h"
+#include "CartPoleAgentv0_v0.h"
 
-CartPoleAgent::CartPoleAgent()
+CartPoleAgent_v0::CartPoleAgent_v0()
 {
 
   random = new RLLib::Random<double>;
-  problem = new CartPole;
-  projector = new CartPoleProjector(random);
+  problem = new CartPole_v0;
+  projector = new CartPoleProjector_v0(random);
   toStateAction = new RLLib::StateActionTilings<double>(projector, problem->getDiscreteActions());
 
   e = new RLLib::ATrace<double>(toStateAction->dimension());
@@ -31,7 +31,7 @@ CartPoleAgent::CartPoleAgent()
 
 }
 
-CartPoleAgent::~CartPoleAgent()
+CartPoleAgent_v0::~CartPoleAgent_v0()
 {
 
   delete random;
@@ -46,7 +46,7 @@ CartPoleAgent::~CartPoleAgent()
   delete simulator;
 }
 
-const RLLib::Action<double>* CartPoleAgent::toRLLibStep()
+const RLLib::Action<double>* CartPoleAgent_v0::toRLLibStep()
 {
   simulator->step();
   return simulator->getAgentAction();

@@ -5,11 +5,11 @@
  *      Author: sabeyruw
  */
 
-#include "MountainCarAgent.h"
+#include "MountainCarv0Agent_v0.h"
 
-MountainCarAgent::MountainCarAgent()
+MountainCarAgent_v0::MountainCarAgent_v0()
 {
-  problem = new MountainCar();
+  problem = new MountainCar_v0();
   random = new RLLib::Random<double>();
   hashing = new RLLib::MurmurHashing<double>(random, 10000);
   projector = new RLLib::TileCoderHashing<double>(hashing, problem->dimension(), 10, 10, true);
@@ -29,7 +29,7 @@ MountainCarAgent::MountainCarAgent()
   simulator->setVerbose(false);
 }
 
-MountainCarAgent::~MountainCarAgent()
+MountainCarAgent_v0::~MountainCarAgent_v0()
 {
   delete random;
   delete problem;
@@ -44,7 +44,7 @@ MountainCarAgent::~MountainCarAgent()
   delete simulator;
 }
 
-const RLLib::Action<double>* MountainCarAgent::toRLLibStep()
+const RLLib::Action<double>* MountainCarAgent_v0::toRLLibStep()
 {
   simulator->step();
   return simulator->getAgentAction();

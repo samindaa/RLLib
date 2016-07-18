@@ -5,13 +5,13 @@
  *      Author: sabeyruw
  */
 
-#ifndef OPENAI_GYM_ACROBOTAGENT_H_
-#define OPENAI_GYM_ACROBOTAGENT_H_
+#ifndef OPENAI_GYM_ACROBOTAGENTV0_V0_H_
+#define OPENAI_GYM_ACROBOTAGENTV0_V0_H_
 
 #include "RLLibOpenAiGymAgent.h"
 
 //Env
-class Acrobot: public OpenAiGymRLProblem
+class Acrobot_v0: public OpenAiGymRLProblem
 {
   protected:
     // Global variables:
@@ -20,7 +20,7 @@ class Acrobot: public OpenAiGymRLProblem
     RLLib::Range<double>* theta2DotRange;
 
   public:
-    Acrobot() :
+    Acrobot_v0() :
         OpenAiGymRLProblem(4, 3, 1),  //
         thetaRange(new RLLib::Range<double>(-M_PI, M_PI)), //
         theta1DotRange(new RLLib::Range<double>(-4.0 * M_PI, 4.0 * M_PI)), //
@@ -40,7 +40,7 @@ class Acrobot: public OpenAiGymRLProblem
       observationRanges->push_back(theta2DotRange);
     }
 
-    virtual ~Acrobot()
+    virtual ~Acrobot_v0()
     {
       delete thetaRange;
       delete theta1DotRange;
@@ -62,7 +62,7 @@ class Acrobot: public OpenAiGymRLProblem
     }
 };
 
-class AcrobotAgent: public RLLibOpenAiGymAgent
+class AcrobotAgent_v0: public RLLibOpenAiGymAgent
 {
   private:
     // RLLib
@@ -82,9 +82,9 @@ class AcrobotAgent: public RLLibOpenAiGymAgent
     RLLib::RLRunner<double>* simulator;
 
   public:
-    AcrobotAgent();
-    virtual ~AcrobotAgent();
+    AcrobotAgent_v0();
+    virtual ~AcrobotAgent_v0();
     const RLLib::Action<double>* toRLLibStep();
 };
 
-#endif /* OPENAI_GYM_ACROBOTAGENT_H_ */
+#endif /* OPENAI_GYM_ACROBOTAGENTV0_V0_H_ */

@@ -5,11 +5,11 @@
  *      Author: sabeyruw
  */
 
-#include "PendulumAgent.h"
+#include "Pendulumv0Agent_v0.h"
 
-PendulumAgent::PendulumAgent()
+PendulumAgent_v0::PendulumAgent_v0()
 {
-  problem = new Pendulum;
+  problem = new Pendulum_v0;
   random = new RLLib::Random<double>;
   hashing = new RLLib::MurmurHashing<double>(random, 1000);
   projector = new RLLib::TileCoderHashing<double>(hashing, problem->dimension(), 10, 10, false);
@@ -44,7 +44,7 @@ PendulumAgent::PendulumAgent()
   simulator = new RLLib::RLRunner<double>(agent, problem, 5000);
 }
 
-PendulumAgent::~PendulumAgent()
+PendulumAgent_v0::~PendulumAgent_v0()
 {
   delete problem;
   delete random;
@@ -66,7 +66,7 @@ PendulumAgent::~PendulumAgent()
   delete simulator;
 }
 
-const RLLib::Action<double>* PendulumAgent::toRLLibStep()
+const RLLib::Action<double>* PendulumAgent_v0::toRLLibStep()
 {
   simulator->step();
   return simulator->getAgentAction();

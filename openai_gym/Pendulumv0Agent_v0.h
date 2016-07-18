@@ -5,13 +5,13 @@
  *      Author: sabeyruw
  */
 
-#ifndef OPENAI_GYM_PENDULUMAGENT_H_
-#define OPENAI_GYM_PENDULUMAGENT_H_
+#ifndef OPENAI_GYM_PENDULUMV0AGENT_V0_H_
+#define OPENAI_GYM_PENDULUMV0AGENT_V0_H_
 
 #include "RLLibOpenAiGymAgent.h"
 
 // Env
-class Pendulum: public OpenAiGymRLProblem
+class Pendulum_v0: public OpenAiGymRLProblem
 {
   protected:
     // Global variables:
@@ -22,7 +22,7 @@ class Pendulum: public OpenAiGymRLProblem
     double velocity;
 
   public:
-    Pendulum() :
+    Pendulum_v0() :
         OpenAiGymRLProblem(2, 1, 1),  //
         thetaRange(new RLLib::Range<double>(-M_PI, M_PI)), //
         velocityRange(new RLLib::Range<double>(-8.0f, 8.0f)), theta(0), velocity(0)
@@ -34,7 +34,7 @@ class Pendulum: public OpenAiGymRLProblem
       observationRanges->push_back(velocityRange);
     }
 
-    virtual ~Pendulum()
+    virtual ~Pendulum_v0()
     {
       delete thetaRange;
       delete velocityRange;
@@ -58,7 +58,7 @@ class Pendulum: public OpenAiGymRLProblem
     }
 };
 
-class PendulumAgent: public RLLibOpenAiGymAgent
+class PendulumAgent_v0: public RLLibOpenAiGymAgent
 {
   private:
     RLLib::Random<double>* random;
@@ -91,9 +91,9 @@ class PendulumAgent: public RLLibOpenAiGymAgent
     RLLib::RLRunner<double>* simulator;
 
   public:
-    PendulumAgent();
-    virtual ~PendulumAgent();
+    PendulumAgent_v0();
+    virtual ~PendulumAgent_v0();
     const RLLib::Action<double>* toRLLibStep();
 };
 
-#endif /* OPENAI_GYM_PENDULUMAGENT_H_ */
+#endif /* OPENAI_GYM_PENDULUMV0AGENT_V0_H_ */

@@ -5,12 +5,12 @@
  *      Author: sabeyruw
  */
 
-#include "AcrobotAgent.h"
+#include "AcrobotAgentv0_v0.h"
 
-AcrobotAgent::AcrobotAgent()
+AcrobotAgent_v0::AcrobotAgent_v0()
 {
   random = new RLLib::Random<double>;
-  problem = new Acrobot();
+  problem = new Acrobot_v0();
   order = 5;
   projector = new RLLib::FourierBasis<double>(problem->dimension(), order,
       problem->getDiscreteActions());
@@ -29,7 +29,7 @@ AcrobotAgent::AcrobotAgent()
   simulator->setVerbose(false);
 }
 
-AcrobotAgent::~AcrobotAgent()
+AcrobotAgent_v0::~AcrobotAgent_v0()
 {
   delete random;
   delete problem;
@@ -43,7 +43,7 @@ AcrobotAgent::~AcrobotAgent()
   delete simulator;
 }
 
-const RLLib::Action<double>* AcrobotAgent::toRLLibStep()
+const RLLib::Action<double>* AcrobotAgent_v0::toRLLibStep()
 {
   simulator->step();
   return simulator->getAgentAction();

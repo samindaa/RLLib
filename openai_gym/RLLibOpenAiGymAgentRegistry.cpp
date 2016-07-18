@@ -6,11 +6,11 @@
  */
 
 #include "RLLibOpenAiGymAgentRegistry.h"
-//
-#include "AcrobotAgent.h"
-#include "CartPoleAgent.h"
-#include "PendulumAgent.h"
-#include "MountainCarAgent.h"
+
+#include "AcrobotAgentv0_v0.h"
+#include "CartPoleAgentv0_v0.h"
+#include "MountainCarv0Agent_v0.h"
+#include "Pendulumv0Agent_v0.h"
 
 RLLibOpenAiGymAgent* RLLibOpenAiGymAgentRegistry::make(const std::string& name)
 {
@@ -18,19 +18,19 @@ RLLibOpenAiGymAgent* RLLibOpenAiGymAgentRegistry::make(const std::string& name)
   std::cout << "name: [" << name << "]" << std::endl;
   if (name == "MountainCar-v0")
   {
-    return new MountainCarAgent();
+    return new MountainCarAgent_v0();
   }
   else if (name == "Pendulum-v0")
   {
-    return new PendulumAgent();
+    return new PendulumAgent_v0();
   }
   else if (name == "Acrobot-v0")
   {
-    return new AcrobotAgent();
+    return new AcrobotAgent_v0();
   }
   else if (name == "CartPole-v0")
   {
-    return new CartPoleAgent();
+    return new CartPoleAgent_v0();
   }
   else
   {
