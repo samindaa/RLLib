@@ -5,7 +5,7 @@
  *      Author: sabeyruw
  */
 
-#include "AcrobotAgentv0_v0.h"
+#include "AcrobotAgent_v0.h"
 
 AcrobotAgent_v0::AcrobotAgent_v0()
 {

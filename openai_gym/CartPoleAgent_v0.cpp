@@ -5,7 +5,7 @@
  *      Author: sabeyruw
  */
 
-#include "CartPoleAgentv0_v0.h"
+#include "CartPoleAgent_v0.h"
 
 CartPoleAgent_v0::CartPoleAgent_v0()
 {

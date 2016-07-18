@@ -5,7 +5,7 @@
  *      Author: sabeyruw
  */
 
-#include "Pendulumv0Agent_v0.h"
+#include "PendulumAgent_v0.h"
 
 PendulumAgent_v0::PendulumAgent_v0()
 {

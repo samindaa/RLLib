@@ -5,8 +5,8 @@
  *      Author: sabeyruw
  */
 
-#ifndef OPENAI_GYM_MOUNTAINCARV0AGENT_V0_H_
-#define OPENAI_GYM_MOUNTAINCARV0AGENT_V0_H_
+#ifndef OPENAI_GYM_MOUNTAINCARAGENT_V0_H_
+#define OPENAI_GYM_MOUNTAINCARAGENT_V0_H_
 
 #include "RLLibOpenAiGymAgent.h"
 
@@ -78,4 +78,4 @@ class MountainCarAgent_v0: public RLLibOpenAiGymAgent
     const RLLib::Action<double>* toRLLibStep();
 };
 
-#endif /* OPENAI_GYM_MOUNTAINCARV0AGENT_V0_H_ */
+#endif /* OPENAI_GYM_MOUNTAINCARAGENT_V0_H_ */

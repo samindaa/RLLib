@@ -5,8 +5,8 @@
  *      Author: sabeyruw
  */
 
-#ifndef OPENAI_GYM_CARTPOLEAGENTV0_V0_H_
-#define OPENAI_GYM_CARTPOLEAGENTV0_V0_H_
+#ifndef OPENAI_GYM_CARTPOLEAGENT_V0_H_
+#define OPENAI_GYM_CARTPOLEAGENT_V0_H_
 
 #include "RLLibOpenAiGymAgent.h"
 
@@ -243,4 +243,4 @@ class CartPoleAgent_v0: public RLLibOpenAiGymAgent
     const RLLib::Action<double>* toRLLibStep();
 };
 
-#endif /* OPENAI_GYM_CARTPOLEAGENTV0_V0_H_ */
+#endif /* OPENAI_GYM_CARTPOLEAGENT_V0_H_ */

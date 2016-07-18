@@ -7,10 +7,10 @@
 
 #include "RLLibOpenAiGymAgentRegistry.h"
 
-#include "AcrobotAgentv0_v0.h"
-#include "CartPoleAgentv0_v0.h"
-#include "MountainCarv0Agent_v0.h"
-#include "Pendulumv0Agent_v0.h"
+#include "AcrobotAgent_v0.h"
+#include "CartPoleAgent_v0.h"
+#include "MountainCarAgent_v0.h"
+#include "PendulumAgent_v0.h"
 
 RLLibOpenAiGymAgent* RLLibOpenAiGymAgentRegistry::make(const std::string& name)
 {
