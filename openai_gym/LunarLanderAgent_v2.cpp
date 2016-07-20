@@ -26,7 +26,7 @@ LunarLanderAgent_v2::LunarLanderAgent_v2()
   control = new RLLib::SarsaControl<double>(acting, toStateAction, sarsa);
 
   agent = new RLLib::LearnerAgent<double>(control);
-  simulator = new RLLib::RLRunner<double>(agent, problem, 300);
+  simulator = new RLLib::RLRunner<double>(agent, problem, 1000);
   simulator->setVerbose(true);
 
 }
