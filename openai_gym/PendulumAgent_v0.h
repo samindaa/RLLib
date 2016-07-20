@@ -93,7 +93,7 @@ class PendulumAgent_v0: public RLLibOpenAiGymAgent
   public:
     PendulumAgent_v0();
     virtual ~PendulumAgent_v0();
-    const RLLib::Action<double>* toRLLibStep();
+    const RLLib::Action<double>* step();
 };
 
 #endif /* OPENAI_GYM_PENDULUMAGENT_V0_H_ */

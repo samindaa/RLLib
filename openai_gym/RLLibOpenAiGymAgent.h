@@ -24,7 +24,7 @@ class RLLibOpenAiGymAgent
     {
     }
 
-    virtual const RLLib::Action<double>* toRLLibStep() =0;
+    virtual const RLLib::Action<double>* step() =0;
 };
 
 #endif /* OPENAI_GYM_RLLIBOPENAIGYMAGENT_H_ */

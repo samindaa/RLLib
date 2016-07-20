@@ -66,7 +66,7 @@ PendulumAgent_v0::~PendulumAgent_v0()
   delete simulator;
 }
 
-const RLLib::Action<double>* PendulumAgent_v0::toRLLibStep()
+const RLLib::Action<double>* PendulumAgent_v0::step()
 {
   simulator->step();
   return simulator->getAgentAction();

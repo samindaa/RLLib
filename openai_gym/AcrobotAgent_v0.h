@@ -84,7 +84,7 @@ class AcrobotAgent_v0: public RLLibOpenAiGymAgent
   public:
     AcrobotAgent_v0();
     virtual ~AcrobotAgent_v0();
-    const RLLib::Action<double>* toRLLibStep();
+    const RLLib::Action<double>* step();
 };
 
 #endif /* OPENAI_GYM_ACROBOTAGENT_V0_H_ */

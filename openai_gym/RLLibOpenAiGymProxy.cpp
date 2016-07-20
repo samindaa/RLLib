@@ -27,7 +27,7 @@ RLLibOpenAiGymProxy::~RLLibOpenAiGymProxy()
 
 std::string RLLibOpenAiGymProxy::toRLLib(const std::string& str)
 {
-  //std::cout << "recv: " << str << std::endl;
+  //std::cout << "recv: |" << str << "|" << std::endl;
 
   size_t cmdIdx = str.find_first_of("__"); // Look for commands
   if (cmdIdx != std::string::npos)
@@ -67,7 +67,7 @@ std::string RLLibOpenAiGymProxy::toRLLib(const std::string& str)
     ssStateVar >> agent->problem->step_tp1->observation_tp1[i];
   }
 
-  const RLLib::Action<double>* action_tp1 = agent->toRLLibStep();
+  const RLLib::Action<double>* action_tp1 = agent->step();
 
   // The action_tp1 will be nullptr when the agent exhausted all the time-steps.
   // Then we send an episode end signal to OpenAI Gym to reset the environment.

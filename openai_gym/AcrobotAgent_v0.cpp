@@ -43,7 +43,7 @@ AcrobotAgent_v0::~AcrobotAgent_v0()
   delete simulator;
 }
 
-const RLLib::Action<double>* AcrobotAgent_v0::toRLLibStep()
+const RLLib::Action<double>* AcrobotAgent_v0::step()
 {
   simulator->step();
   return simulator->getAgentAction();

@@ -32,10 +32,13 @@ class LearnerAgent(object):
         self.client_socket = TcpClient(host, port)
         
     def newMsg(self, observations, reward, episode_state):
-        msg = ""
-        for x in np.nditer(observations):
-            msg += str(x)
-            msg += " "
+        """ A simple msg format 
+            obs0_t1 obs1_t2 ... reward episode_state
+            episode_state = 0 => new epoch starts, 1 episode starts, 2 episode continue, 3 episode ends
+        """
+        obs_tojson = self.env.observation_space.to_jsonable(np.array(observations).flatten());
+        msg = " ".join([str(i) for i in obs_tojson])
+        msg += " "
         msg += str(reward)
         msg += " "
         msg += str(episode_state)
@@ -126,7 +129,7 @@ if __name__ == '__main__':
     if (len(argv) > 1):
         input_v0 = int(argv[1])
         
-    if (input_v0 < 0 or input_v0 > 3):
+    if (input_v0 < 0 or input_v0 > 4):
         input_v0 = 0    
     
     print("input_v0: {} argvs: {}".format(input_v0, len(argv)))
@@ -134,7 +137,8 @@ if __name__ == '__main__':
     control_v0 = {0 : OnPolicyLearnerAgent('MountainCar-v0', True, True),
                   1 : OnPolicyLearnerAgent('Pendulum-v0', False, True),    
                   2 : OnPolicyLearnerAgent('Acrobot-v0', True, True),
-                  3 : OnPolicyLearnerAgent('CartPole-v0', True, True)
+                  3 : OnPolicyLearnerAgent('CartPole-v0', True, True),
+                  4 : OnPolicyLearnerAgent('LunarLander-v2', True, True)
                  }
     
     control_v0[input_v0].run()

@@ -11,6 +11,7 @@
 #include "CartPoleAgent_v0.h"
 #include "MountainCarAgent_v0.h"
 #include "PendulumAgent_v0.h"
+#include "LunarLanderAgent_v2.h"
 
 RLLibOpenAiGymAgent* RLLibOpenAiGymAgentRegistry::make(const std::string& name)
 {
@@ -31,6 +32,10 @@ RLLibOpenAiGymAgent* RLLibOpenAiGymAgentRegistry::make(const std::string& name)
   else if (name == "CartPole-v0")
   {
     return new CartPoleAgent_v0();
+  }
+  else if (name == "LunarLander-v2")
+  {
+    return new LunarLanderAgent_v2();
   }
   else
   {

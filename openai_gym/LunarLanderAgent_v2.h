@@ -1,31 +1,39 @@
 /*
- * CartPoleAgent.h
+ * LunarLanderAgent_v2.h
  *
- *  Created on: Jun 27, 2016
+ *  Created on: Jul 18, 2016
  *      Author: sabeyruw
  */
 
-#ifndef OPENAI_GYM_CARTPOLEAGENT_V0_H_
-#define OPENAI_GYM_CARTPOLEAGENT_V0_H_
+#ifndef OPENAI_GYM_LUNARLANDERAGENT_V2_H_
+#define OPENAI_GYM_LUNARLANDERAGENT_V2_H_
 
 #include "RLLibOpenAiGymAgent.h"
 
 //Env
-class CartPole_v0: public OpenAiGymRLProblem
+class LunarLander_v2: public OpenAiGymRLProblem
 {
   protected:
     // Global variables:
-    RLLib::Range<double>* thetaRange;
-    RLLib::Range<double>* theta1DotRange;
-    RLLib::Range<double>* theta2DotRange;
+    std::vector<RLLib::Range<double>*> ranges;
+    std::vector<std::pair<double, double>> stats;
+
+    size_t numObservationUpdates;
 
   public:
-    CartPole_v0() :
-        OpenAiGymRLProblem(4, 2, 1),  //
-        thetaRange(new RLLib::Range<double>(-M_PI, M_PI)), //
-        theta1DotRange(new RLLib::Range<double>(-4.0 * M_PI, 4.0 * M_PI)), //
-        theta2DotRange(new RLLib::Range<double>(-9.0 * M_PI, 9.0 * M_PI))
+    LunarLander_v2() :
+        OpenAiGymRLProblem(8, 4, 1/*NA*/), numObservationUpdates(0)
     {
+
+      /*Preliminary experiments*/
+      ranges.push_back(new RLLib::Range<double>(-1.01422, 1.01184)); // x
+      ranges.push_back(new RLLib::Range<double>(-0.161061, 1.16219)); // y
+      ranges.push_back(new RLLib::Range<double>(-1.77318, 1.62135)); // xdot
+      ranges.push_back(new RLLib::Range<double>(-1.92527, 0.513943)); // ydot
+      ranges.push_back(new RLLib::Range<double>(-3.73458, 3.44188)); // angle
+      ranges.push_back(new RLLib::Range<double>(-6.39456, 6.53424)); // angleDot
+      ranges.push_back(new RLLib::Range<double>(0.0f, 1.0f)); // touch 1
+      ranges.push_back(new RLLib::Range<double>(0.0f, 1.0f)); // touch 2
 
       for (int i = 0; i < discreteActions->dimension(); ++i)
       {
@@ -35,34 +43,76 @@ class CartPole_v0: public OpenAiGymRLProblem
       // subject to change
       continuousActions->push_back(0, 0.0);
 
-      observationRanges->push_back(thetaRange);
-      observationRanges->push_back(theta1DotRange);
-      observationRanges->push_back(theta2DotRange);
+      for (std::vector<RLLib::Range<double>*>::iterator iter = ranges.begin(); iter != ranges.end();
+          ++iter)
+      {
+        observationRanges->push_back(*iter);
+      }
+
+      for (size_t i = 0; i < ranges.size(); ++i)
+      {
+        stats.push_back(std::make_pair(ranges[i]->min(), ranges[i]->max()));
+      }
+
     }
 
-    virtual ~CartPole_v0()
+    virtual ~LunarLander_v2()
     {
-      delete thetaRange;
-      delete theta1DotRange;
-      delete theta2DotRange;
+
+      for (std::vector<RLLib::Range<double>*>::iterator iter = ranges.begin(); iter != ranges.end();
+          ++iter)
+      {
+        delete *iter;
+      }
+
     }
 
     void updateTRStep()
     {
-      output->o_tp1->setEntry(0, thetaRange->toUnit(step_tp1->observation_tp1.at(0)));
-      output->o_tp1->setEntry(1, thetaRange->toUnit(step_tp1->observation_tp1.at(1)));
-      output->o_tp1->setEntry(2, theta1DotRange->toUnit(step_tp1->observation_tp1.at(2)));
-      output->o_tp1->setEntry(3, theta2DotRange->toUnit(step_tp1->observation_tp1.at(3)));
 
-      output->observation_tp1->setEntry(0, step_tp1->observation_tp1.at(0));
-      output->observation_tp1->setEntry(1, step_tp1->observation_tp1.at(1));
-      output->observation_tp1->setEntry(2, theta1DotRange->bound(step_tp1->observation_tp1.at(2)));
-      output->observation_tp1->setEntry(1, theta2DotRange->bound(step_tp1->observation_tp1.at(3)));
+      for (int i = 0; i < output->observation_tp1->dimension(); ++i)
+      {
+        output->o_tp1->setEntry(i, ranges[i]->toUnit(step_tp1->observation_tp1.at(i)));
+        output->observation_tp1->setEntry(i, step_tp1->observation_tp1.at(i));
 
+        // calculateMin and max
+        stats[i].first = std::min(stats[i].first, output->observation_tp1->getEntry(i)); // min
+        stats[i].second = std::max(stats[i].second, output->observation_tp1->getEntry(i)); // max
+
+      }
+
+      // Collect statistics
+      if (++numObservationUpdates % 101 == 0)
+      {
+        for (std::vector<RLLib::Range<double>*>::iterator iter = ranges.begin();
+            iter != ranges.end(); ++iter)
+        {
+          delete *iter;
+        }
+
+        ranges.clear();
+
+        if (observationRanges)
+        {
+          delete observationRanges;
+          observationRanges = new RLLib::Ranges<double>();
+
+          for (int i = 0; i < output->observation_tp1->dimension(); ++i)
+          {
+            ranges.push_back(new RLLib::Range<double>(stats[i].first, stats[i].second));
+            observationRanges->push_back(ranges[i]);
+          }
+
+        }
+
+        numObservationUpdates = 0;
+
+      }
     }
 };
 
-class CartPoleProjector_v0: public RLLib::Projector<double>
+// Create the feature extractor
+class LunarLanderProjector_v2: public RLLib::Projector<double>
 {
   private:
     const double gridResolution;
@@ -75,36 +125,24 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
     std::vector<std::vector<int>> events;
 
   public:
-    CartPoleProjector_v0(RLLib::Random<double>* random) :
-        gridResolution(6), totalTilings(0)
+    LunarLanderProjector_v2(RLLib::Random<double>* random) :
+        gridResolution(4), totalTilings(0)
     {
-      /**
-       * Agent configuration according to:
-       * https://webdocs.cs.ualberta.ca/~sutton/papers/sutton-96.pdf
-       */
-
-      int memory = 0;
-      memory += (12 * std::pow(gridResolution, 4));
-      memory += (4 * 3 * std::pow(gridResolution, 3));
-      memory += (6 * 2 * std::pow(gridResolution, 2));
-      memory += (4 * 3 * std::pow(gridResolution, 1));
-      memory *= 1;
-
+      const int memory = 1000000;
       std::cout << "memory: " << memory << std::endl;
 
       hashing = new RLLib::MurmurHashing<double>(random, memory);
       tiles = new RLLib::Tiles<double>(hashing);
-      vector = new RLLib::SVector<double>(hashing->getMemorySize() + 1/*bias*/);
+      vector = new RLLib::SVector<double>(hashing->getMemorySize() + 2 + 1/*bias*/);
 
-      for (int i = 1; i <= 4; ++i)
+      for (int i = 1; i <= 3; ++i)
       {
         x_tvec.push_back(new RLLib::PVector<double>(i));
       }
 
-      numTilings.push_back(3);
       numTilings.push_back(2);
-      numTilings.push_back(3);
-      numTilings.push_back(12);
+      numTilings.push_back(4);
+      numTilings.push_back(8);
 
       calculateEvents();
 
@@ -119,13 +157,13 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
         std::cout << "]" << std::endl;
 
         totalTilings += numTilings[events[i].size() - 1];
-      }
 
+      }
       std::cout << "totalTilings: " << totalTilings << std::endl;
 
     }
 
-    virtual ~CartPoleProjector_v0()
+    virtual ~LunarLanderProjector_v2()
     {
       delete hashing;
       delete tiles;
@@ -136,11 +174,12 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
       {
         delete *iter;
       }
+
     }
 
     const RLLib::Vector<double>* project(const RLLib::Vector<double>* x, const int& h2)
     {
-      ASSERT(x->dimension() == 4);
+      ASSERT(x->dimension() == 8);
       vector->clear();
       if (x->empty())
       {
@@ -156,8 +195,6 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
         x_t = x_tvec.at(size - 1);
         x_t->clear();
 
-        ASSERT(x_t->dimension() == size);
-
         for (size_t j = 0; j < size; ++j)
         {
           x_t->setEntry(j, x->getEntry(events[i][j]) * gridResolution);
@@ -167,6 +204,8 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
 
       }
 
+      vector->setEntry(vector->dimension() - 3, x->getEntry(6));
+      vector->setEntry(vector->dimension() - 2, x->getEntry(7));
       vector->setEntry(vector->dimension() - 1, 1.0);
 
       return vector;
@@ -179,7 +218,7 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
 
     double vectorNorm() const
     {
-      return totalTilings + 1;
+      return totalTilings + 1 + 2;
     }
 
     int dimension() const
@@ -192,7 +231,7 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
     {
       std::vector<int> currVec;
       std::vector<int> indexVec;
-      for (int i = 0; i < 4; ++i)
+      for (int i = 0; i < 6; ++i)
       {
         indexVec.push_back(i);
       }
@@ -203,6 +242,11 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
     void calculateEvents(const std::vector<int>& indexVec, std::vector<int>& currVec,
         const size_t& i)
     {
+      if (currVec.size() > 3)
+      {
+        return;
+      }
+
       if (!currVec.empty())
       {
         events.push_back(currVec);
@@ -217,7 +261,8 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
     }
 };
 
-class CartPoleAgent_v0: public RLLibOpenAiGymAgent
+// Agent
+class LunarLanderAgent_v2: public RLLibOpenAiGymAgent
 {
   private:
     // RLLib
@@ -236,9 +281,11 @@ class CartPoleAgent_v0: public RLLibOpenAiGymAgent
     RLLib::RLRunner<double>* simulator;
 
   public:
-    CartPoleAgent_v0();
-    virtual ~CartPoleAgent_v0();
+    LunarLanderAgent_v2();
+    virtual ~LunarLanderAgent_v2();
+
     const RLLib::Action<double>* step();
+
 };
 
-#endif /* OPENAI_GYM_CARTPOLEAGENT_V0_H_ */
+#endif /* OPENAI_GYM_LUNARLANDERAGENT_V2_H_ */

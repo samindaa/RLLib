@@ -44,7 +44,7 @@ MountainCarAgent_v0::~MountainCarAgent_v0()
   delete simulator;
 }
 
-const RLLib::Action<double>* MountainCarAgent_v0::toRLLibStep()
+const RLLib::Action<double>* MountainCarAgent_v0::step()
 {
   simulator->step();
   return simulator->getAgentAction();

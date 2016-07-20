@@ -75,7 +75,7 @@ class MountainCarAgent_v0: public RLLibOpenAiGymAgent
   public:
     MountainCarAgent_v0();
     virtual ~MountainCarAgent_v0();
-    const RLLib::Action<double>* toRLLibStep();
+    const RLLib::Action<double>* step();
 };
 
 #endif /* OPENAI_GYM_MOUNTAINCARAGENT_V0_H_ */

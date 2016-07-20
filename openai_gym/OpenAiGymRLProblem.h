@@ -33,7 +33,8 @@ class OpenAiGymRLProblem: public RLLib::RLProblem<double>
     OpenAiGymTRStep* step_tp1;
 
   public:
-    OpenAiGymRLProblem(int nbVars, int nbDiscreteActions, int nbContinuousActions) :
+    OpenAiGymRLProblem(const int& nbVars, const int& nbDiscreteActions,
+        const int& nbContinuousActions) :
         RLLib::RLProblem<double>(NULL, nbVars, nbDiscreteActions, nbContinuousActions), //
         step_tp1(new OpenAiGymTRStep())
     {
