@@ -8,7 +8,7 @@
 #ifndef OPENAI_GYM_LUNARLANDERAGENT_V2_H_
 #define OPENAI_GYM_LUNARLANDERAGENT_V2_H_
 
-#include "RLLibOpenAiGymAgent.h"
+#include "RLLibOpenAiGymAgentMacro.h"
 
 //Env
 class LunarLander_v2: public OpenAiGymRLProblem
@@ -16,21 +16,18 @@ class LunarLander_v2: public OpenAiGymRLProblem
   protected:
     // Global variables:
     std::vector<RLLib::Range<double>*> ranges;
-    std::vector<std::pair<double, double>> stats;
-
-    size_t numObservationUpdates;
 
   public:
     LunarLander_v2() :
-        OpenAiGymRLProblem(8, 4, 1/*NA*/), numObservationUpdates(0)
+        OpenAiGymRLProblem(8, 4, 1/*NA*/)
     {
 
-      /*Preliminary experiments*/
+      /*The values are collected from preliminary experiments*/
       ranges.push_back(new RLLib::Range<double>(-1.01422, 1.01184)); // x
-      ranges.push_back(new RLLib::Range<double>(-0.161061, 1.16219)); // y
-      ranges.push_back(new RLLib::Range<double>(-1.77318, 1.62135)); // xdot
-      ranges.push_back(new RLLib::Range<double>(-1.92527, 0.513943)); // ydot
-      ranges.push_back(new RLLib::Range<double>(-3.73458, 3.44188)); // angle
+      ranges.push_back(new RLLib::Range<double>(-0.290803, 1.147717)); // y
+      ranges.push_back(new RLLib::Range<double>(-1.77457, 2.16033)); // xdot
+      ranges.push_back(new RLLib::Range<double>(-2.22352, 0.756905)); // ydot
+      ranges.push_back(new RLLib::Range<double>(-3.73458, 3.72149)); // angle
       ranges.push_back(new RLLib::Range<double>(-6.39456, 6.53424)); // angleDot
       ranges.push_back(new RLLib::Range<double>(0.0f, 1.0f)); // touch 1
       ranges.push_back(new RLLib::Range<double>(0.0f, 1.0f)); // touch 2
@@ -48,12 +45,6 @@ class LunarLander_v2: public OpenAiGymRLProblem
       {
         observationRanges->push_back(*iter);
       }
-
-      for (size_t i = 0; i < ranges.size(); ++i)
-      {
-        stats.push_back(std::make_pair(ranges[i]->min(), ranges[i]->max()));
-      }
-
     }
 
     virtual ~LunarLander_v2()
@@ -74,39 +65,6 @@ class LunarLander_v2: public OpenAiGymRLProblem
       {
         output->o_tp1->setEntry(i, ranges[i]->toUnit(step_tp1->observation_tp1.at(i)));
         output->observation_tp1->setEntry(i, step_tp1->observation_tp1.at(i));
-
-        // calculateMin and max
-        stats[i].first = std::min(stats[i].first, output->observation_tp1->getEntry(i)); // min
-        stats[i].second = std::max(stats[i].second, output->observation_tp1->getEntry(i)); // max
-
-      }
-
-      // Collect statistics
-      if (++numObservationUpdates % 101 == 0)
-      {
-        for (std::vector<RLLib::Range<double>*>::iterator iter = ranges.begin();
-            iter != ranges.end(); ++iter)
-        {
-          delete *iter;
-        }
-
-        ranges.clear();
-
-        if (observationRanges)
-        {
-          delete observationRanges;
-          observationRanges = new RLLib::Ranges<double>();
-
-          for (int i = 0; i < output->observation_tp1->dimension(); ++i)
-          {
-            ranges.push_back(new RLLib::Range<double>(stats[i].first, stats[i].second));
-            observationRanges->push_back(ranges[i]);
-          }
-
-        }
-
-        numObservationUpdates = 0;
-
       }
     }
 };
@@ -179,12 +137,13 @@ class LunarLanderProjector_v2: public RLLib::Projector<double>
 
     const RLLib::Vector<double>* project(const RLLib::Vector<double>* x, const int& h2)
     {
-      ASSERT(x->dimension() == 8);
       vector->clear();
       if (x->empty())
       {
         return vector;
       }
+
+      ASSERT(x->dimension() == 8);
 
       int h1 = 0;
       int size = 0;
@@ -261,21 +220,27 @@ class LunarLanderProjector_v2: public RLLib::Projector<double>
     }
 };
 
-// Agent
-class LunarLanderAgent_v2: public RLLibOpenAiGymAgent
+OPENAI_AGENT(LunarLanderAgent_v2, LunarLander-v2)
+class LunarLanderAgent_v2: public LunarLanderAgent_v2Base
 {
   private:
     // RLLib
     RLLib::Random<double>* random;
     RLLib::Projector<double>* projector;
     RLLib::StateToStateAction<double>* toStateAction;
-    RLLib::Trace<double>* e;
-    double alpha;
+
+    double alpha_v;
+    double alpha_u;
+    double alpha_r;
     double gamma;
     double lambda;
-    RLLib::Sarsa<double>* sarsa;
-    double epsilon;
-    RLLib::Policy<double>* acting;
+
+    RLLib::Trace<double>* critice;
+    RLLib::TDLambda<double>* critic;
+    RLLib::PolicyDistribution<double>* acting;
+    RLLib::Trace<double>* actore1;
+    RLLib::Traces<double>* actoreTraces;
+    RLLib::ActorOnPolicy<double>* actor;
     RLLib::OnPolicyControlLearner<double>* control;
     RLLib::RLAgent<double>* agent;
     RLLib::RLRunner<double>* simulator;

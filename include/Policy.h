@@ -376,9 +376,8 @@ namespace RLLib
     public:
       BoltzmannDistribution(Random<T>* random, Actions<T>* actions, const int& numFeatures) :
           StochasticPolicy<T>(random, actions), avg(new SVector<T>(numFeatures)), //
-          grad(new SVector<T>(numFeatures)), u(new PVector<T>(numFeatures)), multiu(
-              new Vectors<T>()), //
-          multigrad(new Vectors<T>())
+          grad(new SVector<T>(numFeatures)), u(new PVector<T>(numFeatures)), //
+          multiu(new Vectors<T>()), multigrad(new Vectors<T>())
       {
         // Parameter setting
         multiu->push_back(u);

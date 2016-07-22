@@ -7,6 +7,7 @@
 
 #include "AcrobotAgent_v0.h"
 
+OPENAI_AGENT_MAKE(AcrobotAgent_v0)
 AcrobotAgent_v0::AcrobotAgent_v0()
 {
   random = new RLLib::Random<double>;

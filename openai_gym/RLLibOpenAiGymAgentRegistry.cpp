@@ -7,38 +7,44 @@
 
 #include "RLLibOpenAiGymAgentRegistry.h"
 
-#include "AcrobotAgent_v0.h"
-#include "CartPoleAgent_v0.h"
-#include "MountainCarAgent_v0.h"
-#include "PendulumAgent_v0.h"
-#include "LunarLanderAgent_v2.h"
+RLLibOpenAiGymAgentRegistry::RLLibOpenAiGymAgentRegistry()
+{
+}
 
-RLLibOpenAiGymAgent* RLLibOpenAiGymAgentRegistry::make(const std::string& name)
+RLLibOpenAiGymAgentRegistry::~RLLibOpenAiGymAgentRegistry()
+{
+  for (auto iter = registry.begin(); iter != registry.end(); ++iter)
+  {
+    delete iter->second;
+  }
+}
+
+RLLibOpenAiGymAgentRegistry& RLLibOpenAiGymAgentRegistry::getInstance()
+{
+  static RLLibOpenAiGymAgentRegistry theInstance;
+  return theInstance;
+}
+
+RLLibOpenAiGymAgent* RLLibOpenAiGymAgentRegistry::make(const std::string& env)
 {
   // Register OpenAI Gym agents here
-  std::cout << "name: [" << name << "]" << std::endl;
-  if (name == "MountainCar-v0")
+  std::cout << "env: [" << env << "]" << std::endl;
+
+  std::unordered_map<std::string, Entry*>::iterator iter = registry.find(env);
+  if (iter != RLLibOpenAiGymAgentRegistry::getInstance().registry.end())
   {
-    return new MountainCarAgent_v0();
-  }
-  else if (name == "Pendulum-v0")
-  {
-    return new PendulumAgent_v0();
-  }
-  else if (name == "Acrobot-v0")
-  {
-    return new AcrobotAgent_v0();
-  }
-  else if (name == "CartPole-v0")
-  {
-    return new CartPoleAgent_v0();
-  }
-  else if (name == "LunarLander-v2")
-  {
-    return new LunarLanderAgent_v2();
+    return iter->second->factory->make();
   }
   else
   {
-    return NULL;
+    return nullptr;
   }
+
+}
+
+void RLLibOpenAiGymAgentRegistry::registerInstance(const std::string& name, const std::string& env,
+    RLLibOpenAiGymAgentFactory* factory)
+{
+  std::cout << "registering: name: " << name << " env: " << env << std::endl;
+  registry.emplace(env, new Entry(name, env, factory));
 }

@@ -8,7 +8,7 @@
 #ifndef OPENAI_GYM_ACROBOTAGENT_V0_H_
 #define OPENAI_GYM_ACROBOTAGENT_V0_H_
 
-#include "RLLibOpenAiGymAgent.h"
+#include "RLLibOpenAiGymAgentMacro.h"
 
 //Env
 class Acrobot_v0: public OpenAiGymRLProblem
@@ -62,7 +62,8 @@ class Acrobot_v0: public OpenAiGymRLProblem
     }
 };
 
-class AcrobotAgent_v0: public RLLibOpenAiGymAgent
+OPENAI_AGENT(AcrobotAgent_v0, Acrobot-v0)
+class AcrobotAgent_v0: public AcrobotAgent_v0Base
 {
   private:
     // RLLib

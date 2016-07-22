@@ -8,7 +8,7 @@
 #ifndef OPENAI_GYM_MOUNTAINCARAGENT_V0_H_
 #define OPENAI_GYM_MOUNTAINCARAGENT_V0_H_
 
-#include "RLLibOpenAiGymAgent.h"
+#include "RLLibOpenAiGymAgentMacro.h"
 
 // Env
 class MountainCar_v0: public OpenAiGymRLProblem
@@ -53,7 +53,8 @@ class MountainCar_v0: public OpenAiGymRLProblem
     }
 };
 
-class MountainCarAgent_v0: public RLLibOpenAiGymAgent
+OPENAI_AGENT(MountainCarAgent_v0, MountainCar-v0)
+class MountainCarAgent_v0: public MountainCarAgent_v0Base
 {
   private:
     // An algorithm

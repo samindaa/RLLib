@@ -7,6 +7,7 @@
 
 #include "MountainCarAgent_v0.h"
 
+OPENAI_AGENT_MAKE(MountainCarAgent_v0)
 MountainCarAgent_v0::MountainCarAgent_v0()
 {
   problem = new MountainCar_v0();
@@ -20,8 +21,7 @@ MountainCarAgent_v0::MountainCarAgent_v0()
   lambda = 0.3;
   sarsa = new RLLib::SarsaAlphaBound<double>(alpha_v, gamma, lambda, e);
   epsilon = 0.01;
-  acting = new RLLib::EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa,
-      epsilon);
+  acting = new RLLib::EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa, epsilon);
   control = new RLLib::SarsaControl<double>(acting, toStateAction, sarsa);
 
   agent = new RLLib::LearnerAgent<double>(control);

@@ -8,7 +8,7 @@
 #ifndef OPENAI_GYM_PENDULUMAGENT_V0_H_
 #define OPENAI_GYM_PENDULUMAGENT_V0_H_
 
-#include "RLLibOpenAiGymAgent.h"
+#include "RLLibOpenAiGymAgentMacro.h"
 
 // Env
 class Pendulum_v0: public OpenAiGymRLProblem
@@ -58,7 +58,8 @@ class Pendulum_v0: public OpenAiGymRLProblem
     }
 };
 
-class PendulumAgent_v0: public RLLibOpenAiGymAgent
+OPENAI_AGENT(PendulumAgent_v0, Pendulum-v0)
+class PendulumAgent_v0: public PendulumAgent_v0Base
 {
   private:
     RLLib::Random<double>* random;

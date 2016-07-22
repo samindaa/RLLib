@@ -8,7 +8,7 @@
 #ifndef OPENAI_GYM_CARTPOLEAGENT_V0_H_
 #define OPENAI_GYM_CARTPOLEAGENT_V0_H_
 
-#include "RLLibOpenAiGymAgent.h"
+#include "RLLibOpenAiGymAgentMacro.h"
 
 //Env
 class CartPole_v0: public OpenAiGymRLProblem
@@ -140,12 +140,13 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
 
     const RLLib::Vector<double>* project(const RLLib::Vector<double>* x, const int& h2)
     {
-      ASSERT(x->dimension() == 4);
       vector->clear();
       if (x->empty())
       {
         return vector;
       }
+
+      ASSERT(x->dimension() == 4);
 
       int h1 = 0;
       int size = 0;
@@ -217,7 +218,8 @@ class CartPoleProjector_v0: public RLLib::Projector<double>
     }
 };
 
-class CartPoleAgent_v0: public RLLibOpenAiGymAgent
+OPENAI_AGENT(CartPoleAgent_v0, CartPole-v0)
+class CartPoleAgent_v0: public CartPoleAgent_v0Base
 {
   private:
     // RLLib
