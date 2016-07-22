@@ -7,6 +7,7 @@
 
 #include "PendulumAgent_v0.h"
 
+OPENAI_AGENT_MAKE(PendulumAgent_v0)
 PendulumAgent_v0::PendulumAgent_v0()
 {
   problem = new Pendulum_v0;

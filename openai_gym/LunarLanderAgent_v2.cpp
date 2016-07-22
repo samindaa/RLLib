@@ -7,6 +7,7 @@
 
 #include "LunarLanderAgent_v2.h"
 
+OPENAI_AGENT_MAKE(LunarLanderAgent_v2)
 LunarLanderAgent_v2::LunarLanderAgent_v2()
 {
 
@@ -15,18 +16,28 @@ LunarLanderAgent_v2::LunarLanderAgent_v2()
   projector = new LunarLanderProjector_v2(random);
   toStateAction = new RLLib::StateActionTilings<double>(projector, problem->getDiscreteActions());
 
-  e = new RLLib::ATrace<double>(toStateAction->dimension());
-  alpha = 0.2f / projector->vectorNorm();
-  gamma = 0.9f;
-  lambda = 0.4f;
-  sarsa = new RLLib::SarsaTrue<double>(alpha, gamma, lambda, e);
-  epsilon = 0.01;
-  //acting = new RLLib::EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa, epsilon);
-  acting = new RLLib::SoftMax<double>(random, problem->getDiscreteActions(), sarsa);
-  control = new RLLib::SarsaControl<double>(acting, toStateAction, sarsa);
+  alpha_v = 0.1 / projector->vectorNorm();
+  alpha_u = 0.001 / projector->vectorNorm();
+  alpha_r = .0001;
+  gamma = 1.0;
+  lambda = 0.5;
+
+  critice = new RLLib::ATrace<double>(projector->dimension());
+  critic = new RLLib::TDLambda<double>(alpha_v, gamma, lambda, critice);
+
+  acting = new RLLib::BoltzmannDistribution<double>(random, problem->getDiscreteActions(),
+      projector->dimension());
+
+  actore1 = new RLLib::ATrace<double>(projector->dimension());
+  actoreTraces = new RLLib::Traces<double>();
+  actoreTraces->push_back(actore1);
+  actor = new RLLib::ActorLambda<double>(alpha_u, gamma, lambda, acting, actoreTraces);
+
+  control = new RLLib::AverageRewardActorCritic<double>(critic, actor, projector, toStateAction,
+      alpha_r);
 
   agent = new RLLib::LearnerAgent<double>(control);
-  simulator = new RLLib::RLRunner<double>(agent, problem, 1000);
+  simulator = new RLLib::RLRunner<double>(agent, problem, 1600);
   simulator->setVerbose(true);
 
 }
@@ -37,8 +48,11 @@ LunarLanderAgent_v2::~LunarLanderAgent_v2()
   delete problem;
   delete projector;
   delete toStateAction;
-  delete e;
-  delete sarsa;
+  delete critice;
+  delete critic;
+  delete actore1;
+  delete actoreTraces;
+  delete actor;
   delete acting;
   delete control;
   delete agent;

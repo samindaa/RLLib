@@ -16,7 +16,7 @@ class RLLibOpenAiGymAgent
     OpenAiGymRLProblem* problem; //<< interface between OpenAi and RLLib
 
     RLLibOpenAiGymAgent() :
-        problem(NULL)
+        problem(nullptr)
     {
     }
 

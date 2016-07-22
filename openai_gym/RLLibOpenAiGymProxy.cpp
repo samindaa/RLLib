@@ -39,7 +39,7 @@ std::string RLLibOpenAiGymProxy::toRLLib(const std::string& str)
         delete agent;
         agent = 0;
       }
-      agent = RLLibOpenAiGymAgentRegistry::make(str.substr(cmdIdx + 6));
+      agent = RLLibOpenAiGymAgentRegistry::getInstance().make(str.substr(cmdIdx + 6));
       return agent ? "__A__" : "__?__";
     }
     else
@@ -65,6 +65,11 @@ std::string RLLibOpenAiGymProxy::toRLLib(const std::string& str)
   {
     std::stringstream ssStateVar(tokens[i]);
     ssStateVar >> agent->problem->step_tp1->observation_tp1[i];
+  }
+
+  if (agent->problem->step_tp1->observation_tp1.empty())
+  {
+    std::cout << "r: " << agent->problem->step_tp1->reward_tp1 << std::endl;
   }
 
   const RLLib::Action<double>* action_tp1 = agent->step();

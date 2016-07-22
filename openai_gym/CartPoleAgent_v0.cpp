@@ -7,6 +7,7 @@
 
 #include "CartPoleAgent_v0.h"
 
+OPENAI_AGENT_MAKE(CartPoleAgent_v0)
 CartPoleAgent_v0::CartPoleAgent_v0()
 {
 
@@ -16,9 +17,9 @@ CartPoleAgent_v0::CartPoleAgent_v0()
   toStateAction = new RLLib::StateActionTilings<double>(projector, problem->getDiscreteActions());
 
   e = new RLLib::ATrace<double>(toStateAction->dimension());
-  alpha = 0.2f / projector->vectorNorm();
+  alpha = 0.3f / projector->vectorNorm();
   gamma = 0.99f;
-  lambda = 0.3f;
+  lambda = 0.9f;
   sarsa = new RLLib::SarsaTrue<double>(alpha, gamma, lambda, e);
   epsilon = 0.01;
   //acting = new RLLib::EpsilonGreedy<double>(random, problem->getDiscreteActions(), sarsa, epsilon);
