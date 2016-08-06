@@ -5,6 +5,7 @@
  *      Author: sabeyruw
  */
 
+#include <cassert>
 #include <sstream>
 #include <iostream>
 #include <iterator>
@@ -67,11 +68,15 @@ std::string RLLibOpenAiGymProxy::toRLLib(const std::string& str)
     ssStateVar >> agent->problem->step_tp1->observation_tp1[i];
   }
 
-  if (agent->problem->step_tp1->observation_tp1.empty())
-  {
-    std::cout << "r: " << agent->problem->step_tp1->reward_tp1 << std::endl;
-  }
+  //assert(agent->problem->step_tp1->observation_tp1.size() == agent->problem->dimension());
 
+  /*for (size_t i = 0; i < agent->problem->step_tp1->observation_tp1.size(); ++i)
+   {
+   std::cout << agent->problem->step_tp1->observation_tp1[i] << " ";
+   }
+
+   std::cout << " r: " << agent->problem->step_tp1->reward_tp1 << std::endl;
+   */
   const RLLib::Action<double>* action_tp1 = agent->step();
 
   // The action_tp1 will be nullptr when the agent exhausted all the time-steps.

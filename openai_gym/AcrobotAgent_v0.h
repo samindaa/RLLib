@@ -36,6 +36,7 @@ class Acrobot_v0: public OpenAiGymRLProblem
       continuousActions->push_back(0, 0.0);
 
       observationRanges->push_back(thetaRange);
+      observationRanges->push_back(thetaRange);
       observationRanges->push_back(theta1DotRange);
       observationRanges->push_back(theta2DotRange);
     }
@@ -45,20 +46,6 @@ class Acrobot_v0: public OpenAiGymRLProblem
       delete thetaRange;
       delete theta1DotRange;
       delete theta2DotRange;
-    }
-
-    void updateTRStep()
-    {
-      output->o_tp1->setEntry(0, thetaRange->toUnit(step_tp1->observation_tp1.at(0)));
-      output->o_tp1->setEntry(1, thetaRange->toUnit(step_tp1->observation_tp1.at(1)));
-      output->o_tp1->setEntry(2, theta1DotRange->toUnit(step_tp1->observation_tp1.at(2)));
-      output->o_tp1->setEntry(3, theta2DotRange->toUnit(step_tp1->observation_tp1.at(3)));
-
-      output->observation_tp1->setEntry(0, step_tp1->observation_tp1.at(0));
-      output->observation_tp1->setEntry(1, step_tp1->observation_tp1.at(1));
-      output->observation_tp1->setEntry(2, theta1DotRange->bound(step_tp1->observation_tp1.at(2)));
-      output->observation_tp1->setEntry(1, theta2DotRange->bound(step_tp1->observation_tp1.at(3)));
-
     }
 };
 

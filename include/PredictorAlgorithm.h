@@ -270,9 +270,8 @@ namespace RLLib
 
     public:
       Sarsa(const T& alpha, const T& gamma, const T& lambda, Trace<T>* e) :
-          v_t(0), v_tp1(0), delta(0), initialized(false), alpha(alpha), gamma(gamma), lambda(
-              lambda), //
-          e(e), q(new PVector<T>(e->vect()->dimension()))
+          v_t(0), v_tp1(0), delta(0), initialized(false), alpha(alpha), gamma(gamma), //
+          lambda(lambda), e(e), q(new PVector<T>(e->vect()->dimension()))
       {
       }
       virtual ~Sarsa()

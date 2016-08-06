@@ -42,15 +42,6 @@ class MountainCar_v0: public OpenAiGymRLProblem
       delete velocityRange;
     }
 
-    void updateTRStep()
-    {
-      output->o_tp1->setEntry(0, positionRange->toUnit(step_tp1->observation_tp1.at(0)));
-      output->o_tp1->setEntry(1, velocityRange->toUnit(step_tp1->observation_tp1.at(1)));
-
-      output->observation_tp1->setEntry(0, step_tp1->observation_tp1.at(0));
-      output->observation_tp1->setEntry(1, step_tp1->observation_tp1.at(1));
-
-    }
 };
 
 OPENAI_AGENT(MountainCarAgent_v0, MountainCar-v0)

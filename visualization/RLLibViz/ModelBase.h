@@ -21,6 +21,7 @@
 #include "ControlAlgorithm.h"
 #include "StateToStateAction.h"
 #include "RL.h"
+#include "FourierBasis.h"
 //
 #include "Eigen/Dense"
 

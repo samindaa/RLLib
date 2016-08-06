@@ -22,38 +22,39 @@
 #ifndef HEADERTEST_H_
 #define HEADERTEST_H_
 
-#include <iostream>
-#include <cmath>
-#include <cstdlib>
-#include <ctime>
-#include <string>
-#include <cstring>
-#include <cassert>
 #include <map>
 #include <set>
+#include <cmath>
+#include <ctime>
+#include <limits>
+#include <string>
+#include <iomanip>
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
 #include <fstream>
 #include <istream>
 #include <ostream>
-#include <iterator>
 #include <sstream>
+#include <iostream>
+#include <iterator>
 #include <algorithm>
-#include <limits>
-#include <iomanip>
 
-#include "Vector.h"
+#include "RL.h"
 #include "Trace.h"
+#include "Vector.h"
 #include "Projector.h"
-#include "ControlAlgorithm.h"
-#include "SupervisedAlgorithm.h"
-#include "StateToStateAction.h"
 #include "MountainCar.h"
+#include "FourierBasis.h"
+#include "NoisyInputSum.h"
 #include "MountainCar3D.h"
 #include "SwingPendulum.h"
-#include "ContinuousGridworld.h"
 #include "NoStateProblem.h"
+#include "ControlAlgorithm.h"
+#include "StateToStateAction.h"
+#include "SupervisedAlgorithm.h"
+#include "ContinuousGridworld.h"
 //#include "StateGraph.h"
-#include "NoisyInputSum.h"
-#include "RL.h"
 
 namespace RLLib
 {

@@ -14,8 +14,6 @@
 class LunarLander_v2: public OpenAiGymRLProblem
 {
   protected:
-    // Global variables:
-    std::vector<RLLib::Range<double>*> ranges;
 
   public:
     LunarLander_v2() :
@@ -23,14 +21,14 @@ class LunarLander_v2: public OpenAiGymRLProblem
     {
 
       /*The values are collected from preliminary experiments*/
-      ranges.push_back(new RLLib::Range<double>(-1.01422, 1.01184)); // x
-      ranges.push_back(new RLLib::Range<double>(-0.290803, 1.147717)); // y
-      ranges.push_back(new RLLib::Range<double>(-1.77457, 2.16033)); // xdot
-      ranges.push_back(new RLLib::Range<double>(-2.22352, 0.756905)); // ydot
-      ranges.push_back(new RLLib::Range<double>(-3.73458, 3.72149)); // angle
-      ranges.push_back(new RLLib::Range<double>(-6.39456, 6.53424)); // angleDot
-      ranges.push_back(new RLLib::Range<double>(0.0f, 1.0f)); // touch 1
-      ranges.push_back(new RLLib::Range<double>(0.0f, 1.0f)); // touch 2
+      observationRanges->push_back(new RLLib::Range<double>(-2.0, 2.0)); // x
+      observationRanges->push_back(new RLLib::Range<double>(-0.5, 2.0)); // y
+      observationRanges->push_back(new RLLib::Range<double>(-3.0, 3.0)); // xdot
+      observationRanges->push_back(new RLLib::Range<double>(-3.0, 1.0)); // ydot
+      observationRanges->push_back(new RLLib::Range<double>(-M_PI, M_PI)); // angle
+      observationRanges->push_back(new RLLib::Range<double>(-M_PI, M_PI)); // angleDot
+      observationRanges->push_back(new RLLib::Range<double>(0.0f, 1.0f)); // touch 1
+      observationRanges->push_back(new RLLib::Range<double>(0.0f, 1.0f)); // touch 2
 
       for (int i = 0; i < discreteActions->dimension(); ++i)
       {
@@ -40,32 +38,10 @@ class LunarLander_v2: public OpenAiGymRLProblem
       // subject to change
       continuousActions->push_back(0, 0.0);
 
-      for (std::vector<RLLib::Range<double>*>::iterator iter = ranges.begin(); iter != ranges.end();
-          ++iter)
-      {
-        observationRanges->push_back(*iter);
-      }
     }
 
     virtual ~LunarLander_v2()
     {
-
-      for (std::vector<RLLib::Range<double>*>::iterator iter = ranges.begin(); iter != ranges.end();
-          ++iter)
-      {
-        delete *iter;
-      }
-
-    }
-
-    void updateTRStep()
-    {
-
-      for (int i = 0; i < output->observation_tp1->dimension(); ++i)
-      {
-        output->o_tp1->setEntry(i, ranges[i]->toUnit(step_tp1->observation_tp1.at(i)));
-        output->observation_tp1->setEntry(i, step_tp1->observation_tp1.at(i));
-      }
     }
 };
 

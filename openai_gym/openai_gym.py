@@ -29,7 +29,10 @@ class LearnerAgent(object):
         self.discrete_actions = discrete_actions
         self.render = render 
         self.env = gym.make(env_name)
-        self.client_socket = TcpClient(host, port)
+        self.host = host
+        self.port = port
+        self.client_socket = None
+        #self.client_socket = TcpClient(host, port)
         
     def newMsg(self, observations, reward, episode_state):
         """ A simple msg format 
@@ -45,6 +48,8 @@ class LearnerAgent(object):
         return msg
     
     def run(self):
+        # craete the connection
+        self.client_socket = TcpClient(self.host, self.port)
         
         observations = self.env.reset()
         reward = 0

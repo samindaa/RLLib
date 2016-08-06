@@ -6,6 +6,7 @@
  */
 
 #include "AcrobotAgent_v0.h"
+#include "FourierBasis.h"
 
 OPENAI_AGENT_MAKE(AcrobotAgent_v0)
 AcrobotAgent_v0::AcrobotAgent_v0()
@@ -17,7 +18,7 @@ AcrobotAgent_v0::AcrobotAgent_v0()
       problem->getDiscreteActions());
   toStateAction = new RLLib::StateActionTilings<double>(projector, problem->getDiscreteActions());
   e = new RLLib::ATrace<double>(projector->dimension());
-  alpha = 1.0;
+  alpha = 0.001;
   gamma = 1.0;
   lambda = 0.9;
   sarsa = new RLLib::SarsaAlphaBound<double>(alpha, gamma, lambda, e);

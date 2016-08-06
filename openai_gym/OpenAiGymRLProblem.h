@@ -52,6 +52,16 @@ class OpenAiGymRLProblem: public RLLib::RLProblem<double>
     {
     }
 
+    void updateTRStep()
+    {
+      for (int i = 0; i < this->dimension(); ++i)
+      {
+        const double& x = step_tp1->observation_tp1.at(i);
+        output->o_tp1->setEntry(i, observationRanges->at(i)->toUnit(x));
+        output->observation_tp1->setEntry(i, x);
+      }
+    }
+
     bool endOfEpisode() const
     {
       return (step_tp1->episode_state_tp1 == 3);
