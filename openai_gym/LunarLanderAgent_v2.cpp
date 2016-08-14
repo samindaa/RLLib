@@ -19,8 +19,8 @@ LunarLanderAgent_v2::LunarLanderAgent_v2()
   toStateAction = new RLLib::StateActionTilings<double>(projector, problem->getDiscreteActions());
   e = new RLLib::ATrace<double>(projector->dimension());
 
-  alpha = 0.0001;
-  gamma = 0.9;
+  alpha = 0.01;
+  gamma = 0.95;
   lambda = 0.9;
   sarsa = new RLLib::SarsaAlphaBound<double>(alpha, gamma, lambda, e);
 
