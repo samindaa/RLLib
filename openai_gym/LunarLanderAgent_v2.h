@@ -9,6 +9,7 @@
 #define OPENAI_GYM_LUNARLANDERAGENT_V2_H_
 
 #include "RLLibOpenAiGymAgentMacro.h"
+#include "FourierBasis.h"
 
 //Env
 class LunarLander_v2: public OpenAiGymRLProblem
@@ -46,104 +47,93 @@ class LunarLander_v2: public OpenAiGymRLProblem
 };
 
 // Create the feature extractor
+// based on Fourier Basis (therefore, dense)
 class LunarLanderProjector_v2: public RLLib::Projector<double>
 {
   private:
-    const double gridResolution;
-    int totalTilings;
-    RLLib::Hashing<double>* hashing;
-    RLLib::Tiles<double>* tiles;
-    RLLib::Vector<double>* vector;
-    std::vector<RLLib::Vector<double>*> x_tvec;
-    std::vector<int> numTilings;
-    std::vector<std::vector<int>> events;
+    RLLib::Vector<double>* x_t;
+    RLLib::FourierCoefficientGenerator<double>* generator;
+    RLLib::Vector<double>* featureVector;
+    std::vector<RLLib::Vector<double>*> multipliers;
+    std::vector<std::vector<int>> indexSets;
 
   public:
-    LunarLanderProjector_v2(RLLib::Random<double>* random) :
-        gridResolution(4), totalTilings(0)
+    LunarLanderProjector_v2(const int& order, const RLLib::Actions<double>* actions) :
+        x_t(new RLLib::PVector<double>(4)), //
+        generator(new RLLib::FullFourierCoefficientGenerator<double>())
     {
-      const int memory = 1000000;
-      std::cout << "memory: " << memory << std::endl;
 
-      hashing = new RLLib::MurmurHashing<double>(random, memory);
-      tiles = new RLLib::Tiles<double>(hashing);
-      vector = new RLLib::SVector<double>(hashing->getMemorySize() + 2 + 1/*bias*/);
+      generator->computeFourierCoefficients(multipliers, x_t->dimension(), order);
 
-      for (int i = 1; i <= 3; ++i)
+      // remove the first multiplier => 1, then add it later
+      multipliers.erase(multipliers.begin());
+
+      populateIndexSets();
+
+      std::cout << "multipliers: " << multipliers.size() << " indexSets: " << indexSets.size()
+          << std::endl;
+      for (size_t i = 0; i < indexSets.size(); ++i)
       {
-        x_tvec.push_back(new RLLib::PVector<double>(i));
-      }
-
-      numTilings.push_back(2);
-      numTilings.push_back(4);
-      numTilings.push_back(8);
-
-      calculateEvents();
-
-      std::cout << "evens: " << events.size() << std::endl;
-      for (size_t i = 0; i < events.size(); ++i)
-      {
-        std::cout << "i: " << i << " size: " << events[i].size() << "  [";
-        for (size_t j = 0; j < events[i].size(); ++j)
+        std::cout << "i: " << i << " size: " << indexSets[i].size() << "  [";
+        for (size_t j = 0; j < indexSets[i].size(); ++j)
         {
-          std::cout << events[i][j] << " ";
+          std::cout << indexSets[i][j] << " ";
         }
         std::cout << "]" << std::endl;
-
-        totalTilings += numTilings[events[i].size() - 1];
-
       }
-      std::cout << "totalTilings: " << totalTilings << std::endl;
+
+      featureVector = new RLLib::PVector<double>(
+          multipliers.size() * indexSets.size() * actions->dimension() + 2 + 1);
+
+      std::cout << "featureVector: " << featureVector->dimension() << std::endl;
 
     }
 
     virtual ~LunarLanderProjector_v2()
     {
-      delete hashing;
-      delete tiles;
-      delete vector;
-
-      for (std::vector<RLLib::Vector<double>*>::iterator iter = x_tvec.begin();
-          iter != x_tvec.end(); ++iter)
-      {
+      delete x_t;
+      delete generator;
+      delete featureVector;
+      for (std::vector<RLLib::Vector<double>*>::iterator iter = multipliers.begin();
+          iter != multipliers.end(); ++iter)
         delete *iter;
-      }
 
     }
 
-    const RLLib::Vector<double>* project(const RLLib::Vector<double>* x, const int& h2)
+    /**
+     * x must be unit normalized [0, 1)
+     */
+    const RLLib::Vector<double>* project(const RLLib::Vector<double>* x, const int& h1)
     {
-      vector->clear();
+      featureVector->clear();
       if (x->empty())
-      {
-        return vector;
-      }
+        return featureVector;
 
-      ASSERT(x->dimension() == 8);
+      const int stripWidth = multipliers.size() * indexSets.size() * h1;
 
-      int h1 = 0;
-      int size = 0;
-      RLLib::Vector<double>* x_t = NULL;
-      for (size_t i = 0; i < events.size(); ++i)
+      for (size_t k = 0; k < indexSets.size(); ++k)
       {
-        size = events[i].size();
-        x_t = x_tvec.at(size - 1);
         x_t->clear();
-
-        for (size_t j = 0; j < size; ++j)
+        const int offset = k * multipliers.size() + stripWidth;
+        auto& set = indexSets[k];
+        for (size_t i = 0; i < set.size(); ++i)
         {
-          x_t->setEntry(j, x->getEntry(events[i][j]) * gridResolution);
+          ASSERT(set[i] < x->dimension());
+          x_t->setEntry(i, x->getEntry(set[i]));
         }
 
-        tiles->tiles(vector, numTilings[size - 1], x_t, h1++, h2);
-
+        for (size_t i = 0; i < multipliers.size(); i++)
+        {
+          featureVector->setEntry(offset + i, std::cos(M_PI * x_t->dot(multipliers[i])));
+        }
       }
 
-      vector->setEntry(vector->dimension() - 3, x->getEntry(6));
-      vector->setEntry(vector->dimension() - 2, x->getEntry(7));
-      vector->setEntry(vector->dimension() - 1, 1.0);
+      featureVector->setEntry(featureVector->dimension() - 3, x->getEntry(x->dimension() - 2));
+      featureVector->setEntry(featureVector->dimension() - 2, x->getEntry(x->dimension() - 1));
+      featureVector->setEntry(featureVector->dimension() - 1, 1.0f);
 
-      return vector;
+      return featureVector;
+
     }
 
     const RLLib::Vector<double>* project(const RLLib::Vector<double>* x)
@@ -153,45 +143,37 @@ class LunarLanderProjector_v2: public RLLib::Projector<double>
 
     double vectorNorm() const
     {
-      return totalTilings + 1 + 2;
+      return 1.0f;
     }
 
     int dimension() const
     {
-      return vector->dimension();
+      return featureVector->dimension();
     }
 
   private:
-    void calculateEvents()
+    void populateIndexSets()
     {
-      std::vector<int> currVec;
-      std::vector<int> indexVec;
-      for (int i = 0; i < 6; ++i)
-      {
-        indexVec.push_back(i);
-      }
+      std::vector<int> curr;
+      std::vector<int> indices(6); // TODO: param
+      std::iota(indices.begin(), indices.end(), 0);
 
-      calculateEvents(indexVec, currVec, 0);
+      populateIndexSets(indices, curr, 0);
     }
 
-    void calculateEvents(const std::vector<int>& indexVec, std::vector<int>& currVec,
-        const size_t& i)
+    void populateIndexSets(const std::vector<int>& indices, std::vector<int>& curr, const size_t& i)
     {
-      if (currVec.size() > 3)
+      if (curr.size() == static_cast<size_t>(x_t->dimension()))
       {
+        indexSets.push_back(curr);
         return;
       }
 
-      if (!currVec.empty())
+      for (size_t j = i; j < indices.size(); ++j)
       {
-        events.push_back(currVec);
-      }
-
-      for (size_t j = i; j < indexVec.size(); ++j)
-      {
-        currVec.push_back(indexVec[j]);
-        calculateEvents(indexVec, currVec, j + 1);
-        currVec.pop_back();
+        curr.push_back(indices[j]); // use
+        populateIndexSets(indices, curr, j + 1);
+        curr.pop_back(); // remove
       }
     }
 };
@@ -202,21 +184,16 @@ class LunarLanderAgent_v2: public LunarLanderAgent_v2Base
   private:
     // RLLib
     RLLib::Random<double>* random;
+    int order;
     RLLib::Projector<double>* projector;
     RLLib::StateToStateAction<double>* toStateAction;
-
-    double alpha_v;
-    double alpha_u;
-    double alpha_r;
+    RLLib::Trace<double>* e;
+    double alpha;
     double gamma;
     double lambda;
-
-    RLLib::Trace<double>* critice;
-    RLLib::TDLambda<double>* critic;
-    RLLib::PolicyDistribution<double>* acting;
-    RLLib::Trace<double>* actore1;
-    RLLib::Traces<double>* actoreTraces;
-    RLLib::ActorOnPolicy<double>* actor;
+    RLLib::Sarsa<double>* sarsa;
+    double epsilon;
+    RLLib::Policy<double>* acting;
     RLLib::OnPolicyControlLearner<double>* control;
     RLLib::RLAgent<double>* agent;
     RLLib::RLRunner<double>* simulator;

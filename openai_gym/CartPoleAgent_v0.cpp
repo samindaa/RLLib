@@ -39,7 +39,6 @@ CartPoleAgent_v0::CartPoleAgent_v0()
 
 CartPoleAgent_v0::~CartPoleAgent_v0()
 {
-
   delete random;
   delete problem;
   delete projector;
