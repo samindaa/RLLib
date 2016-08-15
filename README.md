@@ -60,6 +60,11 @@ Features
  There are a plethora of examples demonstrating on-policy and off-policy control experiments.
 * **Visualization**:
  We provide a Qt4 based application to visualize benchmark problems.  
+
+Build
+----
+
+[![Build Status](https://travis-ci.org/samindaa/RLLib.svg?branch=master)](https://travis-ci.org/samindaa/RLLib)
  
 New: OpenAI Gym Binding
 ----
