@@ -325,9 +325,9 @@ namespace RLLib
         ranges.clear();
       }
 
-      Ranges(const Range<T>& that)
+      Ranges(const Ranges<T>& that)
       {
-        for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+        for (typename Ranges<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
           ranges.push_back(*iter);
       }
 
@@ -336,7 +336,7 @@ namespace RLLib
         if (this != that)
         {
           ranges.clear();
-          for (typename Vectors<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
+          for (typename Ranges<T>::iterator iter = that.begin(); iter != that.end(); ++iter)
             ranges.push_back(*iter);
         }
         return *this;
